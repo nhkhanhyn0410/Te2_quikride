@@ -21,7 +21,10 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Mật khẩu là bắt buộc'],
+      required: function () {
+        // Password chỉ bắt buộc nếu không phải OAuth user
+        return !this.googleId && !this.facebookId;
+      },
       minlength: [6, 'Mật khẩu phải có ít nhất 6 ký tự'],
       select: false, // Không trả về password khi query
     },

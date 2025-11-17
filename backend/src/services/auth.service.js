@@ -23,9 +23,10 @@ class AuthService {
   /**
    * Tạo access token (ngắn hạn - 1 ngày)
    * @param {Object} user - User object
+   * @param {Boolean} rememberMe - Remember me option (30 days if true)
    * @returns {String} Access token
    */
-  static generateAccessToken(user) {
+  static generateAccessToken(user, rememberMe = false) {
     const payload = {
       userId: user._id,
       email: user.email,
@@ -33,21 +34,24 @@ class AuthService {
       type: 'access',
     };
 
-    return this.generateToken(payload, process.env.JWT_ACCESS_EXPIRES || '1d');
+    const expiresIn = rememberMe ? '30d' : (process.env.JWT_ACCESS_EXPIRES || '1d');
+    return this.generateToken(payload, expiresIn);
   }
 
   /**
-   * Tạo refresh token (dài hạn - 7 ngày)
+   * Tạo refresh token (dài hạn - 7 ngày hoặc 30 ngày nếu remember me)
    * @param {Object} user - User object
+   * @param {Boolean} rememberMe - Remember me option
    * @returns {String} Refresh token
    */
-  static generateRefreshToken(user) {
+  static generateRefreshToken(user, rememberMe = false) {
     const payload = {
       userId: user._id,
       type: 'refresh',
     };
 
-    return this.generateToken(payload, process.env.JWT_REFRESH_EXPIRES || '7d');
+    const expiresIn = rememberMe ? '30d' : (process.env.JWT_REFRESH_EXPIRES || '7d');
+    return this.generateToken(payload, expiresIn);
   }
 
   /**
@@ -123,9 +127,10 @@ class AuthService {
    * Đăng nhập
    * @param {String} identifier - Email hoặc phone
    * @param {String} password - Password
+   * @param {Boolean} rememberMe - Remember me option
    * @returns {Object} User và tokens
    */
-  static async login(identifier, password) {
+  static async login(identifier, password, rememberMe = false) {
     // Tìm user và select password để so sánh
     const user = await User.findByEmailOrPhone(identifier).select('+password');
 
@@ -151,6 +156,112 @@ class AuthService {
     // Cập nhật lastLogin
     user.lastLogin = Date.now();
     await user.save({ validateBeforeSave: false });
+
+    // Tạo tokens với remember me option
+    const accessToken = this.generateAccessToken(user, rememberMe);
+    const refreshToken = this.generateRefreshToken(user, rememberMe);
+
+    // Chuẩn bị response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    return {
+      user: userResponse,
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  /**
+   * Google OAuth Login/Register
+   * @param {Object} googleProfile - Google profile data
+   * @returns {Object} User và tokens
+   */
+  static async googleOAuth(googleProfile) {
+    const { id, email, name, picture } = googleProfile;
+
+    // Tìm user với googleId hoặc email
+    let user = await User.findOne({
+      $or: [{ googleId: id }, { email: email.toLowerCase() }],
+    });
+
+    if (user) {
+      // User đã tồn tại - cập nhật googleId nếu chưa có
+      if (!user.googleId) {
+        user.googleId = id;
+        user.isEmailVerified = true; // Email từ Google đã verified
+        await user.save({ validateBeforeSave: false });
+      }
+
+      // Cập nhật lastLogin
+      user.lastLogin = Date.now();
+      await user.save({ validateBeforeSave: false });
+    } else {
+      // Tạo user mới với Google account
+      user = await User.create({
+        email: email.toLowerCase(),
+        fullName: name,
+        googleId: id,
+        avatar: picture,
+        isEmailVerified: true,
+        // OAuth users không cần password
+        phone: `GOOGLE_${id}`, // Temporary phone, user can update later
+      });
+    }
+
+    // Tạo tokens
+    const accessToken = this.generateAccessToken(user);
+    const refreshToken = this.generateRefreshToken(user);
+
+    // Chuẩn bị response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    return {
+      user: userResponse,
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  /**
+   * Facebook OAuth Login/Register
+   * @param {Object} facebookProfile - Facebook profile data
+   * @returns {Object} User và tokens
+   */
+  static async facebookOAuth(facebookProfile) {
+    const { id, email, name, picture } = facebookProfile;
+
+    // Tìm user với facebookId hoặc email
+    let user = await User.findOne({
+      $or: [{ facebookId: id }, { email: email?.toLowerCase() }],
+    });
+
+    if (user) {
+      // User đã tồn tại - cập nhật facebookId nếu chưa có
+      if (!user.facebookId) {
+        user.facebookId = id;
+        if (email) {
+          user.isEmailVerified = true;
+        }
+        await user.save({ validateBeforeSave: false });
+      }
+
+      // Cập nhật lastLogin
+      user.lastLogin = Date.now();
+      await user.save({ validateBeforeSave: false });
+    } else {
+      // Tạo user mới với Facebook account
+      user = await User.create({
+        email: email ? email.toLowerCase() : `facebook_${id}@quikride.temp`,
+        fullName: name,
+        facebookId: id,
+        avatar: picture?.data?.url,
+        isEmailVerified: email ? true : false,
+        // OAuth users không cần password
+        phone: `FACEBOOK_${id}`, // Temporary phone, user can update later
+      });
+    }
 
     // Tạo tokens
     const accessToken = this.generateAccessToken(user);

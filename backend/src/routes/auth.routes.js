@@ -26,6 +26,10 @@ router.post('/forgot-password', validateForgotPassword, authController.forgotPas
 router.post('/reset-password', validateResetPassword, authController.resetPassword);
 router.get('/verify-email/:token', validateVerifyEmail, authController.verifyEmail);
 
+// OAuth routes
+router.post('/google', authController.googleOAuth);
+router.post('/facebook', authController.facebookOAuth);
+
 // Protected routes (cần authentication)
 router.use(authenticate); // Tất cả routes sau đây yêu cầu đăng nhập
 
