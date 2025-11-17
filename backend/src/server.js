@@ -56,8 +56,8 @@ if (process.env.NODE_ENV === 'development') {
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW) || 60000, // 1 minute
-  max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // 100 requests per minute
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW, 10) || 60000, // 1 minute
+  max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100, // 100 requests per minute
   message: 'Quá nhiều yêu cầu từ IP này, vui lòng thử lại sau.',
   standardHeaders: true,
   legacyHeaders: false,
