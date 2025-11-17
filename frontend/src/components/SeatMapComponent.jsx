@@ -6,8 +6,17 @@ import useBookingStore from '../store/bookingStore';
 const { Text } = Typography;
 
 const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] }) => {
-  const { selectedSeats, addSeat, removeSeat, searchCriteria } = useBookingStore();
+  const { selectedSeats, addSeat, removeSeat, searchCriteria, clearSeats } = useBookingStore();
   const [seats, setSeats] = useState([]);
+
+  useEffect(() => {
+    // Clear invalid old data from localStorage
+    // Old data has arrays instead of seat objects
+    if (selectedSeats.length > 0 && Array.isArray(selectedSeats[0]) && !selectedSeats[0].seatNumber) {
+      console.log('Clearing invalid old seat data');
+      clearSeats();
+    }
+  }, []);
 
   useEffect(() => {
     if (seatLayout && seatLayout.layout) {
