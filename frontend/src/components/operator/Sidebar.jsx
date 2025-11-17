@@ -4,7 +4,8 @@ import {
   CarOutlined,
   EnvironmentOutlined,
   TeamOutlined,
-  LayoutOutlined,
+  BarChartOutlined,
+  GiftOutlined,
 } from '@ant-design/icons';
 
 const Sidebar = () => {
@@ -34,6 +35,18 @@ const Sidebar = () => {
       path: '/operator/employees',
       icon: <TeamOutlined />,
       label: 'Nhân Viên',
+    },
+    {
+      key: 'reports',
+      path: '/operator/reports',
+      icon: <BarChartOutlined />,
+      label: 'Báo Cáo',
+    },
+    {
+      key: 'vouchers',
+      path: '/operator/vouchers',
+      icon: <GiftOutlined />,
+      label: 'Voucher',
     },
   ];
 

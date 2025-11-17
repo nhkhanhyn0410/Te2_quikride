@@ -388,6 +388,124 @@ class TripManagerController {
       });
     }
   }
+
+  /**
+   * UC-21: Update trip status (Unified endpoint)
+   * PUT /api/trip-manager/trips/:tripId/status
+   * Status values: scheduled, ongoing, completed, cancelled
+   * Notifies passengers on status change
+   */
+  static async updateTripStatus(req, res) {
+    try {
+      const { tripId } = req.params;
+      const { status, reason } = req.body;
+
+      // Validate input
+      if (!status) {
+        return res.status(400).json({
+          success: false,
+          message: 'Trạng thái mới là bắt buộc',
+        });
+      }
+
+      const validStatuses = ['scheduled', 'ongoing', 'completed', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Trạng thái không hợp lệ. Chỉ chấp nhận: ${validStatuses.join(', ')}`,
+        });
+      }
+
+      const Trip = require('../models/Trip');
+
+      // Find trip
+      const trip = await Trip.findById(tripId).populate('routeId operatorId');
+
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy chuyến xe',
+        });
+      }
+
+      // Check if status change is valid
+      if (!trip.canChangeStatus(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Không thể chuyển từ trạng thái "${trip.status}" sang "${status}"`,
+        });
+      }
+
+      // For cancelled status, reason is required
+      if (status === 'cancelled' && !reason) {
+        return res.status(400).json({
+          success: false,
+          message: 'Lý do hủy chuyến là bắt buộc',
+        });
+      }
+
+      // Update status using the model method (will send notifications automatically)
+      const result = await trip.updateStatus(status, {
+        reason,
+        userId: req.tripManager?.id,
+      });
+
+      // Prepare response message
+      let message = '';
+      switch (status) {
+        case 'ongoing':
+          message = 'Chuyến xe đã được đánh dấu đang di chuyển. Hành khách đã được thông báo.';
+          break;
+        case 'completed':
+          message = 'Chuyến xe đã hoàn thành. Hành khách đã được thông báo.';
+          break;
+        case 'cancelled':
+          message = 'Chuyến xe đã bị hủy. Hành khách đã được thông báo.';
+          break;
+        default:
+          message = 'Trạng thái chuyến xe đã được cập nhật. Hành khách đã được thông báo.';
+      }
+
+      res.json({
+        success: true,
+        message,
+        data: {
+          trip: {
+            _id: trip._id,
+            status: trip.status,
+            oldStatus: result.oldStatus,
+            newStatus: result.newStatus,
+            updatedAt: trip.updatedAt,
+            cancelReason: trip.cancelReason,
+            cancelledAt: trip.cancelledAt,
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Update trip status error:', error);
+
+      // Handle specific error messages
+      if (error.message.includes('Trạng thái không hợp lệ')) {
+        return res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      if (error.message.includes('Không thể chuyển')) {
+        return res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Lỗi cập nhật trạng thái chuyến xe',
+        error: error.message,
+      });
+    }
+  }
 }
 
 module.exports = TripManagerController;
