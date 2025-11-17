@@ -17,14 +17,20 @@ const CustomerLoginPage = () => {
   const onFinish = async (values) => {
     setLoading(true);
     try {
-      const response = await customerApi.login(values);
+      // Transform email to identifier for backend
+      const loginData = {
+        identifier: values.email,
+        password: values.password,
+      };
 
-      // Response structure: { status, message, data: { user, token } }
+      const response = await customerApi.login(loginData);
+
+      // Response structure: { status, message, data: { user, accessToken, refreshToken } }
       if (response.status === 'success') {
-        const { user, token } = response.data;
+        const { user, accessToken } = response.data;
 
         // Set user as customer role
-        login({ ...user, role: 'customer' }, token);
+        login({ ...user, role: 'customer' }, accessToken);
 
         message.success('Đăng nhập thành công!');
 
@@ -32,7 +38,7 @@ const CustomerLoginPage = () => {
         navigate(from, { replace: true });
       }
     } catch (error) {
-      message.error(error.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+      message.error(error || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setLoading(false);
     }
