@@ -36,13 +36,18 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
 
   const handleSelectTemplate = async (templateName) => {
     try {
-      const response = await seatLayoutApi.buildLayout({
-        busType,
-        templateName,
-      });
-      setSelectedTemplate(response.data.seatLayout);
+      const response = await seatLayoutApi.getTemplate(busType, templateName);
+      console.log('Template response:', response);
+
+      if (response.status === 'success' && response.data?.template) {
+        setSelectedTemplate(response.data.template);
+        message.success('Đã tải template thành công');
+      } else {
+        message.error('Không thể tải template');
+      }
     } catch (error) {
-      message.error('Không thể tải template');
+      console.error('Get template error:', error);
+      message.error(error || 'Không thể tải template');
     }
   };
 
@@ -52,12 +57,18 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
         busType,
         rows,
         columns,
-        type: 'custom',
       });
-      setCustomLayout(response.data.seatLayout);
-      message.success('Đã tạo sơ đồ tùy chỉnh');
+      console.log('Build custom layout response:', response);
+
+      if (response.status === 'success' && response.data?.seatLayout) {
+        setCustomLayout(response.data.seatLayout);
+        message.success('Đã tạo sơ đồ tùy chỉnh');
+      } else {
+        message.error('Không thể tạo sơ đồ');
+      }
     } catch (error) {
-      message.error('Không thể tạo sơ đồ');
+      console.error('Build custom layout error:', error);
+      message.error(error || 'Không thể tạo sơ đồ');
     }
   };
 
