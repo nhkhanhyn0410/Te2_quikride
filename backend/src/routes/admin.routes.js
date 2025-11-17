@@ -20,4 +20,12 @@ router.put('/operators/:id/reject', adminController.rejectOperator);
 router.put('/operators/:id/suspend', adminController.suspendOperator);
 router.put('/operators/:id/resume', adminController.resumeOperator);
 
+// User management routes (UC-22)
+router.get('/users/statistics', adminController.getUserStatistics);
+router.get('/users', adminController.getUsers);
+router.get('/users/:id', adminController.getUserById);
+router.put('/users/:id/block', adminController.blockUser);
+router.put('/users/:id/unblock', adminController.unblockUser);
+router.post('/users/:id/reset-password', adminController.resetUserPassword);
+
 module.exports = router;
