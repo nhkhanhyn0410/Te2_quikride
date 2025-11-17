@@ -15,22 +15,29 @@ const CustomerRegisterPage = () => {
     setLoading(true);
     try {
       // Remove confirmPassword before sending to API
-      const { confirmPassword, ...registerData } = values;
+      const { confirmPassword, phoneNumber, name, ...rest } = values;
+
+      // Transform data to match backend expectations
+      const registerData = {
+        ...rest,
+        phone: phoneNumber, // Backend expects 'phone' not 'phoneNumber'
+        fullName: name,     // Backend expects 'fullName' not 'name'
+      };
 
       const response = await customerApi.register(registerData);
 
-      // Response structure: { status, message, data: { user, token } }
+      // Response structure: { status, message, data: { user, accessToken, refreshToken } }
       if (response.status === 'success') {
-        const { user, token } = response.data;
+        const { user, accessToken } = response.data;
 
         // Auto login after successful registration
-        login({ ...user, role: 'customer' }, token);
+        login({ ...user, role: 'customer' }, accessToken);
 
         message.success('Đăng ký thành công! Chào mừng bạn đến với QuikRide.');
         navigate('/');
       }
     } catch (error) {
-      message.error(error.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+      message.error(error || 'Đăng ký thất bại. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
