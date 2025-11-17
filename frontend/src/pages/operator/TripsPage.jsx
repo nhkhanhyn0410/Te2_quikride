@@ -50,10 +50,12 @@ const TripsPage = () => {
     setLoading(true);
     try {
       const response = await operatorApi.trips.getMyTrips();
-      setTrips(response.data.data.trips || []);
+      console.log('Trips response:', response.data);
+      setTrips(response.data?.data?.trips || response.data?.trips || []);
     } catch (error) {
       console.error('Load trips error:', error);
       message.error(error.response?.data?.message || 'Không thể tải danh sách chuyến xe');
+      setTrips([]);
     } finally {
       setLoading(false);
     }
@@ -68,14 +70,20 @@ const TripsPage = () => {
         operatorApi.employees.getAvailableForTrips('trip_manager'),
       ]);
 
-      setRoutes(routesRes.data.data.routes || []);
-      setBuses(busesRes.data.data.buses || []);
+      console.log('Routes response:', routesRes.data);
+      console.log('Buses response:', busesRes.data);
+      console.log('Drivers response:', driversRes.data);
+      console.log('Managers response:', managersRes.data);
+
+      setRoutes(routesRes.data?.data?.routes || routesRes.data?.routes || []);
+      setBuses(busesRes.data?.data?.buses || busesRes.data?.buses || []);
       setEmployees({
-        drivers: driversRes.data.data.employees || [],
-        tripManagers: managersRes.data.data.employees || [],
+        drivers: driversRes.data?.data?.employees || driversRes.data?.employees || [],
+        tripManagers: managersRes.data?.data?.employees || managersRes.data?.employees || [],
       });
     } catch (error) {
       console.error('Load resources error:', error);
+      message.error('Không thể tải tài nguyên');
     }
   };
 
