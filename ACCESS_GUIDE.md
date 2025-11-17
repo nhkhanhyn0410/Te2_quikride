@@ -70,14 +70,17 @@ Mật khẩu: admin123
 #### Khách hàng 1 - VIP Gold
 ```
 Email: customer1@gmail.com
+Số điện thoại: 0912345678
 Mật khẩu: 123456
 Họ tên: Nguyễn Văn An
 Hạng thành viên: Gold (5,500 điểm)
 ```
+💡 **Đăng nhập bằng**: Email HOẶC Số điện thoại
 
 #### Khách hàng 2 - VIP Silver
 ```
 Email: customer2@gmail.com
+Số điện thoại: 0923456789
 Mật khẩu: 123456
 Họ tên: Trần Thị Bình
 Hạng thành viên: Silver (3,200 điểm)
@@ -86,6 +89,7 @@ Hạng thành viên: Silver (3,200 điểm)
 #### Khách hàng 3 - Thành viên mới
 ```
 Email: customer3@gmail.com
+Số điện thoại: 0934567890
 Mật khẩu: 123456
 Họ tên: Lê Hoàng Cường
 Hạng thành viên: Bronze
@@ -348,9 +352,14 @@ Sử dụng tài khoản trip manager (xem phần Tài khoản mẫu)
 ### Các vấn đề thường gặp
 
 **1. Không đăng nhập được?**
-- Kiểm tra email/mật khẩu
-- Chạy lại seed data: `npm run seed`
-- Xóa localStorage trình duyệt (F12 > Application > Local Storage)
+- **Khách hàng**: Dùng EMAIL hoặc SỐ ĐIỆN THOẠI để đăng nhập (không cần cả hai)
+  - Ví dụ: `customer1@gmail.com` hoặc `0912345678`
+- **Nhà xe**: Dùng EMAIL (ví dụ: `futabus@example.com`)
+- **Trip Manager**: Dùng EMAIL (ví dụ: `tripmanager1@futa.com`)
+- Kiểm tra mật khẩu đúng chưa
+- Chạy lại seed data: `cd backend && npm run seed`
+- Xóa localStorage trình duyệt (F12 > Application > Local Storage > Clear All)
+- Kiểm tra backend đang chạy (port 5000)
 
 **2. Không có dữ liệu?**
 - Chạy seed script: `npm run seed`
