@@ -7,6 +7,7 @@ const employeeController = require('../controllers/employee.controller');
 const tripController = require('../controllers/trip.controller');
 const bookingController = require('../controllers/booking.controller');
 const voucherController = require('../controllers/voucher.controller');
+const paymentController = require('../controllers/payment.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 /**
@@ -81,5 +82,10 @@ router.get('/vouchers/:id', authenticate, authorize('operator'), voucherControll
 router.put('/vouchers/:id', authenticate, authorize('operator'), voucherController.updateVoucher);
 router.delete('/vouchers/:id', authenticate, authorize('operator'), voucherController.deleteVoucher);
 router.put('/vouchers/:id/deactivate', authenticate, authorize('operator'), voucherController.deactivateVoucher);
+
+// Payment management (Operator only)
+router.get('/payments', authenticate, authorize('operator'), paymentController.getOperatorPayments);
+router.get('/payments/statistics', authenticate, authorize('operator'), paymentController.getStatistics);
+router.post('/payments/:paymentId/refund', authenticate, authorize('operator'), paymentController.processRefund);
 
 module.exports = router;

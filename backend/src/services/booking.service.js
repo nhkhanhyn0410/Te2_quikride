@@ -4,6 +4,15 @@ const SeatLockService = require('./seatLock.service');
 const VoucherService = require('./voucher.service');
 const mongoose = require('mongoose');
 
+// Lazy-load PaymentService to avoid circular dependency
+let PaymentService = null;
+const getPaymentService = () => {
+  if (!PaymentService) {
+    PaymentService = require('./payment.service');
+  }
+  return PaymentService;
+};
+
 /**
  * Booking Service
  * Manages bookings with seat hold/lock mechanism
@@ -212,7 +221,7 @@ class BookingService {
    * @param {string} cancelledBy - Who cancelled (customer, operator, system)
    * @returns {Promise<Booking>} Cancelled booking
    */
-  static async cancelBooking(bookingId, reason, cancelledBy = 'customer') {
+  static async cancelBooking(bookingId, reason, cancelledBy = 'customer', ipAddress = '127.0.0.1') {
     const booking = await Booking.findById(bookingId);
 
     if (!booking) {
@@ -247,11 +256,36 @@ class BookingService {
       }
     }
 
+    // Auto-refund if payment was made
+    let refundResult = null;
+    if (booking.paymentStatus === 'paid' && booking.status === 'confirmed') {
+      try {
+        const PaymentServiceClass = getPaymentService();
+        refundResult = await PaymentServiceClass.autoRefundOnCancellation(
+          bookingId,
+          reason,
+          ipAddress
+        );
+
+        if (refundResult.success) {
+          console.log('Auto-refund successful for booking:', bookingId);
+        } else {
+          console.error('Auto-refund failed for booking:', bookingId);
+        }
+      } catch (error) {
+        console.error('Auto-refund error:', error.message);
+        // Don't fail the cancellation if refund fails
+      }
+    }
+
     // Cancel booking
     booking.cancel(reason, cancelledBy);
     await booking.save();
 
-    return booking;
+    return {
+      booking,
+      refundResult,
+    };
   }
 
   /**

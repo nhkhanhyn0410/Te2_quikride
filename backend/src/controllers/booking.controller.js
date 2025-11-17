@@ -105,15 +105,26 @@ exports.cancelBooking = async (req, res) => {
 
     const cancelledBy = req.user.role === 'operator' ? 'operator' : 'customer';
 
-    const booking = await BookingService.cancelBooking(
+    // Get IP address
+    const ipAddress =
+      req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      '127.0.0.1';
+
+    const result = await BookingService.cancelBooking(
       bookingId,
       reason || 'Khách hủy',
-      cancelledBy
+      cancelledBy,
+      ipAddress
     );
 
     res.status(200).json({
       status: 'success',
-      data: { booking },
+      data: {
+        booking: result.booking,
+        refundResult: result.refundResult,
+      },
       message: 'Hủy booking thành công',
     });
   } catch (error) {
