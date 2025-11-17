@@ -132,53 +132,6 @@ router.post(
   TicketController.generateTicket
 );
 
-// Get ticket by ID
-// GET /api/tickets/:id
-router.get(
-  '/:id',
-  // protect,
-  validateTicketId,
-  TicketController.getTicketById
-);
-
-// UC-9: Cancel ticket
-// POST /api/tickets/:id/cancel
-router.post(
-  '/:id/cancel',
-  // protect,
-  validateTicketId,
-  validateCancelTicket,
-  TicketController.cancelTicket
-);
-
-// UC-10: Change/Exchange ticket
-// POST /api/tickets/:id/change
-router.post(
-  '/:id/change',
-  // protect,
-  validateTicketId,
-  validateChangeTicket,
-  TicketController.changeTicket
-);
-
-// Download ticket PDF
-// GET /api/tickets/:id/download
-router.get(
-  '/:id/download',
-  // protect,
-  validateTicketId,
-  TicketController.downloadTicket
-);
-
-// Resend ticket notifications
-// POST /api/tickets/:id/resend
-router.post(
-  '/:id/resend',
-  // protect,
-  validateTicketId,
-  TicketController.resendTicket
-);
-
 /**
  * Customer routes
  * These should be mounted under /api/users in main app
@@ -231,6 +184,57 @@ router.get(
   // protect,
   // authorize('operator'),
   TicketController.getTicketStats
+);
+
+/**
+ * Dynamic param routes (MUST BE LAST to avoid conflicts with specific routes)
+ */
+
+// UC-9: Cancel ticket
+// POST /api/tickets/:id/cancel
+router.post(
+  '/:id/cancel',
+  // protect,
+  validateTicketId,
+  validateCancelTicket,
+  TicketController.cancelTicket
+);
+
+// UC-10: Change/Exchange ticket
+// POST /api/tickets/:id/change
+router.post(
+  '/:id/change',
+  // protect,
+  validateTicketId,
+  validateChangeTicket,
+  TicketController.changeTicket
+);
+
+// Download ticket PDF
+// GET /api/tickets/:id/download
+router.get(
+  '/:id/download',
+  // protect,
+  validateTicketId,
+  TicketController.downloadTicket
+);
+
+// Resend ticket notifications
+// POST /api/tickets/:id/resend
+router.post(
+  '/:id/resend',
+  // protect,
+  validateTicketId,
+  TicketController.resendTicket
+);
+
+// Get ticket by ID
+// GET /api/tickets/:id
+router.get(
+  '/:id',
+  // protect,
+  validateTicketId,
+  TicketController.getTicketById
 );
 
 module.exports = router;
