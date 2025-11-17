@@ -17,16 +17,37 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
 
   const generateSeats = () => {
     const { layout, rows, columns } = seatLayout;
+
+    // Backend returns 2D array: [['A1', 'A2'], ['B1', 'B2'], ...]
+    // Each layout[row][col] is a string like 'A1' or '' (empty)
+    // We need to convert to seat objects
+
     const seatArray = [];
 
     for (let row = 0; row < rows; row++) {
       const rowSeats = [];
       for (let col = 0; col < columns; col++) {
-        const seatIndex = row * columns + col;
-        if (seatIndex < layout.length) {
-          const seat = layout[seatIndex];
-          rowSeats.push(seat);
+        const seatNumber = layout[row]?.[col];
+
+        // Create seat object
+        let seat;
+        if (!seatNumber || seatNumber === '') {
+          // Empty space / aisle
+          seat = { type: 'aisle', seatNumber: null };
+        } else if (seatNumber === '🚗' || seatNumber.includes('Driver')) {
+          // Driver seat
+          seat = { type: 'driver', seatNumber: null };
+        } else {
+          // Regular seat
+          seat = {
+            type: 'seat',
+            seatNumber: seatNumber,
+            row: row,
+            col: col
+          };
         }
+
+        rowSeats.push(seat);
       }
       seatArray.push(rowSeats);
     }
