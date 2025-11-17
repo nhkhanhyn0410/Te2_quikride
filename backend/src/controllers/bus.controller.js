@@ -1,4 +1,11 @@
 const BusService = require('../services/bus.service');
+const {
+  listAllTemplates,
+  getTemplatesByBusType,
+  getTemplate,
+  buildCustomTemplate,
+} = require('../utils/seatLayoutTemplates');
+const { validateSeatLayoutForBusType } = require('../utils/seatLayout');
 
 /**
  * Bus Controller
@@ -274,6 +281,175 @@ exports.search = async (req, res, next) => {
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tìm kiếm xe thất bại',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/buses/seat-layout/templates
+ * @desc    Lấy danh sách tất cả templates sơ đồ ghế
+ * @access  Public
+ */
+exports.getAllSeatLayoutTemplates = async (req, res, next) => {
+  try {
+    const templates = listAllTemplates();
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        templates,
+        total: templates.length,
+      },
+    });
+  } catch (error) {
+    console.error('Get seat layout templates error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Lấy danh sách templates thất bại',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/buses/seat-layout/templates/:busType
+ * @desc    Lấy templates cho loại xe cụ thể
+ * @access  Public
+ */
+exports.getTemplatesByType = async (req, res, next) => {
+  try {
+    const { busType } = req.params;
+
+    const validBusTypes = ['seater', 'sleeper', 'limousine', 'double_decker'];
+    if (!validBusTypes.includes(busType)) {
+      return res.status(400).json({
+        status: 'error',
+        message: `Loại xe không hợp lệ. Chỉ chấp nhận: ${validBusTypes.join(', ')}`,
+      });
+    }
+
+    const templates = getTemplatesByBusType(busType);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        busType,
+        templates,
+      },
+    });
+  } catch (error) {
+    console.error('Get templates by type error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Lấy templates thất bại',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/buses/seat-layout/templates/:busType/:templateKey
+ * @desc    Lấy template cụ thể
+ * @access  Public
+ */
+exports.getSpecificTemplate = async (req, res, next) => {
+  try {
+    const { busType, templateKey } = req.params;
+
+    const template = getTemplate(busType, templateKey);
+
+    if (!template) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Template không tồn tại',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        template,
+      },
+    });
+  } catch (error) {
+    console.error('Get specific template error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Lấy template thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/buses/seat-layout/build
+ * @desc    Tạo sơ đồ ghế tùy chỉnh
+ * @access  Public
+ */
+exports.buildSeatLayout = async (req, res, next) => {
+  try {
+    const { busType, rows, columns, floors, pattern, emptyPositions } = req.body;
+
+    // Validate required fields
+    if (!busType || !rows || !columns) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'busType, rows và columns là bắt buộc',
+      });
+    }
+
+    const template = buildCustomTemplate({
+      busType,
+      rows: Number(rows),
+      columns: Number(columns),
+      floors: floors ? Number(floors) : 1,
+      pattern,
+      emptyPositions: emptyPositions || [],
+    });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Tạo sơ đồ ghế thành công',
+      data: {
+        seatLayout: template,
+      },
+    });
+  } catch (error) {
+    console.error('Build seat layout error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Tạo sơ đồ ghế thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/buses/seat-layout/validate
+ * @desc    Validate sơ đồ ghế
+ * @access  Public
+ */
+exports.validateSeatLayout = async (req, res, next) => {
+  try {
+    const { seatLayout, busType } = req.body;
+
+    if (!seatLayout || !busType) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'seatLayout và busType là bắt buộc',
+      });
+    }
+
+    const validation = validateSeatLayoutForBusType(seatLayout, busType);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        valid: validation.valid,
+        errors: validation.errors,
+      },
+    });
+  } catch (error) {
+    console.error('Validate seat layout error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Validate sơ đồ ghế thất bại',
     });
   }
 };
