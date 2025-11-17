@@ -499,15 +499,15 @@ const seedData = async () => {
     };
 
     const trips = await Trip.create([
-      // FUTA - Sài Gòn Đà Lạt (Today - Tomorrow)
+      // FUTA - Sài Gòn Đà Lạt (Tomorrow - Day after tomorrow)
       {
         operatorId: operators[0]._id,
         routeId: routes[0]._id,
         busId: buses[0]._id, // Limousine
         driverId: futaEmployees[2]._id, // Driver 1
         tripManagerId: futaEmployees[0]._id, // Trip Manager 1
-        departureTime: createTripDate(0, 6, 0), // Today 6:00 AM
-        arrivalTime: createTripDate(0, 13, 0), // Today 1:00 PM
+        departureTime: createTripDate(1, 6, 0), // Tomorrow 6:00 AM
+        arrivalTime: createTripDate(1, 13, 0), // Tomorrow 1:00 PM
         basePrice: 250000,
         finalPrice: 250000,
         totalSeats: 18,
@@ -521,8 +521,8 @@ const seedData = async () => {
         busId: buses[1]._id, // Sleeper
         driverId: futaEmployees[3]._id, // Driver 2
         tripManagerId: futaEmployees[1]._id, // Trip Manager 2
-        departureTime: createTripDate(0, 22, 0), // Today 10:00 PM
-        arrivalTime: createTripDate(1, 5, 0), // Tomorrow 5:00 AM
+        departureTime: createTripDate(1, 22, 0), // Tomorrow 10:00 PM
+        arrivalTime: createTripDate(2, 5, 0), // Day after tomorrow 5:00 AM
         basePrice: 300000,
         finalPrice: 300000,
         totalSeats: 40,
@@ -536,8 +536,8 @@ const seedData = async () => {
         busId: buses[0]._id,
         driverId: futaEmployees[2]._id,
         tripManagerId: futaEmployees[0]._id,
-        departureTime: createTripDate(1, 6, 0), // Tomorrow 6:00 AM
-        arrivalTime: createTripDate(1, 13, 0), // Tomorrow 1:00 PM
+        departureTime: createTripDate(2, 6, 0), // Day after tomorrow 6:00 AM
+        arrivalTime: createTripDate(2, 13, 0), // Day after tomorrow 1:00 PM
         basePrice: 250000,
         finalPrice: 250000,
         totalSeats: 18,
@@ -553,8 +553,8 @@ const seedData = async () => {
         busId: buses[1]._id,
         driverId: futaEmployees[3]._id,
         tripManagerId: futaEmployees[1]._id,
-        departureTime: createTripDate(0, 20, 0), // Today 8:00 PM
-        arrivalTime: createTripDate(1, 5, 0), // Tomorrow 5:00 AM
+        departureTime: createTripDate(1, 20, 0), // Tomorrow 8:00 PM
+        arrivalTime: createTripDate(2, 5, 0), // Day after tomorrow 5:00 AM
         basePrice: 350000,
         finalPrice: 350000,
         totalSeats: 40,
@@ -568,8 +568,8 @@ const seedData = async () => {
         busId: buses[1]._id,
         driverId: futaEmployees[2]._id,
         tripManagerId: futaEmployees[0]._id,
-        departureTime: createTripDate(2, 20, 0), // Day after tomorrow 8:00 PM
-        arrivalTime: createTripDate(3, 5, 0),
+        departureTime: createTripDate(3, 20, 0), // 3 days from now 8:00 PM
+        arrivalTime: createTripDate(4, 5, 0), // 4 days from now 5:00 AM
         basePrice: 350000,
         finalPrice: 350000,
         totalSeats: 40,
@@ -579,36 +579,6 @@ const seedData = async () => {
       },
 
       // Thanh Bưởi - Sài Gòn Vũng Tàu
-      {
-        operatorId: operators[1]._id,
-        routeId: routes[2]._id,
-        busId: buses[2]._id,
-        driverId: thanhBuoiEmployees[1]._id,
-        tripManagerId: thanhBuoiEmployees[0]._id,
-        departureTime: createTripDate(0, 7, 0), // Today 7:00 AM
-        arrivalTime: createTripDate(0, 9, 0), // Today 9:00 AM
-        basePrice: 120000,
-        finalPrice: 120000,
-        totalSeats: 34,
-        status: 'scheduled',
-        availableSeats: 34,
-        bookedSeats: [],
-      },
-      {
-        operatorId: operators[1]._id,
-        routeId: routes[2]._id,
-        busId: buses[2]._id,
-        driverId: thanhBuoiEmployees[1]._id,
-        tripManagerId: thanhBuoiEmployees[0]._id,
-        departureTime: createTripDate(0, 14, 0), // Today 2:00 PM
-        arrivalTime: createTripDate(0, 16, 0), // Today 4:00 PM
-        basePrice: 120000,
-        finalPrice: 120000,
-        totalSeats: 34,
-        status: 'scheduled',
-        availableSeats: 34,
-        bookedSeats: [],
-      },
       {
         operatorId: operators[1]._id,
         routeId: routes[2]._id,
@@ -639,6 +609,36 @@ const seedData = async () => {
         availableSeats: 34,
         bookedSeats: [],
       },
+      {
+        operatorId: operators[1]._id,
+        routeId: routes[2]._id,
+        busId: buses[2]._id,
+        driverId: thanhBuoiEmployees[1]._id,
+        tripManagerId: thanhBuoiEmployees[0]._id,
+        departureTime: createTripDate(2, 7, 0), // Day after tomorrow 7:00 AM
+        arrivalTime: createTripDate(2, 9, 0), // Day after tomorrow 9:00 AM
+        basePrice: 120000,
+        finalPrice: 120000,
+        totalSeats: 34,
+        status: 'scheduled',
+        availableSeats: 34,
+        bookedSeats: [],
+      },
+      {
+        operatorId: operators[1]._id,
+        routeId: routes[2]._id,
+        busId: buses[2]._id,
+        driverId: thanhBuoiEmployees[1]._id,
+        tripManagerId: thanhBuoiEmployees[0]._id,
+        departureTime: createTripDate(2, 14, 0), // Day after tomorrow 2:00 PM
+        arrivalTime: createTripDate(2, 16, 0), // Day after tomorrow 4:00 PM
+        basePrice: 120000,
+        finalPrice: 120000,
+        totalSeats: 34,
+        status: 'scheduled',
+        availableSeats: 34,
+        bookedSeats: [],
+      },
     ]);
 
     console.log(`✅ Created ${trips.length} trips`);
@@ -660,11 +660,12 @@ const seedData = async () => {
     console.log(`\nRoutes: ${routes.length}`);
     console.log(`Buses: ${buses.length}`);
     console.log(`Trips: ${trips.length}`);
-    console.log(`  - Today: ${trips.filter(t => {
-      const today = new Date();
-      return t.departureTime.toDateString() === today.toDateString();
+    console.log(`  - Tomorrow: ${trips.filter(t => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return t.departureTime.toDateString() === tomorrow.toDateString();
     }).length}`);
-    console.log(`  - Upcoming: ${trips.filter(t => t.departureTime > new Date()).length}`);
+    console.log(`  - All upcoming: ${trips.filter(t => t.departureTime > new Date()).length}`);
     console.log('═'.repeat(50));
 
   } catch (error) {
