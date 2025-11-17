@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const http = require('http');
 
 // Load environment variables
 dotenv.config();
@@ -12,6 +13,7 @@ dotenv.config();
 // Import configurations
 const connectDB = require('./config/database');
 const connectRedis = require('./config/redis');
+const websocketService = require('./services/websocket.service');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -20,6 +22,10 @@ const operatorRoutes = require('./routes/operator.routes');
 const adminRoutes = require('./routes/admin.routes');
 const routeRoutes = require('./routes/route.routes');
 const busRoutes = require('./routes/bus.routes');
+const tripRoutes = require('./routes/trip.routes');
+const bookingRoutes = require('./routes/booking.routes');
+const voucherRoutes = require('./routes/voucher.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 // Import middleware
 const errorHandler = require('./middleware/error.middleware');
@@ -144,6 +150,10 @@ app.use(`/api/${API_VERSION}/operators`, operatorRoutes);
 app.use(`/api/${API_VERSION}/admin`, adminRoutes);
 app.use(`/api/${API_VERSION}/routes`, routeRoutes);
 app.use(`/api/${API_VERSION}/buses`, busRoutes);
+app.use(`/api/${API_VERSION}/trips`, tripRoutes);
+app.use(`/api/${API_VERSION}/bookings`, bookingRoutes);
+app.use(`/api/${API_VERSION}/vouchers`, voucherRoutes);
+app.use(`/api/${API_VERSION}/payments`, paymentRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -157,12 +167,19 @@ app.use('*', (req, res) => {
 // Error handling middleware
 app.use(errorHandler);
 
-// Start server
+// Create HTTP server for Socket.IO
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
+const server = http.createServer(app);
+
+// Initialize WebSocket
+websocketService.initialize(server);
+
+// Start server
+server.listen(PORT, () => {
   console.log(`🚀 Server đang chạy ở chế độ ${process.env.NODE_ENV} trên port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
   console.log(`📍 API endpoint: http://localhost:${PORT}/api/${API_VERSION}`);
+  console.log(`🔌 WebSocket server ready for real-time updates`);
 });
 
 // Handle unhandled promise rejections

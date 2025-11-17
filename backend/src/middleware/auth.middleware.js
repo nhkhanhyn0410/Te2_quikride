@@ -237,6 +237,7 @@ const requirePhoneVerified = (req, res, next) => {
 
 module.exports = {
   authenticate,
+  protect: authenticate, // Alias for authenticate
   authorize,
   optionalAuth,
   requireEmailVerified,

@@ -4,6 +4,10 @@ const operatorController = require('../controllers/operator.controller');
 const routeController = require('../controllers/route.controller');
 const busController = require('../controllers/bus.controller');
 const employeeController = require('../controllers/employee.controller');
+const tripController = require('../controllers/trip.controller');
+const bookingController = require('../controllers/booking.controller');
+const voucherController = require('../controllers/voucher.controller');
+const paymentController = require('../controllers/payment.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 /**
@@ -54,5 +58,34 @@ router.put('/employees/:id', authenticate, authorize('operator'), employeeContro
 router.delete('/employees/:id', authenticate, authorize('operator'), employeeController.delete);
 router.put('/employees/:id/status', authenticate, authorize('operator'), employeeController.changeStatus);
 router.post('/employees/:id/reset-password', authenticate, authorize('operator'), employeeController.resetPassword);
+
+// Trip management (Operator only)
+router.post('/trips', authenticate, authorize('operator'), tripController.create);
+router.post('/trips/recurring', authenticate, authorize('operator'), tripController.createRecurring);
+router.get('/trips', authenticate, authorize('operator'), tripController.getMyTrips);
+router.get('/trips/statistics', authenticate, authorize('operator'), tripController.getStatistics);
+router.get('/trips/:id', authenticate, authorize('operator'), tripController.getById);
+router.put('/trips/:id', authenticate, authorize('operator'), tripController.update);
+router.delete('/trips/:id', authenticate, authorize('operator'), tripController.delete);
+router.put('/trips/:id/cancel', authenticate, authorize('operator'), tripController.cancel);
+
+// Booking management (Operator only)
+router.get('/bookings', authenticate, authorize('operator'), bookingController.getOperatorBookings);
+router.get('/bookings/statistics', authenticate, authorize('operator'), bookingController.getStatistics);
+router.put('/bookings/:bookingId/payment', authenticate, authorize('operator'), bookingController.updatePayment);
+
+// Voucher management (Operator only)
+router.post('/vouchers', authenticate, authorize('operator'), voucherController.createVoucher);
+router.get('/vouchers', authenticate, authorize('operator'), voucherController.getOperatorVouchers);
+router.get('/vouchers/statistics', authenticate, authorize('operator'), voucherController.getVoucherStatistics);
+router.get('/vouchers/:id', authenticate, authorize('operator'), voucherController.getVoucherById);
+router.put('/vouchers/:id', authenticate, authorize('operator'), voucherController.updateVoucher);
+router.delete('/vouchers/:id', authenticate, authorize('operator'), voucherController.deleteVoucher);
+router.put('/vouchers/:id/deactivate', authenticate, authorize('operator'), voucherController.deactivateVoucher);
+
+// Payment management (Operator only)
+router.get('/payments', authenticate, authorize('operator'), paymentController.getOperatorPayments);
+router.get('/payments/statistics', authenticate, authorize('operator'), paymentController.getStatistics);
+router.post('/payments/:paymentId/refund', authenticate, authorize('operator'), paymentController.processRefund);
 
 module.exports = router;
