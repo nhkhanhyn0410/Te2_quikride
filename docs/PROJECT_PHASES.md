@@ -279,8 +279,7 @@ Xây dựng hệ thống tìm kiếm, đặt vé và thanh toán - core function
 ---
 
 ## Phase 4: Ticket Management
-**Thời gian dự kiến:** 2 tuần
-**Độ ưu tiên:** Cao (Critical)
+
 
 ### Mục tiêu
 Quản lý vé điện tử, mã QR, và hệ thống soát vé.
