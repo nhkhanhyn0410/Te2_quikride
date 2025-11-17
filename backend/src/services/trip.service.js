@@ -477,6 +477,8 @@ class TripService {
       sortOrder = 'asc',
     } = searchCriteria;
 
+    console.log('🔍 Search criteria:', { fromCity, toCity, date, passengers });
+
     // Build query
     const query = {
       status: 'scheduled',
@@ -495,6 +497,7 @@ class TripService {
         $gte: startOfDay,
         $lte: endOfDay,
       };
+      console.log('📅 Date range:', { startOfDay, endOfDay });
     }
 
     // Price range filter
@@ -532,6 +535,15 @@ class TripService {
       .sort(sortCriteria)
       .lean();
 
+    console.log(`🚌 Found ${trips.length} trips from database`);
+    if (trips.length > 0) {
+      console.log('Sample trip routes:', trips.slice(0, 2).map(t => ({
+        from: t.routeId?.origin?.city,
+        to: t.routeId?.destination?.city,
+        departure: t.departureTime
+      })));
+    }
+
     // Filter by cities (after populate)
     if (fromCity && toCity) {
       trips = trips.filter(
@@ -540,18 +552,21 @@ class TripService {
           trip.routeId.origin.city.toLowerCase().includes(fromCity.toLowerCase()) &&
           trip.routeId.destination.city.toLowerCase().includes(toCity.toLowerCase())
       );
+      console.log(`🏙️  After city filter (${fromCity} → ${toCity}): ${trips.length} trips`);
     } else if (fromCity) {
       trips = trips.filter(
         (trip) =>
           trip.routeId &&
           trip.routeId.origin.city.toLowerCase().includes(fromCity.toLowerCase())
       );
+      console.log(`🏙️  After fromCity filter (${fromCity}): ${trips.length} trips`);
     } else if (toCity) {
       trips = trips.filter(
         (trip) =>
           trip.routeId &&
           trip.routeId.destination.city.toLowerCase().includes(toCity.toLowerCase())
       );
+      console.log(`🏙️  After toCity filter (${toCity}): ${trips.length} trips`);
     }
 
     // Filter by bus type (after populate)
@@ -589,6 +604,7 @@ class TripService {
       });
     }
 
+    console.log(`✅ Returning ${trips.length} trips after all filters`);
     return trips;
   }
 
