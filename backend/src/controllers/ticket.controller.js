@@ -278,7 +278,8 @@ class TicketController {
 
       const { tripId } = req.params;
       const { qrCodeData } = req.body;
-      const verifiedBy = req.user?.id; // Trip manager/employee ID
+      // Support both regular users and trip managers
+      const verifiedBy = req.tripManager?.id || req.user?.id;
 
       const result = await TicketService.verifyTicketQR(qrCodeData, tripId, verifiedBy);
 
