@@ -361,6 +361,77 @@ class TicketController {
   }
 
   /**
+   * UC-10: Change/Exchange ticket
+   * POST /api/tickets/:id/change
+   */
+  static async changeTicket(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          errors: errors.array(),
+        });
+      }
+
+      const { id } = req.params;
+      const { newTripId, seats, pickupPoint, dropoffPoint, reason } = req.body;
+      const customerId = req.user?.id;
+      const ipAddress = req.ip || req.connection.remoteAddress || '127.0.0.1';
+
+      // Verify ownership first
+      const ticket = await TicketService.getTicketById(id, customerId);
+
+      // Change ticket
+      const changeData = {
+        newTripId,
+        seats,
+        pickupPoint,
+        dropoffPoint,
+        reason,
+      };
+
+      const changeResult = await TicketService.changeTicket(id, changeData, ipAddress);
+
+      if (changeResult.success) {
+        res.json({
+          success: true,
+          message: 'Đổi vé thành công',
+          data: {
+            oldTicket: changeResult.oldTicket,
+            newTicket: changeResult.newTicket,
+            newBooking: changeResult.newBooking,
+            priceInfo: changeResult.priceInfo,
+          },
+        });
+      } else if (changeResult.requiresPayment) {
+        res.status(402).json({
+          success: false,
+          requiresPayment: true,
+          message: changeResult.message,
+          data: {
+            oldTicket: changeResult.oldTicket,
+            newBooking: changeResult.newBooking,
+            priceInfo: changeResult.priceInfo,
+            paymentUrl: `${process.env.FRONTEND_URL}/payment/${changeResult.newBooking._id}`,
+          },
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: 'Đổi vé thất bại',
+        });
+      }
+    } catch (error) {
+      console.error('Change ticket error:', error);
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Lỗi đổi vé',
+      });
+    }
+  }
+
+  /**
    * Download ticket PDF
    * GET /api/tickets/:id/download
    */

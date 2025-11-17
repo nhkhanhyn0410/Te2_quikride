@@ -420,6 +420,167 @@ const emailTemplates = {
       </div>
     `,
   }),
+
+  // Ticket change/exchange email template (UC-10)
+  ticketChange: (changeData) => ({
+    subject: `Đổi vé thành công - ${changeData.oldTicketCode}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 20px;">
+        <div style="background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <!-- Header -->
+          <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 20px; margin-bottom: 20px;">
+            <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">QuikRide</h1>
+            <p style="color: #64748b; margin: 5px 0; font-size: 14px;">Đặt vé xe khách trực tuyến</p>
+          </div>
+
+          <!-- Success Message -->
+          <div style="text-align: center; margin: 30px 0;">
+            <div style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 10px 20px; border-radius: 20px; font-size: 14px;">
+              🔄 Đổi vé thành công
+            </div>
+          </div>
+
+          <h2 style="color: #1e293b; margin-top: 30px;">Xác nhận đổi vé</h2>
+          <p style="color: #475569; line-height: 1.6;">
+            Vé của bạn đã được đổi sang chuyến mới thành công vào lúc <strong>${changeData.changedAt}</strong>.
+          </p>
+
+          <!-- Change Reason -->
+          ${changeData.changeReason ? `
+          <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <p style="color: #475569; margin: 0; font-size: 14px;">
+              <strong>Lý do đổi vé:</strong> ${changeData.changeReason}
+            </p>
+          </div>
+          ` : ''}
+
+          <!-- Old Ticket Info -->
+          <div style="background: #fef2f2; padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444; margin: 20px 0;">
+            <h3 style="color: #dc2626; margin-top: 0;">❌ Vé cũ (Đã hủy)</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #7f1d1d; width: 40%;">Mã đặt chỗ:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: bold;">${changeData.oldBookingCode}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #7f1d1d;">Mã vé:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: bold;">${changeData.oldTicketCode}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #7f1d1d;">Tuyến:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${changeData.oldRouteName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #7f1d1d;">Giờ đi:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${changeData.oldDepartureTime}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #7f1d1d;">Giá vé:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${changeData.oldPrice} VNĐ</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- New Ticket Info -->
+          <div style="background: #d1fae5; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; margin: 20px 0;">
+            <h3 style="color: #065f46; margin-top: 0;">✅ Vé mới</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: #047857; width: 40%;">Mã đặt chỗ:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: bold;">${changeData.newBookingCode}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #047857;">Mã vé:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: bold; font-size: 16px;">${changeData.newTicketCode}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #047857;">🚌 Tuyến:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: bold;">${changeData.newRouteName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #047857;">🕐 Giờ đi:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: bold;">${changeData.newDepartureTime}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #047857;">💺 Ghế:</td>
+                <td style="padding: 8px 0; color: #1e293b; font-weight: bold;">${changeData.seatNumbers}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #047857;">Giá vé:</td>
+                <td style="padding: 8px 0; color: #1e293b;">${changeData.newPrice} VNĐ</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Price Difference Info -->
+          <div style="background: ${changeData.priceDifference === 0 ? '#f1f5f9' : changeData.priceDifference > 0 ? '#fff7ed' : '#dbeafe'}; padding: 20px; border-radius: 8px; border-left: 4px solid ${changeData.priceDifference === 0 ? '#64748b' : changeData.priceDifference > 0 ? '#f59e0b' : '#0ea5e9'}; margin: 20px 0;">
+            <h3 style="color: ${changeData.priceDifference === 0 ? '#475569' : changeData.priceDifference > 0 ? '#92400e' : '#1e40af'}; margin-top: 0;">💰 Chênh lệch giá</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; color: ${changeData.priceDifference === 0 ? '#64748b' : changeData.priceDifference > 0 ? '#78350f' : '#1e3a8a'}; width: 50%;">Giá vé cũ:</td>
+                <td style="padding: 8px 0; color: #1e293b; text-align: right;">${changeData.oldPrice} VNĐ</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: ${changeData.priceDifference === 0 ? '#64748b' : changeData.priceDifference > 0 ? '#78350f' : '#1e3a8a'};">Giá vé mới:</td>
+                <td style="padding: 8px 0; color: #1e293b; text-align: right;">${changeData.newPrice} VNĐ</td>
+              </tr>
+              <tr style="border-top: 2px solid ${changeData.priceDifference === 0 ? '#64748b' : changeData.priceDifference > 0 ? '#f59e0b' : '#0ea5e9'};">
+                <td style="padding: 12px 0; color: ${changeData.priceDifference === 0 ? '#64748b' : changeData.priceDifference > 0 ? '#78350f' : '#1e3a8a'}; font-weight: bold;">Chênh lệch:</td>
+                <td style="padding: 12px 0; color: ${changeData.priceDifference === 0 ? '#64748b' : changeData.priceDifference > 0 ? '#f59e0b' : '#0ea5e9'}; font-weight: bold; font-size: 20px; text-align: right;">${changeData.priceDifferenceText} VNĐ</td>
+              </tr>
+            </table>
+            ${changeData.priceDifference > 0 ? `
+            <p style="color: #92400e; font-size: 13px; margin: 15px 0 0 0;">
+              📝 Số tiền chênh lệch đã được thanh toán thành công.
+            </p>
+            ` : changeData.priceDifference < 0 ? `
+            <p style="color: #1e40af; font-size: 13px; margin: 15px 0 0 0;">
+              📝 Số tiền chênh lệch sẽ được hoàn về tài khoản của bạn trong 3-7 ngày làm việc.
+            </p>
+            ` : `
+            <p style="color: #475569; font-size: 13px; margin: 15px 0 0 0;">
+              📝 Không có chênh lệch giá giữa vé cũ và vé mới.
+            </p>
+            `}
+          </div>
+
+          <!-- Important Notes -->
+          <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid #fbbf24; margin: 20px 0;">
+            <h4 style="color: #92400e; margin-top: 0; font-size: 14px;">⚠️ LƯU Ý QUAN TRỌNG:</h4>
+            <ul style="color: #78350f; font-size: 13px; margin: 10px 0; padding-left: 20px;">
+              <li style="margin: 5px 0;">Vui lòng sử dụng <strong>mã vé mới</strong> khi lên xe</li>
+              <li style="margin: 5px 0;">Có mặt trước 15 phút so với giờ khởi hành</li>
+              <li style="margin: 5px 0;">Xuất trình mã QR hoặc vé PDF khi lên xe</li>
+              <li style="margin: 5px 0;">Vé cũ đã không còn hiệu lực</li>
+            </ul>
+          </div>
+
+          <!-- Support Info -->
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 20px;">
+            <h4 style="color: #1e293b; margin-bottom: 10px;">Cần hỗ trợ?</h4>
+            <p style="color: #475569; margin: 5px 0; font-size: 14px;">
+              Nếu bạn có bất kỳ thắc mắc nào về việc đổi vé, vui lòng liên hệ:
+            </p>
+            <p style="color: #0ea5e9; margin: 10px 0; font-size: 14px;">
+              📞 Hotline: 1900-xxxx<br>
+              📧 Email: support@quikride.com
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+            <p style="color: #94a3b8; font-size: 12px; margin: 5px 0;">
+              QuikRide - Nền tảng đặt vé xe khách trực tuyến<br>
+              Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi
+            </p>
+            <p style="color: #cbd5e1; font-size: 11px; margin: 10px 0;">
+              Email này được gửi tự động, vui lòng không reply.
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+  }),
 };
 
 module.exports = {
