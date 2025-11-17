@@ -26,6 +26,13 @@ api.interceptors.request.use(
         console.error('Error parsing auth data:', error);
       }
     }
+
+    // Get guest session token if available
+    const guestToken = localStorage.getItem('guest-token');
+    if (guestToken && !config.headers.Authorization) {
+      config.headers['x-guest-token'] = guestToken;
+    }
+
     return config;
   },
   (error) => {
