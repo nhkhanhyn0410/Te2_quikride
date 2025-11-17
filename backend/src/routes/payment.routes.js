@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const PaymentController = require('../controllers/payment.controller');
-const { authenticateToken, optionalAuth } = require('../middleware/auth');
+const { authenticate, optionalAuth } = require('../middleware/auth.middleware');
 
 /**
  * Payment Routes
@@ -33,15 +33,15 @@ router.get('/:paymentCode/status', PaymentController.queryTransactionStatus);
 router.post('/create', optionalAuth, PaymentController.createPayment);
 
 // Get payment by ID
-router.get('/:paymentId', authenticateToken, PaymentController.getPaymentById);
+router.get('/:paymentId', authenticate, PaymentController.getPaymentById);
 
 // Get payments by booking
-router.get('/booking/:bookingId', authenticateToken, PaymentController.getPaymentsByBooking);
+router.get('/booking/:bookingId', authenticate, PaymentController.getPaymentsByBooking);
 
 // Customer routes
 
 // Get my payments
-router.get('/my-payments', authenticateToken, PaymentController.getMyPayments);
+router.get('/my-payments', authenticate, PaymentController.getMyPayments);
 
 // System/Admin routes
 
