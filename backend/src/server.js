@@ -19,6 +19,7 @@ const websocketService = require('./services/websocket.service');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const operatorRoutes = require('./routes/operator.routes');
+const employeeRoutes = require('./routes/employee.routes');
 const adminRoutes = require('./routes/admin.routes');
 const routeRoutes = require('./routes/route.routes');
 const busRoutes = require('./routes/bus.routes');
@@ -149,6 +150,7 @@ app.get(`/api/${API_VERSION}`, (req, res) => {
 app.use(`/api/${API_VERSION}/auth`, authRoutes);
 app.use(`/api/${API_VERSION}/users`, userRoutes);
 app.use(`/api/${API_VERSION}/operators`, operatorRoutes);
+app.use(`/api/${API_VERSION}/employees`, employeeRoutes);
 app.use(`/api/${API_VERSION}/admin`, adminRoutes);
 app.use(`/api/${API_VERSION}/routes`, routeRoutes);
 app.use(`/api/${API_VERSION}/buses`, busRoutes);

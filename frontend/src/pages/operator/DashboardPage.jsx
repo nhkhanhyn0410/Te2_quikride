@@ -1,48 +1,100 @@
 import { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Spin, message } from 'antd';
+import {
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Spin,
+  message,
+  Select,
+  Table,
+  Progress,
+  Tag,
+} from 'antd';
 import {
   CarOutlined,
   TeamOutlined,
-  EnvironmentOutlined,
+  DollarOutlined,
+  RiseOutlined,
+  FallOutlined,
+  ShoppingCartOutlined,
   CheckCircleOutlined,
-  ToolOutlined,
-  StopOutlined,
+  ClockCircleOutlined,
+  PercentageOutlined,
 } from '@ant-design/icons';
-import { busesApi, employeesApi, routesApi } from '../../services/operatorApi';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from 'recharts';
+import dayjs from 'dayjs';
+import api from '../../services/api';
 import useAuthStore from '../../store/authStore';
+
+const { Option } = Select;
 
 const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    buses: null,
-    employees: null,
-    routes: null,
-  });
+  const [period, setPeriod] = useState('month');
+  const [stats, setStats] = useState(null);
   const { user } = useAuthStore();
 
   useEffect(() => {
-    loadStatistics();
-  }, []);
+    loadDashboardStats();
+  }, [period]);
 
-  const loadStatistics = async () => {
+  const loadDashboardStats = async () => {
     setLoading(true);
     try {
-      const [busStats, empStats, routeStats] = await Promise.all([
-        busesApi.getStatistics(),
-        employeesApi.getStatistics(),
-        routesApi.getMyRoutes({ page: 1, limit: 1 }), // Just to get total count
-      ]);
+      const response = await api.get(`/operators/dashboard/stats?period=${period}`);
 
-      setStats({
-        buses: busStats.data.statistics,
-        employees: empStats.data.statistics,
-        routes: routeStats.data,
-      });
+      if (response.status === 'success') {
+        setStats(response.data.stats);
+      }
     } catch (error) {
-      message.error('Không thể tải thống kê');
-      console.error('Error loading statistics:', error);
+      message.error(error || 'Không thể tải thống kê dashboard');
+      console.error('Error loading dashboard stats:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Format currency
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(value);
+  };
+
+  // Format trend data for charts
+  const formatTrendData = (trends) => {
+    if (!trends || !trends.bookings) return [];
+
+    return trends.bookings.map((item) => ({
+      name: getPeriodLabel(item.period),
+      'Số đơn': item.count,
+      'Doanh thu': item.revenue / 1000000, // Convert to millions
+    }));
+  };
+
+  // Get period label
+  const getPeriodLabel = (periodValue) => {
+    if (period === 'day') {
+      return `${periodValue}h`;
+    } else if (period === 'year') {
+      return `T${periodValue}`;
+    } else {
+      return `${periodValue}`;
     }
   };
 
@@ -54,149 +106,353 @@ const DashboardPage = () => {
     );
   }
 
+  if (!stats) {
+    return <div>No data available</div>;
+  }
+
+  const chartData = formatTrendData(stats.trends);
+
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800">
-          Xin chào, {user?.companyName}!
-        </h1>
-        <p className="text-gray-600 mt-1">
-          Tổng quan hoạt động của nhà xe
-        </p>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">
+            Dashboard Tổng Quan
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Xin chào, <strong>{user?.companyName}</strong>!
+          </p>
+        </div>
+
+        <Select
+          value={period}
+          onChange={setPeriod}
+          style={{ width: 150 }}
+          size="large"
+        >
+          <Option value="day">Hôm nay</Option>
+          <Option value="week">Tuần này</Option>
+          <Option value="month">Tháng này</Option>
+          <Option value="year">Năm này</Option>
+        </Select>
       </div>
 
-      {/* Bus Statistics */}
+      {/* Revenue Statistics */}
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <CarOutlined className="mr-2" />
-          Quản Lý Xe
+          <DollarOutlined className="mr-2" />
+          Doanh Thu
         </h2>
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} lg={6}>
             <Card>
               <Statistic
-                title="Tổng Số Xe"
-                value={stats.buses?.totalBuses || 0}
-                prefix={<CarOutlined />}
+                title="Tổng Doanh Thu"
+                value={stats.revenue.totalRevenue}
+                prefix={<DollarOutlined />}
+                valueStyle={{ color: '#3f8600' }}
+                formatter={(value) => formatCurrency(value)}
+              />
+              <div className="mt-2">
+                {stats.revenue.revenueGrowth >= 0 ? (
+                  <span className="text-green-600 text-sm flex items-center">
+                    <RiseOutlined className="mr-1" />
+                    +{stats.revenue.revenueGrowth}% so với kỳ trước
+                  </span>
+                ) : (
+                  <span className="text-red-600 text-sm flex items-center">
+                    <FallOutlined className="mr-1" />
+                    {stats.revenue.revenueGrowth}% so với kỳ trước
+                  </span>
+                )}
+              </div>
+            </Card>
+          </Col>
+
+          <Col xs={24} sm={12} lg={6}>
+            <Card>
+              <Statistic
+                title="Số Giao Dịch"
+                value={stats.revenue.totalTransactions}
+                prefix={<ShoppingCartOutlined />}
                 valueStyle={{ color: '#1890ff' }}
               />
             </Card>
           </Col>
+
           <Col xs={24} sm={12} lg={6}>
             <Card>
               <Statistic
-                title="Đang Hoạt Động"
-                value={stats.buses?.activeBuses || 0}
+                title="Giá Trị TB/Đơn"
+                value={stats.revenue.averageOrderValue}
+                valueStyle={{ color: '#13c2c2' }}
+                formatter={(value) => formatCurrency(value)}
+              />
+            </Card>
+          </Col>
+
+          <Col xs={24} sm={12} lg={6}>
+            <Card>
+              <Statistic
+                title="Số Vé Đã Bán"
+                value={stats.tickets.used + stats.tickets.valid}
                 prefix={<CheckCircleOutlined />}
                 valueStyle={{ color: '#52c41a' }}
               />
             </Card>
           </Col>
+        </Row>
+      </div>
+
+      {/* Charts */}
+      <Row gutter={[16, 16]}>
+        {/* Revenue Chart */}
+        <Col xs={24} lg={12}>
+          <Card title="Xu Hướng Doanh Thu">
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip
+                  formatter={(value, name) =>
+                    name === 'Doanh thu'
+                      ? [`${value.toFixed(2)}M VNĐ`, name]
+                      : [value, name]
+                  }
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Doanh thu"
+                  stroke="#8884d8"
+                  fillOpacity={1}
+                  fill="url(#colorRevenue)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+
+        {/* Bookings Chart */}
+        <Col xs={24} lg={12}>
+          <Card title="Xu Hướng Đặt Vé">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="Số đơn" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Booking Statistics */}
+      <div>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <ShoppingCartOutlined className="mr-2" />
+          Đặt Vé
+        </h2>
+        <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} lg={6}>
             <Card>
               <Statistic
-                title="Đang Bảo Trì"
-                value={stats.buses?.maintenanceBuses || 0}
-                prefix={<ToolOutlined />}
+                title="Tổng Đơn"
+                value={stats.bookings.total}
+                prefix={<ShoppingCartOutlined />}
+                valueStyle={{ color: '#1890ff' }}
+              />
+            </Card>
+          </Col>
+
+          <Col xs={24} sm={12} lg={6}>
+            <Card>
+              <Statistic
+                title="Đã Xác Nhận"
+                value={stats.bookings.confirmed}
+                prefix={<CheckCircleOutlined />}
+                valueStyle={{ color: '#52c41a' }}
+              />
+            </Card>
+          </Col>
+
+          <Col xs={24} sm={12} lg={6}>
+            <Card>
+              <Statistic
+                title="Đang Chờ"
+                value={stats.bookings.pending}
+                prefix={<ClockCircleOutlined />}
                 valueStyle={{ color: '#faad14' }}
               />
             </Card>
           </Col>
+
           <Col xs={24} sm={12} lg={6}>
             <Card>
               <Statistic
-                title="Ngừng Hoạt Động"
-                value={stats.buses?.retiredBuses || 0}
-                prefix={<StopOutlined />}
-                valueStyle={{ color: '#ff4d4f' }}
+                title="Tỷ Lệ Hủy"
+                value={stats.bookings.cancellationRate}
+                suffix="%"
+                prefix={<PercentageOutlined />}
+                valueStyle={{
+                  color: stats.bookings.cancellationRate > 10 ? '#ff4d4f' : '#52c41a',
+                }}
               />
             </Card>
           </Col>
         </Row>
       </div>
 
-      {/* Employee Statistics */}
+      {/* Trip Statistics */}
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <TeamOutlined className="mr-2" />
-          Nhân Viên
+          <CarOutlined className="mr-2" />
+          Chuyến Xe
         </h2>
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} lg={6}>
             <Card>
               <Statistic
-                title="Tổng Nhân Viên"
-                value={stats.employees?.totalEmployees || 0}
-                prefix={<TeamOutlined />}
+                title="Tổng Chuyến"
+                value={stats.trips.total}
+                prefix={<CarOutlined />}
                 valueStyle={{ color: '#1890ff' }}
               />
             </Card>
           </Col>
+
           <Col xs={24} sm={12} lg={6}>
             <Card>
               <Statistic
-                title="Tài Xế"
-                value={stats.employees?.totalDrivers || 0}
+                title="Đã Hoàn Thành"
+                value={stats.trips.completed}
+                prefix={<CheckCircleOutlined />}
                 valueStyle={{ color: '#52c41a' }}
               />
             </Card>
           </Col>
+
           <Col xs={24} sm={12} lg={6}>
             <Card>
               <Statistic
-                title="Quản Lý Chuyến"
-                value={stats.employees?.totalTripManagers || 0}
+                title="Đang Diễn Ra"
+                value={stats.trips.ongoing}
+                prefix={<ClockCircleOutlined />}
                 valueStyle={{ color: '#13c2c2' }}
               />
             </Card>
           </Col>
+
           <Col xs={24} sm={12} lg={6}>
             <Card>
-              <Statistic
-                title="Đang Hoạt Động"
-                value={stats.employees?.activeEmployees || 0}
-                valueStyle={{ color: '#52c41a' }}
+              <div className="text-gray-600 mb-2 text-sm">Tỷ Lệ Lấp Đầy</div>
+              <Progress
+                percent={Math.round(stats.trips.occupancyRate)}
+                status={
+                  stats.trips.occupancyRate >= 80
+                    ? 'success'
+                    : stats.trips.occupancyRate >= 50
+                    ? 'normal'
+                    : 'exception'
+                }
+                strokeColor={{
+                  '0%': '#108ee9',
+                  '100%': '#87d068',
+                }}
               />
+              <div className="mt-2 text-sm text-gray-600">
+                {stats.trips.totalBooked} / {stats.trips.totalSeats} ghế
+              </div>
             </Card>
           </Col>
         </Row>
       </div>
 
-      {/* Route Statistics */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-          <EnvironmentOutlined className="mr-2" />
-          Tuyến Đường
-        </h2>
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} lg={8}>
-            <Card>
-              <Statistic
-                title="Tổng Tuyến Đường"
-                value={stats.routes?.pagination?.total || 0}
-                prefix={<EnvironmentOutlined />}
-                valueStyle={{ color: '#1890ff' }}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </div>
-
-      {/* Alerts */}
-      {stats.employees?.driversWithExpiringLicense > 0 && (
-        <Card className="bg-yellow-50 border-yellow-300">
-          <div className="flex items-center">
-            <div className="text-yellow-600 text-2xl mr-4">⚠️</div>
-            <div>
-              <h3 className="font-semibold text-yellow-800">
-                Cảnh báo giấy phép lái xe
-              </h3>
-              <p className="text-yellow-700">
-                Có {stats.employees.driversWithExpiringLicense} tài xế có giấy phép sắp hết hạn trong 30 ngày tới
-              </p>
-            </div>
-          </div>
+      {/* Upcoming Trips */}
+      {stats.upcomingTrips && stats.upcomingTrips.length > 0 && (
+        <Card title="Chuyến Xe Sắp Khởi Hành">
+          <Table
+            dataSource={stats.upcomingTrips}
+            rowKey="_id"
+            pagination={false}
+            columns={[
+              {
+                title: 'Tuyến Đường',
+                dataIndex: ['routeId', 'routeName'],
+                key: 'route',
+              },
+              {
+                title: 'Xe',
+                dataIndex: ['busId', 'busNumber'],
+                key: 'bus',
+                render: (busNumber, record) => (
+                  <span>
+                    {busNumber} ({record.busId?.busType})
+                  </span>
+                ),
+              },
+              {
+                title: 'Giờ Đi',
+                dataIndex: 'departureTime',
+                key: 'departureTime',
+                render: (time) => dayjs(time).format('DD/MM/YYYY HH:mm'),
+              },
+              {
+                title: 'Ghế',
+                key: 'seats',
+                render: (_, record) => (
+                  <span>
+                    {record.bookedSeats?.length || 0} / {record.totalSeats}
+                  </span>
+                ),
+              },
+              {
+                title: 'Lấp Đầy',
+                key: 'occupancy',
+                render: (_, record) => {
+                  const rate = record.totalSeats > 0
+                    ? Math.round((record.bookedSeats?.length || 0) / record.totalSeats * 100)
+                    : 0;
+                  return (
+                    <Progress
+                      percent={rate}
+                      size="small"
+                      status={rate >= 80 ? 'success' : 'normal'}
+                    />
+                  );
+                },
+              },
+              {
+                title: 'Trạng Thái',
+                dataIndex: 'status',
+                key: 'status',
+                render: (status) => {
+                  const colors = {
+                    scheduled: 'blue',
+                    ongoing: 'green',
+                    completed: 'default',
+                    cancelled: 'red',
+                  };
+                  const labels = {
+                    scheduled: 'Sắp đi',
+                    ongoing: 'Đang diễn ra',
+                    completed: 'Hoàn thành',
+                    cancelled: 'Đã hủy',
+                  };
+                  return <Tag color={colors[status]}>{labels[status]}</Tag>;
+                },
+              },
+            ]}
+          />
         </Card>
       )}
     </div>

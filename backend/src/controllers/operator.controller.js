@@ -1,9 +1,41 @@
 const OperatorService = require('../services/operator.service');
+const DashboardService = require('../services/dashboard.service');
 
 /**
  * Operator Controller
  * Xử lý các HTTP requests liên quan đến bus operators
  */
+
+/**
+ * @route   GET /api/v1/operators/dashboard/stats
+ * @desc    Get comprehensive dashboard statistics
+ * @access  Private (Operator)
+ */
+exports.getDashboardStats = async (req, res, next) => {
+  try {
+    const operatorId = req.userId; // From authenticate middleware
+    const { period, startDate, endDate } = req.query;
+
+    const stats = await DashboardService.getDashboardStats(operatorId, {
+      period,
+      startDate,
+      endDate,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats,
+      },
+    });
+  } catch (error) {
+    console.error('Get dashboard stats error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message || 'Không thể tải thống kê dashboard',
+    });
+  }
+};
 
 /**
  * @route   POST /api/v1/operators/register
