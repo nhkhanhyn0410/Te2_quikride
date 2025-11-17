@@ -63,21 +63,25 @@ const TripsPage = () => {
       setLoading(true);
       const response = await searchTrips(searchCriteria);
 
-      if (response.success && response.data) {
-        setTrips(response.data);
+      console.log('Search response:', response);
+
+      if (response.status === 'success' && response.data?.trips) {
+        setTrips(response.data.trips);
 
         // Calculate max price for slider
-        if (response.data.length > 0) {
-          const prices = response.data.map(t => t.finalPrice);
+        if (response.data.trips.length > 0) {
+          const prices = response.data.trips.map(t => t.finalPrice);
           const max = Math.max(...prices);
           setMaxPrice(Math.ceil(max / 10000) * 10000); // Round up to nearest 10k
           setPriceRange([0, Math.ceil(max / 10000) * 10000]);
         }
       } else {
+        setTrips([]);
         toast.error('Không tìm thấy chuyến xe phù hợp');
       }
     } catch (error) {
       console.error('Fetch trips error:', error);
+      setTrips([]);
       toast.error(error || 'Có lỗi xảy ra khi tìm kiếm chuyến xe');
     } finally {
       setLoading(false);
