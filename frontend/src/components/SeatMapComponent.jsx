@@ -87,8 +87,11 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
     } else {
       // Check if max passengers reached
       if (selectedSeats.length >= searchCriteria.passengers) {
-        console.log('Max passengers reached');
-        return;
+        console.log('Max passengers reached - replacing first seat');
+        // Auto-replace: remove first seat and add new one
+        if (selectedSeats.length > 0) {
+          removeSeat(selectedSeats[0].seatNumber);
+        }
       }
       console.log('Adding seat:', seat);
       addSeat(seat);
