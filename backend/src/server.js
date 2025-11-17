@@ -20,6 +20,7 @@ const operatorRoutes = require('./routes/operator.routes');
 const adminRoutes = require('./routes/admin.routes');
 const routeRoutes = require('./routes/route.routes');
 const busRoutes = require('./routes/bus.routes');
+const tripRoutes = require('./routes/trip.routes');
 
 // Import middleware
 const errorHandler = require('./middleware/error.middleware');
@@ -144,6 +145,7 @@ app.use(`/api/${API_VERSION}/operators`, operatorRoutes);
 app.use(`/api/${API_VERSION}/admin`, adminRoutes);
 app.use(`/api/${API_VERSION}/routes`, routeRoutes);
 app.use(`/api/${API_VERSION}/buses`, busRoutes);
+app.use(`/api/${API_VERSION}/trips`, tripRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
