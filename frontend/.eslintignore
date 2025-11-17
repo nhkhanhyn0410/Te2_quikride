@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+coverage/
+*.config.js
+*.log
+.env
+.env.*
+package-lock.json
+vite.config.js
+tailwind.config.js
+postcss.config.js

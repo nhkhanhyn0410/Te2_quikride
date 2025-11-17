@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged
+npx lint-staged
+
+# Check for console.log in staged files (warning only)
+git diff --cached --name-only --diff-filter=ACM | grep '\.jsx\?$' | while read file; do
+  if grep -q 'console\.log' "$file"; then
+    echo "⚠️  Warning: console.log found in $file"
+  fi
+done
