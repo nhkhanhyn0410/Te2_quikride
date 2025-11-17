@@ -1,0 +1,279 @@
+const VoucherService = require('../services/voucher.service');
+
+/**
+ * @route   POST /api/v1/vouchers/validate
+ * @desc    Validate voucher for booking
+ * @access  Public
+ */
+exports.validateVoucher = async (req, res) => {
+  try {
+    const { code, tripId, totalAmount } = req.body;
+
+    if (!code || !tripId || !totalAmount) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thiếu thông tin bắt buộc',
+      });
+    }
+
+    const customerId = req.user ? req.user._id : null;
+
+    const validation = await VoucherService.validateForBooking(code, {
+      tripId,
+      customerId,
+      totalAmount,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: validation,
+      message: 'Voucher hợp lệ',
+    });
+  } catch (error) {
+    console.error('Validate voucher error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Voucher không hợp lệ',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/vouchers/public
+ * @desc    Get public vouchers for customers
+ * @access  Public
+ */
+exports.getPublicVouchers = async (req, res) => {
+  try {
+    const { operatorId, routeId } = req.query;
+
+    const vouchers = await VoucherService.getPublicVouchers({
+      operatorId,
+      routeId,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        vouchers,
+        total: vouchers.length,
+      },
+    });
+  } catch (error) {
+    console.error('Get public vouchers error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể lấy danh sách voucher',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/operators/vouchers
+ * @desc    Create new voucher
+ * @access  Private (Operator)
+ */
+exports.createVoucher = async (req, res) => {
+  try {
+    const operatorId = req.user._id;
+    const voucherData = { ...req.body, operatorId };
+
+    const voucher = await VoucherService.create(voucherData, operatorId, 'BusOperator');
+
+    res.status(201).json({
+      status: 'success',
+      data: { voucher },
+      message: 'Tạo voucher thành công',
+    });
+  } catch (error) {
+    console.error('Create voucher error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể tạo voucher',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/operators/vouchers
+ * @desc    Get operator's vouchers
+ * @access  Private (Operator)
+ */
+exports.getOperatorVouchers = async (req, res) => {
+  try {
+    const operatorId = req.user._id;
+
+    const vouchers = await VoucherService.getByOperator(operatorId);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        vouchers,
+        total: vouchers.length,
+      },
+    });
+  } catch (error) {
+    console.error('Get operator vouchers error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể lấy danh sách voucher',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/operators/vouchers/:id
+ * @desc    Get voucher details
+ * @access  Private (Operator)
+ */
+exports.getVoucherById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const voucher = await VoucherService.getById(id);
+
+    // Verify ownership
+    if (voucher.operatorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Không có quyền truy cập voucher này',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: { voucher },
+    });
+  } catch (error) {
+    console.error('Get voucher error:', error);
+    res.status(404).json({
+      status: 'error',
+      message: error.message || 'Không tìm thấy voucher',
+    });
+  }
+};
+
+/**
+ * @route   PUT /api/v1/operators/vouchers/:id
+ * @desc    Update voucher
+ * @access  Private (Operator)
+ */
+exports.updateVoucher = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verify ownership first
+    const existingVoucher = await VoucherService.getById(id);
+    if (existingVoucher.operatorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Không có quyền cập nhật voucher này',
+      });
+    }
+
+    const voucher = await VoucherService.update(id, req.body);
+
+    res.status(200).json({
+      status: 'success',
+      data: { voucher },
+      message: 'Cập nhật voucher thành công',
+    });
+  } catch (error) {
+    console.error('Update voucher error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể cập nhật voucher',
+    });
+  }
+};
+
+/**
+ * @route   DELETE /api/v1/operators/vouchers/:id
+ * @desc    Delete voucher
+ * @access  Private (Operator)
+ */
+exports.deleteVoucher = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verify ownership first
+    const existingVoucher = await VoucherService.getById(id);
+    if (existingVoucher.operatorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Không có quyền xóa voucher này',
+      });
+    }
+
+    await VoucherService.delete(id);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Xóa voucher thành công',
+    });
+  } catch (error) {
+    console.error('Delete voucher error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể xóa voucher',
+    });
+  }
+};
+
+/**
+ * @route   PUT /api/v1/operators/vouchers/:id/deactivate
+ * @desc    Deactivate voucher
+ * @access  Private (Operator)
+ */
+exports.deactivateVoucher = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verify ownership first
+    const existingVoucher = await VoucherService.getById(id);
+    if (existingVoucher.operatorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Không có quyền vô hiệu hóa voucher này',
+      });
+    }
+
+    const voucher = await VoucherService.deactivate(id);
+
+    res.status(200).json({
+      status: 'success',
+      data: { voucher },
+      message: 'Vô hiệu hóa voucher thành công',
+    });
+  } catch (error) {
+    console.error('Deactivate voucher error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể vô hiệu hóa voucher',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/operators/vouchers/statistics
+ * @desc    Get voucher statistics
+ * @access  Private (Operator)
+ */
+exports.getVoucherStatistics = async (req, res) => {
+  try {
+    const operatorId = req.user._id;
+
+    const stats = await VoucherService.getStatistics(operatorId);
+
+    res.status(200).json({
+      status: 'success',
+      data: stats,
+    });
+  } catch (error) {
+    console.error('Get voucher statistics error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể lấy thống kê',
+    });
+  }
+};

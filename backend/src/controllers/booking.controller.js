@@ -1,301 +1,411 @@
 const BookingService = require('../services/booking.service');
-const SeatService = require('../services/seat.service');
-const Booking = require('../models/Booking');
 
 /**
- * Booking Controller
- * Handle booking-related HTTP requests
- */
-
-/**
- * @route   POST /api/bookings/hold-seats
+ * @route   POST /api/v1/bookings/hold-seats
  * @desc    Hold seats temporarily (15 minutes)
- * @access  Public (Guest or Authenticated User)
+ * @access  Public
  */
-exports.holdSeats = async (req, res, next) => {
+exports.holdSeats = async (req, res) => {
   try {
-    const { tripId, seats, contactEmail, contactPhone, passengers, pickupPoint, dropoffPoint } = req.body;
+    const { tripId, seats, contactInfo, pickupPoint, dropoffPoint, voucherCode } = req.body;
 
-    // Get userId from auth or create guest session ID
-    const userId = req.user ? req.user._id.toString() : `guest-${contactEmail}`;
+    // Validation
+    if (!tripId || !seats || !Array.isArray(seats) || seats.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thông tin không hợp lệ. Cần có tripId và danh sách ghế.',
+      });
+    }
 
-    const result = await BookingService.holdSeats(
-      {
-        tripId,
-        seats,
-        contactEmail,
-        contactPhone,
-        passengers,
-        pickupPoint,
-        dropoffPoint,
-        userId: req.user ? req.user._id : null,
-      },
-      userId,
-    );
+    if (!contactInfo || !contactInfo.name || !contactInfo.phone) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thông tin liên hệ không hợp lệ',
+      });
+    }
+
+    // Validate each seat has required fields
+    for (const seat of seats) {
+      if (!seat.seatNumber || !seat.passengerName) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Mỗi ghế cần có số ghế và tên hành khách',
+        });
+      }
+    }
+
+    const customerId = req.user ? req.user._id : null;
+
+    const result = await BookingService.holdSeats({
+      tripId,
+      seats,
+      contactInfo,
+      customerId,
+      pickupPoint,
+      dropoffPoint,
+      voucherCode,
+    });
 
     res.status(201).json({
-      success: true,
-      message: 'Ghế đã được giữ thành công',
-      data: {
-        booking: result.booking,
-        expiresAt: result.expiresAt,
-        timeRemaining: result.timeRemaining,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @route   POST /api/bookings/:bookingId/extend
- * @desc    Extend seat hold time (add 15 more minutes)
- * @access  Public (Guest or Authenticated User)
- */
-exports.extendSeatHold = async (req, res, next) => {
-  try {
-    const { bookingId } = req.params;
-    const userId = req.user ? req.user._id.toString() : `guest-${req.body.email}`;
-
-    const result = await BookingService.extendSeatHold(bookingId, userId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Thời gian giữ ghế đã được gia hạn',
+      status: 'success',
       data: result,
+      message: 'Giữ ghế thành công. Vui lòng hoàn tất thanh toán trong 15 phút.',
     });
   } catch (error) {
-    next(error);
+    console.error('Hold seats error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể giữ ghế. Vui lòng thử lại.',
+    });
   }
 };
 
 /**
- * @route   DELETE /api/bookings/:bookingId/release
- * @desc    Release seat hold (cancel pending booking)
- * @access  Public (Guest or Authenticated User)
- */
-exports.releaseSeatHold = async (req, res, next) => {
-  try {
-    const { bookingId } = req.params;
-    const userId = req.user ? req.user._id.toString() : `guest-${req.body.email}`;
-
-    await BookingService.releaseSeatHold(bookingId, userId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Đã hủy giữ ghế',
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @route   POST /api/bookings/:bookingId/confirm
- * @desc    Confirm booking after payment success
- * @access  Private (Payment gateway callback or authenticated user)
- */
-exports.confirmBooking = async (req, res, next) => {
-  try {
-    const { bookingId } = req.params;
-    const { paymentId } = req.body;
-
-    const booking = await BookingService.confirmBooking(bookingId, paymentId);
-
-    res.status(200).json({
-      success: true,
-      message: 'Booking đã được xác nhận',
-      data: { booking },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @route   GET /api/trips/:tripId/seat-status
- * @desc    Get real-time seat status for a trip
+ * @route   POST /api/v1/bookings/:bookingId/confirm
+ * @desc    Confirm booking after payment
  * @access  Public
  */
-exports.getTripSeatStatus = async (req, res, next) => {
-  try {
-    const { tripId } = req.params;
-
-    const result = await BookingService.getTripSeatStatus(tripId);
-
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @route   GET /api/bookings
- * @desc    Get user's bookings
- * @access  Private (Authenticated User)
- */
-exports.getUserBookings = async (req, res, next) => {
-  try {
-    const userId = req.user._id;
-    const { status } = req.query;
-
-    const bookings = await BookingService.getUserBookings(userId, { status });
-
-    res.status(200).json({
-      success: true,
-      count: bookings.length,
-      data: { bookings },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @route   POST /api/bookings/lookup
- * @desc    Lookup booking by code (for guest)
- * @access  Public
- */
-exports.lookupBooking = async (req, res, next) => {
-  try {
-    const { bookingCode, email, phone } = req.body;
-
-    const booking = await BookingService.getBookingByCode(bookingCode, email, phone);
-
-    res.status(200).json({
-      success: true,
-      data: { booking },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @route   GET /api/bookings/:bookingId
- * @desc    Get booking details
- * @access  Private or Public (with verification)
- */
-exports.getBookingDetails = async (req, res, next) => {
+exports.confirmBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
+    const { sessionId } = req.body;
 
-    const booking = await Booking.findById(bookingId)
-      .populate('tripId')
-      .populate('operatorId', 'companyName logo phone email');
-
-    if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: 'Không tìm thấy booking',
+    if (!sessionId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Session ID là bắt buộc',
       });
     }
 
-    // If authenticated user, check ownership
-    if (req.user && booking.userId && booking.userId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Bạn không có quyền xem booking này',
-      });
-    }
+    const booking = await BookingService.confirmBooking(bookingId, sessionId);
 
     res.status(200).json({
-      success: true,
+      status: 'success',
       data: { booking },
+      message: 'Xác nhận booking thành công',
     });
   } catch (error) {
-    next(error);
+    console.error('Confirm booking error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể xác nhận booking',
+    });
   }
 };
 
 /**
- * @route   POST /api/bookings/:bookingId/cancel
+ * @route   POST /api/v1/bookings/:bookingId/cancel
  * @desc    Cancel booking
- * @access  Private (Authenticated User)
+ * @access  Private (Customer or Operator)
  */
-exports.cancelBooking = async (req, res, next) => {
+exports.cancelBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
     const { reason } = req.body;
 
-    const booking = await BookingService.cancelBooking(bookingId, reason, req.user);
+    const cancelledBy = req.user.role === 'operator' ? 'operator' : 'customer';
+
+    // Get IP address
+    const ipAddress =
+      req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      '127.0.0.1';
+
+    const result = await BookingService.cancelBooking(
+      bookingId,
+      reason || 'Khách hủy',
+      cancelledBy,
+      ipAddress
+    );
 
     res.status(200).json({
-      success: true,
-      message: 'Booking đã được hủy',
+      status: 'success',
       data: {
-        booking,
-        refundAmount: booking.refundAmount,
-        refundStatus: booking.refundStatus,
+        booking: result.booking,
+        refundResult: result.refundResult,
       },
+      message: 'Hủy booking thành công',
     });
   } catch (error) {
-    next(error);
+    console.error('Cancel booking error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể hủy booking',
+    });
   }
 };
 
 /**
- * @route   POST /api/bookings/:bookingId/apply-voucher
- * @desc    Apply voucher to booking
+ * @route   POST /api/v1/bookings/:bookingId/extend
+ * @desc    Extend seat hold duration
  * @access  Public
  */
-exports.applyVoucher = async (req, res, next) => {
+exports.extendHold = async (req, res) => {
   try {
     const { bookingId } = req.params;
-    const { voucherCode } = req.body;
+    const { sessionId, minutes } = req.body;
 
-    const booking = await BookingService.applyVoucher(bookingId, voucherCode);
+    if (!sessionId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Session ID là bắt buộc',
+      });
+    }
+
+    const result = await BookingService.extendHold(
+      bookingId,
+      sessionId,
+      minutes || 15
+    );
 
     res.status(200).json({
-      success: true,
-      message: 'Voucher đã được áp dụng',
+      status: 'success',
+      data: result,
+      message: 'Gia hạn giữ ghế thành công',
+    });
+  } catch (error) {
+    console.error('Extend hold error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể gia hạn',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/bookings/:bookingId/release
+ * @desc    Release seat hold manually
+ * @access  Public
+ */
+exports.releaseHold = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Session ID là bắt buộc',
+      });
+    }
+
+    const booking = await BookingService.releaseHold(bookingId, sessionId);
+
+    res.status(200).json({
+      status: 'success',
+      data: { booking },
+      message: 'Hủy giữ ghế thành công',
+    });
+  } catch (error) {
+    console.error('Release hold error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể hủy giữ ghế',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/bookings/:bookingId
+ * @desc    Get booking details
+ * @access  Public (with authorization)
+ */
+exports.getBookingById = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const customerId = req.user ? req.user._id : null;
+
+    const booking = await BookingService.getBookingById(bookingId, customerId);
+
+    res.status(200).json({
+      status: 'success',
       data: { booking },
     });
   } catch (error) {
-    next(error);
+    console.error('Get booking error:', error);
+    res.status(404).json({
+      status: 'error',
+      message: error.message || 'Không tìm thấy booking',
+    });
   }
 };
 
 /**
- * @route   GET /api/trips/:tripId/available-seats
- * @desc    Get list of available seats for a trip
+ * @route   GET /api/v1/bookings/code/:bookingCode
+ * @desc    Get booking by code (for guests)
  * @access  Public
  */
-exports.getAvailableSeats = async (req, res, next) => {
+exports.getBookingByCode = async (req, res) => {
+  try {
+    const { bookingCode } = req.params;
+    const { phone } = req.query;
+
+    if (!phone) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Số điện thoại là bắt buộc',
+      });
+    }
+
+    const booking = await BookingService.getBookingByCode(bookingCode, phone);
+
+    res.status(200).json({
+      status: 'success',
+      data: { booking },
+    });
+  } catch (error) {
+    console.error('Get booking by code error:', error);
+    res.status(404).json({
+      status: 'error',
+      message: error.message || 'Không tìm thấy booking',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/bookings/trips/:tripId/available-seats
+ * @desc    Get available seats for a trip
+ * @access  Public
+ */
+exports.getAvailableSeats = async (req, res) => {
   try {
     const { tripId } = req.params;
 
-    const availableSeats = await SeatService.getAvailableSeats(tripId);
+    const seatsInfo = await BookingService.getAvailableSeats(tripId);
 
     res.status(200).json({
-      success: true,
-      count: availableSeats.length,
-      data: { availableSeats },
+      status: 'success',
+      data: seatsInfo,
     });
   } catch (error) {
-    next(error);
+    console.error('Get available seats error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể lấy thông tin ghế',
+    });
   }
 };
 
 /**
- * @route   POST /api/bookings/batch-check-seats
- * @desc    Check availability of multiple seats
- * @access  Public
+ * @route   GET /api/v1/bookings/my-bookings
+ * @desc    Get customer's bookings
+ * @access  Private (Customer)
  */
-exports.batchCheckSeats = async (req, res, next) => {
+exports.getMyBookings = async (req, res) => {
   try {
-    const { tripId, seats } = req.body;
+    const customerId = req.user._id;
+    const { status, fromDate, toDate } = req.query;
 
-    const result = await SeatService.batchCheckSeats(tripId, seats);
+    const bookings = await BookingService.getCustomerBookings(customerId, {
+      status,
+      fromDate,
+      toDate,
+    });
 
     res.status(200).json({
-      success: true,
-      data: result,
+      status: 'success',
+      data: {
+        bookings,
+        total: bookings.length,
+      },
     });
   } catch (error) {
-    next(error);
+    console.error('Get my bookings error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể lấy danh sách booking',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/operators/bookings
+ * @desc    Get operator's bookings
+ * @access  Private (Operator)
+ */
+exports.getOperatorBookings = async (req, res) => {
+  try {
+    const operatorId = req.user._id;
+    const { status, paymentStatus, fromDate, toDate } = req.query;
+
+    const bookings = await BookingService.getOperatorBookings(operatorId, {
+      status,
+      paymentStatus,
+      fromDate,
+      toDate,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        bookings,
+        total: bookings.length,
+      },
+    });
+  } catch (error) {
+    console.error('Get operator bookings error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể lấy danh sách booking',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/operators/bookings/statistics
+ * @desc    Get booking statistics for operator
+ * @access  Private (Operator)
+ */
+exports.getStatistics = async (req, res) => {
+  try {
+    const operatorId = req.user._id;
+    const { fromDate, toDate } = req.query;
+
+    const stats = await BookingService.getStatistics(operatorId, {
+      fromDate,
+      toDate,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: stats,
+    });
+  } catch (error) {
+    console.error('Get statistics error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể lấy thống kê',
+    });
+  }
+};
+
+/**
+ * @route   PUT /api/v1/operators/bookings/:bookingId/payment
+ * @desc    Update booking payment status
+ * @access  Private (Operator)
+ */
+exports.updatePayment = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { paymentId, paymentMethod, paymentStatus } = req.body;
+
+    const booking = await BookingService.updatePayment(bookingId, {
+      paymentId,
+      paymentMethod,
+      paymentStatus,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: { booking },
+      message: 'Cập nhật thanh toán thành công',
+    });
+  } catch (error) {
+    console.error('Update payment error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể cập nhật thanh toán',
+    });
   }
 };

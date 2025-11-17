@@ -1,322 +1,589 @@
 const Booking = require('../models/Booking');
 const Trip = require('../models/Trip');
-const SeatService = require('./seat.service');
+const SeatLockService = require('./seatLock.service');
+const VoucherService = require('./voucher.service');
+const mongoose = require('mongoose');
+
+// Lazy-load PaymentService to avoid circular dependency
+let PaymentService = null;
+const getPaymentService = () => {
+  if (!PaymentService) {
+    PaymentService = require('./payment.service');
+  }
+  return PaymentService;
+};
 
 /**
  * Booking Service
- * Business logic cho booking operations
+ * Manages bookings with seat hold/lock mechanism
  */
 class BookingService {
   /**
-   * Hold seats - Lock ghế tạm thời (15 phút)
-   * @param {Object} data - Booking data
-   * @param {String} userId - User ID (or session ID for guest)
-   * @returns {Promise<Object>} - { booking, expiresAt }
+   * Hold seats temporarily (15 minutes)
+   * @param {Object} holdData - Seat hold data
+   * @returns {Promise<Object>} Booking and lock information
    */
-  static async holdSeats(data, userId) {
-    const { tripId, seats, contactEmail, contactPhone, passengers, pickupPoint, dropoffPoint } = data;
+  static async holdSeats(holdData) {
+    const { tripId, seats, contactInfo, customerId, pickupPoint, dropoffPoint, voucherCode } = holdData;
 
-    try {
-      // 1. Validate trip exists and is available
-      const trip = await Trip.findById(tripId)
-        .populate('routeId')
-        .populate('busId')
-        .populate('operatorId');
+    // Validate trip exists and is bookable
+    const trip = await Trip.findById(tripId)
+      .populate('routeId')
+      .populate('busId')
+      .populate('operatorId');
 
-      if (!trip) {
-        throw new Error('Không tìm thấy chuyến xe');
+    if (!trip) {
+      throw new Error('Không tìm thấy chuyến xe');
+    }
+
+    if (trip.status !== 'scheduled') {
+      throw new Error('Chuyến xe không ở trạng thái có thể đặt');
+    }
+
+    if (new Date(trip.departureTime) < new Date()) {
+      throw new Error('Chuyến xe đã khởi hành');
+    }
+
+    // Check if enough seats available
+    const requestedSeats = seats.map((s) => s.seatNumber);
+    if (trip.availableSeats < requestedSeats.length) {
+      throw new Error('Không đủ ghế trống');
+    }
+
+    // Check if seats are already booked
+    const bookedSeatNumbers = trip.bookedSeats.map((s) => s.seatNumber);
+    const alreadyBooked = requestedSeats.filter((seat) =>
+      bookedSeatNumbers.includes(seat)
+    );
+
+    if (alreadyBooked.length > 0) {
+      throw new Error(`Ghế ${alreadyBooked.join(', ')} đã được đặt`);
+    }
+
+    // Generate session ID for lock
+    const sessionId = customerId || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Try to lock seats in Redis
+    const lockResult = await SeatLockService.lockSeats(
+      tripId,
+      requestedSeats,
+      sessionId
+    );
+
+    if (!lockResult.success || lockResult.failed.length > 0) {
+      const failedSeats = lockResult.failed.map((f) => f.seatNumber);
+      throw new Error(`Ghế ${failedSeats.join(', ')} đang được người khác chọn`);
+    }
+
+    // Calculate pricing
+    const seatPrice = trip.finalPrice;
+    const totalPrice = seatPrice * seats.length;
+    const discount = 0;
+
+    // Validate voucher if provided
+    let voucherValidation = null;
+    let voucherDiscount = 0;
+    let voucherId = null;
+
+    if (voucherCode) {
+      try {
+        voucherValidation = await VoucherService.validateForBooking(voucherCode, {
+          tripId,
+          customerId,
+          totalAmount: totalPrice,
+        });
+
+        voucherDiscount = voucherValidation.discountAmount;
+        voucherId = voucherValidation.voucher.id;
+      } catch (error) {
+        // Don't fail the whole booking if voucher is invalid, just ignore it
+        console.log('Voucher validation failed:', error.message);
       }
+    }
 
-      if (trip.status !== 'scheduled') {
-        throw new Error('Chuyến xe không còn mở đặt vé');
-      }
+    // Calculate final price (discount + voucher)
+    let finalPrice = totalPrice * (1 - discount / 100);
+    finalPrice = Math.max(0, finalPrice - voucherDiscount);
 
-      if (new Date(trip.departureTime) <= new Date()) {
-        throw new Error('Chuyến xe đã khởi hành hoặc sắp khởi hành');
-      }
+    // Create temporary booking
+    const bookingCode = await Booking.generateBookingCode();
 
-      // 2. Validate seats
-      if (!seats || seats.length === 0) {
-        throw new Error('Phải chọn ít nhất 1 ghế');
-      }
+    const booking = await Booking.create({
+      bookingCode,
+      tripId,
+      customerId: customerId || null,
+      operatorId: trip.operatorId._id,
+      status: 'pending',
+      seats: seats.map((seat) => ({
+        seatNumber: seat.seatNumber,
+        price: seatPrice,
+        passengerName: seat.passengerName,
+        passengerPhone: seat.passengerPhone,
+        passengerEmail: seat.passengerEmail,
+        passengerIdCard: seat.passengerIdCard,
+      })),
+      contactInfo,
+      pickupPoint,
+      dropoffPoint,
+      totalPrice,
+      discount,
+      voucherCode: voucherCode || undefined,
+      voucherId: voucherId || undefined,
+      voucherDiscount,
+      finalPrice,
+      isGuestBooking: !customerId,
+      isHeld: true,
+      heldUntil: lockResult.expiresAt,
+    });
 
-      if (seats.length > 6) {
-        throw new Error('Chỉ được chọn tối đa 6 ghế');
-      }
+    return {
+      booking: await Booking.findById(booking._id)
+        .populate('tripId')
+        .populate('operatorId', 'companyName phone email'),
+      lockInfo: {
+        sessionId,
+        lockedSeats: lockResult.locked,
+        expiresAt: lockResult.expiresAt,
+        expiresIn: lockResult.expiresIn,
+      },
+    };
+  }
 
-      // 3. Validate passengers match seats
-      if (passengers.length !== seats.length) {
-        throw new Error('Số lượng hành khách phải bằng số ghế đã chọn');
-      }
+  /**
+   * Confirm booking and finalize seat reservation
+   * @param {string} bookingId - Booking ID
+   * @param {string} sessionId - Session ID used for lock
+   * @returns {Promise<Booking>} Confirmed booking
+   */
+  static async confirmBooking(bookingId, sessionId) {
+    const booking = await Booking.findById(bookingId);
 
-      // 4. Check seat availability and lock
-      const seatCheck = await SeatService.batchCheckSeats(tripId, seats);
+    if (!booking) {
+      throw new Error('Không tìm thấy booking');
+    }
 
-      if (seatCheck.booked.length > 0) {
-        throw new Error(`Ghế đã được đặt: ${seatCheck.booked.join(', ')}`);
-      }
+    if (booking.status !== 'pending') {
+      throw new Error('Booking không ở trạng thái pending');
+    }
 
-      if (seatCheck.locked.length > 0) {
-        throw new Error(`Ghế đang được người khác chọn: ${seatCheck.locked.join(', ')}`);
-      }
+    // Check if hold expired
+    if (booking.isExpired) {
+      throw new Error('Booking đã hết hạn. Vui lòng đặt lại.');
+    }
 
-      // Lock seats in Redis
-      await SeatService.lockSeats(tripId, seats, userId);
+    // Get trip and update booked seats
+    const trip = await Trip.findById(booking.tripId);
 
-      // 5. Create pending booking
-      const booking = new Booking({
-        userId: data.userId || null, // Null for guest
-        tripId,
-        operatorId: trip.operatorId._id,
-        contactEmail,
-        contactPhone,
-        seats,
-        passengers,
-        pickupPoint,
-        dropoffPoint,
-        basePrice: trip.finalPrice,
-        totalSeats: seats.length,
-        subtotal: trip.finalPrice * seats.length,
-        discount: 0, // Will apply voucher later
-        total: trip.finalPrice * seats.length,
-        status: 'pending',
+    if (!trip) {
+      throw new Error('Không tìm thấy chuyến xe');
+    }
+
+    // Add seats to trip's booked seats
+    const seatNumbers = booking.seats.map((s) => s.seatNumber);
+
+    for (const seat of booking.seats) {
+      trip.bookedSeats.push({
+        seatNumber: seat.seatNumber,
+        bookingId: booking._id,
+        passengerName: seat.passengerName,
       });
-
-      await booking.save();
-
-      return {
-        booking,
-        expiresAt: booking.seatHoldExpiry,
-        timeRemaining: booking.timeRemaining,
-      };
-    } catch (error) {
-      // If error, unlock seats
-      if (tripId && seats && userId) {
-        try {
-          await SeatService.unlockSeats(tripId, seats, userId);
-        } catch (unlockError) {
-          console.error('Error unlocking seats after hold failure:', unlockError);
-        }
-      }
-
-      throw error;
     }
-  }
 
-  /**
-   * Extend seat hold time (thêm 15 phút)
-   * @param {String} bookingId - Booking ID
-   * @param {String} userId - User ID
-   * @returns {Promise<Object>}
-   */
-  static async extendSeatHold(bookingId, userId) {
-    try {
-      const booking = await Booking.findById(bookingId);
+    trip.availableSeats -= seatNumbers.length;
+    await trip.save();
 
-      if (!booking) {
-        throw new Error('Không tìm thấy booking');
+    // Confirm booking
+    booking.confirm();
+    await booking.save();
+
+    // Increment voucher usage if voucher was applied
+    if (booking.voucherId) {
+      try {
+        await VoucherService.applyToBooking(booking.voucherId);
+      } catch (error) {
+        console.error('Failed to increment voucher usage:', error.message);
       }
-
-      if (booking.status !== 'pending') {
-        throw new Error('Chỉ có thể gia hạn booking đang pending');
-      }
-
-      if (booking.isExpired) {
-        throw new Error('Booking đã hết hạn');
-      }
-
-      // Extend lock in Redis
-      await SeatService.extendSeatLock(booking.tripId.toString(), booking.seats, userId);
-
-      // Update booking expiry
-      booking.seatHoldExpiry = new Date(Date.now() + 15 * 60 * 1000);
-      await booking.save();
-
-      return {
-        booking,
-        expiresAt: booking.seatHoldExpiry,
-        timeRemaining: booking.timeRemaining,
-      };
-    } catch (error) {
-      throw error;
     }
-  }
 
-  /**
-   * Release seat hold (hủy booking pending)
-   * @param {String} bookingId - Booking ID
-   * @param {String} userId - User ID
-   * @returns {Promise<void>}
-   */
-  static async releaseSeatHold(bookingId, userId) {
-    try {
-      const booking = await Booking.findById(bookingId);
+    // Release Redis locks
+    await SeatLockService.releaseSeats(booking.tripId, seatNumbers, sessionId);
 
-      if (!booking) {
-        throw new Error('Không tìm thấy booking');
-      }
-
-      if (booking.status !== 'pending') {
-        throw new Error('Chỉ có thể hủy booking đang pending');
-      }
-
-      // Unlock seats in Redis
-      await SeatService.unlockSeats(booking.tripId.toString(), booking.seats, userId);
-
-      // Delete pending booking
-      await booking.deleteOne();
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Confirm booking after payment success
-   * @param {String} bookingId - Booking ID
-   * @param {String} paymentId - Payment ID
-   * @returns {Promise<Booking>}
-   */
-  static async confirmBooking(bookingId, paymentId) {
-    try {
-      const booking = await Booking.findById(bookingId).populate('tripId');
-
-      if (!booking) {
-        throw new Error('Không tìm thấy booking');
-      }
-
-      if (booking.status !== 'pending') {
-        throw new Error('Booking đã được xác nhận hoặc đã hủy');
-      }
-
-      if (booking.isExpired) {
-        throw new Error('Booking đã hết hạn');
-      }
-
-      // Confirm booking
-      booking.status = 'confirmed';
-      booking.paymentId = paymentId;
-
-      // Calculate loyalty points (1 point per 10,000 VND)
-      if (booking.userId) {
-        booking.pointsEarned = Math.floor(booking.total / 10000);
-      }
-
-      await booking.save();
-
-      // Confirm seats in Redis (remove locks)
-      const userId = booking.userId ? booking.userId.toString() : `guest-${booking.contactEmail}`;
-      await SeatService.confirmSeats(booking.tripId._id.toString(), booking.seats, userId);
-
-      return booking;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Get seat status for a trip (real-time)
-   * @param {String} tripId - Trip ID
-   * @returns {Promise<Object>}
-   */
-  static async getTripSeatStatus(tripId) {
-    try {
-      const seatStatus = await SeatService.getTripSeatStatus(tripId);
-      const availableCount = await SeatService.getTripAvailableSeatCount(tripId);
-
-      return {
-        seatStatus,
-        availableCount,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Get user's bookings
-   * @param {String} userId - User ID
-   * @param {Object} filters - Filter options
-   * @returns {Promise<Array>}
-   */
-  static async getUserBookings(userId, filters = {}) {
-    try {
-      return await Booking.findByUser(userId, filters);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Get booking by code (for guest lookup)
-   * @param {String} bookingCode - Booking code
-   * @param {String} email - Contact email
-   * @param {String} phone - Contact phone
-   * @returns {Promise<Booking>}
-   */
-  static async getBookingByCode(bookingCode, email, phone) {
-    try {
-      const booking = await Booking.findByCodeAndContact(bookingCode, email, phone);
-
-      if (!booking) {
-        throw new Error('Không tìm thấy booking với thông tin đã cung cấp');
-      }
-
-      return booking;
-    } catch (error) {
-      throw error;
-    }
+    return await Booking.findById(booking._id)
+      .populate('tripId')
+      .populate('operatorId', 'companyName phone email')
+      .populate('voucherId');
   }
 
   /**
    * Cancel booking
-   * @param {String} bookingId - Booking ID
-   * @param {String} reason - Cancellation reason
-   * @param {Object} cancelledBy - User or Operator
-   * @returns {Promise<Booking>}
+   * @param {string} bookingId - Booking ID
+   * @param {string} reason - Cancellation reason
+   * @param {string} cancelledBy - Who cancelled (customer, operator, system)
+   * @returns {Promise<Booking>} Cancelled booking
    */
-  static async cancelBooking(bookingId, reason, cancelledBy) {
-    try {
-      const booking = await Booking.findById(bookingId);
+  static async cancelBooking(bookingId, reason, cancelledBy = 'customer', ipAddress = '127.0.0.1') {
+    const booking = await Booking.findById(bookingId);
 
-      if (!booking) {
-        throw new Error('Không tìm thấy booking');
-      }
-
-      await booking.cancelBooking(reason, cancelledBy);
-
-      return booking;
-    } catch (error) {
-      throw error;
+    if (!booking) {
+      throw new Error('Không tìm thấy booking');
     }
+
+    if (!['pending', 'confirmed'].includes(booking.status)) {
+      throw new Error('Không thể hủy booking này');
+    }
+
+    // If booking is confirmed, release seats back to trip
+    if (booking.status === 'confirmed') {
+      const trip = await Trip.findById(booking.tripId);
+
+      if (trip) {
+        // Remove from booked seats
+        const seatNumbers = booking.seats.map((s) => s.seatNumber);
+        trip.bookedSeats = trip.bookedSeats.filter(
+          (s) => !seatNumbers.includes(s.seatNumber)
+        );
+        trip.availableSeats += seatNumbers.length;
+        await trip.save();
+      }
+    }
+
+    // Release voucher usage if voucher was applied
+    if (booking.status === 'confirmed' && booking.voucherId) {
+      try {
+        await VoucherService.releaseFromBooking(booking.voucherId);
+      } catch (error) {
+        console.error('Failed to release voucher usage:', error.message);
+      }
+    }
+
+    // Auto-refund if payment was made
+    let refundResult = null;
+    if (booking.paymentStatus === 'paid' && booking.status === 'confirmed') {
+      try {
+        const PaymentServiceClass = getPaymentService();
+        refundResult = await PaymentServiceClass.autoRefundOnCancellation(
+          bookingId,
+          reason,
+          ipAddress
+        );
+
+        if (refundResult.success) {
+          console.log('Auto-refund successful for booking:', bookingId);
+        } else {
+          console.error('Auto-refund failed for booking:', bookingId);
+        }
+      } catch (error) {
+        console.error('Auto-refund error:', error.message);
+        // Don't fail the cancellation if refund fails
+      }
+    }
+
+    // Cancel booking
+    booking.cancel(reason, cancelledBy);
+    await booking.save();
+
+    return {
+      booking,
+      refundResult,
+    };
   }
 
   /**
-   * Apply voucher to booking
-   * @param {String} bookingId - Booking ID
-   * @param {String} voucherCode - Voucher code
-   * @returns {Promise<Booking>}
+   * Extend seat hold
+   * @param {string} bookingId - Booking ID
+   * @param {string} sessionId - Session ID
+   * @param {number} minutes - Minutes to extend (default 15)
+   * @returns {Promise<Object>} Extended booking and lock info
    */
-  static async applyVoucher(bookingId, voucherCode) {
-    try {
-      // TODO: Implement voucher validation and application
-      // For now, just return the booking
-      const booking = await Booking.findById(bookingId);
+  static async extendHold(bookingId, sessionId, minutes = 15) {
+    const booking = await Booking.findById(bookingId);
 
-      if (!booking) {
-        throw new Error('Không tìm thấy booking');
-      }
-
-      if (booking.status !== 'pending') {
-        throw new Error('Chỉ có thể áp dụng voucher cho booking đang pending');
-      }
-
-      // Placeholder for voucher logic
-      // Will implement in Phase 5
-
-      return booking;
-    } catch (error) {
-      throw error;
+    if (!booking) {
+      throw new Error('Không tìm thấy booking');
     }
+
+    if (!booking.isHeld || booking.status !== 'pending') {
+      throw new Error('Booking không ở trạng thái hold');
+    }
+
+    const seatNumbers = booking.seats.map((s) => s.seatNumber);
+    const duration = minutes * 60;
+
+    const lockResult = await SeatLockService.extendLock(
+      booking.tripId,
+      seatNumbers,
+      sessionId,
+      duration
+    );
+
+    if (!lockResult.success) {
+      throw new Error('Không thể gia hạn hold. Ghế có thể đã được người khác chọn.');
+    }
+
+    // Update booking
+    booking.heldUntil = lockResult.expiresAt;
+    await booking.save();
+
+    return {
+      booking: await Booking.findById(booking._id),
+      lockInfo: {
+        extendedSeats: lockResult.extended,
+        expiresAt: lockResult.expiresAt,
+        expiresIn: lockResult.expiresIn,
+      },
+    };
+  }
+
+  /**
+   * Release seat hold manually
+   * @param {string} bookingId - Booking ID
+   * @param {string} sessionId - Session ID
+   * @returns {Promise<Booking>} Cancelled booking
+   */
+  static async releaseHold(bookingId, sessionId) {
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      throw new Error('Không tìm thấy booking');
+    }
+
+    if (!booking.isHeld) {
+      return booking; // Already released
+    }
+
+    // Release locks
+    const seatNumbers = booking.seats.map((s) => s.seatNumber);
+    await SeatLockService.releaseSeats(booking.tripId, seatNumbers, sessionId);
+
+    // Cancel booking if still pending
+    if (booking.status === 'pending') {
+      booking.cancel('Khách hủy hold', 'customer');
+      await booking.save();
+    }
+
+    return booking;
+  }
+
+  /**
+   * Get booking by ID
+   * @param {string} bookingId - Booking ID
+   * @param {string} customerId - Customer ID (optional, for authorization)
+   * @returns {Promise<Booking>} Booking details
+   */
+  static async getBookingById(bookingId, customerId = null) {
+    const booking = await Booking.findById(bookingId)
+      .populate('tripId')
+      .populate('operatorId', 'companyName phone email');
+
+    if (!booking) {
+      throw new Error('Không tìm thấy booking');
+    }
+
+    // If customerId provided, verify ownership
+    if (customerId && booking.customerId && booking.customerId.toString() !== customerId) {
+      throw new Error('Không có quyền truy cập booking này');
+    }
+
+    return booking;
+  }
+
+  /**
+   * Get booking by code (for guests)
+   * @param {string} bookingCode - Booking code
+   * @param {string} phone - Contact phone for verification
+   * @returns {Promise<Booking>} Booking details
+   */
+  static async getBookingByCode(bookingCode, phone) {
+    const booking = await Booking.findOne({ bookingCode })
+      .populate('tripId')
+      .populate('operatorId', 'companyName phone email');
+
+    if (!booking) {
+      throw new Error('Không tìm thấy booking');
+    }
+
+    // Verify phone number
+    if (booking.contactInfo.phone !== phone) {
+      throw new Error('Số điện thoại không khớp');
+    }
+
+    return booking;
+  }
+
+  /**
+   * Get available seats for a trip (excluding locked and booked)
+   * @param {string} tripId - Trip ID
+   * @returns {Promise<Object>} Available seats information
+   */
+  static async getAvailableSeats(tripId) {
+    const trip = await Trip.findById(tripId).populate('busId');
+
+    if (!trip) {
+      throw new Error('Không tìm thấy chuyến xe');
+    }
+
+    // Get booked seats
+    const bookedSeats = trip.bookedSeats.map((s) => s.seatNumber);
+
+    // Get locked seats from Redis
+    const lockedSeats = await SeatLockService.getLockedSeats(tripId);
+
+    // Get all seats from bus layout
+    const allSeats = trip.busId.seatLayout.seats || [];
+    const availableSeats = allSeats.filter(
+      (seat) => !bookedSeats.includes(seat.number) && !lockedSeats.includes(seat.number)
+    );
+
+    return {
+      totalSeats: trip.totalSeats,
+      availableSeats: trip.availableSeats,
+      bookedSeats,
+      lockedSeats,
+      availableSeatNumbers: availableSeats.map((s) => s.number),
+      seatLayout: trip.busId.seatLayout,
+    };
+  }
+
+  /**
+   * Cleanup expired holds
+   * @returns {Promise<number>} Number of cleaned bookings
+   */
+  static async cleanupExpiredHolds() {
+    const expiredBookings = await Booking.findExpiredHolds();
+
+    let cleaned = 0;
+    for (const booking of expiredBookings) {
+      // Release booking
+      booking.cancel('Hết thời gian hold', 'system');
+      booking.releaseHold();
+      await booking.save();
+      cleaned++;
+    }
+
+    return cleaned;
+  }
+
+  /**
+   * Get bookings for customer
+   * @param {string} customerId - Customer ID
+   * @param {Object} filters - Filters
+   * @returns {Promise<Array>} Bookings
+   */
+  static async getCustomerBookings(customerId, filters = {}) {
+    return await Booking.findByCustomer(customerId, filters);
+  }
+
+  /**
+   * Get bookings for operator
+   * @param {string} operatorId - Operator ID
+   * @param {Object} filters - Filters
+   * @returns {Promise<Array>} Bookings
+   */
+  static async getOperatorBookings(operatorId, filters = {}) {
+    return await Booking.findByOperator(operatorId, filters);
+  }
+
+  /**
+   * Update booking payment
+   * @param {string} bookingId - Booking ID
+   * @param {Object} paymentData - Payment data
+   * @returns {Promise<Booking>} Updated booking
+   */
+  static async updatePayment(bookingId, paymentData) {
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      throw new Error('Không tìm thấy booking');
+    }
+
+    const { paymentId, paymentMethod, paymentStatus } = paymentData;
+
+    if (paymentStatus === 'paid') {
+      booking.markAsPaid(paymentId, paymentMethod);
+    } else {
+      booking.paymentStatus = paymentStatus;
+      booking.paymentId = paymentId;
+      booking.paymentMethod = paymentMethod;
+    }
+
+    await booking.save();
+
+    return booking;
+  }
+
+  /**
+   * Get booking statistics for operator
+   * @param {string} operatorId - Operator ID
+   * @param {Object} filters - Date filters
+   * @returns {Promise<Object>} Statistics
+   */
+  static async getStatistics(operatorId, filters = {}) {
+    const query = { operatorId: new mongoose.Types.ObjectId(operatorId) };
+
+    if (filters.fromDate && filters.toDate) {
+      query.createdAt = {
+        $gte: new Date(filters.fromDate),
+        $lte: new Date(filters.toDate),
+      };
+    }
+
+    const [statusStats, paymentStats, totalRevenue] = await Promise.all([
+      // Status breakdown
+      Booking.aggregate([
+        { $match: query },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+
+      // Payment status breakdown
+      Booking.aggregate([
+        { $match: query },
+        { $group: { _id: '$paymentStatus', count: { $sum: 1 } } },
+      ]),
+
+      // Total revenue
+      Booking.aggregate([
+        {
+          $match: {
+            ...query,
+            paymentStatus: 'paid',
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: '$finalPrice' },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    // Calculate total bookings
+    const totalBookings = await Booking.countDocuments(query);
+
+    // Format status stats
+    const statusBreakdown = {};
+    statusStats.forEach((stat) => {
+      statusBreakdown[stat._id] = stat.count;
+    });
+
+    const paymentBreakdown = {};
+    paymentStats.forEach((stat) => {
+      paymentBreakdown[stat._id] = stat.count;
+    });
+
+    return {
+      totalBookings,
+      statusBreakdown,
+      paymentBreakdown,
+      revenue: {
+        total: totalRevenue[0]?.total || 0,
+        paidBookings: totalRevenue[0]?.count || 0,
+        averageBookingValue: totalRevenue[0]?.count
+          ? (totalRevenue[0].total / totalRevenue[0].count).toFixed(2)
+          : 0,
+      },
+    };
   }
 }
 

@@ -2,151 +2,117 @@ const mongoose = require('mongoose');
 
 /**
  * Booking Schema
- * Quản lý đặt vé
+ * Represents a ticket booking with seat selections and passenger details
  */
 const BookingSchema = new mongoose.Schema(
   {
-    // References
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      // Optional - null for guest bookings
+    // Unique booking reference code
+    bookingCode: {
+      type: String,
+      required: true,
+      unique: true,
       index: true,
     },
 
+    // References
     tripId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Trip',
-      required: [true, 'Trip là bắt buộc'],
+      required: [true, 'Chuyến xe là bắt buộc'],
+      index: true,
+    },
+
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: false, // Allow guest bookings
       index: true,
     },
 
     operatorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'BusOperator',
-      required: [true, 'Operator là bắt buộc'],
+      required: [true, 'Nhà xe là bắt buộc'],
       index: true,
     },
 
-    // Booking Code
-    bookingCode: {
+    // Booking status
+    status: {
       type: String,
-      unique: true,
-      required: true,
-      uppercase: true,
+      enum: ['pending', 'confirmed', 'cancelled', 'completed', 'refunded'],
+      default: 'pending',
       index: true,
     },
 
-    // Contact Info (for guests and confirmation)
-    contactEmail: {
-      type: String,
-      required: [true, 'Email liên hệ là bắt buộc'],
-      lowercase: true,
-      trim: true,
-      match: [/^\S+@\S+\.\S+$/, 'Email không hợp lệ'],
-    },
-
-    contactPhone: {
-      type: String,
-      required: [true, 'Số điện thoại liên hệ là bắt buộc'],
-      trim: true,
-      match: [/^[0-9]{10,11}$/, 'Số điện thoại không hợp lệ'],
-    },
-
-    // Seats
-    seats: {
-      type: [String],
-      required: [true, 'Phải chọn ít nhất 1 ghế'],
-      validate: {
-        validator: function (seats) {
-          return seats.length > 0 && seats.length <= 6;
-        },
-        message: 'Phải chọn từ 1-6 ghế',
-      },
-    },
-
-    // Passengers (Embedded)
-    passengers: [
+    // Selected seats
+    seats: [
       {
         seatNumber: {
           type: String,
           required: true,
         },
-        fullName: {
-          type: String,
-          required: [true, 'Tên hành khách là bắt buộc'],
-          trim: true,
+        price: {
+          type: Number,
+          required: true,
         },
-        phone: {
+        passengerName: {
           type: String,
-          required: [true, 'Số điện thoại hành khách là bắt buộc'],
-          match: [/^[0-9]{10,11}$/, 'Số điện thoại không hợp lệ'],
+          required: true,
         },
-        idCard: {
+        passengerPhone: {
           type: String,
-          trim: true,
-          match: [/^[0-9]{9,12}$/, 'Số CMND/CCCD không hợp lệ'],
+        },
+        passengerEmail: {
+          type: String,
+        },
+        passengerIdCard: {
+          type: String,
         },
       },
     ],
 
-    // Pickup & Dropoff Points
-    pickupPoint: {
+    // Contact information (primary contact)
+    contactInfo: {
       name: {
         type: String,
-        required: true,
+        required: [true, 'Tên liên hệ là bắt buộc'],
       },
+      phone: {
+        type: String,
+        required: [true, 'Số điện thoại liên hệ là bắt buộc'],
+      },
+      email: {
+        type: String,
+      },
+    },
+
+    // Pickup and dropoff points
+    pickupPoint: {
+      name: String,
       address: String,
-      coordinates: {
-        lat: Number,
-        lng: Number,
-      },
+      time: Date,
     },
 
     dropoffPoint: {
-      name: {
-        type: String,
-        required: true,
-      },
+      name: String,
       address: String,
-      coordinates: {
-        lat: Number,
-        lng: Number,
-      },
+      time: Date,
     },
 
     // Pricing
-    basePrice: {
+    totalPrice: {
       type: Number,
       required: true,
-      min: [0, 'Giá không thể âm'],
-    },
-
-    totalSeats: {
-      type: Number,
-      required: true,
-      min: [1, 'Phải có ít nhất 1 ghế'],
-    },
-
-    subtotal: {
-      type: Number,
-      required: true,
-      min: [0, 'Tổng tiền không thể âm'],
+      min: 0,
     },
 
     discount: {
       type: Number,
       default: 0,
-      min: [0, 'Giảm giá không thể âm'],
+      min: 0,
     },
 
-    total: {
-      type: Number,
-      required: true,
-      min: [0, 'Tổng tiền không thể âm'],
-    },
-
-    // Voucher
+    // Voucher information
     voucherCode: {
       type: String,
       uppercase: true,
@@ -157,201 +123,136 @@ const BookingSchema = new mongoose.Schema(
       ref: 'Voucher',
     },
 
-    // Status
-    status: {
+    voucherDiscount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    finalPrice: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    // Payment information
+    paymentMethod: {
       type: String,
-      enum: {
-        values: ['pending', 'confirmed', 'cancelled', 'completed'],
-        message: 'Trạng thái không hợp lệ',
-      },
+      enum: ['cash', 'credit_card', 'debit_card', 'momo', 'vnpay', 'zalopay'],
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed', 'refunded'],
       default: 'pending',
       index: true,
     },
 
-    // Seat Hold (for pending bookings)
-    // Ghế sẽ bị lock trong 15 phút
-    seatHoldExpiry: {
+    paymentId: {
+      type: String,
+    },
+
+    paidAt: {
       type: Date,
-      required: function () {
-        return this.status === 'pending';
-      },
-      index: true,
     },
 
     // Cancellation
-    cancelledAt: Date,
+    cancelledAt: {
+      type: Date,
+    },
 
     cancelReason: {
       type: String,
-      maxlength: [500, 'Lý do hủy không quá 500 ký tự'],
     },
 
     cancelledBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      refPath: 'cancelledByModel',
-    },
-
-    cancelledByModel: {
       type: String,
-      enum: ['User', 'BusOperator'],
+      enum: ['customer', 'operator', 'system'],
     },
 
     refundAmount: {
       type: Number,
-      default: 0,
-      min: [0, 'Số tiền hoàn không thể âm'],
+      min: 0,
     },
 
-    refundStatus: {
+    refundedAt: {
+      type: Date,
+    },
+
+    // Special requests
+    specialRequests: {
       type: String,
-      enum: ['none', 'pending', 'completed', 'failed'],
-      default: 'none',
     },
 
-    // Loyalty Points
-    pointsEarned: {
-      type: Number,
-      default: 0,
-      min: [0, 'Điểm thưởng không thể âm'],
-    },
-
-    // Payment Reference
-    paymentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Payment',
-    },
-
-    // Notes
-    notes: {
+    // Notes from operator
+    operatorNotes: {
       type: String,
-      maxlength: [1000, 'Ghi chú không quá 1000 ký tự'],
+    },
+
+    // Guest booking (for users without account)
+    isGuestBooking: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Hold/Lock information
+    isHeld: {
+      type: Boolean,
+      default: false,
+    },
+
+    heldUntil: {
+      type: Date,
     },
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
+  }
 );
 
 /**
  * Indexes
  */
-// Unique booking code
-BookingSchema.index({ bookingCode: 1 }, { unique: true });
+// Query bookings by customer
+BookingSchema.index({ customerId: 1, createdAt: -1 });
 
-// User bookings with status
-BookingSchema.index({ userId: 1, status: 1 });
+// Query bookings by operator and date
+BookingSchema.index({ operatorId: 1, createdAt: -1 });
 
-// Trip bookings
+// Query bookings by trip
 BookingSchema.index({ tripId: 1, status: 1 });
 
-// Guest lookup by contact info
-BookingSchema.index({ contactEmail: 1, contactPhone: 1 });
+// Query bookings by status and payment
+BookingSchema.index({ status: 1, paymentStatus: 1 });
 
-// Recent bookings
-BookingSchema.index({ createdAt: -1 });
-
-// TTL index for expired seat holds
-// Automatically delete pending bookings after seatHoldExpiry
-BookingSchema.index(
-  { seatHoldExpiry: 1 },
-  {
-    expireAfterSeconds: 0,
-    partialFilterExpression: { status: 'pending' },
-  },
-);
+// Search by booking code
+BookingSchema.index({ bookingCode: 1 });
 
 /**
- * Pre-save Middleware
+ * Virtual fields
  */
-BookingSchema.pre('save', async function (next) {
-  try {
-    // Generate booking code if new
-    if (this.isNew && !this.bookingCode) {
-      this.bookingCode = await this.constructor.generateBookingCode();
-    }
-
-    // Calculate subtotal and total
-    if (this.isModified('basePrice') || this.isModified('totalSeats') || this.isModified('discount')) {
-      this.subtotal = this.basePrice * this.totalSeats;
-      this.total = this.subtotal - this.discount;
-    }
-
-    // Set seat hold expiry for pending bookings (15 minutes)
-    if (this.isNew && this.status === 'pending') {
-      this.seatHoldExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    }
-
-    // Clear seat hold expiry when confirmed
-    if (this.isModified('status') && this.status === 'confirmed') {
-      this.seatHoldExpiry = undefined;
-    }
-
-    // Set cancellation timestamp
-    if (this.isModified('status') && this.status === 'cancelled' && !this.cancelledAt) {
-      this.cancelledAt = new Date();
-    }
-
-    next();
-  } catch (error) {
-    next(error);
-  }
+BookingSchema.virtual('numberOfSeats').get(function () {
+  return this.seats ? this.seats.length : 0;
 });
 
-/**
- * Post-save Middleware
- * Update trip's booked seats when booking status changes
- */
-BookingSchema.post('save', async function (doc) {
-  try {
-    const Trip = mongoose.model('Trip');
-    const trip = await Trip.findById(doc.tripId);
-
-    if (!trip) return;
-
-    // When booking is confirmed, add seats to trip's bookedSeats
-    if (doc.status === 'confirmed') {
-      const newSeats = doc.seats.filter((seat) => !trip.bookedSeats.includes(seat));
-      if (newSeats.length > 0) {
-        trip.bookedSeats.push(...newSeats);
-        await trip.save();
-      }
-    }
-
-    // When booking is cancelled, remove seats from trip's bookedSeats
-    if (doc.status === 'cancelled') {
-      trip.bookedSeats = trip.bookedSeats.filter((seat) => !doc.seats.includes(seat));
-      await trip.save();
-    }
-  } catch (error) {
-    console.error('Error updating trip booked seats:', error);
-  }
-});
-
-/**
- * Virtual: Is expired
- */
 BookingSchema.virtual('isExpired').get(function () {
-  return this.status === 'pending' && this.seatHoldExpiry && new Date() > this.seatHoldExpiry;
-});
-
-/**
- * Virtual: Time remaining (in minutes)
- */
-BookingSchema.virtual('timeRemaining').get(function () {
-  if (this.status === 'pending' && this.seatHoldExpiry) {
-    const diff = this.seatHoldExpiry - new Date();
-    return Math.max(0, Math.round(diff / (1000 * 60)));
+  if (this.isHeld && this.heldUntil) {
+    return new Date() > this.heldUntil;
   }
-  return 0;
+  return false;
 });
 
-/**
- * Virtual: Can be cancelled
- */
 BookingSchema.virtual('canBeCancelled').get(function () {
-  return this.status === 'confirmed' || this.status === 'pending';
+  // Can only cancel pending or confirmed bookings
+  if (!['pending', 'confirmed'].includes(this.status)) {
+    return false;
+  }
+
+  // Cannot cancel if trip has already departed
+  // This check should be done with trip data
+  return true;
 });
 
 /**
@@ -359,62 +260,79 @@ BookingSchema.virtual('canBeCancelled').get(function () {
  */
 
 /**
- * Confirm booking after successful payment
- * @returns {Promise<Booking>}
+ * Generate unique booking code
+ * Format: BK + YYYYMMDD + 6-digit random
  */
-BookingSchema.methods.confirmBooking = async function () {
-  if (this.status !== 'pending') {
-    throw new Error('Chỉ có thể xác nhận booking đang pending');
+BookingSchema.statics.generateBookingCode = async function () {
+  const date = new Date();
+  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+  let code;
+  let exists = true;
+
+  // Keep generating until we get a unique code
+  while (exists) {
+    const random = Math.floor(100000 + Math.random() * 900000);
+    code = `BK${dateStr}${random}`;
+    exists = await this.exists({ bookingCode: code });
   }
 
-  if (this.isExpired) {
-    throw new Error('Booking đã hết hạn');
-  }
-
-  this.status = 'confirmed';
-  return await this.save();
+  return code;
 };
 
 /**
- * Cancel booking with refund calculation
- * @param {String} reason - Cancellation reason
- * @param {Object} cancelledBy - User or Operator who cancelled
- * @returns {Promise<Booking>}
+ * Mark booking as confirmed
  */
-BookingSchema.methods.cancelBooking = async function (reason, cancelledBy) {
-  if (!this.canBeCancelled) {
-    throw new Error('Không thể hủy booking này');
-  }
+BookingSchema.methods.confirm = function () {
+  this.status = 'confirmed';
+  this.isHeld = false;
+  this.heldUntil = null;
+};
 
-  const Trip = mongoose.model('Trip');
-  const trip = await Trip.findById(this.tripId);
-
-  if (!trip) {
-    throw new Error('Không tìm thấy chuyến xe');
-  }
-
-  // Calculate refund based on cancellation policy
-  const hoursUntilDeparture = (trip.departureTime - new Date()) / (1000 * 60 * 60);
-  let refundPercentage = 0;
-
-  if (hoursUntilDeparture >= 24) {
-    refundPercentage = 0.9; // 90% refund
-  } else if (hoursUntilDeparture >= 12) {
-    refundPercentage = 0.7; // 70% refund
-  } else if (hoursUntilDeparture >= 6) {
-    refundPercentage = 0.5; // 50% refund
-  } else {
-    refundPercentage = 0; // No refund
-  }
-
+/**
+ * Cancel booking
+ */
+BookingSchema.methods.cancel = function (reason, cancelledBy = 'customer') {
   this.status = 'cancelled';
+  this.cancelledAt = new Date();
   this.cancelReason = reason;
-  this.cancelledBy = cancelledBy._id;
-  this.cancelledByModel = cancelledBy.constructor.modelName;
-  this.refundAmount = Math.round(this.total * refundPercentage);
-  this.refundStatus = this.refundAmount > 0 ? 'pending' : 'none';
+  this.cancelledBy = cancelledBy;
+};
 
-  return await this.save();
+/**
+ * Mark as paid
+ */
+BookingSchema.methods.markAsPaid = function (paymentId, paymentMethod) {
+  this.paymentStatus = 'paid';
+  this.paymentId = paymentId;
+  this.paymentMethod = paymentMethod;
+  this.paidAt = new Date();
+  this.confirm(); // Automatically confirm when paid
+};
+
+/**
+ * Process refund
+ */
+BookingSchema.methods.processRefund = function (amount) {
+  this.status = 'refunded';
+  this.paymentStatus = 'refunded';
+  this.refundAmount = amount;
+  this.refundedAt = new Date();
+};
+
+/**
+ * Set hold/lock with TTL
+ */
+BookingSchema.methods.hold = function (minutes = 15) {
+  this.isHeld = true;
+  this.heldUntil = new Date(Date.now() + minutes * 60 * 1000);
+};
+
+/**
+ * Release hold
+ */
+BookingSchema.methods.releaseHold = function () {
+  this.isHeld = false;
+  this.heldUntil = null;
 };
 
 /**
@@ -422,81 +340,86 @@ BookingSchema.methods.cancelBooking = async function (reason, cancelledBy) {
  */
 
 /**
- * Generate unique booking code
- * Format: QR-YYYYMMDD-XXXX (e.g., QR-20240115-A1B2)
- * @returns {Promise<String>}
+ * Find bookings by customer
  */
-BookingSchema.statics.generateBookingCode = async function () {
-  const date = new Date();
-  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
-
-  // Generate random 4-character code
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 4; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-
-  const bookingCode = `QR-${dateStr}-${code}`;
-
-  // Check if exists
-  const exists = await this.findOne({ bookingCode });
-  if (exists) {
-    // Recursively try again
-    return await this.generateBookingCode();
-  }
-
-  return bookingCode;
-};
-
-/**
- * Find bookings by user with filters
- * @param {ObjectId} userId
- * @param {Object} filters
- * @returns {Promise<Array>}
- */
-BookingSchema.statics.findByUser = function (userId, filters = {}) {
-  const query = { userId };
+BookingSchema.statics.findByCustomer = function (customerId, filters = {}) {
+  const query = { customerId };
 
   if (filters.status) {
     query.status = filters.status;
   }
 
+  if (filters.fromDate && filters.toDate) {
+    query.createdAt = {
+      $gte: new Date(filters.fromDate),
+      $lte: new Date(filters.toDate),
+    };
+  }
+
   return this.find(query)
     .populate('tripId')
-    .populate('operatorId', 'companyName logo')
+    .populate('operatorId', 'companyName phone email')
     .sort({ createdAt: -1 });
 };
 
 /**
- * Find booking by code (for guest lookup)
- * @param {String} bookingCode
- * @param {String} email
- * @param {String} phone
- * @returns {Promise<Booking>}
+ * Find bookings by operator
  */
-BookingSchema.statics.findByCodeAndContact = function (bookingCode, email, phone) {
-  return this.findOne({
-    bookingCode: bookingCode.toUpperCase(),
-    contactEmail: email.toLowerCase(),
-    contactPhone: phone,
-  })
+BookingSchema.statics.findByOperator = function (operatorId, filters = {}) {
+  const query = { operatorId };
+
+  if (filters.status) {
+    query.status = filters.status;
+  }
+
+  if (filters.paymentStatus) {
+    query.paymentStatus = filters.paymentStatus;
+  }
+
+  if (filters.fromDate && filters.toDate) {
+    query.createdAt = {
+      $gte: new Date(filters.fromDate),
+      $lte: new Date(filters.toDate),
+    };
+  }
+
+  return this.find(query)
     .populate('tripId')
-    .populate('operatorId', 'companyName logo phone email');
+    .populate('customerId', 'fullName phone email')
+    .sort({ createdAt: -1 });
 };
 
 /**
- * Clean up expired pending bookings
- * (Backup to TTL index)
- * @returns {Promise<Number>}
+ * Find expired held bookings
  */
-BookingSchema.statics.cleanupExpiredBookings = async function () {
-  const result = await this.deleteMany({
+BookingSchema.statics.findExpiredHolds = function () {
+  return this.find({
+    isHeld: true,
+    heldUntil: { $lt: new Date() },
     status: 'pending',
-    seatHoldExpiry: { $lt: new Date() },
   });
-
-  return result.deletedCount;
 };
 
-module.exports = mongoose.model('Booking', BookingSchema);
+/**
+ * Pre-save middleware
+ */
+BookingSchema.pre('save', function (next) {
+  // Calculate final price with discounts
+  if (
+    this.isModified('discount') ||
+    this.isModified('totalPrice') ||
+    this.isModified('voucherDiscount')
+  ) {
+    // Apply percentage discount first
+    let price = this.totalPrice * (1 - this.discount / 100);
+    // Then apply voucher discount (fixed amount)
+    price = Math.max(0, price - this.voucherDiscount);
+    this.finalPrice = price;
+  }
+
+  next();
+});
+
+const Booking = mongoose.model('Booking', BookingSchema);
+
+module.exports = Booking;
