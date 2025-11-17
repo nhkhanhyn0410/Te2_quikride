@@ -407,3 +407,55 @@ exports.getPublicTripDetail = async (req, res) => {
     });
   }
 };
+
+/**
+ * @route   PUT /api/v1/operators/trips/:id/dynamic-pricing
+ * @desc    Configure dynamic pricing for a trip
+ * @access  Private (Operator)
+ */
+exports.configureDynamicPricing = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const operatorId = req.user._id;
+    const pricingConfig = req.body;
+
+    const trip = await TripService.configureDynamicPricing(id, operatorId, pricingConfig);
+
+    res.status(200).json({
+      status: 'success',
+      data: { trip },
+      message: 'Cấu hình giá động thành công',
+    });
+  } catch (error) {
+    console.error('Configure dynamic pricing error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể cấu hình giá động',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/trips/:id/dynamic-price
+ * @desc    Get dynamic price for a trip
+ * @access  Public
+ */
+exports.getDynamicPrice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { bookingDate } = req.query;
+
+    const priceInfo = await TripService.getDynamicPrice(id, bookingDate);
+
+    res.status(200).json({
+      status: 'success',
+      data: priceInfo,
+    });
+  } catch (error) {
+    console.error('Get dynamic price error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể tính giá động',
+    });
+  }
+};
