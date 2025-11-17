@@ -243,6 +243,23 @@ class VoucherService {
   }
 
   /**
+   * Activate voucher
+   * @param {string} voucherId - Voucher ID
+   * @returns {Promise<Voucher>} Activated voucher
+   */
+  static async activate(voucherId) {
+    const voucher = await Voucher.findById(voucherId);
+    if (!voucher) {
+      throw new Error('Không tìm thấy voucher');
+    }
+
+    voucher.isActive = true;
+    await voucher.save();
+
+    return voucher;
+  }
+
+  /**
    * Deactivate voucher
    * @param {string} voucherId - Voucher ID
    * @returns {Promise<Voucher>} Deactivated voucher
@@ -364,6 +381,119 @@ class VoucherService {
     }
 
     return code;
+  }
+
+  /**
+   * Get detailed usage report for a voucher
+   * @param {string} voucherId - Voucher ID
+   * @param {Object} options - Query options
+   * @returns {Promise<Object>} Usage report
+   */
+  static async getUsageReport(voucherId, options = {}) {
+    const { startDate, endDate, page = 1, limit = 20 } = options;
+
+    const voucher = await Voucher.findById(voucherId);
+    if (!voucher) {
+      throw new Error('Không tìm thấy voucher');
+    }
+
+    // Build query for bookings that used this voucher
+    const query = {
+      voucherId: mongoose.Types.ObjectId(voucherId),
+      status: { $in: ['confirmed', 'completed', 'cancelled'] },
+    };
+
+    // Add date filter if provided
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) {
+        query.createdAt.$gte = new Date(startDate);
+      }
+      if (endDate) {
+        query.createdAt.$lte = new Date(endDate);
+      }
+    }
+
+    // Count total bookings
+    const total = await Booking.countDocuments(query);
+
+    // Get bookings with pagination
+    const bookings = await Booking.find(query)
+      .populate('tripId', 'departureTime')
+      .populate({
+        path: 'tripId',
+        populate: {
+          path: 'routeId',
+          select: 'routeName origin.city destination.city',
+        },
+      })
+      .select('bookingCode contactEmail contactPhone total discount createdAt status')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    // Calculate statistics
+    const stats = await Booking.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+          totalDiscount: { $sum: '$discount' },
+          totalRevenue: { $sum: '$total' },
+          confirmedCount: {
+            $sum: { $cond: [{ $eq: ['$status', 'confirmed'] }, 1, 0] },
+          },
+          completedCount: {
+            $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] },
+          },
+          cancelledCount: {
+            $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] },
+          },
+        },
+      },
+    ]);
+
+    const statistics = stats[0] || {
+      totalDiscount: 0,
+      totalRevenue: 0,
+      confirmedCount: 0,
+      completedCount: 0,
+      cancelledCount: 0,
+    };
+
+    return {
+      voucher: {
+        code: voucher.code,
+        name: voucher.name,
+        discountType: voucher.discountType,
+        discountValue: voucher.discountValue,
+        currentUsageCount: voucher.currentUsageCount,
+        maxUsageTotal: voucher.maxUsageTotal,
+        validFrom: voucher.validFrom,
+        validUntil: voucher.validUntil,
+        isActive: voucher.isActive,
+      },
+      statistics,
+      bookings: bookings.map((booking) => ({
+        bookingCode: booking.bookingCode,
+        route: booking.tripId?.routeId
+          ? `${booking.tripId.routeId.origin?.city} - ${booking.tripId.routeId.destination?.city}`
+          : 'N/A',
+        departureTime: booking.tripId?.departureTime,
+        customerEmail: booking.contactEmail,
+        customerPhone: booking.contactPhone,
+        totalAmount: booking.total,
+        discountAmount: booking.discount,
+        status: booking.status,
+        bookedAt: booking.createdAt,
+      })),
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: limit,
+      },
+    };
   }
 }
 

@@ -69,6 +69,7 @@ router.get('/trips', authenticate, authorize('operator'), tripController.getMyTr
 router.get('/trips/statistics', authenticate, authorize('operator'), tripController.getStatistics);
 router.get('/trips/:id', authenticate, authorize('operator'), tripController.getById);
 router.put('/trips/:id', authenticate, authorize('operator'), tripController.update);
+router.put('/trips/:id/dynamic-pricing', authenticate, authorize('operator'), tripController.configureDynamicPricing);
 router.delete('/trips/:id', authenticate, authorize('operator'), tripController.delete);
 router.put('/trips/:id/cancel', authenticate, authorize('operator'), tripController.cancel);
 
@@ -82,8 +83,10 @@ router.post('/vouchers', authenticate, authorize('operator'), voucherController.
 router.get('/vouchers', authenticate, authorize('operator'), voucherController.getOperatorVouchers);
 router.get('/vouchers/statistics', authenticate, authorize('operator'), voucherController.getVoucherStatistics);
 router.get('/vouchers/:id', authenticate, authorize('operator'), voucherController.getVoucherById);
+router.get('/vouchers/:id/usage-report', authenticate, authorize('operator'), voucherController.getVoucherUsageReport);
 router.put('/vouchers/:id', authenticate, authorize('operator'), voucherController.updateVoucher);
 router.delete('/vouchers/:id', authenticate, authorize('operator'), voucherController.deleteVoucher);
+router.put('/vouchers/:id/activate', authenticate, authorize('operator'), voucherController.activateVoucher);
 router.put('/vouchers/:id/deactivate', authenticate, authorize('operator'), voucherController.deactivateVoucher);
 
 // Payment management (Operator only)

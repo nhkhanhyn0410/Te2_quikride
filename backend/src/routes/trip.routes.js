@@ -15,4 +15,7 @@ router.get('/search', tripController.search);
 // Get trip detail (public)
 router.get('/:id', tripController.getPublicTripDetail);
 
+// Get dynamic price for a trip
+router.get('/:id/dynamic-price', tripController.getDynamicPrice);
+
 module.exports = router;
