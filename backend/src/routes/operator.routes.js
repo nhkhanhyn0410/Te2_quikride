@@ -25,6 +25,9 @@ router.get('/:id', operatorController.getById);
 router.get('/me/profile', authenticate, authorize('operator'), operatorController.getMe);
 router.put('/me/profile', authenticate, authorize('operator'), operatorController.updateMe);
 
+// Dashboard statistics (Operator only)
+router.get('/dashboard/stats', authenticate, authorize('operator'), operatorController.getDashboardStats);
+
 // Route management (Operator only)
 router.post('/routes', authenticate, authorize('operator'), routeController.create);
 router.get('/routes', authenticate, authorize('operator'), routeController.getMyRoutes);
