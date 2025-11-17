@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Auth Pages
 import OperatorLoginPage from './pages/auth/OperatorLoginPage';
+import TripManagerLoginPage from './pages/auth/TripManagerLoginPage';
 
 // Operator Dashboard Pages
 import DashboardPage from './pages/operator/DashboardPage';
@@ -14,12 +15,19 @@ import RoutesPage from './pages/operator/RoutesPage';
 import BusesPage from './pages/operator/BusesPage';
 import EmployeesPage from './pages/operator/EmployeesPage';
 
-// Customer Booking Pages
+// Customer Pages
 import SearchPage from './pages/SearchPage';
 import TripsPage from './pages/TripsPage';
 import TripDetailPage from './pages/TripDetailPage';
 import PassengerInfoPage from './pages/PassengerInfoPage';
 import BookingConfirmationPage from './pages/BookingConfirmationPage';
+import MyTicketsPage from './pages/customer/MyTicketsPage';
+import GuestTicketLookupPage from './pages/GuestTicketLookupPage';
+
+// Trip Manager Pages
+import TripManagerDashboard from './pages/trip-manager/TripManagerDashboard';
+import QRScannerPage from './pages/trip-manager/QRScannerPage';
+import PassengersPage from './pages/trip-manager/PassengersPage';
 
 function App() {
   return (
@@ -56,6 +64,10 @@ function App() {
         <Route path="/trips/:tripId" element={<TripDetailPage />} />
         <Route path="/booking/passenger-info" element={<PassengerInfoPage />} />
         <Route path="/booking/confirmation/:bookingCode" element={<BookingConfirmationPage />} />
+
+        {/* Customer Ticket Management */}
+        <Route path="/my-tickets" element={<MyTicketsPage />} />
+        <Route path="/tickets/lookup" element={<GuestTicketLookupPage />} />
 
         {/* Payment Success/Failure Pages */}
         <Route
@@ -111,6 +123,35 @@ function App() {
           <Route path="buses" element={<BusesPage />} />
           <Route path="employees" element={<EmployeesPage />} />
         </Route>
+
+        {/* Trip Manager Auth Routes */}
+        <Route path="/trip-manager/login" element={<TripManagerLoginPage />} />
+
+        {/* Trip Manager Routes - Protected */}
+        <Route
+          path="/trip-manager/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['trip_manager']}>
+              <TripManagerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/trip-manager/trips/:tripId/scan"
+          element={
+            <ProtectedRoute allowedRoles={['trip_manager']}>
+              <QRScannerPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/trip-manager/trips/:tripId/passengers"
+          element={
+            <ProtectedRoute allowedRoles={['trip_manager']}>
+              <PassengersPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* 404 Not Found */}
         <Route

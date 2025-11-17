@@ -105,6 +105,46 @@ const TripSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Dynamic Pricing Configuration
+    dynamicPricing: {
+      enabled: {
+        type: Boolean,
+        default: false,
+      },
+
+      // Surge pricing based on occupancy
+      demandMultiplier: {
+        enabled: { type: Boolean, default: true },
+        // When occupancy > 80%, apply surge pricing
+        highDemandThreshold: { type: Number, default: 80, min: 0, max: 100 },
+        highDemandMultiplier: { type: Number, default: 1.2, min: 1, max: 3 },
+        // When occupancy > 90%, apply higher surge
+        veryHighDemandThreshold: { type: Number, default: 90, min: 0, max: 100 },
+        veryHighDemandMultiplier: { type: Number, default: 1.5, min: 1, max: 3 },
+      },
+
+      // Early bird discount
+      earlyBirdDiscount: {
+        enabled: { type: Boolean, default: true },
+        // Discount if booked > 7 days in advance
+        daysBeforeDeparture: { type: Number, default: 7, min: 1 },
+        discountPercentage: { type: Number, default: 10, min: 0, max: 50 },
+      },
+
+      // Peak hours premium
+      peakHoursPremium: {
+        enabled: { type: Boolean, default: true },
+        peakHours: [{ type: Number, min: 0, max: 23 }], // e.g., [7, 8, 17, 18, 19]
+        premiumPercentage: { type: Number, default: 15, min: 0, max: 50 },
+      },
+
+      // Weekend premium
+      weekendPremium: {
+        enabled: { type: Boolean, default: true },
+        premiumPercentage: { type: Number, default: 10, min: 0, max: 50 },
+      },
+    },
+
     // Seat Availability
     totalSeats: {
       type: Number,
@@ -320,6 +360,84 @@ TripSchema.methods.canBeCancelled = function () {
     new Date(this.departureTime) > new Date() &&
     this.bookedSeats.length === 0
   );
+};
+
+/**
+ * Calculate dynamic price based on demand, time, and other factors
+ * @param {Date} bookingDate - Date of booking (default: now)
+ * @returns {Object} Price breakdown with dynamic factors
+ */
+TripSchema.methods.calculateDynamicPrice = function (bookingDate = new Date()) {
+  let price = this.basePrice;
+  const priceFactors = {
+    basePrice: this.basePrice,
+    demandSurge: 0,
+    earlyBirdDiscount: 0,
+    peakHoursPremium: 0,
+    weekendPremium: 0,
+    finalPrice: this.basePrice,
+  };
+
+  // If dynamic pricing is not enabled, return base price
+  if (!this.dynamicPricing || !this.dynamicPricing.enabled) {
+    priceFactors.finalPrice = this.finalPrice || this.basePrice;
+    return priceFactors;
+  }
+
+  const config = this.dynamicPricing;
+  const occupancyRate = parseFloat(this.occupancyRate);
+  const departureTime = new Date(this.departureTime);
+  const departureHour = departureTime.getHours();
+  const dayOfWeek = departureTime.getDay(); // 0 = Sunday, 6 = Saturday
+  const daysUntilDeparture = Math.floor((departureTime - bookingDate) / (1000 * 60 * 60 * 24));
+
+  // 1. Demand-based surge pricing
+  if (config.demandMultiplier?.enabled) {
+    if (occupancyRate >= config.demandMultiplier.veryHighDemandThreshold) {
+      const surgeAmount = price * (config.demandMultiplier.veryHighDemandMultiplier - 1);
+      priceFactors.demandSurge = surgeAmount;
+      price += surgeAmount;
+    } else if (occupancyRate >= config.demandMultiplier.highDemandThreshold) {
+      const surgeAmount = price * (config.demandMultiplier.highDemandMultiplier - 1);
+      priceFactors.demandSurge = surgeAmount;
+      price += surgeAmount;
+    }
+  }
+
+  // 2. Early bird discount (negative premium)
+  if (config.earlyBirdDiscount?.enabled && daysUntilDeparture >= config.earlyBirdDiscount.daysBeforeDeparture) {
+    const discountAmount = this.basePrice * (config.earlyBirdDiscount.discountPercentage / 100);
+    priceFactors.earlyBirdDiscount = -discountAmount;
+    price -= discountAmount;
+  }
+
+  // 3. Peak hours premium
+  if (
+    config.peakHoursPremium?.enabled &&
+    config.peakHoursPremium.peakHours &&
+    config.peakHoursPremium.peakHours.includes(departureHour)
+  ) {
+    const premiumAmount = this.basePrice * (config.peakHoursPremium.premiumPercentage / 100);
+    priceFactors.peakHoursPremium = premiumAmount;
+    price += premiumAmount;
+  }
+
+  // 4. Weekend premium (Saturday = 6, Sunday = 0)
+  if (config.weekendPremium?.enabled && (dayOfWeek === 0 || dayOfWeek === 6)) {
+    const premiumAmount = this.basePrice * (config.weekendPremium.premiumPercentage / 100);
+    priceFactors.weekendPremium = premiumAmount;
+    price += premiumAmount;
+  }
+
+  // Apply manual discount if any
+  if (this.discount > 0) {
+    price = price * (1 - this.discount / 100);
+  }
+
+  // Ensure price is not negative
+  priceFactors.finalPrice = Math.max(0, Math.round(price));
+
+  return priceFactors;
 };
 
 /**

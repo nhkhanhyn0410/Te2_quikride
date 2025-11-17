@@ -702,6 +702,60 @@ class TripService {
 
     return publicTrip;
   }
+
+  /**
+   * Configure dynamic pricing for a trip
+   * @param {string} tripId - Trip ID
+   * @param {string} operatorId - Operator ID (for authorization)
+   * @param {Object} pricingConfig - Dynamic pricing configuration
+   * @returns {Promise<Trip>} Updated trip
+   */
+  static async configureDynamicPricing(tripId, operatorId, pricingConfig) {
+    const trip = await Trip.findById(tripId);
+    if (!trip) {
+      throw new Error('Không tìm thấy chuyến xe');
+    }
+
+    // Verify ownership
+    if (trip.operatorId.toString() !== operatorId.toString()) {
+      throw new Error('Không có quyền cấu hình chuyến xe này');
+    }
+
+    // Update dynamic pricing configuration
+    trip.dynamicPricing = {
+      ...trip.dynamicPricing,
+      ...pricingConfig,
+    };
+
+    await trip.save();
+
+    return trip;
+  }
+
+  /**
+   * Get dynamic price for a trip
+   * @param {string} tripId - Trip ID
+   * @param {Date} bookingDate - Booking date (optional)
+   * @returns {Promise<Object>} Price breakdown
+   */
+  static async getDynamicPrice(tripId, bookingDate = new Date()) {
+    const trip = await Trip.findById(tripId);
+    if (!trip) {
+      throw new Error('Không tìm thấy chuyến xe');
+    }
+
+    const priceBreakdown = trip.calculateDynamicPrice(bookingDate);
+
+    return {
+      tripId: trip._id,
+      basePrice: trip.basePrice,
+      dynamicPricingEnabled: trip.dynamicPricing?.enabled || false,
+      priceBreakdown,
+      occupancyRate: trip.occupancyRate,
+      availableSeats: trip.availableSeats,
+      totalSeats: trip.totalSeats,
+    };
+  }
 }
 
 module.exports = TripService;

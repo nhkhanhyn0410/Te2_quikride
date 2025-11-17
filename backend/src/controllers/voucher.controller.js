@@ -255,6 +255,40 @@ exports.deactivateVoucher = async (req, res) => {
 };
 
 /**
+ * @route   PUT /api/v1/operators/vouchers/:id/activate
+ * @desc    Activate voucher
+ * @access  Private (Operator)
+ */
+exports.activateVoucher = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verify ownership first
+    const existingVoucher = await VoucherService.getById(id);
+    if (existingVoucher.operatorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Không có quyền kích hoạt voucher này',
+      });
+    }
+
+    const voucher = await VoucherService.activate(id);
+
+    res.status(200).json({
+      status: 'success',
+      data: { voucher },
+      message: 'Kích hoạt voucher thành công',
+    });
+  } catch (error) {
+    console.error('Activate voucher error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể kích hoạt voucher',
+    });
+  }
+};
+
+/**
  * @route   GET /api/v1/operators/vouchers/statistics
  * @desc    Get voucher statistics
  * @access  Private (Operator)
@@ -274,6 +308,45 @@ exports.getVoucherStatistics = async (req, res) => {
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể lấy thống kê',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/operators/vouchers/:id/usage-report
+ * @desc    Get detailed voucher usage report
+ * @access  Private (Operator)
+ */
+exports.getVoucherUsageReport = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { startDate, endDate, page = 1, limit = 20 } = req.query;
+
+    // Verify ownership first
+    const existingVoucher = await VoucherService.getById(id);
+    if (existingVoucher.operatorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Không có quyền xem báo cáo voucher này',
+      });
+    }
+
+    const report = await VoucherService.getUsageReport(id, {
+      startDate,
+      endDate,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: report,
+    });
+  } catch (error) {
+    console.error('Get voucher usage report error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể lấy báo cáo sử dụng voucher',
     });
   }
 };
