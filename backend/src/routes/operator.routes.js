@@ -20,7 +20,6 @@ const { authenticate, authorize } = require('../middleware/auth.middleware');
 router.post('/register', operatorController.register);
 router.post('/login', operatorController.login);
 router.get('/', operatorController.getAll);
-router.get('/:id', operatorController.getById);
 
 // Protected routes (Operator only)
 router.get('/me/profile', authenticate, authorize('operator'), operatorController.getMe);
@@ -102,5 +101,8 @@ router.get('/reports/revenue/by-route', authenticate, authorize('operator'), rep
 router.get('/reports/revenue/trend', authenticate, authorize('operator'), reportController.getRevenueTrend);
 router.get('/reports/cancellation', authenticate, authorize('operator'), reportController.getCancellationReport);
 router.get('/reports/growth', authenticate, authorize('operator'), reportController.getGrowthMetrics);
+
+// Dynamic param routes (MUST BE LAST to avoid conflicts with specific routes)
+router.get('/:id', operatorController.getById);
 
 module.exports = router;
