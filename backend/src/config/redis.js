@@ -7,7 +7,7 @@ const connectRedis = async () => {
     redisClient = redis.createClient({
       url: process.env.REDIS_URL || 'redis://localhost:6379',
       password: process.env.REDIS_PASSWORD || undefined,
-      database: parseInt(process.env.REDIS_DB) || 0,
+      database: parseInt(process.env.REDIS_DB, 10) || 0,
     });
 
     redisClient.on('error', (err) => {
