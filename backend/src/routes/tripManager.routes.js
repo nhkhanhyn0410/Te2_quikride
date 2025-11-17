@@ -81,6 +81,30 @@ router.post(
   TripManagerController.completeTrip
 );
 
+// UC-21: Update trip status (Unified endpoint) - Phase 5.4
+// PUT /api/trip-manager/trips/:tripId/status
+// Status values: scheduled, ongoing, completed, cancelled
+// Automatically notifies passengers on status change
+router.put(
+  '/trips/:tripId/status',
+  protectTripManager,
+  authorizeTripManager('trip_manager', 'driver'),
+  validateTripId,
+  [
+    body('status')
+      .notEmpty()
+      .withMessage('Trạng thái là bắt buộc')
+      .isIn(['scheduled', 'ongoing', 'completed', 'cancelled'])
+      .withMessage('Trạng thái không hợp lệ'),
+    body('reason')
+      .optional()
+      .trim()
+      .isLength({ max: 500 })
+      .withMessage('Lý do không quá 500 ký tự'),
+  ],
+  TripManagerController.updateTripStatus
+);
+
 /**
  * Ticket Verification Routes
  * These routes are for trip managers to verify tickets on their trips

@@ -363,6 +363,81 @@ TripSchema.methods.canBeCancelled = function () {
 };
 
 /**
+ * Update trip status with validation
+ * @param {string} newStatus - New status (scheduled, ongoing, completed, cancelled)
+ * @param {Object} options - Additional options (reason, userId)
+ * @returns {Promise<void>}
+ */
+TripSchema.methods.updateStatus = async function (newStatus, options = {}) {
+  const validStatuses = ['scheduled', 'ongoing', 'completed', 'cancelled'];
+
+  if (!validStatuses.includes(newStatus)) {
+    throw new Error(`Trạng thái không hợp lệ: ${newStatus}`);
+  }
+
+  const oldStatus = this.status;
+
+  // Validate status transitions
+  const validTransitions = {
+    scheduled: ['ongoing', 'cancelled'],
+    ongoing: ['completed', 'cancelled'],
+    completed: [],
+    cancelled: [],
+  };
+
+  if (!validTransitions[oldStatus].includes(newStatus)) {
+    throw new Error(
+      `Không thể chuyển từ trạng thái "${oldStatus}" sang "${newStatus}"`
+    );
+  }
+
+  // Update status
+  this.status = newStatus;
+
+  // Handle specific status changes
+  if (newStatus === 'cancelled') {
+    this.cancelledAt = new Date();
+    this.cancelReason = options.reason || 'Không có lý do';
+    this.cancelledBy = options.userId || null;
+  }
+
+  await this.save();
+
+  // Notify passengers about status change (async, don't wait)
+  try {
+    const NotificationService = require('../services/notification.service');
+
+    // Populate route for notification
+    await this.populate('routeId');
+
+    NotificationService.notifyTripStatusChange(this, oldStatus, newStatus).catch((error) => {
+      console.error('Error sending notifications:', error);
+    });
+  } catch (error) {
+    console.error('Error in notification service:', error);
+    // Don't throw error - status update should succeed even if notifications fail
+  }
+
+  return { oldStatus, newStatus };
+};
+
+/**
+ * Check if status can be changed
+ * @param {string} newStatus - Target status
+ * @returns {boolean}
+ */
+TripSchema.methods.canChangeStatus = function (newStatus) {
+  const validTransitions = {
+    scheduled: ['ongoing', 'cancelled'],
+    ongoing: ['completed', 'cancelled'],
+    completed: [],
+    cancelled: [],
+  };
+
+  return validTransitions[this.status]?.includes(newStatus) || false;
+};
+
+/**
  * Calculate dynamic price based on demand, time, and other factors
  * @param {Date} bookingDate - Date of booking (default: now)
  * @returns {Object} Price breakdown with dynamic factors
