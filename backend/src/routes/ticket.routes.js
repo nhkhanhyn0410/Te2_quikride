@@ -29,6 +29,31 @@ const validateLookupTicket = [
     .withMessage('Số điện thoại không hợp lệ'),
 ];
 
+const validateRequestOTP = [
+  body('ticketCode').notEmpty().withMessage('Mã vé là bắt buộc'),
+  body('phone')
+    .notEmpty()
+    .withMessage('Số điện thoại là bắt buộc')
+    .matches(/^(0|\+84)[0-9]{9,10}$/)
+    .withMessage('Số điện thoại không hợp lệ'),
+];
+
+const validateVerifyOTP = [
+  body('ticketCode').notEmpty().withMessage('Mã vé là bắt buộc'),
+  body('phone')
+    .notEmpty()
+    .withMessage('Số điện thoại là bắt buộc')
+    .matches(/^(0|\+84)[0-9]{9,10}$/)
+    .withMessage('Số điện thoại không hợp lệ'),
+  body('otp')
+    .notEmpty()
+    .withMessage('Mã OTP là bắt buộc')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Mã OTP phải có 6 chữ số')
+    .isNumeric()
+    .withMessage('Mã OTP chỉ chứa số'),
+];
+
 const validateVerifyQR = [
   body('qrCodeData').notEmpty().withMessage('Dữ liệu QR code là bắt buộc'),
 ];
@@ -52,7 +77,24 @@ const validateTripId = [
  * Public routes (no authentication required)
  */
 
-// UC-27: Lookup ticket by code (for guests)
+// UC-27: Guest ticket lookup with OTP (2-step process)
+// Step 1: Request OTP
+// POST /api/tickets/lookup/request-otp
+router.post(
+  '/lookup/request-otp',
+  validateRequestOTP,
+  TicketController.requestTicketLookupOTP
+);
+
+// Step 2: Verify OTP and get ticket
+// POST /api/tickets/lookup/verify-otp
+router.post(
+  '/lookup/verify-otp',
+  validateVerifyOTP,
+  TicketController.verifyTicketLookupOTP
+);
+
+// UC-27: Legacy lookup without OTP (for backward compatibility)
 // POST /api/tickets/lookup
 router.post('/lookup', validateLookupTicket, TicketController.lookupTicket);
 

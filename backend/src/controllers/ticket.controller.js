@@ -72,7 +72,75 @@ class TicketController {
   }
 
   /**
-   * UC-27: Lookup ticket by code (for guests)
+   * UC-27: Request OTP for ticket lookup (Step 1)
+   * POST /api/tickets/lookup/request-otp
+   */
+  static async requestTicketLookupOTP(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          errors: errors.array(),
+        });
+      }
+
+      const { ticketCode, phone } = req.body;
+
+      const result = await TicketService.requestTicketLookupOTP(ticketCode, phone);
+
+      res.json({
+        success: true,
+        message: result.message,
+        data: {
+          expiresIn: result.expiresIn,
+        },
+      });
+    } catch (error) {
+      console.error('Request OTP error:', error);
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Không thể gửi OTP',
+      });
+    }
+  }
+
+  /**
+   * UC-27: Verify OTP and get ticket (Step 2)
+   * POST /api/tickets/lookup/verify-otp
+   */
+  static async verifyTicketLookupOTP(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          errors: errors.array(),
+        });
+      }
+
+      const { ticketCode, phone, otp } = req.body;
+
+      const ticket = await TicketService.verifyTicketLookupOTP(ticketCode, phone, otp);
+
+      res.json({
+        success: true,
+        message: 'Xác thực thành công',
+        data: {
+          ticket,
+        },
+      });
+    } catch (error) {
+      console.error('Verify OTP error:', error);
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Xác thực OTP thất bại',
+      });
+    }
+  }
+
+  /**
+   * UC-27: Lookup ticket by code (for guests) - Legacy without OTP
    * POST /api/tickets/lookup
    */
   static async lookupTicket(req, res) {
@@ -107,27 +175,34 @@ class TicketController {
   /**
    * UC-8: Get customer tickets
    * GET /api/users/tickets
+   * Query params:
+   * - type: upcoming | past | cancelled
+   * - status: valid | used | cancelled | expired
+   * - fromDate, toDate: date range
+   * - search: search by ticket/booking code
+   * - page, limit: pagination
    */
   static async getCustomerTickets(req, res) {
     try {
       const customerId = req.user.id; // From auth middleware
-      const { status, fromDate, toDate } = req.query;
+      const { type, status, fromDate, toDate, search, page, limit } = req.query;
 
       const filters = {};
+      if (type) filters.type = type; // upcoming, past, cancelled
       if (status) filters.status = status;
       if (fromDate && toDate) {
         filters.fromDate = fromDate;
         filters.toDate = toDate;
       }
+      if (search) filters.search = search;
+      if (page) filters.page = page;
+      if (limit) filters.limit = limit;
 
-      const tickets = await TicketService.getCustomerTickets(customerId, filters);
+      const result = await TicketService.getCustomerTickets(customerId, filters);
 
       res.json({
         success: true,
-        data: {
-          tickets,
-          count: tickets.length,
-        },
+        data: result,
       });
     } catch (error) {
       console.error('Get customer tickets error:', error);

@@ -6,6 +6,7 @@ const PDFService = require('./pdf.service');
 const { sendEmail, emailTemplates } = require('../config/email');
 const SMSService = require('./sms.service');
 const cloudinary = require('../config/cloudinary');
+const redisClient = require('../config/redis');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment-timezone');
@@ -346,7 +347,110 @@ class TicketService {
   }
 
   /**
-   * Get ticket by code (for guests)
+   * Request OTP for guest ticket lookup
+   * @param {string} ticketCode - Ticket code
+   * @param {string} phone - Contact phone
+   * @returns {Promise<Object>} OTP request result
+   */
+  static async requestTicketLookupOTP(ticketCode, phone) {
+    // Find ticket
+    const ticket = await Ticket.findByCode(ticketCode);
+
+    if (!ticket) {
+      throw new Error('Không tìm thấy vé');
+    }
+
+    // Verify phone number
+    const booking = ticket.bookingId;
+    if (booking.contactInfo.phone !== phone) {
+      throw new Error('Số điện thoại không khớp');
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store OTP in Redis with 5 minutes expiry
+    const otpKey = `ticket_lookup_otp:${ticketCode}:${phone}`;
+    const redis = await redisClient;
+    await redis.setEx(otpKey, 300, otp); // 5 minutes
+
+    // Send OTP via SMS
+    try {
+      await SMSService.sendOTP(phone, otp);
+    } catch (error) {
+      console.error('Failed to send OTP SMS:', error);
+      // Continue anyway - for development, OTP is logged
+    }
+
+    // Also send via email if available
+    if (booking.contactInfo.email) {
+      try {
+        await sendEmail({
+          to: booking.contactInfo.email,
+          subject: 'Mã OTP tra cứu vé - QuikRide',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h1 style="color: #0ea5e9;">Mã OTP tra cứu vé</h1>
+              <p>Mã OTP của bạn để tra cứu vé <strong>${ticketCode}</strong> là:</p>
+              <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                <h2 style="color: #0ea5e9; font-size: 32px; margin: 0; letter-spacing: 5px;">${otp}</h2>
+              </div>
+              <p style="color: #dc2626;">Mã có hiệu lực trong 5 phút.</p>
+              <p style="color: #666; font-size: 14px;">
+                Nếu bạn không yêu cầu tra cứu vé, vui lòng bỏ qua email này.
+              </p>
+            </div>
+          `,
+        });
+      } catch (error) {
+        console.error('Failed to send OTP email:', error);
+      }
+    }
+
+    console.log(`📱 OTP for ticket lookup (${ticketCode}): ${otp}`); // For development
+
+    return {
+      message: 'Mã OTP đã được gửi qua SMS và email',
+      expiresIn: 300, // 5 minutes
+    };
+  }
+
+  /**
+   * Verify OTP and get ticket (for guests)
+   * @param {string} ticketCode - Ticket code
+   * @param {string} phone - Contact phone
+   * @param {string} otp - OTP code
+   * @returns {Promise<Ticket>} Ticket details
+   */
+  static async verifyTicketLookupOTP(ticketCode, phone, otp) {
+    // Get OTP from Redis
+    const otpKey = `ticket_lookup_otp:${ticketCode}:${phone}`;
+    const redis = await redisClient;
+    const storedOTP = await redis.get(otpKey);
+
+    if (!storedOTP) {
+      throw new Error('Mã OTP đã hết hạn hoặc không tồn tại');
+    }
+
+    if (storedOTP !== otp) {
+      throw new Error('Mã OTP không đúng');
+    }
+
+    // Delete OTP after successful verification
+    await redis.del(otpKey);
+
+    // Get ticket
+    const ticket = await Ticket.findByCode(ticketCode);
+
+    if (!ticket) {
+      throw new Error('Không tìm thấy vé');
+    }
+
+    return ticket;
+  }
+
+  /**
+   * Get ticket by code (for guests) - Legacy method without OTP
    * @param {string} ticketCode - Ticket code
    * @param {string} phone - Contact phone for verification
    * @returns {Promise<Ticket>} Ticket details
@@ -368,13 +472,116 @@ class TicketService {
   }
 
   /**
-   * Get customer tickets
+   * Get customer tickets with enhanced filtering
    * @param {string} customerId - Customer ID
    * @param {Object} filters - Filters
-   * @returns {Promise<Array>} Tickets
+   * @returns {Promise<Object>} Tickets with metadata
    */
   static async getCustomerTickets(customerId, filters = {}) {
-    return await Ticket.findByCustomer(customerId, filters);
+    const query = { customerId };
+    const now = new Date();
+
+    // Filter by status type (upcoming, past, cancelled)
+    if (filters.type) {
+      switch (filters.type) {
+        case 'upcoming':
+          // Valid tickets with future departure time
+          query.status = 'valid';
+          query['tripInfo.departureTime'] = { $gte: now };
+          break;
+        case 'past':
+          // Used tickets or valid tickets with past departure time
+          query.$or = [
+            { status: 'used' },
+            { status: 'valid', 'tripInfo.departureTime': { $lt: now } },
+          ];
+          break;
+        case 'cancelled':
+          query.status = 'cancelled';
+          break;
+        default:
+          // All tickets
+          break;
+      }
+    }
+
+    // Filter by status
+    if (filters.status && !filters.type) {
+      query.status = filters.status;
+    }
+
+    // Filter by date range
+    if (filters.fromDate && filters.toDate) {
+      query.createdAt = {
+        $gte: new Date(filters.fromDate),
+        $lte: new Date(filters.toDate),
+      };
+    }
+
+    // Search by ticket code or booking code
+    if (filters.search) {
+      const searchRegex = new RegExp(filters.search, 'i');
+      const booking = await Booking.find({
+        customerId,
+        bookingCode: searchRegex,
+      }).select('_id');
+
+      const bookingIds = booking.map((b) => b._id);
+
+      query.$or = [
+        { ticketCode: searchRegex },
+        { bookingId: { $in: bookingIds } },
+      ];
+    }
+
+    // Pagination
+    const page = parseInt(filters.page, 10) || 1;
+    const limit = parseInt(filters.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
+    // Get tickets
+    const tickets = await Ticket.find(query)
+      .populate('tripId')
+      .populate('operatorId', 'companyName phone email logo')
+      .populate('bookingId', 'bookingCode contactInfo')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Get total count
+    const total = await Ticket.countDocuments(query);
+
+    // Calculate stats
+    const stats = {
+      upcoming: await Ticket.countDocuments({
+        customerId,
+        status: 'valid',
+        'tripInfo.departureTime': { $gte: now },
+      }),
+      past: await Ticket.countDocuments({
+        customerId,
+        $or: [
+          { status: 'used' },
+          { status: 'valid', 'tripInfo.departureTime': { $lt: now } },
+        ],
+      }),
+      cancelled: await Ticket.countDocuments({
+        customerId,
+        status: 'cancelled',
+      }),
+      total: await Ticket.countDocuments({ customerId }),
+    };
+
+    return {
+      tickets,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+      stats,
+    };
   }
 
   /**

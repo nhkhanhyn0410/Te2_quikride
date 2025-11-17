@@ -1,11 +1,13 @@
 const express = require('express');
 const userController = require('../controllers/user.controller');
+const ticketController = require('../controllers/ticket.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 const { uploadAvatar, handleUploadError } = require('../middleware/upload.middleware');
 const {
   validateUpdateProfile,
   validateChangePassword,
 } = require('../middleware/validate.middleware');
+const { param } = require('express-validator');
 
 const router = express.Router();
 
@@ -35,5 +37,62 @@ router.delete('/saved-passengers/:passengerId', userController.removeSavedPassen
 
 // Loyalty points routes
 router.get('/points-history', userController.getPointsHistory);
+
+// ============================================================================
+// UC-8: Ticket Management Routes
+// ============================================================================
+
+/**
+ * Get customer tickets with filtering
+ * GET /api/v1/users/tickets
+ * Query params:
+ * - type: upcoming | past | cancelled
+ * - status: valid | used | cancelled | expired
+ * - search: search by ticket/booking code
+ * - fromDate, toDate: date range filter
+ * - page, limit: pagination
+ */
+router.get('/tickets', ticketController.getCustomerTickets);
+
+/**
+ * Get ticket details by ID
+ * GET /api/v1/users/tickets/:id
+ */
+router.get(
+  '/tickets/:id',
+  [param('id').isMongoId().withMessage('Ticket ID không hợp lệ')],
+  ticketController.getTicketById
+);
+
+/**
+ * Download ticket PDF
+ * GET /api/v1/users/tickets/:id/download
+ */
+router.get(
+  '/tickets/:id/download',
+  [param('id').isMongoId().withMessage('Ticket ID không hợp lệ')],
+  ticketController.downloadTicket
+);
+
+/**
+ * Resend ticket notifications
+ * POST /api/v1/users/tickets/:id/resend
+ */
+router.post(
+  '/tickets/:id/resend',
+  [param('id').isMongoId().withMessage('Ticket ID không hợp lệ')],
+  ticketController.resendTicket
+);
+
+/**
+ * Cancel ticket
+ * POST /api/v1/users/tickets/:id/cancel
+ * Note: Cancellation logic should check refund policy
+ */
+router.post(
+  '/tickets/:id/cancel',
+  [param('id').isMongoId().withMessage('Ticket ID không hợp lệ')],
+  ticketController.cancelTicket
+);
 
 module.exports = router;
