@@ -8,6 +8,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Auth Pages
 import OperatorLoginPage from './pages/auth/OperatorLoginPage';
 import TripManagerLoginPage from './pages/auth/TripManagerLoginPage';
+import CustomerLoginPage from './pages/auth/CustomerLoginPage';
+import CustomerRegisterPage from './pages/auth/CustomerRegisterPage';
 
 // Operator Dashboard Pages
 import DashboardPage from './pages/operator/DashboardPage';
@@ -60,6 +62,10 @@ function App() {
       />
 
       <Routes>
+        {/* Customer Auth Routes */}
+        <Route path="/login" element={<CustomerLoginPage />} />
+        <Route path="/register" element={<CustomerRegisterPage />} />
+
         {/* Customer Booking Flow */}
         <Route path="/" element={<SearchPage />} />
         <Route path="/trips" element={<TripsPage />} />
