@@ -1,0 +1,367 @@
+const TicketService = require('../services/ticket.service');
+const { validationResult } = require('express-validator');
+
+/**
+ * Ticket Controller
+ * Handles ticket-related HTTP requests
+ */
+class TicketController {
+  /**
+   * Generate ticket for a booking
+   * POST /api/tickets/generate
+   */
+  static async generateTicket(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          errors: errors.array(),
+        });
+      }
+
+      const { bookingId } = req.body;
+
+      const ticket = await TicketService.generateTicket(bookingId);
+
+      // Send notifications in background
+      TicketService.sendTicketNotifications(ticket._id).catch((error) => {
+        console.error('Notification error:', error);
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Vé điện tử đã được tạo thành công',
+        data: {
+          ticket,
+        },
+      });
+    } catch (error) {
+      console.error('Generate ticket error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Lỗi tạo vé điện tử',
+      });
+    }
+  }
+
+  /**
+   * Get ticket by ID
+   * GET /api/tickets/:id
+   */
+  static async getTicketById(req, res) {
+    try {
+      const { id } = req.params;
+      const customerId = req.user?.id; // From auth middleware
+
+      const ticket = await TicketService.getTicketById(id, customerId);
+
+      res.json({
+        success: true,
+        data: {
+          ticket,
+        },
+      });
+    } catch (error) {
+      console.error('Get ticket error:', error);
+      res.status(404).json({
+        success: false,
+        message: error.message || 'Không tìm thấy vé',
+      });
+    }
+  }
+
+  /**
+   * UC-27: Lookup ticket by code (for guests)
+   * POST /api/tickets/lookup
+   */
+  static async lookupTicket(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          errors: errors.array(),
+        });
+      }
+
+      const { ticketCode, phone } = req.body;
+
+      const ticket = await TicketService.getTicketByCode(ticketCode, phone);
+
+      res.json({
+        success: true,
+        data: {
+          ticket,
+        },
+      });
+    } catch (error) {
+      console.error('Lookup ticket error:', error);
+      res.status(404).json({
+        success: false,
+        message: error.message || 'Không tìm thấy vé',
+      });
+    }
+  }
+
+  /**
+   * UC-8: Get customer tickets
+   * GET /api/users/tickets
+   */
+  static async getCustomerTickets(req, res) {
+    try {
+      const customerId = req.user.id; // From auth middleware
+      const { status, fromDate, toDate } = req.query;
+
+      const filters = {};
+      if (status) filters.status = status;
+      if (fromDate && toDate) {
+        filters.fromDate = fromDate;
+        filters.toDate = toDate;
+      }
+
+      const tickets = await TicketService.getCustomerTickets(customerId, filters);
+
+      res.json({
+        success: true,
+        data: {
+          tickets,
+          count: tickets.length,
+        },
+      });
+    } catch (error) {
+      console.error('Get customer tickets error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Lỗi lấy danh sách vé',
+      });
+    }
+  }
+
+  /**
+   * UC-20: Get trip passengers (for trip manager)
+   * GET /api/trips/:tripId/passengers
+   */
+  static async getTripPassengers(req, res) {
+    try {
+      const { tripId } = req.params;
+      const { isUsed } = req.query;
+
+      const filters = {};
+      if (isUsed !== undefined) {
+        filters.isUsed = isUsed === 'true';
+      }
+
+      const tickets = await TicketService.getTripTickets(tripId, filters);
+
+      // Format passenger list
+      const passengers = tickets.map((ticket) => ({
+        ticketId: ticket._id,
+        ticketCode: ticket.ticketCode,
+        passengers: ticket.passengers,
+        isUsed: ticket.isUsed,
+        usedAt: ticket.usedAt,
+        status: ticket.status,
+      }));
+
+      const stats = {
+        total: tickets.length,
+        boarded: tickets.filter((t) => t.isUsed).length,
+        notBoarded: tickets.filter((t) => !t.isUsed && t.status === 'valid').length,
+        cancelled: tickets.filter((t) => t.status === 'cancelled').length,
+      };
+
+      res.json({
+        success: true,
+        data: {
+          passengers,
+          stats,
+        },
+      });
+    } catch (error) {
+      console.error('Get trip passengers error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Lỗi lấy danh sách hành khách',
+      });
+    }
+  }
+
+  /**
+   * UC-19: Verify ticket QR code
+   * POST /api/trips/:tripId/verify-ticket
+   */
+  static async verifyTicketQR(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          errors: errors.array(),
+        });
+      }
+
+      const { tripId } = req.params;
+      const { qrCodeData } = req.body;
+      const verifiedBy = req.user?.id; // Trip manager/employee ID
+
+      const result = await TicketService.verifyTicketQR(qrCodeData, tripId, verifiedBy);
+
+      if (result.success) {
+        res.json({
+          success: true,
+          message: result.message,
+          data: {
+            ticket: result.ticket,
+            passengers: result.passengers,
+          },
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: result.error,
+          data: result.ticket
+            ? {
+                ticket: result.ticket,
+              }
+            : null,
+        });
+      }
+    } catch (error) {
+      console.error('Verify QR error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Lỗi xác thực QR code',
+      });
+    }
+  }
+
+  /**
+   * UC-9: Cancel ticket
+   * POST /api/tickets/:id/cancel
+   */
+  static async cancelTicket(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          errors: errors.array(),
+        });
+      }
+
+      const { id } = req.params;
+      const { reason } = req.body;
+      const customerId = req.user?.id;
+
+      // Verify ownership first
+      const ticket = await TicketService.getTicketById(id, customerId);
+
+      // Cancel ticket
+      const cancelledTicket = await TicketService.cancelTicket(id, reason);
+
+      res.json({
+        success: true,
+        message: 'Vé đã được hủy thành công',
+        data: {
+          ticket: cancelledTicket,
+        },
+      });
+    } catch (error) {
+      console.error('Cancel ticket error:', error);
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Lỗi hủy vé',
+      });
+    }
+  }
+
+  /**
+   * Download ticket PDF
+   * GET /api/tickets/:id/download
+   */
+  static async downloadTicket(req, res) {
+    try {
+      const { id } = req.params;
+      const customerId = req.user?.id;
+
+      const ticket = await TicketService.getTicketById(id, customerId);
+
+      if (!ticket.pdfUrl) {
+        return res.status(404).json({
+          success: false,
+          message: 'PDF vé chưa sẵn sàng. Vui lòng thử lại sau.',
+        });
+      }
+
+      // Redirect to PDF URL (Cloudinary)
+      res.redirect(ticket.pdfUrl);
+    } catch (error) {
+      console.error('Download ticket error:', error);
+      res.status(404).json({
+        success: false,
+        message: error.message || 'Không tìm thấy vé',
+      });
+    }
+  }
+
+  /**
+   * Resend ticket notifications
+   * POST /api/tickets/:id/resend
+   */
+  static async resendTicket(req, res) {
+    try {
+      const { id } = req.params;
+      const customerId = req.user?.id;
+
+      // Verify ownership
+      await TicketService.getTicketById(id, customerId);
+
+      const result = await TicketService.resendTicket(id);
+
+      res.json({
+        success: true,
+        message: 'Đã gửi lại vé',
+        data: {
+          notifications: result,
+        },
+      });
+    } catch (error) {
+      console.error('Resend ticket error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Lỗi gửi lại vé',
+      });
+    }
+  }
+
+  /**
+   * Get ticket statistics (for operators)
+   * GET /api/operators/tickets/stats
+   */
+  static async getTicketStats(req, res) {
+    try {
+      const operatorId = req.user.operatorId; // From auth middleware
+      const { fromDate, toDate } = req.query;
+
+      // This would need to be implemented in TicketService
+      // For now, return a placeholder
+
+      res.json({
+        success: true,
+        message: 'Feature coming soon',
+        data: {
+          stats: {},
+        },
+      });
+    } catch (error) {
+      console.error('Get ticket stats error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Lỗi lấy thống kê vé',
+      });
+    }
+  }
+}
+
+module.exports = TicketController;
