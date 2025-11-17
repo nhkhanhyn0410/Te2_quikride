@@ -15,6 +15,7 @@ import CustomerRegisterPage from './pages/auth/CustomerRegisterPage';
 import DashboardPage from './pages/operator/DashboardPage';
 import RoutesPage from './pages/operator/RoutesPage';
 import BusesPage from './pages/operator/BusesPage';
+import OperatorTripsPage from './pages/operator/TripsPage';
 import EmployeesPage from './pages/operator/EmployeesPage';
 import ReportsPage from './pages/operator/ReportsPage';
 import VouchersPage from './pages/operator/VouchersPage';
@@ -129,6 +130,7 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="routes" element={<RoutesPage />} />
           <Route path="buses" element={<BusesPage />} />
+          <Route path="trips" element={<OperatorTripsPage />} />
           <Route path="employees" element={<EmployeesPage />} />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="vouchers" element={<VouchersPage />} />

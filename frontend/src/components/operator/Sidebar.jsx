@@ -6,6 +6,7 @@ import {
   TeamOutlined,
   BarChartOutlined,
   GiftOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons';
 
 const Sidebar = () => {
@@ -29,6 +30,12 @@ const Sidebar = () => {
       path: '/operator/buses',
       icon: <CarOutlined />,
       label: 'Quản Lý Xe',
+    },
+    {
+      key: 'trips',
+      path: '/operator/trips',
+      icon: <CalendarOutlined />,
+      label: 'Chuyến Xe',
     },
     {
       key: 'employees',
