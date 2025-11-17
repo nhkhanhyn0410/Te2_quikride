@@ -59,7 +59,7 @@ exports.register = async (req, res, next) => {
  */
 exports.login = async (req, res, next) => {
   try {
-    const { identifier, password } = req.body;
+    const { identifier, password, rememberMe } = req.body;
 
     // Validate input
     if (!identifier || !password) {
@@ -69,8 +69,8 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Login
-    const result = await AuthService.login(identifier, password);
+    // Login with remember me option
+    const result = await AuthService.login(identifier, password, rememberMe || false);
 
     res.status(200).json({
       status: 'success',
@@ -340,6 +340,100 @@ exports.logout = async (req, res, next) => {
     res.status(500).json({
       status: 'error',
       message: 'Đăng xuất thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/auth/google
+ * @desc    Google OAuth login/register
+ * @access  Public
+ */
+exports.googleOAuth = async (req, res, next) => {
+  try {
+    const { googleToken } = req.body;
+
+    if (!googleToken) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng cung cấp Google token',
+      });
+    }
+
+    // TODO: Verify Google token với Google API
+    // For now, we expect the client to send the verified profile data
+    const googleProfile = req.body.profile;
+
+    if (!googleProfile || !googleProfile.id || !googleProfile.email) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thông tin Google profile không hợp lệ',
+      });
+    }
+
+    const result = await AuthService.googleOAuth(googleProfile);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Đăng nhập Google thành công',
+      data: {
+        user: result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      },
+    });
+  } catch (error) {
+    console.error('Google OAuth error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Đăng nhập Google thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/auth/facebook
+ * @desc    Facebook OAuth login/register
+ * @access  Public
+ */
+exports.facebookOAuth = async (req, res, next) => {
+  try {
+    const { facebookToken } = req.body;
+
+    if (!facebookToken) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng cung cấp Facebook token',
+      });
+    }
+
+    // TODO: Verify Facebook token với Facebook API
+    // For now, we expect the client to send the verified profile data
+    const facebookProfile = req.body.profile;
+
+    if (!facebookProfile || !facebookProfile.id || !facebookProfile.name) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thông tin Facebook profile không hợp lệ',
+      });
+    }
+
+    const result = await AuthService.facebookOAuth(facebookProfile);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Đăng nhập Facebook thành công',
+      data: {
+        user: result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      },
+    });
+  } catch (error) {
+    console.error('Facebook OAuth error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Đăng nhập Facebook thất bại',
     });
   }
 };
