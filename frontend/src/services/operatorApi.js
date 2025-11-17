@@ -104,6 +104,38 @@ export const employeesApi = {
     api.post(`/operators/employees/${id}/reset-password`, { newPassword }),
 };
 
+// ==================== Trips ====================
+
+export const tripsApi = {
+  // Get all trips for operator
+  getMyTrips: (params = {}) => api.get('/operators/trips', { params }),
+
+  // Get single trip
+  getById: (id) => api.get(`/operators/trips/${id}`),
+
+  // Create trip
+  create: (data) => api.post('/operators/trips', data),
+
+  // Create recurring trips
+  createRecurring: (data) => api.post('/operators/trips/recurring', data),
+
+  // Update trip
+  update: (id, data) => api.put(`/operators/trips/${id}`, data),
+
+  // Delete trip
+  delete: (id) => api.delete(`/operators/trips/${id}`),
+
+  // Cancel trip
+  cancel: (id, reason) => api.put(`/operators/trips/${id}/cancel`, { reason }),
+
+  // Configure dynamic pricing
+  configureDynamicPricing: (id, config) =>
+    api.put(`/operators/trips/${id}/dynamic-pricing`, config),
+
+  // Get statistics
+  getStatistics: (params = {}) => api.get('/operators/trips/statistics', { params }),
+};
+
 // ==================== Seat Layout Templates ====================
 
 export const seatLayoutApi = {
@@ -130,5 +162,6 @@ export default {
   routes: routesApi,
   buses: busesApi,
   employees: employeesApi,
+  trips: tripsApi,
   seatLayout: seatLayoutApi,
 };
