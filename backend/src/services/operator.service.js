@@ -54,18 +54,12 @@ class OperatorService {
 
     // Tạo tokens cho operator (tương tự như user)
     const accessToken = AuthService.generateAccessToken(
-      {
-        _id: operator._id,
-        email: operator.email,
-        role: 'operator',
-      },
+      operator, // Pass operator object directly, not destructured
       false
     );
 
     const refreshToken = AuthService.generateRefreshToken(
-      {
-        _id: operator._id,
-      },
+      operator, // Pass operator object directly
       false
     );
 
@@ -114,18 +108,12 @@ class OperatorService {
 
     // Tạo tokens
     const accessToken = AuthService.generateAccessToken(
-      {
-        _id: operator._id,
-        email: operator.email,
-        role: 'operator',
-      },
+      operator, // Pass operator object directly
       rememberMe
     );
 
     const refreshToken = AuthService.generateRefreshToken(
-      {
-        _id: operator._id,
-      },
+      operator, // Pass operator object directly
       rememberMe
     );
 

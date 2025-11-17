@@ -1,5 +1,7 @@
 const AuthService = require('../services/auth.service');
 const User = require('../models/User');
+const BusOperator = require('../models/BusOperator');
+const Employee = require('../models/Employee');
 
 /**
  * Check session timeout (30 minutes of inactivity by default)
@@ -62,50 +64,88 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // 4. Kiểm tra user còn tồn tại không
-    const user = await User.findById(decoded.userId);
+    // 4. Kiểm tra user/operator/employee còn tồn tại không
+    let user;
+
+    // Tìm trong collection tương ứng dựa trên role
+    if (decoded.role === 'operator') {
+      user = await BusOperator.findById(decoded.userId);
+    } else if (decoded.role === 'trip_manager' || decoded.role === 'driver') {
+      user = await Employee.findById(decoded.userId);
+    } else {
+      // customer, admin
+      user = await User.findById(decoded.userId);
+    }
+
     if (!user) {
       return res.status(401).json({
         status: 'error',
-        message: 'User không tồn tại',
+        message: 'Tài khoản không tồn tại',
         code: 'USER_NOT_FOUND',
       });
     }
 
-    // 5. Kiểm tra user có bị block không
-    if (user.isBlocked) {
-      return res.status(403).json({
-        status: 'error',
-        message: `Tài khoản đã bị khóa. Lý do: ${user.blockedReason || 'Không rõ'}`,
-        code: 'ACCOUNT_BLOCKED',
-      });
+    // 5. Kiểm tra account status dựa trên loại user
+    if (decoded.role === 'operator') {
+      // BusOperator checks
+      if (user.isSuspended) {
+        return res.status(403).json({
+          status: 'error',
+          message: `Tài khoản đã bị tạm ngưng. Lý do: ${user.suspensionReason || 'Không rõ'}`,
+          code: 'ACCOUNT_SUSPENDED',
+        });
+      }
+      if (!user.isActive) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Tài khoản không hoạt động',
+          code: 'ACCOUNT_INACTIVE',
+        });
+      }
+    } else if (decoded.role === 'trip_manager' || decoded.role === 'driver') {
+      // Employee checks
+      if (user.status !== 'active') {
+        return res.status(403).json({
+          status: 'error',
+          message: `Tài khoản ${user.status === 'suspended' ? 'đã bị tạm ngưng' : 'không hoạt động'}`,
+          code: 'ACCOUNT_INACTIVE',
+        });
+      }
+    } else {
+      // User (customer/admin) checks
+      if (user.isBlocked) {
+        return res.status(403).json({
+          status: 'error',
+          message: `Tài khoản đã bị khóa. Lý do: ${user.blockedReason || 'Không rõ'}`,
+          code: 'ACCOUNT_BLOCKED',
+        });
+      }
+      if (!user.isActive) {
+        return res.status(403).json({
+          status: 'error',
+          message: 'Tài khoản không hoạt động',
+          code: 'ACCOUNT_INACTIVE',
+        });
+      }
+
+      // Check session timeout only for regular users
+      if (!checkSessionTimeout(user)) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Phiên đăng nhập đã hết hạn do không hoạt động. Vui lòng đăng nhập lại.',
+          code: 'SESSION_TIMEOUT',
+        });
+      }
+
+      // Update lastLogin to extend session
+      user.lastLogin = Date.now();
+      await user.save({ validateBeforeSave: false });
     }
 
-    // 6. Kiểm tra user có active không
-    if (!user.isActive) {
-      return res.status(403).json({
-        status: 'error',
-        message: 'Tài khoản không hoạt động',
-        code: 'ACCOUNT_INACTIVE',
-      });
-    }
-
-    // 7. Check session timeout (30 minutes of inactivity)
-    if (!checkSessionTimeout(user)) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Phiên đăng nhập đã hết hạn do không hoạt động. Vui lòng đăng nhập lại.',
-        code: 'SESSION_TIMEOUT',
-      });
-    }
-
-    // 8. Update lastLogin to extend session on each request
-    user.lastLogin = Date.now();
-    await user.save({ validateBeforeSave: false });
-
-    // 9. Lưu user vào request object
+    // 6. Lưu user vào request object
     req.user = user;
     req.userId = user._id;
+    req.userRole = decoded.role; // Add role for easier access
 
     next();
   } catch (error) {
