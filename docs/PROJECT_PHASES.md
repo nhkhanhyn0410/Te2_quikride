@@ -19,18 +19,18 @@ Thiết lập nền tảng cơ sở hạ tầng cho toàn bộ dự án, bao g�
 ### Công việc chi tiết
 
 #### 1.1 Setup Project Structure
-- [ ] Khởi tạo Monorepo (Frontend + Backend)
-- [ ] Cấu hình Git workflow và branching strategy
-- [ ] Setup CI/CD pipeline cơ bản
-- [ ] Cấu hình ESLint, Prettier, Husky
+- [x] Khởi tạo Monorepo (Frontend + Backend)
+- [x] Cấu hình Git workflow và branching strategy
+- [x] Setup CI/CD pipeline cơ bản
+- [x] Cấu hình ESLint, Prettier, Husky
 
 #### 1.2 Backend Setup
-- [ ] Khởi tạo Node.js + Express project
-- [ ] Cấu hình TypeScript (nếu sử dụng)
-- [ ] Setup MongoDB connection
-- [ ] Cấu hình Redis cho caching
-- [ ] Setup environment variables (.env)
-- [ ] Tạo folder structure chuẩn:
+- [x] Khởi tạo Node.js + Express project
+- [x] Cấu hình TypeScript (nếu sử dụng)
+- [x] Setup MongoDB connection
+- [x] Cấu hình Redis cho caching
+- [x] Setup environment variables (.env)
+- [x] Tạo folder structure chuẩn:
   - `controllers/`
   - `models/`
   - `routes/`
