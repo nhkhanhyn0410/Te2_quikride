@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "seed": "node scripts/seedData.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "lint": "eslint src/",
