@@ -730,3 +730,296 @@ exports.getUserStatistics = async (req, res) => {
     });
   }
 };
+
+/**
+ * ========================
+ * SYSTEM REPORTS (UC-26)
+ * ========================
+ */
+
+/**
+ * @route   GET /api/admin/reports/overview
+ * @desc    Get comprehensive system overview report
+ * @access  Private (Admin)
+ */
+exports.getSystemOverview = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const Operator = require('../models/Operator');
+    const Trip = require('../models/Trip');
+    const Route = require('../models/Route');
+
+    // Parse date range or default to last 30 days
+    const end = endDate ? new Date(endDate) : new Date();
+    const start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    // User Statistics
+    const totalUsers = await User.countDocuments();
+    const newUsers = await User.countDocuments({
+      createdAt: { $gte: start, $lte: end },
+    });
+    const activeUsers = await User.countDocuments({ isActive: true, isBlocked: false });
+
+    // Operator Statistics
+    const totalOperators = await Operator.countDocuments();
+    const approvedOperators = await Operator.countDocuments({ verificationStatus: 'approved' });
+    const pendingOperators = await Operator.countDocuments({ verificationStatus: 'pending' });
+
+    // Booking Statistics
+    const totalBookings = await Booking.countDocuments({
+      createdAt: { $gte: start, $lte: end },
+    });
+    const paidBookings = await Booking.countDocuments({
+      createdAt: { $gte: start, $lte: end },
+      paymentStatus: 'paid',
+    });
+    const cancelledBookings = await Booking.countDocuments({
+      createdAt: { $gte: start, $lte: end },
+      paymentStatus: { $in: ['cancelled', 'refunded'] },
+    });
+
+    // Revenue Statistics
+    const revenueData = await Booking.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: start, $lte: end },
+          paymentStatus: 'paid',
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$finalPrice' },
+          averageOrderValue: { $avg: '$finalPrice' },
+          totalTickets: { $sum: { $size: '$seats' } },
+        },
+      },
+    ]);
+
+    const revenue = revenueData[0] || {
+      totalRevenue: 0,
+      averageOrderValue: 0,
+      totalTickets: 0,
+    };
+
+    // Trip Statistics
+    const totalTrips = await Trip.countDocuments({
+      departureTime: { $gte: start, $lte: end },
+    });
+    const completedTrips = await Trip.countDocuments({
+      departureTime: { $gte: start, $lte: end },
+      status: 'completed',
+    });
+
+    // Top Routes by Bookings
+    const topRoutes = await Booking.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: start, $lte: end },
+          paymentStatus: 'paid',
+        },
+      },
+      {
+        $lookup: {
+          from: 'trips',
+          localField: 'tripId',
+          foreignField: '_id',
+          as: 'trip',
+        },
+      },
+      {
+        $unwind: '$trip',
+      },
+      {
+        $lookup: {
+          from: 'routes',
+          localField: 'trip.routeId',
+          foreignField: '_id',
+          as: 'route',
+        },
+      },
+      {
+        $unwind: '$route',
+      },
+      {
+        $group: {
+          _id: '$route._id',
+          routeName: { $first: '$route.routeName' },
+          origin: { $first: '$route.origin' },
+          destination: { $first: '$route.destination' },
+          totalBookings: { $sum: 1 },
+          totalRevenue: { $sum: '$finalPrice' },
+          totalTickets: { $sum: { $size: '$seats' } },
+        },
+      },
+      {
+        $sort: { totalRevenue: -1 },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+
+    // Top Operators by Revenue
+    const topOperators = await Booking.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: start, $lte: end },
+          paymentStatus: 'paid',
+        },
+      },
+      {
+        $lookup: {
+          from: 'trips',
+          localField: 'tripId',
+          foreignField: '_id',
+          as: 'trip',
+        },
+      },
+      {
+        $unwind: '$trip',
+      },
+      {
+        $lookup: {
+          from: 'operators',
+          localField: 'trip.operatorId',
+          foreignField: '_id',
+          as: 'operator',
+        },
+      },
+      {
+        $unwind: '$operator',
+      },
+      {
+        $group: {
+          _id: '$operator._id',
+          companyName: { $first: '$operator.companyName' },
+          totalBookings: { $sum: 1 },
+          totalRevenue: { $sum: '$finalPrice' },
+          totalTickets: { $sum: { $size: '$seats' } },
+        },
+      },
+      {
+        $sort: { totalRevenue: -1 },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
+
+    // Daily Revenue Trend
+    const revenueTrend = await Booking.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: start, $lte: end },
+          paymentStatus: 'paid',
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+            day: { $dayOfMonth: '$createdAt' },
+          },
+          revenue: { $sum: '$finalPrice' },
+          bookings: { $sum: 1 },
+          tickets: { $sum: { $size: '$seats' } },
+        },
+      },
+      {
+        $sort: {
+          '_id.year': 1,
+          '_id.month': 1,
+          '_id.day': 1,
+        },
+      },
+    ]);
+
+    // Format revenue trend with dates
+    const formattedRevenueTrend = revenueTrend.map((item) => ({
+      date: new Date(item._id.year, item._id.month - 1, item._id.day),
+      revenue: item.revenue,
+      bookings: item.bookings,
+      tickets: item.tickets,
+    }));
+
+    // Growth Metrics (compare with previous period)
+    const periodDays = Math.ceil((end - start) / (24 * 60 * 60 * 1000));
+    const previousStart = new Date(start.getTime() - periodDays * 24 * 60 * 60 * 1000);
+    const previousEnd = start;
+
+    const previousRevenue = await Booking.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: previousStart, $lt: previousEnd },
+          paymentStatus: 'paid',
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$finalPrice' },
+        },
+      },
+    ]);
+
+    const previousBookings = await Booking.countDocuments({
+      createdAt: { $gte: previousStart, $lt: previousEnd },
+      paymentStatus: 'paid',
+    });
+
+    const previousUsers = await User.countDocuments({
+      createdAt: { $gte: previousStart, $lt: previousEnd },
+    });
+
+    const prevRevenue = previousRevenue[0]?.totalRevenue || 0;
+    const revenueGrowth = prevRevenue > 0 ? ((revenue.totalRevenue - prevRevenue) / prevRevenue) * 100 : 0;
+    const bookingsGrowth = previousBookings > 0 ? ((paidBookings - previousBookings) / previousBookings) * 100 : 0;
+    const usersGrowth = previousUsers > 0 ? ((newUsers - previousUsers) / previousUsers) * 100 : 0;
+
+    res.json({
+      success: true,
+      data: {
+        dateRange: {
+          start,
+          end,
+        },
+        overview: {
+          totalUsers,
+          newUsers,
+          activeUsers,
+          totalOperators,
+          approvedOperators,
+          pendingOperators,
+          totalBookings,
+          paidBookings,
+          cancelledBookings,
+          cancellationRate: totalBookings > 0 ? ((cancelledBookings / totalBookings) * 100).toFixed(2) : 0,
+          totalTrips,
+          completedTrips,
+        },
+        revenue: {
+          totalRevenue: revenue.totalRevenue,
+          averageOrderValue: revenue.averageOrderValue,
+          totalTickets: revenue.totalTickets,
+        },
+        growth: {
+          revenueGrowth: parseFloat(revenueGrowth.toFixed(2)),
+          bookingsGrowth: parseFloat(bookingsGrowth.toFixed(2)),
+          usersGrowth: parseFloat(usersGrowth.toFixed(2)),
+        },
+        topRoutes,
+        topOperators,
+        revenueTrend: formattedRevenueTrend,
+      },
+    });
+  } catch (error) {
+    console.error('Get system overview error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Không thể tải báo cáo tổng quan',
+      error: error.message,
+    });
+  }
+};
