@@ -15,6 +15,7 @@ const BusOperator = require('../src/models/BusOperator');
 const Employee = require('../src/models/Employee');
 const Route = require('../src/models/Route');
 const Bus = require('../src/models/Bus');
+const Trip = require('../src/models/Trip');
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -42,6 +43,7 @@ const seedData = async () => {
     await Employee.deleteMany({});
     await Route.deleteMany({});
     await Bus.deleteMany({});
+    await Trip.deleteMany({});
     console.log('✅ Cleared existing data\n');
 
     // ==================== USERS ====================
@@ -485,6 +487,144 @@ const seedData = async () => {
 
     console.log(`✅ Created ${buses.length} buses`);
 
+    // ==================== TRIPS ====================
+    console.log('\n🚌 Creating Trips...');
+
+    // Helper function to create date for trips
+    const createTripDate = (daysFromNow, hours, minutes) => {
+      const date = new Date();
+      date.setDate(date.getDate() + daysFromNow);
+      date.setHours(hours, minutes, 0, 0);
+      return date;
+    };
+
+    const trips = await Trip.create([
+      // FUTA - Sài Gòn Đà Lạt (Today - Tomorrow)
+      {
+        operatorId: operators[0]._id,
+        routeId: routes[0]._id,
+        busId: buses[0]._id, // Limousine
+        driverId: futaEmployees[2]._id, // Driver 1
+        tripManagerId: futaEmployees[0]._id, // Trip Manager 1
+        departureTime: createTripDate(0, 6, 0), // Today 6:00 AM
+        arrivalTime: createTripDate(0, 13, 0), // Today 1:00 PM
+        basePrice: 250000,
+        status: 'scheduled',
+        availableSeats: 18,
+        bookedSeats: 0,
+      },
+      {
+        operatorId: operators[0]._id,
+        routeId: routes[0]._id,
+        busId: buses[1]._id, // Sleeper
+        driverId: futaEmployees[3]._id, // Driver 2
+        tripManagerId: futaEmployees[1]._id, // Trip Manager 2
+        departureTime: createTripDate(0, 22, 0), // Today 10:00 PM
+        arrivalTime: createTripDate(1, 5, 0), // Tomorrow 5:00 AM
+        basePrice: 300000,
+        status: 'scheduled',
+        availableSeats: 40,
+        bookedSeats: 0,
+      },
+      {
+        operatorId: operators[0]._id,
+        routeId: routes[0]._id,
+        busId: buses[0]._id,
+        driverId: futaEmployees[2]._id,
+        tripManagerId: futaEmployees[0]._id,
+        departureTime: createTripDate(1, 6, 0), // Tomorrow 6:00 AM
+        arrivalTime: createTripDate(1, 13, 0), // Tomorrow 1:00 PM
+        basePrice: 250000,
+        status: 'scheduled',
+        availableSeats: 18,
+        bookedSeats: 0,
+      },
+
+      // FUTA - Sài Gòn Nha Trang
+      {
+        operatorId: operators[0]._id,
+        routeId: routes[1]._id,
+        busId: buses[1]._id,
+        driverId: futaEmployees[3]._id,
+        tripManagerId: futaEmployees[1]._id,
+        departureTime: createTripDate(0, 20, 0), // Today 8:00 PM
+        arrivalTime: createTripDate(1, 5, 0), // Tomorrow 5:00 AM
+        basePrice: 350000,
+        status: 'scheduled',
+        availableSeats: 40,
+        bookedSeats: 0,
+      },
+      {
+        operatorId: operators[0]._id,
+        routeId: routes[1]._id,
+        busId: buses[1]._id,
+        driverId: futaEmployees[2]._id,
+        tripManagerId: futaEmployees[0]._id,
+        departureTime: createTripDate(2, 20, 0), // Day after tomorrow 8:00 PM
+        arrivalTime: createTripDate(3, 5, 0),
+        basePrice: 350000,
+        status: 'scheduled',
+        availableSeats: 40,
+        bookedSeats: 0,
+      },
+
+      // Thanh Bưởi - Sài Gòn Vũng Tàu
+      {
+        operatorId: operators[1]._id,
+        routeId: routes[2]._id,
+        busId: buses[2]._id,
+        driverId: thanhBuoiEmployees[1]._id,
+        tripManagerId: thanhBuoiEmployees[0]._id,
+        departureTime: createTripDate(0, 7, 0), // Today 7:00 AM
+        arrivalTime: createTripDate(0, 9, 0), // Today 9:00 AM
+        basePrice: 120000,
+        status: 'scheduled',
+        availableSeats: 34,
+        bookedSeats: 0,
+      },
+      {
+        operatorId: operators[1]._id,
+        routeId: routes[2]._id,
+        busId: buses[2]._id,
+        driverId: thanhBuoiEmployees[1]._id,
+        tripManagerId: thanhBuoiEmployees[0]._id,
+        departureTime: createTripDate(0, 14, 0), // Today 2:00 PM
+        arrivalTime: createTripDate(0, 16, 0), // Today 4:00 PM
+        basePrice: 120000,
+        status: 'scheduled',
+        availableSeats: 34,
+        bookedSeats: 0,
+      },
+      {
+        operatorId: operators[1]._id,
+        routeId: routes[2]._id,
+        busId: buses[2]._id,
+        driverId: thanhBuoiEmployees[1]._id,
+        tripManagerId: thanhBuoiEmployees[0]._id,
+        departureTime: createTripDate(1, 7, 0), // Tomorrow 7:00 AM
+        arrivalTime: createTripDate(1, 9, 0), // Tomorrow 9:00 AM
+        basePrice: 120000,
+        status: 'scheduled',
+        availableSeats: 34,
+        bookedSeats: 0,
+      },
+      {
+        operatorId: operators[1]._id,
+        routeId: routes[2]._id,
+        busId: buses[2]._id,
+        driverId: thanhBuoiEmployees[1]._id,
+        tripManagerId: thanhBuoiEmployees[0]._id,
+        departureTime: createTripDate(1, 14, 0), // Tomorrow 2:00 PM
+        arrivalTime: createTripDate(1, 16, 0), // Tomorrow 4:00 PM
+        basePrice: 120000,
+        status: 'scheduled',
+        availableSeats: 34,
+        bookedSeats: 0,
+      },
+    ]);
+
+    console.log(`✅ Created ${trips.length} trips`);
+
     console.log('\n✅ Seed completed successfully!\n');
 
     // Print summary
@@ -501,6 +641,12 @@ const seedData = async () => {
     console.log(`  - Drivers: ${employees.filter(e => e.role === 'driver').length}`);
     console.log(`\nRoutes: ${routes.length}`);
     console.log(`Buses: ${buses.length}`);
+    console.log(`Trips: ${trips.length}`);
+    console.log(`  - Today: ${trips.filter(t => {
+      const today = new Date();
+      return t.departureTime.toDateString() === today.toDateString();
+    }).length}`);
+    console.log(`  - Upcoming: ${trips.filter(t => t.departureTime > new Date()).length}`);
     console.log('═'.repeat(50));
 
   } catch (error) {
