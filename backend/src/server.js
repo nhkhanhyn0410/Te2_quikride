@@ -14,7 +14,7 @@ const connectDB = require('./config/database');
 const connectRedis = require('./config/redis');
 
 // Import routes
-// const authRoutes = require('./routes/auth.routes');
+const authRoutes = require('./routes/auth.routes');
 // const userRoutes = require('./routes/user.routes');
 
 // Import middleware
@@ -86,7 +86,7 @@ app.get(`/api/${API_VERSION}`, (req, res) => {
 });
 
 // Mount routes
-// app.use(`/api/${API_VERSION}/auth`, authRoutes);
+app.use(`/api/${API_VERSION}/auth`, authRoutes);
 // app.use(`/api/${API_VERSION}/users`, userRoutes);
 
 // 404 handler
