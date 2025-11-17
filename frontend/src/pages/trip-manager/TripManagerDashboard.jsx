@@ -11,6 +11,10 @@ import {
   Row,
   Col,
   Empty,
+  Modal,
+  Form,
+  Input,
+  Popconfirm,
 } from 'antd';
 import {
   CarOutlined,
@@ -19,10 +23,15 @@ import {
   ClockCircleOutlined,
   EnvironmentOutlined,
   CalendarOutlined,
+  PlayCircleOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import useAuthStore from '../../store/authStore';
 import api from '../../services/api';
+import tripManagerApi from '../../services/tripManagerApi';
 
 const TripManagerDashboard = () => {
   const navigate = useNavigate();
@@ -35,6 +44,10 @@ const TripManagerDashboard = () => {
     ongoingTrips: 0,
     completedTrips: 0,
   });
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [form] = Form.useForm();
 
   // Fetch assigned trips
   const fetchTrips = async () => {
@@ -71,6 +84,72 @@ const TripManagerDashboard = () => {
   const handleLogout = () => {
     logout();
     navigate('/trip-manager/login');
+  };
+
+  // Handle status update
+  const handleUpdateStatus = async (tripId, status, reason = null) => {
+    setActionLoading(true);
+    try {
+      const response = await tripManagerApi.updateTripStatus(tripId, {
+        status,
+        reason,
+      });
+
+      if (response.success) {
+        message.success(response.message || 'Cập nhật trạng thái thành công');
+        fetchTrips(); // Reload trips
+      } else {
+        message.error(response.message || 'Cập nhật thất bại');
+      }
+    } catch (error) {
+      console.error('Update status error:', error);
+      message.error(error.message || 'Không thể cập nhật trạng thái');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle start trip
+  const handleStartTrip = (trip) => {
+    Modal.confirm({
+      title: 'Xác nhận bắt đầu chuyến xe',
+      content: `Bạn có chắc muốn bắt đầu chuyến ${trip.route?.routeName}?`,
+      icon: <PlayCircleOutlined />,
+      okText: 'Bắt đầu',
+      cancelText: 'Hủy',
+      onOk: () => handleUpdateStatus(trip._id, 'ongoing'),
+    });
+  };
+
+  // Handle complete trip
+  const handleCompleteTrip = (trip) => {
+    Modal.confirm({
+      title: 'Xác nhận hoàn thành chuyến xe',
+      content: `Bạn có chắc muốn hoàn thành chuyến ${trip.route?.routeName}?`,
+      icon: <CheckCircleOutlined />,
+      okText: 'Hoàn thành',
+      cancelText: 'Hủy',
+      onOk: () => handleUpdateStatus(trip._id, 'completed'),
+    });
+  };
+
+  // Handle cancel trip - open modal for reason
+  const handleCancelTrip = (trip) => {
+    setSelectedTrip(trip);
+    form.resetFields();
+    setCancelModalVisible(true);
+  };
+
+  // Submit cancel with reason
+  const handleSubmitCancel = async () => {
+    try {
+      const values = await form.validateFields();
+      await handleUpdateStatus(selectedTrip._id, 'cancelled', values.reason);
+      setCancelModalVisible(false);
+      setSelectedTrip(null);
+    } catch (error) {
+      // Validation error
+    }
   };
 
   // Get status tag
@@ -139,10 +218,62 @@ const TripManagerDashboard = () => {
     {
       title: 'Thao tác',
       key: 'actions',
+      width: 400,
+      fixed: 'right',
       render: (_, record) => (
-        <Space>
+        <Space wrap size="small">
+          {/* Status Update Actions */}
+          {record.status === 'scheduled' && (
+            <>
+              <Button
+                type="primary"
+                size="small"
+                icon={<PlayCircleOutlined />}
+                onClick={() => handleStartTrip(record)}
+                loading={actionLoading}
+              >
+                Bắt đầu
+              </Button>
+              <Button
+                danger
+                size="small"
+                icon={<CloseCircleOutlined />}
+                onClick={() => handleCancelTrip(record)}
+                loading={actionLoading}
+              >
+                Hủy
+              </Button>
+            </>
+          )}
+
+          {record.status === 'ongoing' && (
+            <>
+              <Button
+                type="primary"
+                size="small"
+                icon={<CheckCircleOutlined />}
+                onClick={() => handleCompleteTrip(record)}
+                loading={actionLoading}
+                style={{ backgroundColor: '#52c41a' }}
+              >
+                Hoàn thành
+              </Button>
+              <Button
+                danger
+                size="small"
+                icon={<CloseCircleOutlined />}
+                onClick={() => handleCancelTrip(record)}
+                loading={actionLoading}
+              >
+                Hủy
+              </Button>
+            </>
+          )}
+
+          {/* Regular Actions */}
           <Button
-            type="primary"
+            type={record.status === 'ongoing' ? 'primary' : 'default'}
+            size="small"
             icon={<QrcodeOutlined />}
             onClick={() => navigate(`/trip-manager/trips/${record._id}/scan`)}
           >
@@ -150,6 +281,7 @@ const TripManagerDashboard = () => {
           </Button>
 
           <Button
+            size="small"
             icon={<TeamOutlined />}
             onClick={() => navigate(`/trip-manager/trips/${record._id}/passengers`)}
           >
@@ -252,6 +384,55 @@ const TripManagerDashboard = () => {
           )}
         </Card>
       </div>
+
+      {/* Cancel Trip Modal */}
+      <Modal
+        title={
+          <span>
+            <CloseCircleOutlined className="mr-2" style={{ color: '#ff4d4f' }} />
+            Hủy Chuyến Xe
+          </span>
+        }
+        open={cancelModalVisible}
+        onOk={handleSubmitCancel}
+        onCancel={() => {
+          setCancelModalVisible(false);
+          setSelectedTrip(null);
+        }}
+        okText="Xác nhận hủy"
+        cancelText="Đóng"
+        okButtonProps={{ danger: true, loading: actionLoading }}
+      >
+        <div className="mb-4">
+          <InfoCircleOutlined className="mr-2" style={{ color: '#faad14' }} />
+          <span>
+            Bạn có chắc muốn hủy chuyến <strong>{selectedTrip?.route?.routeName}</strong>?
+          </span>
+        </div>
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+          <p className="text-sm text-gray-700">
+            ⚠️ Khi hủy chuyến, tất cả hành khách sẽ nhận được thông báo qua email và SMS.
+          </p>
+        </div>
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="reason"
+            label="Lý do hủy chuyến"
+            rules={[
+              { required: true, message: 'Vui lòng nhập lý do hủy' },
+              { min: 10, message: 'Lý do phải có ít nhất 10 ký tự' },
+              { max: 500, message: 'Lý do không quá 500 ký tự' },
+            ]}
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="Nhập lý do hủy chuyến (VD: Xe gặp sự cố, thời tiết xấu, ...)"
+              maxLength={500}
+              showCount
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
