@@ -509,9 +509,11 @@ const seedData = async () => {
         departureTime: createTripDate(0, 6, 0), // Today 6:00 AM
         arrivalTime: createTripDate(0, 13, 0), // Today 1:00 PM
         basePrice: 250000,
+        finalPrice: 250000,
+        totalSeats: 18,
         status: 'scheduled',
         availableSeats: 18,
-        bookedSeats: 0,
+        bookedSeats: [],
       },
       {
         operatorId: operators[0]._id,
@@ -522,9 +524,11 @@ const seedData = async () => {
         departureTime: createTripDate(0, 22, 0), // Today 10:00 PM
         arrivalTime: createTripDate(1, 5, 0), // Tomorrow 5:00 AM
         basePrice: 300000,
+        finalPrice: 300000,
+        totalSeats: 40,
         status: 'scheduled',
         availableSeats: 40,
-        bookedSeats: 0,
+        bookedSeats: [],
       },
       {
         operatorId: operators[0]._id,
@@ -535,9 +539,11 @@ const seedData = async () => {
         departureTime: createTripDate(1, 6, 0), // Tomorrow 6:00 AM
         arrivalTime: createTripDate(1, 13, 0), // Tomorrow 1:00 PM
         basePrice: 250000,
+        finalPrice: 250000,
+        totalSeats: 18,
         status: 'scheduled',
         availableSeats: 18,
-        bookedSeats: 0,
+        bookedSeats: [],
       },
 
       // FUTA - Sài Gòn Nha Trang
@@ -550,9 +556,11 @@ const seedData = async () => {
         departureTime: createTripDate(0, 20, 0), // Today 8:00 PM
         arrivalTime: createTripDate(1, 5, 0), // Tomorrow 5:00 AM
         basePrice: 350000,
+        finalPrice: 350000,
+        totalSeats: 40,
         status: 'scheduled',
         availableSeats: 40,
-        bookedSeats: 0,
+        bookedSeats: [],
       },
       {
         operatorId: operators[0]._id,
@@ -563,9 +571,11 @@ const seedData = async () => {
         departureTime: createTripDate(2, 20, 0), // Day after tomorrow 8:00 PM
         arrivalTime: createTripDate(3, 5, 0),
         basePrice: 350000,
+        finalPrice: 350000,
+        totalSeats: 40,
         status: 'scheduled',
         availableSeats: 40,
-        bookedSeats: 0,
+        bookedSeats: [],
       },
 
       // Thanh Bưởi - Sài Gòn Vũng Tàu
@@ -578,9 +588,11 @@ const seedData = async () => {
         departureTime: createTripDate(0, 7, 0), // Today 7:00 AM
         arrivalTime: createTripDate(0, 9, 0), // Today 9:00 AM
         basePrice: 120000,
+        finalPrice: 120000,
+        totalSeats: 34,
         status: 'scheduled',
         availableSeats: 34,
-        bookedSeats: 0,
+        bookedSeats: [],
       },
       {
         operatorId: operators[1]._id,
@@ -591,9 +603,11 @@ const seedData = async () => {
         departureTime: createTripDate(0, 14, 0), // Today 2:00 PM
         arrivalTime: createTripDate(0, 16, 0), // Today 4:00 PM
         basePrice: 120000,
+        finalPrice: 120000,
+        totalSeats: 34,
         status: 'scheduled',
         availableSeats: 34,
-        bookedSeats: 0,
+        bookedSeats: [],
       },
       {
         operatorId: operators[1]._id,
@@ -604,9 +618,11 @@ const seedData = async () => {
         departureTime: createTripDate(1, 7, 0), // Tomorrow 7:00 AM
         arrivalTime: createTripDate(1, 9, 0), // Tomorrow 9:00 AM
         basePrice: 120000,
+        finalPrice: 120000,
+        totalSeats: 34,
         status: 'scheduled',
         availableSeats: 34,
-        bookedSeats: 0,
+        bookedSeats: [],
       },
       {
         operatorId: operators[1]._id,
@@ -617,9 +633,11 @@ const seedData = async () => {
         departureTime: createTripDate(1, 14, 0), // Tomorrow 2:00 PM
         arrivalTime: createTripDate(1, 16, 0), // Tomorrow 4:00 PM
         basePrice: 120000,
+        finalPrice: 120000,
+        totalSeats: 34,
         status: 'scheduled',
         availableSeats: 34,
-        bookedSeats: 0,
+        bookedSeats: [],
       },
     ]);
 
