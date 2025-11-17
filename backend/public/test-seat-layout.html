@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuikRide - Test Seat Layout UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .main {
+            padding: 20px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .template-btn {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            font-size: 12px;
+        }
+
+        .template-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        #seatLayoutPreview {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .seat-grid {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .seat-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .seat {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #667eea;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .seat:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .seat.selected {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .seat.empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        .seat.empty:hover {
+            transform: none;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+        }
+
+        .legend-box.available {
+            background: white;
+            border: 2px solid #667eea;
+        }
+
+        .legend-box.selected {
+            background: #28a745;
+        }
+
+        .legend-box.aisle {
+            background: transparent;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .info-box h3 {
+            color: #2196F3;
+            margin-bottom: 10px;
+        }
+
+        .info-item {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .json-view {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #666;
+            font-weight: 600;
+            position: relative;
+            width: auto;
+        }
+
+        .tab.active {
+            color: #667eea;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        @media (max-width: 1200px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚌 QuikRide Seat Layout Test</h1>
+            <p>Công cụ test và visualize sơ đồ ghế xe</p>
+        </div>
+
+        <div class="content">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="section">
+                    <h2>📋 Templates</h2>
+                    <div class="form-group">
+                        <label>Loại xe:</label>
+                        <select id="busTypeSelect">
+                            <option value="">-- Chọn loại xe --</option>
+                            <option value="seater">Ghế ngồi (Seater)</option>
+                            <option value="sleeper">Giường nằm (Sleeper)</option>
+                            <option value="limousine">Limousine</option>
+                            <option value="double_decker">2 tầng (Double Decker)</option>
+                        </select>
+                    </div>
+                    <button onclick="loadTemplates()">🔍 Tải Templates</button>
+                    <div id="templateList"></div>
+                </div>
+
+                <div class="section">
+                    <h2>🎨 Custom Layout</h2>
+                    <div class="form-group">
+                        <label>Bus Type:</label>
+                        <select id="customBusType">
+                            <option value="seater">Seater</option>
+                            <option value="sleeper">Sleeper</option>
+                            <option value="limousine">Limousine</option>
+                            <option value="double_decker">Double Decker</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Số hàng (Rows):</label>
+                        <input type="number" id="customRows" value="10" min="1" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label>Số cột (Columns):</label>
+                        <input type="number" id="customColumns" value="4" min="1" max="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Số tầng (Floors):</label>
+                        <input type="number" id="customFloors" value="1" min="1" max="2">
+                    </div>
+                    <div class="form-group">
+                        <label>Pattern:</label>
+                        <select id="customPattern">
+                            <option value="standard">Standard</option>
+                            <option value="aisle">Aisle (có lối đi)</option>
+                            <option value="vip">VIP</option>
+                        </select>
+                    </div>
+                    <button onclick="buildCustomLayout()">🛠️ Tạo Layout</button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('preview')">👁️ Preview</button>
+                    <button class="tab" onclick="switchTab('json')">📄 JSON</button>
+                    <button class="tab" onclick="switchTab('info')">ℹ️ Info</button>
+                </div>
+
+                <div id="alertContainer"></div>
+
+                <!-- Preview Tab -->
+                <div id="previewTab" class="tab-content active">
+                    <div class="section">
+                        <h2>Seat Layout Preview</h2>
+                        <div id="seatLayoutPreview">
+                            <p style="color: #999; font-size: 1.2em;">
+                                👆 Chọn template hoặc tạo custom layout để xem preview
+                            </p>
+                        </div>
+
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-box available"></div>
+                                <span>Ghế trống</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-box selected"></div>
+                                <span>Ghế đã chọn</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-box aisle"></div>
+                                <span>Lối đi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats" id="statsContainer" style="display: none;">
+                        <div class="stat-card">
+                            <div class="number" id="totalSeatsCount">0</div>
+                            <div class="label">Tổng số ghế</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number" id="selectedSeatsCount">0</div>
+                            <div class="label">Ghế đã chọn</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number" id="rowsCount">0</div>
+                            <div class="label">Số hàng</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number" id="columnsCount">0</div>
+                            <div class="label">Số cột</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JSON Tab -->
+                <div id="jsonTab" class="tab-content">
+                    <div class="section">
+                        <h2>Layout JSON</h2>
+                        <div class="json-view" id="jsonView">
+                            <pre>// Chưa có layout nào được load</pre>
+                        </div>
+                        <button onclick="copyJson()">📋 Copy JSON</button>
+                    </div>
+                </div>
+
+                <!-- Info Tab -->
+                <div id="infoTab" class="tab-content">
+                    <div class="section">
+                        <h2>Thông tin Layout</h2>
+                        <div id="infoContent">
+                            <p style="color: #999;">Chưa có thông tin</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api/v1';
+        let currentLayout = null;
+        let selectedSeats = [];
+
+        function showAlert(message, type = 'info') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        function switchTab(tabName) {
+            // Remove active from all tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active to selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function loadTemplates() {
+            const busType = document.getElementById('busTypeSelect').value;
+            if (!busType) {
+                showAlert('Vui lòng chọn loại xe', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/buses/seat-layout/templates/${busType}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    const templateList = document.getElementById('templateList');
+                    templateList.innerHTML = '<h3 style="margin-top: 15px;">Templates:</h3>';
+
+                    Object.entries(data.data.templates).forEach(([key, template]) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'template-btn';
+                        btn.textContent = `${template.name} (${template.totalSeats} chỗ)`;
+                        btn.onclick = () => loadTemplate(busType, key);
+                        templateList.appendChild(btn);
+                    });
+
+                    showAlert(`Loaded ${Object.keys(data.data.templates).length} templates`, 'success');
+                }
+            } catch (error) {
+                showAlert('Lỗi khi tải templates: ' + error.message, 'error');
+            }
+        }
+
+        async function loadTemplate(busType, templateKey) {
+            try {
+                const response = await fetch(`${API_BASE}/buses/seat-layout/templates/${busType}/${templateKey}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    currentLayout = data.data.template;
+                    renderSeatLayout(currentLayout);
+                    updateStats();
+                    updateJson();
+                    updateInfo();
+                    showAlert(`Template "${currentLayout.name}" loaded successfully`, 'success');
+                }
+            } catch (error) {
+                showAlert('Lỗi khi tải template: ' + error.message, 'error');
+            }
+        }
+
+        async function buildCustomLayout() {
+            const busType = document.getElementById('customBusType').value;
+            const rows = parseInt(document.getElementById('customRows').value);
+            const columns = parseInt(document.getElementById('customColumns').value);
+            const floors = parseInt(document.getElementById('customFloors').value);
+            const pattern = document.getElementById('customPattern').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/buses/seat-layout/build`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ busType, rows, columns, floors, pattern })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    currentLayout = data.data.seatLayout;
+                    renderSeatLayout(currentLayout);
+                    updateStats();
+                    updateJson();
+                    updateInfo();
+                    showAlert('Custom layout created successfully', 'success');
+                }
+            } catch (error) {
+                showAlert('Lỗi khi tạo custom layout: ' + error.message, 'error');
+            }
+        }
+
+        function renderSeatLayout(layout) {
+            const preview = document.getElementById('seatLayoutPreview');
+            preview.innerHTML = '';
+
+            if (!layout || !layout.layout) {
+                preview.innerHTML = '<p style="color: #999;">Invalid layout data</p>';
+                return;
+            }
+
+            const seatGrid = document.createElement('div');
+            seatGrid.className = 'seat-grid';
+
+            // Add title
+            const title = document.createElement('h3');
+            title.textContent = layout.name || 'Custom Layout';
+            title.style.marginBottom = '20px';
+            title.style.textAlign = 'center';
+            title.style.color = '#667eea';
+            seatGrid.appendChild(title);
+
+            // Render seats
+            layout.layout.forEach((row, rowIndex) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'seat-row';
+
+                row.forEach((seat, colIndex) => {
+                    const seatDiv = document.createElement('div');
+                    seatDiv.className = 'seat';
+
+                    if (seat && seat.trim() !== '') {
+                        seatDiv.textContent = seat;
+                        seatDiv.onclick = () => toggleSeat(seat, seatDiv);
+                    } else {
+                        seatDiv.classList.add('empty');
+                    }
+
+                    rowDiv.appendChild(seatDiv);
+                });
+
+                seatGrid.appendChild(rowDiv);
+            });
+
+            preview.appendChild(seatGrid);
+            document.getElementById('statsContainer').style.display = 'grid';
+        }
+
+        function toggleSeat(seatNumber, seatDiv) {
+            const index = selectedSeats.indexOf(seatNumber);
+            if (index > -1) {
+                selectedSeats.splice(index, 1);
+                seatDiv.classList.remove('selected');
+            } else {
+                selectedSeats.push(seatNumber);
+                seatDiv.classList.add('selected');
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            if (!currentLayout) return;
+
+            const totalSeats = currentLayout.totalSeats || 0;
+            document.getElementById('totalSeatsCount').textContent = totalSeats;
+            document.getElementById('selectedSeatsCount').textContent = selectedSeats.length;
+            document.getElementById('rowsCount').textContent = currentLayout.rows || 0;
+            document.getElementById('columnsCount').textContent = currentLayout.columns || 0;
+        }
+
+        function updateJson() {
+            if (!currentLayout) return;
+
+            const jsonView = document.getElementById('jsonView');
+            jsonView.innerHTML = `<pre>${JSON.stringify(currentLayout, null, 2)}</pre>`;
+        }
+
+        function updateInfo() {
+            if (!currentLayout) return;
+
+            const infoContent = document.getElementById('infoContent');
+            infoContent.innerHTML = `
+                <div class="info-box">
+                    <h3>${currentLayout.name || 'Custom Layout'}</h3>
+                    <p><strong>Bus Type:</strong> ${currentLayout.busType}</p>
+                    <p><strong>Total Seats:</strong> ${currentLayout.totalSeats}</p>
+                    <p><strong>Floors:</strong> ${currentLayout.floors}</p>
+                    <p><strong>Rows:</strong> ${currentLayout.rows}</p>
+                    <p><strong>Columns:</strong> ${currentLayout.columns}</p>
+                    ${currentLayout.description ? `<p><strong>Description:</strong> ${currentLayout.description}</p>` : ''}
+                </div>
+            `;
+        }
+
+        function copyJson() {
+            const jsonText = JSON.stringify(currentLayout, null, 2);
+            navigator.clipboard.writeText(jsonText);
+            showAlert('JSON copied to clipboard!', 'success');
+        }
+
+        // Initial load
+        console.log('🚌 QuikRide Seat Layout Test UI loaded');
+        console.log('API Base:', API_BASE);
+    </script>
+</body>
+</html>
