@@ -65,6 +65,26 @@ const validateCancelTicket = [
     .withMessage('Lý do hủy phải là chuỗi ký tự'),
 ];
 
+const validateChangeTicket = [
+  body('newTripId')
+    .notEmpty()
+    .withMessage('Trip ID mới là bắt buộc')
+    .isMongoId()
+    .withMessage('Trip ID mới không hợp lệ'),
+  body('seats')
+    .notEmpty()
+    .withMessage('Danh sách ghế là bắt buộc')
+    .isArray({ min: 1 })
+    .withMessage('Phải chọn ít nhất 1 ghế'),
+  body('seats.*.seatNumber')
+    .notEmpty()
+    .withMessage('Số ghế là bắt buộc'),
+  body('reason')
+    .optional()
+    .isString()
+    .withMessage('Lý do đổi vé phải là chuỗi ký tự'),
+];
+
 const validateTicketId = [
   param('id').isMongoId().withMessage('Ticket ID không hợp lệ'),
 ];
@@ -129,6 +149,16 @@ router.post(
   validateTicketId,
   validateCancelTicket,
   TicketController.cancelTicket
+);
+
+// UC-10: Change/Exchange ticket
+// POST /api/tickets/:id/change
+router.post(
+  '/:id/change',
+  // protect,
+  validateTicketId,
+  validateChangeTicket,
+  TicketController.changeTicket
 );
 
 // Download ticket PDF

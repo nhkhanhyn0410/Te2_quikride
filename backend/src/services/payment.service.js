@@ -397,9 +397,10 @@ class PaymentService {
    * @param {string} bookingId - Booking ID
    * @param {string} reason - Cancellation reason
    * @param {string} ipAddress - IP address
+   * @param {number} specificRefundAmount - Specific refund amount from cancellation policy (optional)
    * @returns {Object} Refund result
    */
-  static async autoRefundOnCancellation(bookingId, reason, ipAddress) {
+  static async autoRefundOnCancellation(bookingId, reason, ipAddress, specificRefundAmount = null) {
     // Find completed payment for booking
     const payments = await Payment.find({
       bookingId,
@@ -417,7 +418,15 @@ class PaymentService {
 
     for (const payment of payments) {
       try {
-        const refundAmount = payment.amount - (payment.refundAmount || 0);
+        // Calculate refund amount
+        let refundAmount;
+        if (specificRefundAmount !== null && specificRefundAmount >= 0) {
+          // Use specific refund amount from cancellation policy
+          refundAmount = Math.min(specificRefundAmount, payment.amount - (payment.refundAmount || 0));
+        } else {
+          // Full refund (legacy behavior)
+          refundAmount = payment.amount - (payment.refundAmount || 0);
+        }
 
         if (refundAmount > 0) {
           const result = await this.processRefund({
@@ -429,6 +438,14 @@ class PaymentService {
           });
 
           results.push(result);
+        } else if (refundAmount === 0) {
+          // No refund according to policy
+          results.push({
+            success: true,
+            paymentId: payment._id,
+            message: 'Không hoàn tiền theo chính sách hủy vé',
+            refundAmount: 0,
+          });
         }
       } catch (error) {
         console.error('Auto-refund failed for payment:', payment._id, error.message);

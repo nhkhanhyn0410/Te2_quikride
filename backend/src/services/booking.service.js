@@ -219,9 +219,11 @@ class BookingService {
    * @param {string} bookingId - Booking ID
    * @param {string} reason - Cancellation reason
    * @param {string} cancelledBy - Who cancelled (customer, operator, system)
-   * @returns {Promise<Booking>} Cancelled booking
+   * @param {string} ipAddress - IP address
+   * @param {number} refundAmount - Specific refund amount (optional, for policy-based refunds)
+   * @returns {Promise<Object>} Cancelled booking with refund result
    */
-  static async cancelBooking(bookingId, reason, cancelledBy = 'customer', ipAddress = '127.0.0.1') {
+  static async cancelBooking(bookingId, reason, cancelledBy = 'customer', ipAddress = '127.0.0.1', refundAmount = null) {
     const booking = await Booking.findById(bookingId);
 
     if (!booking) {
@@ -264,7 +266,8 @@ class BookingService {
         refundResult = await PaymentServiceClass.autoRefundOnCancellation(
           bookingId,
           reason,
-          ipAddress
+          ipAddress,
+          refundAmount // Pass specific refund amount from cancellation policy
         );
 
         if (refundResult.success) {
