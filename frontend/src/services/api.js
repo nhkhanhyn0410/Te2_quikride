@@ -14,10 +14,17 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Get token from localStorage
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Get token from Zustand persist storage (auth-storage)
+    const authData = localStorage.getItem('auth-storage');
+    if (authData) {
+      try {
+        const { state } = JSON.parse(authData);
+        if (state?.token) {
+          config.headers.Authorization = `Bearer ${state.token}`;
+        }
+      } catch (error) {
+        console.error('Error parsing auth data:', error);
+      }
     }
     return config;
   },
