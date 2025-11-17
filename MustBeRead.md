@@ -1,1 +1,0 @@
-#Trước khi thực hiện bất kỳ một dự phase hãy đọc qua 3 file là: Readme.md, Project_phases và database_schema
