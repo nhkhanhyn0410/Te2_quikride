@@ -19,6 +19,15 @@ const userRoutes = require('./routes/user.routes');
 
 // Import middleware
 const errorHandler = require('./middleware/error.middleware');
+const {
+  sanitizeData,
+  preventXSS,
+  preventHPP,
+  setSecurityHeaders,
+  sanitizeRequest,
+  detectAttackPatterns,
+} = require('./middleware/security.middleware');
+const { validateOrigin } = require('./middleware/csrf.middleware');
 
 // Initialize express app
 const app = express();
@@ -30,7 +39,28 @@ connectDB();
 connectRedis();
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      fontSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+}));
+
+// Additional security headers
+app.use(setSecurityHeaders);
 
 // CORS configuration
 const corsOptions = {
@@ -43,6 +73,24 @@ app.use(cors(corsOptions));
 // Body parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Data sanitization against NoSQL injection
+app.use(sanitizeData());
+
+// Data sanitization against XSS
+app.use(preventXSS());
+
+// Prevent parameter pollution
+app.use(preventHPP());
+
+// Custom request sanitization
+app.use(sanitizeRequest);
+
+// Detect attack patterns
+app.use(detectAttackPatterns);
+
+// Validate origin for state-changing requests
+app.use(validateOrigin);
 
 // Compression middleware
 app.use(compression());

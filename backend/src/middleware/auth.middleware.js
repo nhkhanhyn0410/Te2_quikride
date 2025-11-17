@@ -2,6 +2,24 @@ const AuthService = require('../services/auth.service');
 const User = require('../models/User');
 
 /**
+ * Check session timeout (30 minutes of inactivity by default)
+ * @param {Object} user - User object
+ * @returns {Boolean} - True if session is valid
+ */
+const checkSessionTimeout = (user) => {
+  const sessionTimeout = parseInt(process.env.SESSION_TIMEOUT_MINUTES, 10) || 30;
+  const timeoutMs = sessionTimeout * 60 * 1000;
+
+  if (user.lastLogin) {
+    const timeSinceLastLogin = Date.now() - new Date(user.lastLogin).getTime();
+    return timeSinceLastLogin <= timeoutMs;
+  }
+
+  // If no lastLogin, session is valid (newly created user)
+  return true;
+};
+
+/**
  * Middleware xác thực JWT token
  * Kiểm tra token trong header Authorization: Bearer <token>
  */
@@ -19,6 +37,7 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({
         status: 'error',
         message: 'Vui lòng đăng nhập để truy cập',
+        code: 'NO_TOKEN',
       });
     }
 
@@ -30,6 +49,7 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({
         status: 'error',
         message: error.message || 'Token không hợp lệ',
+        code: 'INVALID_TOKEN',
       });
     }
 
@@ -38,6 +58,7 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({
         status: 'error',
         message: 'Token không hợp lệ',
+        code: 'INVALID_TOKEN_TYPE',
       });
     }
 
@@ -47,6 +68,7 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({
         status: 'error',
         message: 'User không tồn tại',
+        code: 'USER_NOT_FOUND',
       });
     }
 
@@ -55,6 +77,7 @@ const authenticate = async (req, res, next) => {
       return res.status(403).json({
         status: 'error',
         message: `Tài khoản đã bị khóa. Lý do: ${user.blockedReason || 'Không rõ'}`,
+        code: 'ACCOUNT_BLOCKED',
       });
     }
 
@@ -63,10 +86,24 @@ const authenticate = async (req, res, next) => {
       return res.status(403).json({
         status: 'error',
         message: 'Tài khoản không hoạt động',
+        code: 'ACCOUNT_INACTIVE',
       });
     }
 
-    // 7. Lưu user vào request object
+    // 7. Check session timeout (30 minutes of inactivity)
+    if (!checkSessionTimeout(user)) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Phiên đăng nhập đã hết hạn do không hoạt động. Vui lòng đăng nhập lại.',
+        code: 'SESSION_TIMEOUT',
+      });
+    }
+
+    // 8. Update lastLogin to extend session on each request
+    user.lastLogin = Date.now();
+    await user.save({ validateBeforeSave: false });
+
+    // 9. Lưu user vào request object
     req.user = user;
     req.userId = user._id;
 
@@ -76,6 +113,7 @@ const authenticate = async (req, res, next) => {
     return res.status(500).json({
       status: 'error',
       message: 'Lỗi xác thực',
+      code: 'AUTH_ERROR',
     });
   }
 };
