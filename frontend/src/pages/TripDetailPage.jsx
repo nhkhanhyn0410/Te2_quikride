@@ -52,9 +52,11 @@ const TripDetailPage = () => {
       setLoading(true);
       const response = await getTripDetails(tripId);
 
-      if (response.success && response.data) {
-        setTrip(response.data);
-        setSelectedTrip(response.data);
+      console.log('Trip detail response:', response);
+
+      if (response.status === 'success' && response.data?.trip) {
+        setTrip(response.data.trip);
+        setSelectedTrip(response.data.trip);
       } else {
         toast.error('Không tìm thấy thông tin chuyến xe');
         navigate('/');
@@ -71,8 +73,10 @@ const TripDetailPage = () => {
   const fetchAvailableSeats = async () => {
     try {
       const response = await getAvailableSeats(tripId);
-      if (response.success && response.data) {
-        setAvailableSeats(response.data.availableSeats || []);
+      console.log('Available seats response:', response);
+
+      if (response.status === 'success' && response.data) {
+        setAvailableSeats(response.data.availableSeats || response.data.available || []);
       }
     } catch (error) {
       console.error('Fetch available seats error:', error);
