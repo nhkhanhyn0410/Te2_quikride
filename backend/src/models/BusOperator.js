@@ -247,6 +247,11 @@ BusOperatorSchema.virtual('fullAddress').get(function () {
   return parts.join(', ');
 });
 
+// Virtual for role (always 'operator' for BusOperator)
+BusOperatorSchema.virtual('role').get(function () {
+  return 'operator';
+});
+
 // Virtual for verification status label (for display)
 BusOperatorSchema.virtual('verificationStatusLabel').get(function () {
   const labels = {
