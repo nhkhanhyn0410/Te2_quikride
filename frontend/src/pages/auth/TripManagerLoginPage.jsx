@@ -33,11 +33,11 @@ const TripManagerLoginPage = () => {
           return;
         }
 
-        // Store auth data
-        login(token, {
+        // Store auth data - login(user, token) not login(token, user)
+        login({
           ...employee,
-          role: 'trip_manager', // Set role for authorization
-        });
+          role: employee.role, // Keep original role (trip_manager or driver)
+        }, token);
 
         message.success('Đăng nhập thành công');
         navigate('/trip-manager/dashboard');

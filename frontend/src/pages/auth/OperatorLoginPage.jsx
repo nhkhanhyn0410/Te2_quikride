@@ -15,12 +15,12 @@ const OperatorLoginPage = () => {
     try {
       const response = await operatorAuth.login(values);
 
-      // Response structure: { status, message, data: { operator, token } }
+      // Response structure: { status, message, data: { operator, accessToken, refreshToken } }
       if (response.status === 'success') {
-        const { operator, token } = response.data;
+        const { operator, accessToken } = response.data;
 
         // Set user as operator role
-        login({ ...operator, role: 'operator' }, token);
+        login({ ...operator, role: 'operator' }, accessToken);
 
         message.success('Đăng nhập thành công!');
         navigate('/operator/dashboard');
