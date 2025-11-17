@@ -16,6 +16,8 @@ const connectRedis = require('./config/redis');
 // Import routes
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
+const operatorRoutes = require('./routes/operator.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 // Import middleware
 const errorHandler = require('./middleware/error.middleware');
@@ -136,6 +138,8 @@ app.get(`/api/${API_VERSION}`, (req, res) => {
 // Mount routes
 app.use(`/api/${API_VERSION}/auth`, authRoutes);
 app.use(`/api/${API_VERSION}/users`, userRoutes);
+app.use(`/api/${API_VERSION}/operators`, operatorRoutes);
+app.use(`/api/${API_VERSION}/admin`, adminRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
