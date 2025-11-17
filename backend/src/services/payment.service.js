@@ -3,6 +3,15 @@ const Booking = require('../models/Booking');
 const vnpayService = require('./vnpay.service');
 const moment = require('moment');
 
+// Lazy-load TicketService to avoid circular dependency
+let TicketService = null;
+const getTicketService = () => {
+  if (!TicketService) {
+    TicketService = require('./ticket.service');
+  }
+  return TicketService;
+};
+
 /**
  * Payment Service
  * Handles payment operations and integrates with payment gateways
@@ -193,6 +202,23 @@ class PaymentService {
         }
 
         await booking.save();
+
+        // Generate digital ticket in background (UC-7)
+        const TicketServiceClass = getTicketService();
+        TicketServiceClass.generateTicket(booking._id)
+          .then((ticket) => {
+            console.log('✅ Ticket generated for booking:', booking.bookingCode);
+            // Send ticket notifications in background
+            return TicketServiceClass.sendTicketNotifications(ticket._id);
+          })
+          .then((notificationResult) => {
+            console.log('✅ Ticket notifications sent:', notificationResult);
+          })
+          .catch((error) => {
+            console.error('❌ Ticket generation/notification failed:', error);
+            // Don't fail the payment if ticket generation fails
+            // Admin can retry ticket generation manually
+          });
       }
 
       return {
@@ -371,9 +397,10 @@ class PaymentService {
    * @param {string} bookingId - Booking ID
    * @param {string} reason - Cancellation reason
    * @param {string} ipAddress - IP address
+   * @param {number} specificRefundAmount - Specific refund amount from cancellation policy (optional)
    * @returns {Object} Refund result
    */
-  static async autoRefundOnCancellation(bookingId, reason, ipAddress) {
+  static async autoRefundOnCancellation(bookingId, reason, ipAddress, specificRefundAmount = null) {
     // Find completed payment for booking
     const payments = await Payment.find({
       bookingId,
@@ -391,7 +418,15 @@ class PaymentService {
 
     for (const payment of payments) {
       try {
-        const refundAmount = payment.amount - (payment.refundAmount || 0);
+        // Calculate refund amount
+        let refundAmount;
+        if (specificRefundAmount !== null && specificRefundAmount >= 0) {
+          // Use specific refund amount from cancellation policy
+          refundAmount = Math.min(specificRefundAmount, payment.amount - (payment.refundAmount || 0));
+        } else {
+          // Full refund (legacy behavior)
+          refundAmount = payment.amount - (payment.refundAmount || 0);
+        }
 
         if (refundAmount > 0) {
           const result = await this.processRefund({
@@ -403,6 +438,14 @@ class PaymentService {
           });
 
           results.push(result);
+        } else if (refundAmount === 0) {
+          // No refund according to policy
+          results.push({
+            success: true,
+            paymentId: payment._id,
+            message: 'Không hoàn tiền theo chính sách hủy vé',
+            refundAmount: 0,
+          });
         }
       } catch (error) {
         console.error('Auto-refund failed for payment:', payment._id, error.message);
