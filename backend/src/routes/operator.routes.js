@@ -3,6 +3,7 @@ const router = express.Router();
 const operatorController = require('../controllers/operator.controller');
 const routeController = require('../controllers/route.controller');
 const busController = require('../controllers/bus.controller');
+const employeeController = require('../controllers/employee.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 /**
@@ -42,5 +43,16 @@ router.get('/buses/:id', authenticate, authorize('operator'), busController.getB
 router.put('/buses/:id', authenticate, authorize('operator'), busController.update);
 router.delete('/buses/:id', authenticate, authorize('operator'), busController.delete);
 router.put('/buses/:id/status', authenticate, authorize('operator'), busController.changeStatus);
+
+// Employee management (Operator only)
+router.post('/employees', authenticate, authorize('operator'), employeeController.create);
+router.get('/employees', authenticate, authorize('operator'), employeeController.getMyEmployees);
+router.get('/employees/statistics', authenticate, authorize('operator'), employeeController.getStatistics);
+router.get('/employees/available/:role', authenticate, authorize('operator'), employeeController.getAvailableForTrips);
+router.get('/employees/:id', authenticate, authorize('operator'), employeeController.getById);
+router.put('/employees/:id', authenticate, authorize('operator'), employeeController.update);
+router.delete('/employees/:id', authenticate, authorize('operator'), employeeController.delete);
+router.put('/employees/:id/status', authenticate, authorize('operator'), employeeController.changeStatus);
+router.post('/employees/:id/reset-password', authenticate, authorize('operator'), employeeController.resetPassword);
 
 module.exports = router;

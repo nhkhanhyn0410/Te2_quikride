@@ -1,11 +1,18 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
-// Pages (to be created)
-// import HomePage from '@pages/HomePage';
-// import SearchPage from '@pages/SearchPage';
-// import LoginPage from '@pages/auth/LoginPage';
-// import RegisterPage from '@pages/auth/RegisterPage';
+// Layouts
+import DashboardLayout from './components/operator/DashboardLayout';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Auth Pages
+import OperatorLoginPage from './pages/auth/OperatorLoginPage';
+
+// Operator Dashboard Pages
+import DashboardPage from './pages/operator/DashboardPage';
+import RoutesPage from './pages/operator/RoutesPage';
+import BusesPage from './pages/operator/BusesPage';
+import EmployeesPage from './pages/operator/EmployeesPage';
 
 function App() {
   return (
@@ -36,26 +43,43 @@ function App() {
       />
 
       <Routes>
-        <Route path="/" element={<div className="p-8 text-center">
-          <h1 className="text-4xl font-bold text-primary-600 mb-4">
-            🚌 QuikRide
-          </h1>
-          <p className="text-gray-600">
-            Hệ thống đặt vé xe khách trực tuyến
-          </p>
-          <p className="mt-4 text-sm text-gray-500">
-            Frontend đang được phát triển...
-          </p>
-        </div>} />
+        {/* Root - Redirect to operator login for now */}
+        <Route path="/" element={<Navigate to="/operator/login" replace />} />
 
-        {/* Auth routes */}
-        {/* <Route path="/login" element={<LoginPage />} /> */}
-        {/* <Route path="/register" element={<RegisterPage />} /> */}
+        {/* Operator Auth Routes */}
+        <Route path="/operator/login" element={<OperatorLoginPage />} />
 
-        {/* Search & Booking routes */}
-        {/* <Route path="/search" element={<SearchPage />} /> */}
+        {/* Operator Dashboard Routes - Protected */}
+        <Route
+          path="/operator"
+          element={
+            <ProtectedRoute allowedRoles={['operator']}>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/operator/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="routes" element={<RoutesPage />} />
+          <Route path="buses" element={<BusesPage />} />
+          <Route path="employees" element={<EmployeesPage />} />
+        </Route>
 
-        {/* Add more routes as needed */}
+        {/* 404 Not Found */}
+        <Route
+          path="*"
+          element={
+            <div className="flex items-center justify-center h-screen bg-gray-50">
+              <div className="text-center">
+                <h1 className="text-6xl font-bold text-gray-800">404</h1>
+                <p className="text-gray-600 mt-4">Trang không tồn tại</p>
+                <a href="/" className="text-blue-600 hover:underline mt-2 inline-block">
+                  Về trang chủ
+                </a>
+              </div>
+            </div>
+          }
+        />
       </Routes>
     </>
   );
