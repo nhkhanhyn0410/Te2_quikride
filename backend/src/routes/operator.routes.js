@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const operatorController = require('../controllers/operator.controller');
 const routeController = require('../controllers/route.controller');
+const busController = require('../controllers/bus.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 /**
@@ -32,5 +33,14 @@ router.post('/routes/:id/pickup-points', authenticate, authorize('operator'), ro
 router.delete('/routes/:id/pickup-points/:pointId', authenticate, authorize('operator'), routeController.removePickupPoint);
 router.post('/routes/:id/dropoff-points', authenticate, authorize('operator'), routeController.addDropoffPoint);
 router.delete('/routes/:id/dropoff-points/:pointId', authenticate, authorize('operator'), routeController.removeDropoffPoint);
+
+// Bus management (Operator only)
+router.post('/buses', authenticate, authorize('operator'), busController.create);
+router.get('/buses', authenticate, authorize('operator'), busController.getMyBuses);
+router.get('/buses/statistics', authenticate, authorize('operator'), busController.getStatistics);
+router.get('/buses/:id', authenticate, authorize('operator'), busController.getById);
+router.put('/buses/:id', authenticate, authorize('operator'), busController.update);
+router.delete('/buses/:id', authenticate, authorize('operator'), busController.delete);
+router.put('/buses/:id/status', authenticate, authorize('operator'), busController.changeStatus);
 
 module.exports = router;
