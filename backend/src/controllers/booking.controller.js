@@ -7,7 +7,7 @@ const BookingService = require('../services/booking.service');
  */
 exports.holdSeats = async (req, res) => {
   try {
-    const { tripId, seats, contactInfo, pickupPoint, dropoffPoint } = req.body;
+    const { tripId, seats, contactInfo, pickupPoint, dropoffPoint, voucherCode } = req.body;
 
     // Validation
     if (!tripId || !seats || !Array.isArray(seats) || seats.length === 0) {
@@ -43,6 +43,7 @@ exports.holdSeats = async (req, res) => {
       customerId,
       pickupPoint,
       dropoffPoint,
+      voucherCode,
     });
 
     res.status(201).json({

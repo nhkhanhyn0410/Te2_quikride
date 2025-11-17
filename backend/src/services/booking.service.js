@@ -1,6 +1,7 @@
 const Booking = require('../models/Booking');
 const Trip = require('../models/Trip');
 const SeatLockService = require('./seatLock.service');
+const VoucherService = require('./voucher.service');
 const mongoose = require('mongoose');
 
 /**
@@ -14,7 +15,7 @@ class BookingService {
    * @returns {Promise<Object>} Booking and lock information
    */
   static async holdSeats(holdData) {
-    const { tripId, seats, contactInfo, customerId, pickupPoint, dropoffPoint } = holdData;
+    const { tripId, seats, contactInfo, customerId, pickupPoint, dropoffPoint, voucherCode } = holdData;
 
     // Validate trip exists and is bookable
     const trip = await Trip.findById(tripId)
@@ -68,8 +69,32 @@ class BookingService {
     // Calculate pricing
     const seatPrice = trip.finalPrice;
     const totalPrice = seatPrice * seats.length;
-    const discount = 0; // Can add discount logic here
-    const finalPrice = totalPrice * (1 - discount / 100);
+    const discount = 0;
+
+    // Validate voucher if provided
+    let voucherValidation = null;
+    let voucherDiscount = 0;
+    let voucherId = null;
+
+    if (voucherCode) {
+      try {
+        voucherValidation = await VoucherService.validateForBooking(voucherCode, {
+          tripId,
+          customerId,
+          totalAmount: totalPrice,
+        });
+
+        voucherDiscount = voucherValidation.discountAmount;
+        voucherId = voucherValidation.voucher.id;
+      } catch (error) {
+        // Don't fail the whole booking if voucher is invalid, just ignore it
+        console.log('Voucher validation failed:', error.message);
+      }
+    }
+
+    // Calculate final price (discount + voucher)
+    let finalPrice = totalPrice * (1 - discount / 100);
+    finalPrice = Math.max(0, finalPrice - voucherDiscount);
 
     // Create temporary booking
     const bookingCode = await Booking.generateBookingCode();
@@ -93,6 +118,9 @@ class BookingService {
       dropoffPoint,
       totalPrice,
       discount,
+      voucherCode: voucherCode || undefined,
+      voucherId: voucherId || undefined,
+      voucherDiscount,
       finalPrice,
       isGuestBooking: !customerId,
       isHeld: true,
@@ -159,12 +187,22 @@ class BookingService {
     booking.confirm();
     await booking.save();
 
+    // Increment voucher usage if voucher was applied
+    if (booking.voucherId) {
+      try {
+        await VoucherService.applyToBooking(booking.voucherId);
+      } catch (error) {
+        console.error('Failed to increment voucher usage:', error.message);
+      }
+    }
+
     // Release Redis locks
     await SeatLockService.releaseSeats(booking.tripId, seatNumbers, sessionId);
 
     return await Booking.findById(booking._id)
       .populate('tripId')
-      .populate('operatorId', 'companyName phone email');
+      .populate('operatorId', 'companyName phone email')
+      .populate('voucherId');
   }
 
   /**
@@ -197,6 +235,15 @@ class BookingService {
         );
         trip.availableSeats += seatNumbers.length;
         await trip.save();
+      }
+    }
+
+    // Release voucher usage if voucher was applied
+    if (booking.status === 'confirmed' && booking.voucherId) {
+      try {
+        await VoucherService.releaseFromBooking(booking.voucherId);
+      } catch (error) {
+        console.error('Failed to release voucher usage:', error.message);
       }
     }
 

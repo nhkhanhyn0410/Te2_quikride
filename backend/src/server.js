@@ -22,6 +22,7 @@ const routeRoutes = require('./routes/route.routes');
 const busRoutes = require('./routes/bus.routes');
 const tripRoutes = require('./routes/trip.routes');
 const bookingRoutes = require('./routes/booking.routes');
+const voucherRoutes = require('./routes/voucher.routes');
 
 // Import middleware
 const errorHandler = require('./middleware/error.middleware');
@@ -148,6 +149,7 @@ app.use(`/api/${API_VERSION}/routes`, routeRoutes);
 app.use(`/api/${API_VERSION}/buses`, busRoutes);
 app.use(`/api/${API_VERSION}/trips`, tripRoutes);
 app.use(`/api/${API_VERSION}/bookings`, bookingRoutes);
+app.use(`/api/${API_VERSION}/vouchers`, voucherRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

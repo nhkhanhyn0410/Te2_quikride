@@ -110,7 +110,23 @@ const BookingSchema = new mongoose.Schema(
       type: Number,
       default: 0,
       min: 0,
-      max: 100,
+    },
+
+    // Voucher information
+    voucherCode: {
+      type: String,
+      uppercase: true,
+    },
+
+    voucherId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Voucher',
+    },
+
+    voucherDiscount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
 
     finalPrice: {
@@ -388,9 +404,17 @@ BookingSchema.statics.findExpiredHolds = function () {
  * Pre-save middleware
  */
 BookingSchema.pre('save', function (next) {
-  // Calculate final price if discount changed
-  if (this.isModified('discount') || this.isModified('totalPrice')) {
-    this.finalPrice = this.totalPrice * (1 - this.discount / 100);
+  // Calculate final price with discounts
+  if (
+    this.isModified('discount') ||
+    this.isModified('totalPrice') ||
+    this.isModified('voucherDiscount')
+  ) {
+    // Apply percentage discount first
+    let price = this.totalPrice * (1 - this.discount / 100);
+    // Then apply voucher discount (fixed amount)
+    price = Math.max(0, price - this.voucherDiscount);
+    this.finalPrice = price;
   }
 
   next();

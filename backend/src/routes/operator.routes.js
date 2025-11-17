@@ -6,6 +6,7 @@ const busController = require('../controllers/bus.controller');
 const employeeController = require('../controllers/employee.controller');
 const tripController = require('../controllers/trip.controller');
 const bookingController = require('../controllers/booking.controller');
+const voucherController = require('../controllers/voucher.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 /**
@@ -71,5 +72,14 @@ router.put('/trips/:id/cancel', authenticate, authorize('operator'), tripControl
 router.get('/bookings', authenticate, authorize('operator'), bookingController.getOperatorBookings);
 router.get('/bookings/statistics', authenticate, authorize('operator'), bookingController.getStatistics);
 router.put('/bookings/:bookingId/payment', authenticate, authorize('operator'), bookingController.updatePayment);
+
+// Voucher management (Operator only)
+router.post('/vouchers', authenticate, authorize('operator'), voucherController.createVoucher);
+router.get('/vouchers', authenticate, authorize('operator'), voucherController.getOperatorVouchers);
+router.get('/vouchers/statistics', authenticate, authorize('operator'), voucherController.getVoucherStatistics);
+router.get('/vouchers/:id', authenticate, authorize('operator'), voucherController.getVoucherById);
+router.put('/vouchers/:id', authenticate, authorize('operator'), voucherController.updateVoucher);
+router.delete('/vouchers/:id', authenticate, authorize('operator'), voucherController.deleteVoucher);
+router.put('/vouchers/:id/deactivate', authenticate, authorize('operator'), voucherController.deactivateVoucher);
 
 module.exports = router;
