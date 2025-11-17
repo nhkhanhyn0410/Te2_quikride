@@ -35,18 +35,32 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
   };
 
   const handleSeatClick = (seat) => {
-    if (!seat || seat.type === 'aisle' || seat.type === 'driver') return;
-    if (isSeatBooked(seat.seatNumber)) return;
+    console.log('Seat clicked:', seat);
+    console.log('Current selectedSeats:', selectedSeats);
+
+    if (!seat || seat.type === 'aisle' || seat.type === 'driver') {
+      console.log('Seat click ignored: invalid seat type');
+      return;
+    }
+
+    if (isSeatBooked(seat.seatNumber)) {
+      console.log('Seat click ignored: seat is booked');
+      return;
+    }
 
     const isSelected = selectedSeats.some(s => s.seatNumber === seat.seatNumber);
+    console.log('Is seat selected:', isSelected);
 
     if (isSelected) {
+      console.log('Removing seat:', seat.seatNumber);
       removeSeat(seat.seatNumber);
     } else {
       // Check if max passengers reached
       if (selectedSeats.length >= searchCriteria.passengers) {
+        console.log('Max passengers reached');
         return;
       }
+      console.log('Adding seat:', seat);
       addSeat(seat);
     }
   };
