@@ -3,6 +3,15 @@ const Booking = require('../models/Booking');
 const vnpayService = require('./vnpay.service');
 const moment = require('moment');
 
+// Lazy-load TicketService to avoid circular dependency
+let TicketService = null;
+const getTicketService = () => {
+  if (!TicketService) {
+    TicketService = require('./ticket.service');
+  }
+  return TicketService;
+};
+
 /**
  * Payment Service
  * Handles payment operations and integrates with payment gateways
@@ -193,6 +202,23 @@ class PaymentService {
         }
 
         await booking.save();
+
+        // Generate digital ticket in background (UC-7)
+        const TicketServiceClass = getTicketService();
+        TicketServiceClass.generateTicket(booking._id)
+          .then((ticket) => {
+            console.log('✅ Ticket generated for booking:', booking.bookingCode);
+            // Send ticket notifications in background
+            return TicketServiceClass.sendTicketNotifications(ticket._id);
+          })
+          .then((notificationResult) => {
+            console.log('✅ Ticket notifications sent:', notificationResult);
+          })
+          .catch((error) => {
+            console.error('❌ Ticket generation/notification failed:', error);
+            // Don't fail the payment if ticket generation fails
+            // Admin can retry ticket generation manually
+          });
       }
 
       return {
