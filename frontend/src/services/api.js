@@ -52,10 +52,21 @@ api.interceptors.response.use(
       const { status, data } = error.response;
 
       if (status === 401) {
-        // Unauthorized - clear token and redirect to login
+        // Unauthorized - clear all auth data
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        localStorage.removeItem('auth-storage'); // Zustand persist key
+        localStorage.removeItem('guest-token');
+
+        // Redirect based on current path
+        const currentPath = window.location.pathname;
+        if (currentPath.startsWith('/operator')) {
+          window.location.href = '/operator/login';
+        } else if (currentPath.startsWith('/trip-manager')) {
+          window.location.href = '/trip-manager/login';
+        } else {
+          window.location.href = '/login';
+        }
       }
 
       // Return error message from server
