@@ -8,6 +8,7 @@ const tripController = require('../controllers/trip.controller');
 const bookingController = require('../controllers/booking.controller');
 const voucherController = require('../controllers/voucher.controller');
 const paymentController = require('../controllers/payment.controller');
+const reportController = require('../controllers/report.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 /**
@@ -93,5 +94,13 @@ router.put('/vouchers/:id/deactivate', authenticate, authorize('operator'), vouc
 router.get('/payments', authenticate, authorize('operator'), paymentController.getOperatorPayments);
 router.get('/payments/statistics', authenticate, authorize('operator'), paymentController.getStatistics);
 router.post('/payments/:paymentId/refund', authenticate, authorize('operator'), paymentController.processRefund);
+
+// Reports & Analytics (Operator only) - Phase 5.3
+router.get('/reports/revenue', authenticate, authorize('operator'), reportController.getRevenueReport);
+router.get('/reports/revenue/summary', authenticate, authorize('operator'), reportController.getRevenueSummary);
+router.get('/reports/revenue/by-route', authenticate, authorize('operator'), reportController.getRevenueByRoute);
+router.get('/reports/revenue/trend', authenticate, authorize('operator'), reportController.getRevenueTrend);
+router.get('/reports/cancellation', authenticate, authorize('operator'), reportController.getCancellationReport);
+router.get('/reports/growth', authenticate, authorize('operator'), reportController.getGrowthMetrics);
 
 module.exports = router;
