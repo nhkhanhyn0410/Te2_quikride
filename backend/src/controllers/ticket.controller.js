@@ -312,7 +312,7 @@ class TicketController {
   }
 
   /**
-   * UC-9: Cancel ticket
+   * UC-9: Cancel ticket with refund calculation
    * POST /api/tickets/:id/cancel
    */
   static async cancelTicket(req, res) {
@@ -328,18 +328,27 @@ class TicketController {
       const { id } = req.params;
       const { reason } = req.body;
       const customerId = req.user?.id;
+      const ipAddress = req.ip || req.connection.remoteAddress || '127.0.0.1';
 
       // Verify ownership first
       const ticket = await TicketService.getTicketById(id, customerId);
 
-      // Cancel ticket
-      const cancelledTicket = await TicketService.cancelTicket(id, reason);
+      // Cancel ticket with refund calculation
+      const cancellationResult = await TicketService.cancelTicket(id, reason, ipAddress);
 
       res.json({
         success: true,
         message: 'Vé đã được hủy thành công',
         data: {
-          ticket: cancelledTicket,
+          ticket: cancellationResult.ticket,
+          booking: cancellationResult.booking,
+          refund: {
+            amount: cancellationResult.refundInfo.refundAmount,
+            percentage: cancellationResult.refundInfo.refundPercentage,
+            originalAmount: cancellationResult.refundInfo.originalAmount,
+            policy: cancellationResult.refundInfo.appliedRule,
+            status: cancellationResult.refundResult?.success ? 'processing' : 'pending',
+          },
         },
       });
     } catch (error) {

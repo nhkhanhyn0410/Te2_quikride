@@ -5,11 +5,21 @@ const QRService = require('./qr.service');
 const PDFService = require('./pdf.service');
 const { sendEmail, emailTemplates } = require('../config/email');
 const SMSService = require('./sms.service');
+const CancellationService = require('./cancellation.service');
 const cloudinary = require('../config/cloudinary');
 const redisClient = require('../config/redis');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment-timezone');
+
+// Lazy-load BookingService to avoid circular dependency
+let BookingService = null;
+const getBookingService = () => {
+  if (!BookingService) {
+    BookingService = require('./booking.service');
+  }
+  return BookingService;
+};
 
 /**
  * Ticket Service
@@ -681,30 +691,92 @@ class TicketService {
   }
 
   /**
-   * Cancel ticket
+   * Cancel ticket with refund calculation (UC-9)
    * @param {string} ticketId - Ticket ID
    * @param {string} reason - Cancellation reason
-   * @returns {Promise<Ticket>} Cancelled ticket
+   * @param {string} ipAddress - IP address for refund processing
+   * @returns {Promise<Object>} Cancelled ticket with refund info
    */
-  static async cancelTicket(ticketId, reason) {
-    const ticket = await Ticket.findById(ticketId);
+  static async cancelTicket(ticketId, reason, ipAddress = '127.0.0.1') {
+    // Get ticket with populated references
+    const ticket = await Ticket.findById(ticketId)
+      .populate('bookingId')
+      .populate('operatorId', 'companyName phone email');
 
     if (!ticket) {
       throw new Error('Không tìm thấy vé');
     }
 
-    if (ticket.status === 'cancelled') {
-      throw new Error('Vé đã bị hủy trước đó');
+    const booking = ticket.bookingId;
+
+    // Check cancellation eligibility
+    const eligibility = CancellationService.canCancelTicket(ticket);
+    if (!eligibility.canCancel) {
+      throw new Error(eligibility.reason);
     }
 
-    if (ticket.isUsed) {
-      throw new Error('Không thể hủy vé đã sử dụng');
-    }
+    // Calculate refund amount based on cancellation policy
+    const refundInfo = CancellationService.calculateRefund(ticket, booking);
 
-    ticket.cancel(reason);
+    // Validate cancellation reason
+    const validatedReason = CancellationService.validateCancellationReason(reason);
+
+    // Mark ticket as cancelled
+    ticket.cancel(validatedReason.reason);
     await ticket.save();
 
-    return ticket;
+    // Cancel booking (releases seats and processes refund)
+    const BookingServiceClass = getBookingService();
+    const cancellationResult = await BookingServiceClass.cancelBooking(
+      booking._id,
+      validatedReason.reason,
+      'customer',
+      ipAddress,
+      refundInfo.refundAmount // Pass calculated refund amount
+    );
+
+    // Format cancellation details for email/notification
+    const cancellationDetails = CancellationService.formatCancellationDetails({
+      ticket,
+      booking,
+      refundInfo,
+      cancelReason: validatedReason.reason,
+    });
+
+    // Send cancellation email
+    try {
+      const emailTemplate = emailTemplates.ticketCancellation(cancellationDetails);
+      await sendEmail({
+        to: booking.contactInfo.email,
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+      });
+      console.log('✅ Cancellation email sent to:', booking.contactInfo.email);
+    } catch (error) {
+      console.error('❌ Failed to send cancellation email:', error);
+      // Don't fail the cancellation if email fails
+    }
+
+    // Send SMS notification
+    try {
+      const message = `QuikRide: Ve ${ticket.ticketCode} da bi huy.
+${refundInfo.refundAmount > 0 ? `So tien hoan: ${refundInfo.refundAmount.toLocaleString('vi-VN')} VND` : 'Khong hoan tien'}
+${refundInfo.appliedRule}`;
+
+      await SMSService.sendSMS(booking.contactInfo.phone, message);
+      console.log('✅ Cancellation SMS sent to:', booking.contactInfo.phone);
+    } catch (error) {
+      console.error('❌ Failed to send cancellation SMS:', error);
+      // Don't fail the cancellation if SMS fails
+    }
+
+    return {
+      ticket,
+      booking: cancellationResult.booking,
+      refundInfo,
+      refundResult: cancellationResult.refundResult,
+      cancellationDetails,
+    };
   }
 
   /**
