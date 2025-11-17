@@ -5,6 +5,7 @@ const routeController = require('../controllers/route.controller');
 const busController = require('../controllers/bus.controller');
 const employeeController = require('../controllers/employee.controller');
 const tripController = require('../controllers/trip.controller');
+const bookingController = require('../controllers/booking.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 /**
@@ -65,5 +66,10 @@ router.get('/trips/:id', authenticate, authorize('operator'), tripController.get
 router.put('/trips/:id', authenticate, authorize('operator'), tripController.update);
 router.delete('/trips/:id', authenticate, authorize('operator'), tripController.delete);
 router.put('/trips/:id/cancel', authenticate, authorize('operator'), tripController.cancel);
+
+// Booking management (Operator only)
+router.get('/bookings', authenticate, authorize('operator'), bookingController.getOperatorBookings);
+router.get('/bookings/statistics', authenticate, authorize('operator'), bookingController.getStatistics);
+router.put('/bookings/:bookingId/payment', authenticate, authorize('operator'), bookingController.updatePayment);
 
 module.exports = router;
