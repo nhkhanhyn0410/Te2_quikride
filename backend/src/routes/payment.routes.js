@@ -24,16 +24,10 @@ router.get('/vnpay/return', PaymentController.vnpayReturn);
 // Get payment by code (public for status checking)
 router.get('/code/:paymentCode', PaymentController.getPaymentByCode);
 
-// Query transaction status
-router.get('/:paymentCode/status', PaymentController.queryTransactionStatus);
-
 // Protected routes (require authentication)
 
 // Create payment (optional auth - supports guest booking)
 router.post('/create', optionalAuth, PaymentController.createPayment);
-
-// Get payment by ID
-router.get('/:paymentId', authenticate, PaymentController.getPaymentById);
 
 // Get payments by booking
 router.get('/booking/:bookingId', authenticate, PaymentController.getPaymentsByBooking);
@@ -47,5 +41,15 @@ router.get('/my-payments', authenticate, PaymentController.getMyPayments);
 
 // Handle expired payments (should be protected with admin auth in production)
 router.post('/handle-expired', PaymentController.handleExpiredPayments);
+
+/**
+ * Dynamic param routes (MUST BE LAST to avoid conflicts with specific routes)
+ */
+
+// Query transaction status
+router.get('/:paymentCode/status', PaymentController.queryTransactionStatus);
+
+// Get payment by ID
+router.get('/:paymentId', authenticate, PaymentController.getPaymentById);
 
 module.exports = router;

@@ -37,14 +37,15 @@ router.get(
   bookingController.getMyBookings
 );
 
-// Get booking details
-router.get('/:bookingId', bookingController.getBookingById);
-
 // Cancel booking
 router.post(
   '/:bookingId/cancel',
   authenticate,
   bookingController.cancelBooking
 );
+
+// Dynamic param routes (MUST BE LAST to avoid conflicts with specific routes)
+// Get booking details
+router.get('/:bookingId', bookingController.getBookingById);
 
 module.exports = router;
