@@ -183,8 +183,8 @@ Xây dựng hệ thống quản lý nhà xe, tuyến đường, và phương ti�
 ---
 
 ## Phase 3: Booking System
-**Thời gian dự kiến:** 3 tuần
-**Độ ưu tiên:** Cao (Critical)
+
+
 
 ### Mục tiêu
 Xây dựng hệ thống tìm kiếm, đặt vé và thanh toán - core functionality của ứng dụng.
@@ -244,8 +244,6 @@ Xây dựng hệ thống tìm kiếm, đặt vé và thanh toán - core function
 #### 3.5 Payment Integration
 - [ ] **UC-6:** Thanh toán
   - VNPay integration
-  - MoMo integration
-  - ZaloPay integration
   - ATM card integration
 - [ ] POST `/api/payments/create` - Khởi tạo thanh toán
 - [ ] GET `/api/payments/callback` - Xử lý callback
