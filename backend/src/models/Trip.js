@@ -196,6 +196,12 @@ TripSchema.index({ operatorId: 1, status: 1 });
 // Search available trips
 TripSchema.index({ status: 1, departureTime: 1, availableSeats: 1 });
 
+// Price-based search (for filtering by price range)
+TripSchema.index({ status: 1, finalPrice: 1, departureTime: 1 });
+
+// Bus-based search (for filtering by bus type)
+TripSchema.index({ busId: 1, status: 1, departureTime: 1 });
+
 // Recurring trips
 TripSchema.index({ recurringGroupId: 1 });
 

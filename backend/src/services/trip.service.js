@@ -446,11 +446,36 @@ class TripService {
 
   /**
    * Search available trips (for customers)
-   * @param {Object} searchCriteria
+   * @param {Object} searchCriteria - Search and filter criteria
+   * @param {string} searchCriteria.fromCity - Origin city
+   * @param {string} searchCriteria.toCity - Destination city
+   * @param {string} searchCriteria.date - Travel date
+   * @param {number} searchCriteria.passengers - Number of passengers
+   * @param {number} searchCriteria.minPrice - Minimum price filter
+   * @param {number} searchCriteria.maxPrice - Maximum price filter
+   * @param {string} searchCriteria.departureTimeStart - Departure time start (HH:mm)
+   * @param {string} searchCriteria.departureTimeEnd - Departure time end (HH:mm)
+   * @param {string} searchCriteria.operatorId - Filter by operator
+   * @param {string} searchCriteria.busType - Filter by bus type
+   * @param {string} searchCriteria.sortBy - Sort field: 'price', 'time', 'rating'
+   * @param {string} searchCriteria.sortOrder - Sort order: 'asc', 'desc'
    * @returns {Promise<Array>}
    */
   static async searchAvailableTrips(searchCriteria) {
-    const { fromCity, toCity, date, passengers = 1 } = searchCriteria;
+    const {
+      fromCity,
+      toCity,
+      date,
+      passengers = 1,
+      minPrice,
+      maxPrice,
+      departureTimeStart,
+      departureTimeEnd,
+      operatorId,
+      busType,
+      sortBy = 'time',
+      sortOrder = 'asc',
+    } = searchCriteria;
 
     // Build query
     const query = {
@@ -472,11 +497,39 @@ class TripService {
       };
     }
 
+    // Price range filter
+    if (minPrice || maxPrice) {
+      query.finalPrice = {};
+      if (minPrice) query.finalPrice.$gte = Number(minPrice);
+      if (maxPrice) query.finalPrice.$lte = Number(maxPrice);
+    }
+
+    // Operator filter
+    if (operatorId) {
+      query.operatorId = operatorId;
+    }
+
+    // Build sort criteria
+    let sortCriteria = {};
+    switch (sortBy) {
+      case 'price':
+        sortCriteria = { finalPrice: sortOrder === 'asc' ? 1 : -1 };
+        break;
+      case 'rating':
+        // Will sort after populate based on operator rating
+        sortCriteria = { departureTime: 1 }; // Default sort, will re-sort later
+        break;
+      case 'time':
+      default:
+        sortCriteria = { departureTime: sortOrder === 'asc' ? 1 : -1 };
+        break;
+    }
+
     let trips = await Trip.find(query)
       .populate('routeId')
       .populate('busId', 'busNumber busType seatLayout amenities')
-      .populate('operatorId', 'companyName averageRating')
-      .sort({ departureTime: 1 })
+      .populate('operatorId', 'companyName averageRating totalReviews')
+      .sort(sortCriteria)
       .lean();
 
     // Filter by cities (after populate)
@@ -501,13 +554,49 @@ class TripService {
       );
     }
 
+    // Filter by bus type (after populate)
+    if (busType) {
+      trips = trips.filter(
+        (trip) => trip.busId && trip.busId.busType === busType
+      );
+    }
+
+    // Filter by departure time range (after date filter)
+    if (departureTimeStart || departureTimeEnd) {
+      trips = trips.filter((trip) => {
+        const tripTime = new Date(trip.departureTime);
+        const hours = tripTime.getHours();
+        const minutes = tripTime.getMinutes();
+        const tripTimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+        if (departureTimeStart && departureTimeEnd) {
+          return tripTimeStr >= departureTimeStart && tripTimeStr <= departureTimeEnd;
+        } else if (departureTimeStart) {
+          return tripTimeStr >= departureTimeStart;
+        } else if (departureTimeEnd) {
+          return tripTimeStr <= departureTimeEnd;
+        }
+        return true;
+      });
+    }
+
+    // Sort by rating if requested (after populate)
+    if (sortBy === 'rating') {
+      trips.sort((a, b) => {
+        const ratingA = a.operatorId?.averageRating || 0;
+        const ratingB = b.operatorId?.averageRating || 0;
+        return sortOrder === 'asc' ? ratingA - ratingB : ratingB - ratingA;
+      });
+    }
+
     return trips;
   }
 
   /**
    * Get trip detail for customers (public)
+   * Includes comprehensive trip information without sensitive data
    * @param {ObjectId} tripId
-   * @returns {Promise<Trip>}
+   * @returns {Promise<Object>}
    */
   static async getPublicTripDetail(tripId) {
     const trip = await Trip.findOne({
@@ -523,11 +612,95 @@ class TripService {
       throw new Error('Không tìm thấy chuyến xe hoặc chuyến không khả dụng');
     }
 
-    // Don't return sensitive employee info to public
-    delete trip.driverId;
-    delete trip.tripManagerId;
+    // Calculate duration in hours
+    const durationMs = new Date(trip.arrivalTime) - new Date(trip.departureTime);
+    const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+    const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
 
-    return trip;
+    // Calculate occupancy rate
+    const occupancyRate = trip.totalSeats > 0
+      ? ((trip.totalSeats - trip.availableSeats) / trip.totalSeats * 100).toFixed(2)
+      : 0;
+
+    // Get booked seat numbers (for seat selection, but not customer details)
+    const bookedSeatNumbers = trip.bookedSeats.map(seat => seat.seatNumber);
+
+    // Build enhanced response
+    const publicTrip = {
+      // Trip basic info
+      id: trip._id,
+      departureTime: trip.departureTime,
+      arrivalTime: trip.arrivalTime,
+      status: trip.status,
+
+      // Duration
+      duration: {
+        hours: durationHours,
+        minutes: durationMinutes,
+        formatted: `${durationHours}h ${durationMinutes}m`,
+      },
+
+      // Pricing
+      pricing: {
+        basePrice: trip.basePrice,
+        discount: trip.discount,
+        finalPrice: trip.finalPrice,
+      },
+
+      // Seat availability
+      seats: {
+        total: trip.totalSeats,
+        available: trip.availableSeats,
+        booked: trip.totalSeats - trip.availableSeats,
+        bookedSeatNumbers, // Array of booked seat numbers
+        occupancyRate: parseFloat(occupancyRate),
+      },
+
+      // Route information
+      route: trip.routeId ? {
+        id: trip.routeId._id,
+        name: trip.routeId.routeName,
+        code: trip.routeId.routeCode,
+        origin: trip.routeId.origin,
+        destination: trip.routeId.destination,
+        distance: trip.routeId.distance,
+        estimatedDuration: trip.routeId.estimatedDuration,
+        pickupPoints: trip.routeId.pickupPoints,
+        dropoffPoints: trip.routeId.dropoffPoints,
+      } : null,
+
+      // Bus information
+      bus: trip.busId ? {
+        id: trip.busId._id,
+        busNumber: trip.busId.busNumber,
+        busType: trip.busId.busType,
+        amenities: trip.busId.amenities,
+        seatLayout: trip.busId.seatLayout,
+      } : null,
+
+      // Operator information
+      operator: trip.operatorId ? {
+        id: trip.operatorId._id,
+        companyName: trip.operatorId.companyName,
+        phone: trip.operatorId.phone,
+        email: trip.operatorId.email,
+        rating: {
+          average: trip.operatorId.averageRating,
+          total: trip.operatorId.totalReviews,
+        },
+      } : null,
+
+      // Policies
+      policies: trip.policies,
+
+      // Cancellation info
+      cancellationPolicy: trip.cancellationPolicy,
+
+      // Additional info
+      notes: trip.notes,
+    };
+
+    return publicTrip;
   }
 }
 

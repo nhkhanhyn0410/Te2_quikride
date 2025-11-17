@@ -819,15 +819,272 @@ describe('TripService', () => {
         })
       );
     });
+
+    it('should filter by price range', async () => {
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([]),
+      };
+
+      Trip.find.mockReturnValue(mockQuery);
+
+      await TripService.searchAvailableTrips({
+        passengers: 1,
+        minPrice: 100000,
+        maxPrice: 300000,
+      });
+
+      expect(Trip.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          finalPrice: {
+            $gte: 100000,
+            $lte: 300000,
+          },
+        })
+      );
+    });
+
+    it('should filter by operator', async () => {
+      const operatorId = new mongoose.Types.ObjectId();
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([]),
+      };
+
+      Trip.find.mockReturnValue(mockQuery);
+
+      await TripService.searchAvailableTrips({
+        passengers: 1,
+        operatorId: operatorId.toString(),
+      });
+
+      expect(Trip.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operatorId: operatorId.toString(),
+        })
+      );
+    });
+
+    it('should filter by bus type', async () => {
+      const mockTrips = [
+        {
+          _id: tripId,
+          routeId: mockRoute,
+          busId: { ...mockBus, busType: 'limousine' },
+          operatorId: { companyName: 'Test', averageRating: 4.5 },
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          routeId: mockRoute,
+          busId: { ...mockBus, busType: 'seater' },
+          operatorId: { companyName: 'Test', averageRating: 4.5 },
+        },
+      ];
+
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue(mockTrips),
+      };
+
+      Trip.find.mockReturnValue(mockQuery);
+
+      const result = await TripService.searchAvailableTrips({
+        passengers: 1,
+        busType: 'limousine',
+      });
+
+      expect(result.length).toBe(1);
+      expect(result[0].busId.busType).toBe('limousine');
+    });
+
+    it('should sort by price ascending', async () => {
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([]),
+      };
+
+      Trip.find.mockReturnValue(mockQuery);
+
+      await TripService.searchAvailableTrips({
+        passengers: 1,
+        sortBy: 'price',
+        sortOrder: 'asc',
+      });
+
+      expect(mockQuery.sort).toHaveBeenCalledWith({ finalPrice: 1 });
+    });
+
+    it('should sort by price descending', async () => {
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([]),
+      };
+
+      Trip.find.mockReturnValue(mockQuery);
+
+      await TripService.searchAvailableTrips({
+        passengers: 1,
+        sortBy: 'price',
+        sortOrder: 'desc',
+      });
+
+      expect(mockQuery.sort).toHaveBeenCalledWith({ finalPrice: -1 });
+    });
+
+    it('should sort by rating', async () => {
+      const mockTrips = [
+        {
+          _id: new mongoose.Types.ObjectId(),
+          routeId: mockRoute,
+          busId: mockBus,
+          operatorId: { companyName: 'Operator A', averageRating: 4.0 },
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          routeId: mockRoute,
+          busId: mockBus,
+          operatorId: { companyName: 'Operator B', averageRating: 4.8 },
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          routeId: mockRoute,
+          busId: mockBus,
+          operatorId: { companyName: 'Operator C', averageRating: 3.5 },
+        },
+      ];
+
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([...mockTrips]),
+      };
+
+      Trip.find.mockReturnValue(mockQuery);
+
+      const result = await TripService.searchAvailableTrips({
+        passengers: 1,
+        sortBy: 'rating',
+        sortOrder: 'desc',
+      });
+
+      expect(result[0].operatorId.averageRating).toBe(4.8);
+      expect(result[1].operatorId.averageRating).toBe(4.0);
+      expect(result[2].operatorId.averageRating).toBe(3.5);
+    });
+
+    it('should filter by departure time range', async () => {
+      const mockTrips = [
+        {
+          _id: new mongoose.Types.ObjectId(),
+          routeId: mockRoute,
+          busId: mockBus,
+          operatorId: { companyName: 'Test', averageRating: 4.5 },
+          departureTime: new Date('2025-12-15T08:30:00'),
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          routeId: mockRoute,
+          busId: mockBus,
+          operatorId: { companyName: 'Test', averageRating: 4.5 },
+          departureTime: new Date('2025-12-15T14:00:00'),
+        },
+        {
+          _id: new mongoose.Types.ObjectId(),
+          routeId: mockRoute,
+          busId: mockBus,
+          operatorId: { companyName: 'Test', averageRating: 4.5 },
+          departureTime: new Date('2025-12-15T18:30:00'),
+        },
+      ];
+
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue(mockTrips),
+      };
+
+      Trip.find.mockReturnValue(mockQuery);
+
+      const result = await TripService.searchAvailableTrips({
+        passengers: 1,
+        departureTimeStart: '08:00',
+        departureTimeEnd: '15:00',
+      });
+
+      expect(result.length).toBe(2);
+      expect(result.some(t => t.departureTime.getHours() === 8)).toBe(true);
+      expect(result.some(t => t.departureTime.getHours() === 14)).toBe(true);
+      expect(result.some(t => t.departureTime.getHours() === 18)).toBe(false);
+    });
+
+    it('should combine multiple filters', async () => {
+      const mockTrips = [
+        {
+          _id: tripId,
+          routeId: mockRoute,
+          busId: { ...mockBus, busType: 'limousine' },
+          operatorId: { companyName: 'Test', averageRating: 4.5 },
+          finalPrice: 250000,
+          departureTime: new Date('2025-12-15T09:00:00'),
+        },
+      ];
+
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue(mockTrips),
+      };
+
+      Trip.find.mockReturnValue(mockQuery);
+
+      const result = await TripService.searchAvailableTrips({
+        fromCity: 'Hanoi',
+        toCity: 'Haiphong',
+        passengers: 2,
+        minPrice: 200000,
+        maxPrice: 300000,
+        busType: 'limousine',
+        sortBy: 'price',
+        sortOrder: 'asc',
+      });
+
+      expect(Trip.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'scheduled',
+          availableSeats: { $gte: 2 },
+          finalPrice: {
+            $gte: 200000,
+            $lte: 300000,
+          },
+        })
+      );
+      expect(result.length).toBe(1);
+      expect(result[0].busId.busType).toBe('limousine');
+    });
   });
 
   describe('getPublicTripDetail', () => {
-    it('should return public trip details', async () => {
+    it('should return enhanced public trip details with comprehensive information', async () => {
       const mockTrip = {
         _id: tripId,
-        routeId: mockRoute,
-        busId: mockBus,
+        routeId: {
+          ...mockRoute,
+          distance: 120,
+          estimatedDuration: 180,
+          pickupPoints: [{ name: 'Point A', address: 'Address A' }],
+          dropoffPoints: [{ name: 'Point B', address: 'Address B' }],
+        },
+        busId: {
+          ...mockBus,
+          amenities: ['wifi', 'ac', 'toilet'],
+        },
         operatorId: {
+          _id: operatorId,
           companyName: 'Test Operator',
           phone: '0123456789',
           email: 'test@example.com',
@@ -837,6 +1094,20 @@ describe('TripService', () => {
         driverId: mockDriver,
         tripManagerId: mockTripManager,
         status: 'scheduled',
+        departureTime: new Date('2025-12-15T08:00:00'),
+        arrivalTime: new Date('2025-12-15T11:00:00'),
+        basePrice: 250000,
+        discount: 10,
+        finalPrice: 225000,
+        totalSeats: 40,
+        availableSeats: 30,
+        bookedSeats: [
+          { seatNumber: 'A1', customerId: 'customer1' },
+          { seatNumber: 'A2', customerId: 'customer2' },
+        ],
+        policies: { cancellation: '24h before departure' },
+        cancellationPolicy: { refund: '80% before 24h' },
+        notes: 'Test notes',
       };
 
       const mockQuery = {
@@ -852,9 +1123,47 @@ describe('TripService', () => {
         _id: tripId,
         status: 'scheduled',
       });
+
+      // Verify structure
+      expect(result).toHaveProperty('id');
+      expect(result).toHaveProperty('duration');
+      expect(result).toHaveProperty('pricing');
+      expect(result).toHaveProperty('seats');
+      expect(result).toHaveProperty('route');
+      expect(result).toHaveProperty('bus');
+      expect(result).toHaveProperty('operator');
+
+      // Verify duration calculation
+      expect(result.duration.hours).toBe(3);
+      expect(result.duration.minutes).toBe(0);
+      expect(result.duration.formatted).toBe('3h 0m');
+
+      // Verify pricing
+      expect(result.pricing.basePrice).toBe(250000);
+      expect(result.pricing.finalPrice).toBe(225000);
+
+      // Verify seats
+      expect(result.seats.total).toBe(40);
+      expect(result.seats.available).toBe(30);
+      expect(result.seats.booked).toBe(10);
+      expect(result.seats.bookedSeatNumbers).toEqual(['A1', 'A2']);
+      expect(result.seats.occupancyRate).toBe(25);
+
+      // Verify no sensitive data
       expect(result.driverId).toBeUndefined();
       expect(result.tripManagerId).toBeUndefined();
-      expect(result.operatorId).toBeDefined();
+
+      // Verify operator info includes rating
+      expect(result.operator.rating.average).toBe(4.5);
+      expect(result.operator.rating.total).toBe(100);
+
+      // Verify route details
+      expect(result.route.pickupPoints).toBeDefined();
+      expect(result.route.dropoffPoints).toBeDefined();
+
+      // Verify bus amenities
+      expect(result.bus.amenities).toContain('wifi');
+      expect(result.bus.seatLayout).toBeDefined();
     });
 
     it('should throw error if trip not found', async () => {
@@ -868,6 +1177,41 @@ describe('TripService', () => {
       await expect(TripService.getPublicTripDetail(tripId)).rejects.toThrow(
         'Không tìm thấy chuyến xe hoặc chuyến không khả dụng'
       );
+    });
+
+    it('should handle trips with no booked seats', async () => {
+      const mockTrip = {
+        _id: tripId,
+        routeId: mockRoute,
+        busId: mockBus,
+        operatorId: {
+          _id: operatorId,
+          companyName: 'Test Operator',
+          averageRating: 4.5,
+          totalReviews: 100,
+        },
+        status: 'scheduled',
+        departureTime: new Date('2025-12-15T08:00:00'),
+        arrivalTime: new Date('2025-12-15T11:00:00'),
+        basePrice: 250000,
+        discount: 0,
+        finalPrice: 250000,
+        totalSeats: 40,
+        availableSeats: 40,
+        bookedSeats: [],
+      };
+
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue(mockTrip),
+      };
+
+      Trip.findOne.mockReturnValue(mockQuery);
+
+      const result = await TripService.getPublicTripDetail(tripId);
+
+      expect(result.seats.bookedSeatNumbers).toEqual([]);
+      expect(result.seats.occupancyRate).toBe(0);
     });
   });
 });

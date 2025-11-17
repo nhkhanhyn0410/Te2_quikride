@@ -305,18 +305,51 @@ exports.getStatistics = async (req, res) => {
 
 /**
  * @route   GET /api/v1/trips/search
- * @desc    Tìm kiếm chuyến (public - for customers)
+ * @desc    Tìm kiếm chuyến với các bộ lọc nâng cao (public - for customers)
  * @access  Public
+ * @query   {string} fromCity - Thành phố đi
+ * @query   {string} toCity - Thành phố đến
+ * @query   {string} date - Ngày đi (YYYY-MM-DD)
+ * @query   {number} passengers - Số hành khách
+ * @query   {number} minPrice - Giá tối thiểu
+ * @query   {number} maxPrice - Giá tối đa
+ * @query   {string} departureTimeStart - Giờ khởi hành sớm nhất (HH:mm)
+ * @query   {string} departureTimeEnd - Giờ khởi hành muộn nhất (HH:mm)
+ * @query   {string} operatorId - ID nhà xe
+ * @query   {string} busType - Loại xe (limousine, sleeper, seater, double_decker)
+ * @query   {string} sortBy - Sắp xếp theo (price, time, rating)
+ * @query   {string} sortOrder - Thứ tự (asc, desc)
  */
 exports.search = async (req, res) => {
   try {
-    const { fromCity, toCity, date, passengers } = req.query;
+    const {
+      fromCity,
+      toCity,
+      date,
+      passengers,
+      minPrice,
+      maxPrice,
+      departureTimeStart,
+      departureTimeEnd,
+      operatorId,
+      busType,
+      sortBy,
+      sortOrder,
+    } = req.query;
 
     const trips = await TripService.searchAvailableTrips({
       fromCity,
       toCity,
       date,
       passengers: passengers ? parseInt(passengers) : 1,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+      departureTimeStart,
+      departureTimeEnd,
+      operatorId,
+      busType,
+      sortBy: sortBy || 'time',
+      sortOrder: sortOrder || 'asc',
     });
 
     res.status(200).json({
@@ -324,6 +357,20 @@ exports.search = async (req, res) => {
       data: {
         trips,
         total: trips.length,
+        filters: {
+          fromCity,
+          toCity,
+          date,
+          passengers: passengers ? parseInt(passengers) : 1,
+          minPrice,
+          maxPrice,
+          departureTimeStart,
+          departureTimeEnd,
+          operatorId,
+          busType,
+          sortBy: sortBy || 'time',
+          sortOrder: sortOrder || 'asc',
+        },
       },
     });
   } catch (error) {
