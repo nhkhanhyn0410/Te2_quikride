@@ -132,7 +132,7 @@ Xây dựng hệ thống quản lý nhà xe, tuyến đường, và phương ti�
   - GET `/api/operators/routes` - Danh sách tuyến
   - PUT `/api/operators/routes/:id` - Cập nhật
   - DELETE `/api/operators/routes/:id` - Xóa
-- [ ] Google Maps API integration (cho coordinates)
+
 
 #### 2.3 Bus Management
 - [ ] Implement Bus Model
