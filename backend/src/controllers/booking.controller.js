@@ -34,7 +34,10 @@ exports.holdSeats = async (req, res) => {
       }
     }
 
+    // Get customer ID from authenticated user or guest session
     const customerId = req.user ? req.user._id : null;
+    const isGuest = req.isGuest || !req.user;
+    const guestInfo = req.guest || null;
 
     const result = await BookingService.holdSeats({
       tripId,
@@ -44,6 +47,8 @@ exports.holdSeats = async (req, res) => {
       pickupPoint,
       dropoffPoint,
       voucherCode,
+      isGuest,
+      guestInfo,
     });
 
     res.status(201).json({

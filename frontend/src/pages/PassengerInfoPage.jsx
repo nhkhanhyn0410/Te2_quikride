@@ -12,6 +12,7 @@ import {
   Select,
   message,
   Spin,
+  Alert,
 } from 'antd';
 import {
   UserOutlined,
@@ -20,6 +21,7 @@ import {
   ArrowLeftOutlined,
   CreditCardOutlined,
   TagOutlined,
+  SafetyOutlined,
 } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
@@ -31,6 +33,7 @@ import {
   createPayment,
 } from '../services/bookingApi';
 import useBookingStore from '../store/bookingStore';
+import GuestOTPModal from '../components/GuestOTPModal';
 
 const { Title, Text } = Typography;
 const { Step } = Steps;
@@ -61,6 +64,9 @@ const PassengerInfoPage = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('vnpay');
   const [selectedBank, setSelectedBank] = useState('');
   const [voucherValidating, setVoucherValidating] = useState(false);
+  const [showGuestOTPModal, setShowGuestOTPModal] = useState(false);
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestData, setGuestData] = useState(null);
 
   useEffect(() => {
     // Validate booking state
@@ -117,6 +123,22 @@ const PassengerInfoPage = () => {
     } finally {
       setVoucherValidating(false);
     }
+  };
+
+  const handleGuestOTPSuccess = (guestSessionData) => {
+    setIsGuest(true);
+    setGuestData(guestSessionData.guest);
+
+    // Pre-fill form with guest data if available
+    if (guestSessionData.guest) {
+      form.setFieldsValue({
+        name: guestSessionData.guest.name || '',
+        email: guestSessionData.guest.email || '',
+        phone: guestSessionData.guest.phone || '',
+      });
+    }
+
+    message.success('Xác thực thành công! Bạn có thể tiếp tục đặt vé.');
   };
 
   const handlePassengerInfoSubmit = async (values) => {
@@ -251,6 +273,41 @@ const PassengerInfoPage = () => {
               layout="vertical"
               onFinish={handlePassengerInfoSubmit}
             >
+              {/* Guest Booking Alert */}
+              {!isGuest && (
+                <Alert
+                  message="Đặt vé không cần đăng ký"
+                  description={
+                    <div>
+                      <Text>Bạn có thể đặt vé nhanh chóng mà không cần tạo tài khoản. Chỉ cần xác thực email hoặc số điện thoại.</Text>
+                      <div className="mt-2">
+                        <Button
+                          type="link"
+                          icon={<SafetyOutlined />}
+                          onClick={() => setShowGuestOTPModal(true)}
+                        >
+                          Đặt vé với OTP
+                        </Button>
+                      </div>
+                    </div>
+                  }
+                  type="info"
+                  showIcon
+                  className="mb-4"
+                />
+              )}
+
+              {isGuest && guestData && (
+                <Alert
+                  message="Đã xác thực OTP"
+                  description={`Bạn đang đặt vé với ${guestData.email || guestData.phone}`}
+                  type="success"
+                  showIcon
+                  closable
+                  className="mb-4"
+                />
+              )}
+
               {/* Contact Information */}
               <Title level={5}>Thông tin liên hệ</Title>
               <div className="bg-gray-50 p-4 rounded mb-6">
@@ -426,6 +483,13 @@ const PassengerInfoPage = () => {
           </Card>
         )}
       </div>
+
+      {/* Guest OTP Modal */}
+      <GuestOTPModal
+        open={showGuestOTPModal}
+        onCancel={() => setShowGuestOTPModal(false)}
+        onSuccess={handleGuestOTPSuccess}
+      />
     </div>
   );
 };
