@@ -1,0 +1,345 @@
+const AuthService = require('../services/auth.service');
+
+/**
+ * Auth Controller
+ * Xử lý các HTTP requests liên quan đến authentication
+ */
+
+/**
+ * @route   POST /api/v1/auth/register
+ * @desc    Đăng ký user mới
+ * @access  Public
+ */
+exports.register = async (req, res, next) => {
+  try {
+    const { email, phone, password, fullName } = req.body;
+
+    // Validate input
+    if (!email || !phone || !password || !fullName) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng cung cấp đầy đủ thông tin: email, phone, password, fullName',
+      });
+    }
+
+    // Register user
+    const result = await AuthService.register({
+      email,
+      phone,
+      password,
+      fullName,
+    });
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Đăng ký thành công',
+      data: {
+        user: result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        // verificationToken chỉ để test, production sẽ gửi qua email
+        ...(process.env.NODE_ENV === 'development' && {
+          verificationToken: result.verificationToken,
+        }),
+      },
+    });
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Đăng ký thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/auth/login
+ * @desc    Đăng nhập
+ * @access  Public
+ */
+exports.login = async (req, res, next) => {
+  try {
+    const { identifier, password } = req.body;
+
+    // Validate input
+    if (!identifier || !password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng cung cấp email/số điện thoại và mật khẩu',
+      });
+    }
+
+    // Login
+    const result = await AuthService.login(identifier, password);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Đăng nhập thành công',
+      data: {
+        user: result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      },
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(401).json({
+      status: 'error',
+      message: error.message || 'Đăng nhập thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/auth/refresh-token
+ * @desc    Làm mới access token
+ * @access  Public
+ */
+exports.refreshToken = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng cung cấp refresh token',
+      });
+    }
+
+    const result = await AuthService.refreshAccessToken(refreshToken);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Làm mới token thành công',
+      data: {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      },
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(401).json({
+      status: 'error',
+      message: error.message || 'Làm mới token thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/auth/forgot-password
+ * @desc    Quên mật khẩu - Gửi reset token
+ * @access  Public
+ */
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng cung cấp email',
+      });
+    }
+
+    const resetToken = await AuthService.forgotPassword(email);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Email reset password đã được gửi',
+      // resetToken chỉ để test, production sẽ gửi qua email
+      ...(process.env.NODE_ENV === 'development' && {
+        data: { resetToken },
+      }),
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Xử lý quên mật khẩu thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/auth/reset-password
+ * @desc    Reset mật khẩu
+ * @access  Public
+ */
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+
+    if (!resetToken || !newPassword) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng cung cấp reset token và mật khẩu mới',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Mật khẩu phải có ít nhất 6 ký tự',
+      });
+    }
+
+    await AuthService.resetPassword(resetToken, newPassword);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Đặt lại mật khẩu thành công',
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Đặt lại mật khẩu thất bại',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/auth/verify-email/:token
+ * @desc    Xác thực email
+ * @access  Public
+ */
+exports.verifyEmail = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Token không hợp lệ',
+      });
+    }
+
+    const user = await AuthService.verifyEmail(token);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Xác thực email thành công',
+      data: {
+        user: {
+          _id: user._id,
+          email: user.email,
+          isEmailVerified: user.isEmailVerified,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('Verify email error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Xác thực email thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/auth/send-phone-otp
+ * @desc    Gửi OTP xác thực phone
+ * @access  Private
+ */
+exports.sendPhoneOTP = async (req, res, next) => {
+  try {
+    const userId = req.userId; // Từ authenticate middleware
+
+    const otp = await AuthService.sendPhoneOTP(userId);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'OTP đã được gửi đến số điện thoại',
+      // otp chỉ để test, production sẽ gửi qua SMS
+      ...(process.env.NODE_ENV === 'development' && {
+        data: { otp },
+      }),
+    });
+  } catch (error) {
+    console.error('Send phone OTP error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Gửi OTP thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/auth/verify-phone
+ * @desc    Xác thực phone với OTP
+ * @access  Private
+ */
+exports.verifyPhone = async (req, res, next) => {
+  try {
+    const userId = req.userId; // Từ authenticate middleware
+    const { otp } = req.body;
+
+    if (!otp) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng cung cấp OTP',
+      });
+    }
+
+    await AuthService.verifyPhone(userId, otp);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Xác thực số điện thoại thành công',
+    });
+  } catch (error) {
+    console.error('Verify phone error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Xác thực số điện thoại thất bại',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/auth/me
+ * @desc    Lấy thông tin user hiện tại
+ * @access  Private
+ */
+exports.getMe = async (req, res, next) => {
+  try {
+    const user = req.user; // Từ authenticate middleware
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user,
+      },
+    });
+  } catch (error) {
+    console.error('Get me error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Lỗi server',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/auth/logout
+ * @desc    Đăng xuất
+ * @access  Private
+ */
+exports.logout = async (req, res, next) => {
+  try {
+    // Note: Với JWT, logout được xử lý ở client bằng cách xóa token
+    // Server có thể implement blacklist nếu cần
+    // TODO: Implement token blacklist với Redis nếu cần
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Đăng xuất thành công',
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Đăng xuất thất bại',
+    });
+  }
+};
