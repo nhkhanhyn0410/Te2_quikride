@@ -359,8 +359,6 @@ Quản lý vé điện tử, mã QR, và hệ thống soát vé.
 ---
 
 ## Phase 5: Bus Operator Admin
-**Thời gian dự kiến:** 2 tuần
-**Độ ưu tiên:** Trung bình
 
 ### Mục tiêu
 Hoàn thiện hệ thống quản trị cho nhà xe với dashboard, báo cáo, và quản lý khuyến mãi.
