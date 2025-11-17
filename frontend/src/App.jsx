@@ -14,6 +14,13 @@ import RoutesPage from './pages/operator/RoutesPage';
 import BusesPage from './pages/operator/BusesPage';
 import EmployeesPage from './pages/operator/EmployeesPage';
 
+// Customer Booking Pages
+import SearchPage from './pages/SearchPage';
+import TripsPage from './pages/TripsPage';
+import TripDetailPage from './pages/TripDetailPage';
+import PassengerInfoPage from './pages/PassengerInfoPage';
+import BookingConfirmationPage from './pages/BookingConfirmationPage';
+
 function App() {
   return (
     <>
@@ -43,8 +50,48 @@ function App() {
       />
 
       <Routes>
-        {/* Root - Redirect to operator login for now */}
-        <Route path="/" element={<Navigate to="/operator/login" replace />} />
+        {/* Customer Booking Flow */}
+        <Route path="/" element={<SearchPage />} />
+        <Route path="/trips" element={<TripsPage />} />
+        <Route path="/trips/:tripId" element={<TripDetailPage />} />
+        <Route path="/booking/passenger-info" element={<PassengerInfoPage />} />
+        <Route path="/booking/confirmation/:bookingCode" element={<BookingConfirmationPage />} />
+
+        {/* Payment Success/Failure Pages */}
+        <Route
+          path="/payment/success"
+          element={<BookingConfirmationPage />}
+        />
+        <Route
+          path="/payment/failure"
+          element={
+            <div className="flex items-center justify-center h-screen bg-gray-50">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-red-600">❌</h1>
+                <h2 className="text-2xl font-semibold mt-4">Thanh toán thất bại</h2>
+                <p className="text-gray-600 mt-2">Đã có lỗi xảy ra trong quá trình thanh toán</p>
+                <a href="/" className="text-blue-600 hover:underline mt-4 inline-block">
+                  Về trang chủ
+                </a>
+              </div>
+            </div>
+          }
+        />
+        <Route
+          path="/payment/error"
+          element={
+            <div className="flex items-center justify-center h-screen bg-gray-50">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-orange-600">⚠️</h1>
+                <h2 className="text-2xl font-semibold mt-4">Lỗi hệ thống</h2>
+                <p className="text-gray-600 mt-2">Vui lòng thử lại sau</p>
+                <a href="/" className="text-blue-600 hover:underline mt-4 inline-block">
+                  Về trang chủ
+                </a>
+              </div>
+            </div>
+          }
+        />
 
         {/* Operator Auth Routes */}
         <Route path="/operator/login" element={<OperatorLoginPage />} />
