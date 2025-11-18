@@ -40,6 +40,7 @@ const TripDetailPage = () => {
     selectedSeats,
     setPickupPoint,
     setDropoffPoint,
+    clearSeats,
   } = useBookingStore();
 
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,9 @@ const TripDetailPage = () => {
   const [selectedPickup, setSelectedPickup] = useState(null);
   const [selectedDropoff, setSelectedDropoff] = useState(null);
 
+  // Clear selected seats when entering a new trip page
   useEffect(() => {
+    clearSeats();
     fetchTripDetails();
     fetchAvailableSeats();
   }, [tripId]);
