@@ -158,6 +158,14 @@ class TicketService {
    */
   static async generateAndUploadPDF(ticket, booking, trip, qrCodeData) {
     try {
+      // Check if demo mode
+      const isDemoMode = process.env.DEMO_MODE === 'true';
+
+      if (isDemoMode) {
+        console.log('📝 Demo mode: Skipping PDF generation and upload');
+        return `${process.env.FRONTEND_URL || 'http://localhost:3000'}/tickets/${ticket.ticketCode}`;
+      }
+
       // Generate QR buffer for PDF
       const qrBuffer = await QRService.generateQRBuffer(qrCodeData);
 
@@ -200,6 +208,13 @@ class TicketService {
 
       await PDFService.generateTicket(pdfData, pdfPath);
 
+      // Check if Cloudinary is configured
+      if (!cloudinary.uploader) {
+        console.warn('⚠️  Cloudinary not configured, saving PDF locally');
+        ticket.pdfFileName = pdfFileName;
+        return pdfPath;
+      }
+
       // Upload to Cloudinary
       const uploadResult = await cloudinary.uploader.upload(pdfPath, {
         folder: 'quikride/tickets',
@@ -216,7 +231,8 @@ class TicketService {
       return uploadResult.secure_url;
     } catch (error) {
       console.error('❌ PDF upload error:', error);
-      throw error;
+      // Don't throw error, return fallback URL
+      return `${process.env.FRONTEND_URL || 'http://localhost:3000'}/tickets/${ticket.ticketCode}`;
     }
   }
 
@@ -243,6 +259,26 @@ class TicketService {
         email: { sent: false },
         sms: { sent: false },
       };
+
+      // Check if demo mode
+      const isDemoMode = process.env.DEMO_MODE === 'true';
+
+      if (isDemoMode) {
+        console.log('📝 Demo mode: Simulating email and SMS notifications');
+        results.email.sent = true;
+        results.email.demo = true;
+        results.sms.sent = true;
+        results.sms.demo = true;
+
+        ticket.markEmailSent();
+        ticket.markSmsSent();
+        await ticket.save();
+
+        console.log('✅ [DEMO] Email would be sent to:', contactEmail);
+        console.log('✅ [DEMO] SMS would be sent to:', contactPhone);
+
+        return results;
+      }
 
       // Prepare ticket data for email
       const departureTime = moment(ticket.tripInfo.departureTime)
@@ -328,7 +364,11 @@ class TicketService {
       return results;
     } catch (error) {
       console.error('❌ Notification sending error:', error);
-      throw error;
+      // Return partial results instead of throwing to not fail the booking
+      return {
+        email: { sent: false, error: error.message },
+        sms: { sent: false, error: error.message },
+      };
     }
   }
 
