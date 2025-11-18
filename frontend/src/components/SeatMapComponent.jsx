@@ -20,7 +20,9 @@ const SeatMapComponent = ({
   seatLayout,
   bookedSeats = [],
   availableSeats = [],
-  maxSeatsAllowed = MAX_SEATS_SELECTION
+  maxSeatsAllowed = MAX_SEATS_SELECTION,
+  seatPrice = 0,
+  showPrice = false
 }) => {
   const { selectedSeats, addSeat, removeSeat, clearSeats } = useBookingStore();
   const [seats, setSeats] = useState([]);
@@ -183,8 +185,9 @@ const SeatMapComponent = ({
     if (seat.type === SEAT_TYPES.FLOOR_SEPARATOR) return 'Dấu phân tách tầng 2';
 
     const floorText = seat.floor === 2 ? ' (Tầng 2)' : '';
-    return `Ghế ${seat.seatNumber}${floorText}`;
-  }, []);
+    const priceText = showPrice && seatPrice > 0 ? ` - ${seatPrice.toLocaleString('vi-VN')}đ` : '';
+    return `Ghế ${seat.seatNumber}${floorText}${priceText}`;
+  }, [showPrice, seatPrice]);
 
   return (
     <div className="seat-map-wrapper">
@@ -239,6 +242,9 @@ const SeatMapComponent = ({
                                   seat.type === SEAT_TYPES.FLOOR_SEPARATOR ||
                                   isSeatBooked(seat?.seatNumber);
 
+                // Show price below seat number for regular seats
+                const showSeatPrice = showPrice && seatPrice > 0 && seat.type === SEAT_TYPES.SEAT;
+
                 return (
                   <button
                     key={`${rowIndex}-${colIndex}`}
@@ -248,7 +254,12 @@ const SeatMapComponent = ({
                     title={seatTitle}
                     aria-label={seatTitle}
                   >
-                    {seatIcon}
+                    <div className="seat-content">
+                      <div className="seat-number">{seatIcon}</div>
+                      {showSeatPrice && (
+                        <div className="seat-price">{(seatPrice / 1000).toFixed(0)}K</div>
+                      )}
+                    </div>
                   </button>
                 );
               })}
@@ -271,8 +282,8 @@ const SeatMapComponent = ({
         }
 
         .seat {
-          width: 40px;
-          height: 40px;
+          width: 48px;
+          height: 48px;
           border-radius: 6px;
           border: 2px solid transparent;
           font-size: 12px;
@@ -282,7 +293,29 @@ const SeatMapComponent = ({
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 0;
+          padding: 2px;
+          position: relative;
+        }
+
+        .seat-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1px;
+          width: 100%;
+        }
+
+        .seat-number {
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .seat-price {
+          font-size: 9px;
+          font-weight: 500;
+          opacity: 0.9;
+          line-height: 1;
         }
 
         .seat:hover:not(:disabled) {
@@ -381,9 +414,16 @@ const SeatMapComponent = ({
 
         @media (max-width: 640px) {
           .seat {
-            width: 36px;
-            height: 36px;
+            width: 44px;
+            height: 44px;
+          }
+
+          .seat-number {
             font-size: 11px;
+          }
+
+          .seat-price {
+            font-size: 8px;
           }
 
           .seat-row {
