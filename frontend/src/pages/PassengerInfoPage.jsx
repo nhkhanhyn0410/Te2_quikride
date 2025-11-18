@@ -214,13 +214,23 @@ const PassengerInfoPage = () => {
 
       const holdResponse = await holdSeats(holdData);
 
+      console.log('Hold seats response:', holdResponse);
+
       if (holdResponse.success && holdResponse.data) {
+        console.log('Setting current booking:', holdResponse.data.booking);
+        console.log('Lock info:', holdResponse.data.lockInfo);
+
         setCurrentBooking(holdResponse.data.booking);
         setSessionId(holdResponse.data.lockInfo.sessionId);
         setExpiresAt(holdResponse.data.lockInfo.expiresAt);
 
         message.success('Giữ chỗ thành công! Vui lòng hoàn tất thanh toán trong 15 phút');
+
+        console.log('Changing step to 1 (payment)');
         setCurrentStep(1);
+      } else {
+        console.error('Hold seats response invalid:', holdResponse);
+        toast.error('Phản hồi từ server không hợp lệ');
       }
     } catch (error) {
       console.error('Hold seats error:', error);
@@ -267,30 +277,48 @@ const PassengerInfoPage = () => {
 
       const { currentBooking } = useBookingStore.getState();
 
+      console.log('handlePayment - currentBooking:', currentBooking);
+
       if (!currentBooking) {
         toast.error('Không tìm thấy thông tin booking');
         return;
       }
 
+      // Support both 'id' and '_id' fields
+      const bookingId = currentBooking.id || currentBooking._id;
+      if (!bookingId) {
+        toast.error('Thông tin booking không hợp lệ');
+        console.error('Booking ID not found:', currentBooking);
+        return;
+      }
+
       // Create payment
       const paymentData = {
-        bookingId: currentBooking._id,
+        bookingId: bookingId,
         paymentMethod: selectedPaymentMethod,
         amount: currentBooking.finalPrice,
         bankCode: selectedBank,
         locale: 'vn',
       };
 
+      console.log('Creating payment with data:', paymentData);
+
       const paymentResponse = await createPayment(paymentData);
+
+      console.log('Payment response:', paymentResponse);
 
       if (paymentResponse.success && paymentResponse.data) {
         // Redirect to payment URL
         if (paymentResponse.data.paymentUrl) {
+          console.log('Redirecting to payment URL:', paymentResponse.data.paymentUrl);
           window.location.href = paymentResponse.data.paymentUrl;
         } else {
           toast.success('Thanh toán thành công!');
           navigate(`/booking/confirmation/${currentBooking.bookingCode}`);
         }
+      } else {
+        console.error('Payment response invalid:', paymentResponse);
+        toast.error('Phản hồi thanh toán không hợp lệ');
       }
     } catch (error) {
       console.error('Payment error:', error);
