@@ -97,19 +97,18 @@ class VNPayService {
     // Sort parameters
     vnp_Params = this.sortObject(vnp_Params);
 
-    // Create signature data using raw values (no encoding)
-    // VNPay requires signature to be calculated from unencoded values
-    const signData = Object.keys(vnp_Params)
-      .map(key => `${key}=${vnp_Params[key]}`)
-      .join('&');
+    // Create signature data and URL
+    // VNPay uses application/x-www-form-urlencoded format:
+    // - Encode special characters with %XX
+    // - Encode space as + (not %20)
+    const signData = querystring.stringify(vnp_Params).replace(/%20/g, '+');
 
-    // Create signature
+    // Create signature from the same string that will be in URL
     const secureHash = this.createSignature(signData, this.vnp_HashSecret);
     vnp_Params['vnp_SecureHash'] = secureHash;
 
-    // Create payment URL with URL encoding
-    // Use default querystring.stringify which properly encodes values
-    const paymentUrl = this.vnp_Url + '?' + querystring.stringify(vnp_Params);
+    // Create payment URL with the same encoding
+    const paymentUrl = this.vnp_Url + '?' + querystring.stringify(vnp_Params).replace(/%20/g, '+');
 
     return paymentUrl;
   }
@@ -130,11 +129,9 @@ class VNPayService {
     // Sort parameters
     const sortedParams = this.sortObject(vnpParams);
 
-    // Create signature data using raw values (no encoding)
-    // This must match how the signature was created
-    const signData = Object.keys(sortedParams)
-      .map(key => `${key}=${sortedParams[key]}`)
-      .join('&');
+    // Create signature data using the same encoding as when creating payment URL
+    // VNPay uses application/x-www-form-urlencoded (space = +)
+    const signData = querystring.stringify(sortedParams).replace(/%20/g, '+');
 
     // Create signature
     const checkSum = this.createSignature(signData, this.vnp_HashSecret);
