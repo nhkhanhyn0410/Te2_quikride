@@ -15,12 +15,12 @@ const AdminLoginPage = () => {
     try {
       const response = await adminAuth.login(values);
 
-      // Response structure: { status, message, data: { admin, accessToken, refreshToken } }
+      // Response structure: { status, message, data: { user, accessToken, refreshToken } }
       if (response.status === 'success') {
-        const { admin, accessToken } = response.data;
+        const { user, accessToken } = response.data;
 
-        // Set user as admin role
-        login({ ...admin, role: 'admin' }, accessToken);
+        // Login with user data (role is already set by backend)
+        login(user, accessToken);
 
         message.success('Đăng nhập thành công!');
         navigate('/admin/dashboard');
