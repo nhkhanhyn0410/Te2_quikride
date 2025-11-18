@@ -26,18 +26,10 @@ class VNPayService {
    */
   sortObject(obj) {
     const sorted = {};
-    const str = [];
-    let key;
+    const keys = Object.keys(obj).sort();
 
-    for (key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        str.push(encodeURIComponent(key));
-      }
-    }
-    str.sort();
-
-    for (key = 0; key < str.length; key++) {
-      sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, '+');
+    for (const key of keys) {
+      sorted[key] = obj[key];
     }
 
     return sorted;

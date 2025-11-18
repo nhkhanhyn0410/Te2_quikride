@@ -8,36 +8,41 @@ import {
   PrinterOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import api from '../../services/api';
+import useBookingStore from '../../store/bookingStore';
 
 const BookingSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const bookingCode = searchParams.get('bookingCode');
 
-  const [loading, setLoading] = useState(true);
+  const { currentBooking, selectedTrip, selectedSeats, pickupPoint, dropoffPoint, contactInfo } = useBookingStore();
+
+  const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState(null);
 
   useEffect(() => {
-    if (bookingCode) {
-      fetchBookingDetails();
-    } else {
-      setLoading(false);
-    }
-  }, [bookingCode]);
+    // Use currentBooking from store if available
+    if (currentBooking && currentBooking.bookingCode === bookingCode) {
+      setBooking(currentBooking);
+    } else if (selectedTrip && bookingCode) {
+      // Construct booking from store data if currentBooking not available
+      const seatPrice = selectedTrip?.pricing?.finalPrice || selectedTrip?.finalPrice || selectedTrip?.pricing?.basePrice || 0;
+      const finalPrice = seatPrice * (selectedSeats?.length || 0);
 
-  const fetchBookingDetails = async () => {
-    try {
-      const response = await api.get(`/bookings/code/${bookingCode}`);
-      if (response.status === 'success' && response.data) {
-        setBooking(response.data);
-      }
-    } catch (error) {
-      console.error('Fetch booking error:', error);
-    } finally {
-      setLoading(false);
+      const constructedBooking = {
+        bookingCode,
+        tripId: selectedTrip,
+        seats: selectedSeats,
+        pickupPoint,
+        dropoffPoint,
+        contactInfo,
+        finalPrice,
+        paymentMethod: 'cash', // Default, will be updated if payment info available
+        paymentStatus: 'pending',
+      };
+      setBooking(constructedBooking);
     }
-  };
+  }, [bookingCode, currentBooking, selectedTrip, selectedSeats, pickupPoint, dropoffPoint, contactInfo]);
 
   const handlePrintTicket = () => {
     window.print();
