@@ -42,6 +42,9 @@ const generateSeatLayout = (rows, columns, prefix = null, emptyPositions = []) =
 const generateAisleLayout = (rows, hasBackRow = false) => {
   const layout = [];
 
+  // Add driver seat at front
+  layout.push(['DRIVER', '', '', '', '']);
+
   for (let row = 0; row < rows; row++) {
     const rowArray = [];
     const rowPrefix = String.fromCharCode(65 + row);
@@ -104,6 +107,13 @@ const generateSleeperLayout = (rows, floors = 1) => {
 const generateLimousineLayout = (rows, pattern = 'standard') => {
   const layout = [];
 
+  // Add driver seat at front
+  if (pattern === 'vip') {
+    layout.push(['DRIVER', '', '']);
+  } else {
+    layout.push(['DRIVER', '', '', '']);
+  }
+
   for (let row = 0; row < rows; row++) {
     const rowPrefix = String.fromCharCode(65 + row);
 
@@ -126,18 +136,44 @@ const generateLimousineLayout = (rows, pattern = 'standard') => {
  * @returns {Object} Layout configuration for double decker
  */
 const generateDoubleDecker = (rowsPerFloor, columns = 4) => {
-  // Lower floor
-  const lowerFloor = generateSeatLayout(rowsPerFloor, columns, 'L');
+  const layout = [];
 
-  // Upper floor
-  const upperFloor = generateSeatLayout(rowsPerFloor, columns, 'U');
+  // Lower floor - add driver seat at front
+  layout.push(['DRIVER', ...Array(columns - 1).fill('')]);
+
+  // Lower floor seats
+  for (let row = 0; row < rowsPerFloor; row++) {
+    const rowArray = [];
+    const rowPrefix = `L${String.fromCharCode(65 + row)}`;
+    for (let col = 0; col < columns; col++) {
+      rowArray.push(`${rowPrefix}${col + 1}`);
+    }
+    layout.push(rowArray);
+  }
+
+  // Floor separator marker
+  layout.push(['FLOOR_2', ...Array(columns - 1).fill('')]);
+
+  // Upper floor seats
+  for (let row = 0; row < rowsPerFloor; row++) {
+    const rowArray = [];
+    const rowPrefix = `U${String.fromCharCode(65 + row)}`;
+    for (let col = 0; col < columns; col++) {
+      rowArray.push(`${rowPrefix}${col + 1}`);
+    }
+    layout.push(rowArray);
+  }
 
   return {
     floors: 2,
-    rows: rowsPerFloor,
+    rows: rowsPerFloor * 2 + 2, // Total rows including driver and floor separator
     columns,
-    layout: [...lowerFloor, ...upperFloor],
+    layout,
     totalSeats: rowsPerFloor * columns * 2,
+    floorInfo: {
+      lowerFloorRows: rowsPerFloor + 1, // Including driver row
+      upperFloorStart: rowsPerFloor + 2, // After driver and floor separator
+    },
   };
 };
 

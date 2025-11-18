@@ -43,16 +43,20 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
         if (!seatNumber || seatNumber === '') {
           // Empty space / aisle
           seat = { type: 'aisle', seatNumber: null };
-        } else if (seatNumber === '🚗' || seatNumber.includes('Driver')) {
+        } else if (seatNumber === 'DRIVER' || seatNumber === '🚗' || seatNumber.includes('Driver')) {
           // Driver seat
           seat = { type: 'driver', seatNumber: null };
+        } else if (seatNumber === 'FLOOR_2') {
+          // Floor separator for double decker
+          seat = { type: 'floor_separator', seatNumber: null };
         } else {
           // Regular seat
           seat = {
             type: 'seat',
             seatNumber: seatNumber,
             row: row,
-            col: col
+            col: col,
+            floor: seatNumber.startsWith('L') ? 1 : seatNumber.startsWith('U') ? 2 : 1,
           };
         }
 
@@ -65,7 +69,7 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
   };
 
   const handleSeatClick = (seat) => {
-    if (!seat || seat.type === 'aisle' || seat.type === 'driver') {
+    if (!seat || seat.type === 'aisle' || seat.type === 'driver' || seat.type === 'floor_separator') {
       return;
     }
 
@@ -97,6 +101,7 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
   const getSeatClass = (seat) => {
     if (!seat || seat.type === 'aisle') return 'invisible';
     if (seat.type === 'driver') return 'seat-driver';
+    if (seat.type === 'floor_separator') return 'floor-separator';
 
     const isSelected = isSeatSelected(seat.seatNumber);
     const isBooked = isSeatBooked(seat.seatNumber);
@@ -109,6 +114,7 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
   const getSeatIcon = (seat) => {
     if (!seat || seat.type === 'aisle') return null;
     if (seat.type === 'driver') return '🚗';
+    if (seat.type === 'floor_separator') return '--- Tầng 2 ---';
 
     const isSelected = isSeatSelected(seat.seatNumber);
     const isBooked = isSeatBooked(seat.seatNumber);
@@ -229,6 +235,19 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
           color: white;
           cursor: not-allowed;
           font-size: 18px;
+        }
+
+        .floor-separator {
+          width: auto;
+          grid-column: 1 / -1;
+          background-color: #fbbf24;
+          border-color: #f59e0b;
+          color: #78350f;
+          font-size: 11px;
+          font-weight: 700;
+          text-align: center;
+          cursor: not-allowed;
+          padding: 4px 8px;
         }
 
         .seat:disabled {

@@ -5,7 +5,6 @@ import {
   Form,
   Input,
   DatePicker,
-  InputNumber,
   Button,
   Row,
   Col,
@@ -17,10 +16,10 @@ import {
   SearchOutlined,
   SwapOutlined,
   CalendarOutlined,
-  UserOutlined,
   LoginOutlined,
   LogoutOutlined,
   DownOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
@@ -66,7 +65,7 @@ const SearchPage = () => {
         fromCity: values.fromCity,
         toCity: values.toCity,
         date: values.date ? dayjs(values.date).format('YYYY-MM-DD') : null,
-        passengers: values.passengers || 1,
+        passengers: 1, // Default to 1, users can select seats freely in trip detail page
       };
 
       // Validate
@@ -173,7 +172,6 @@ const SearchPage = () => {
               fromCity: searchCriteria.fromCity,
               toCity: searchCriteria.toCity,
               date: searchCriteria.date ? dayjs(searchCriteria.date) : null,
-              passengers: searchCriteria.passengers || 1,
             }}
           >
             <Row gutter={[16, 16]}>
@@ -218,7 +216,7 @@ const SearchPage = () => {
               </Col>
 
               {/* Date */}
-              <Col xs={24} md={12}>
+              <Col xs={24}>
                 <Form.Item
                   name="date"
                   label="Ngày đi"
@@ -231,24 +229,6 @@ const SearchPage = () => {
                     placeholder="Chọn ngày đi"
                     disabledDate={disabledDate}
                     suffixIcon={<CalendarOutlined />}
-                  />
-                </Form.Item>
-              </Col>
-
-              {/* Passengers */}
-              <Col xs={24} md={12}>
-                <Form.Item
-                  name="passengers"
-                  label="Số lượng ghế"
-                  rules={[{ required: true, message: 'Vui lòng nhập số lượng ghế' }]}
-                >
-                  <InputNumber
-                    size="large"
-                    min={1}
-                    max={10}
-                    className="w-full"
-                    placeholder="Số lượng ghế"
-                    prefix={<UserOutlined className="text-gray-400" />}
                   />
                 </Form.Item>
               </Col>
