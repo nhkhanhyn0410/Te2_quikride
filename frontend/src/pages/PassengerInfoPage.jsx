@@ -344,17 +344,34 @@ const PassengerInfoPage = () => {
       console.log('Payment response:', paymentResponse);
 
       if (paymentResponse.status === 'success' && paymentResponse.data) {
-        // Redirect to payment URL
-        if (paymentResponse.data.paymentUrl) {
-          console.log('Redirecting to payment URL:', paymentResponse.data.paymentUrl);
-          window.location.href = paymentResponse.data.paymentUrl;
+        const { payment, paymentUrl } = paymentResponse.data;
+        const bookingCode = payment?.bookingId?.bookingCode || currentBooking.bookingCode;
+
+        // Handle different payment methods
+        if (selectedPaymentMethod === 'cash') {
+          // For cash payment, go directly to success page
+          message.success('Đặt vé thành công! Vui lòng thanh toán khi lên xe.');
+          setTimeout(() => {
+            navigate(`/booking/success?bookingCode=${bookingCode}`);
+          }, 1000);
+        } else if (selectedPaymentMethod === 'vnpay') {
+          // For VNPay, redirect to payment gateway
+          if (paymentUrl) {
+            console.log('Redirecting to VNPay:', paymentUrl);
+            window.location.href = paymentUrl;
+          } else {
+            console.error('VNPay URL not found');
+            toast.error('Không thể tạo link thanh toán VNPay');
+            navigate(`/booking/failure?message=Không thể tạo link thanh toán`);
+          }
         } else {
-          toast.success('Thanh toán thành công!');
-          navigate(`/booking/confirmation/${currentBooking.bookingCode}`);
+          // Other payment methods (not implemented yet)
+          toast.error('Phương thức thanh toán chưa được hỗ trợ');
         }
       } else {
         console.error('Payment response invalid:', paymentResponse);
         toast.error('Phản hồi thanh toán không hợp lệ');
+        navigate(`/booking/failure?message=Phản hồi thanh toán không hợp lệ`);
       }
     } catch (error) {
       console.error('Payment error:', error);
