@@ -234,13 +234,11 @@ const SeatMapComponent = ({
       </div>
 
       {/* Selection Info */}
-      {selectedSeats.length > 0 && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
-          <Text className="text-sm text-blue-700">
-            Đã chọn: <strong>{selectedSeats.length}</strong> / {maxSeatsAllowed} ghế
-          </Text>
-        </div>
-      )}
+      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+        <Text className="text-sm text-blue-700">
+          Đã chọn: <strong>{selectedSeats.length}</strong> / {maxSeatsAllowed} ghế
+        </Text>
+      </div>
 
       {/* Seat Map */}
       <div className="bg-gray-100 p-4 rounded-lg">
