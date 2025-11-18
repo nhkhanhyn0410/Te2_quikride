@@ -153,7 +153,7 @@ const BookingSuccess = () => {
 
             <Descriptions bordered column={1}>
               <Descriptions.Item label="Tuyến xe">
-                {booking.tripId?.routeId?.fromCity || booking.tripInfo?.origin?.city || 'N/A'} → {booking.tripId?.routeId?.toCity || booking.tripInfo?.destination?.city || 'N/A'}
+                {booking.tripId?.routeId?.origin?.city || booking.tripInfo?.origin?.city || 'N/A'} → {booking.tripId?.routeId?.destination?.city || booking.tripInfo?.destination?.city || 'N/A'}
               </Descriptions.Item>
               <Descriptions.Item label="Thời gian khởi hành">
                 {booking.tripId?.departureTime ? dayjs(booking.tripId.departureTime).format('HH:mm, DD/MM/YYYY') : 'N/A'}
