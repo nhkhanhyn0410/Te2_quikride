@@ -134,6 +134,19 @@ export const SUCCESS_MESSAGES = {
 
 // Amenities Icons
 export const AMENITIES_ICONS = {
+  // English lowercase (from backend)
+  'wifi': '📶',
+  'ac': '❄️',
+  'toilet': '🚻',
+  'tv': '📺',
+  'water': '💧',
+  'blanket': '🛏️',
+  'pillow': '🛏️',
+  'charging': '🔌',
+  'snack': '🍪',
+  'entertainment': '🎬',
+
+  // Vietnamese and other variants
   'WiFi': '📶',
   'AC': '❄️',
   'Điều hòa': '❄️',
