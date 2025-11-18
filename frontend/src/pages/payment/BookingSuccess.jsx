@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, Result, Button, Descriptions, Tag, Spin, Divider } from 'antd';
+import { Card, Result, Button, Descriptions, Tag, Spin, Divider, message } from 'antd';
 import {
   CheckCircleOutlined,
   DownloadOutlined,
@@ -9,11 +9,13 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import useBookingStore from '../../store/bookingStore';
+import api from '../../services/api';
 
 const BookingSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const bookingCode = searchParams.get('bookingCode');
+  const phone = searchParams.get('phone'); // Optional phone for guest lookup
 
   const { currentBooking, selectedTrip, selectedSeats, pickupPoint, dropoffPoint, contactInfo } = useBookingStore();
 
@@ -21,28 +23,73 @@ const BookingSuccess = () => {
   const [booking, setBooking] = useState(null);
 
   useEffect(() => {
-    // Use currentBooking from store if available
-    if (currentBooking && currentBooking.bookingCode === bookingCode) {
-      setBooking(currentBooking);
-    } else if (selectedTrip && bookingCode) {
-      // Construct booking from store data if currentBooking not available
-      const seatPrice = selectedTrip?.pricing?.finalPrice || selectedTrip?.finalPrice || selectedTrip?.pricing?.basePrice || 0;
-      const finalPrice = seatPrice * (selectedSeats?.length || 0);
+    const loadBooking = async () => {
+      // First try: Use currentBooking from store if available and matches
+      if (currentBooking && currentBooking.bookingCode === bookingCode) {
+        console.log('Using currentBooking from store:', currentBooking);
+        setBooking(currentBooking);
+        return;
+      }
 
-      const constructedBooking = {
-        bookingCode,
-        tripId: selectedTrip,
-        seats: selectedSeats,
-        pickupPoint,
-        dropoffPoint,
-        contactInfo,
-        finalPrice,
-        paymentMethod: 'cash', // Default, will be updated if payment info available
-        paymentStatus: 'pending',
-      };
-      setBooking(constructedBooking);
-    }
-  }, [bookingCode, currentBooking, selectedTrip, selectedSeats, pickupPoint, dropoffPoint, contactInfo]);
+      // Second try: Construct from store data if available
+      if (selectedTrip && bookingCode) {
+        console.log('Constructing booking from store data');
+        const seatPrice = selectedTrip?.pricing?.finalPrice || selectedTrip?.finalPrice || selectedTrip?.pricing?.basePrice || 0;
+        const finalPrice = seatPrice * (selectedSeats?.length || 0);
+
+        const constructedBooking = {
+          bookingCode,
+          tripId: selectedTrip,
+          seats: selectedSeats,
+          pickupPoint,
+          dropoffPoint,
+          contactInfo,
+          finalPrice,
+          paymentMethod: 'vnpay', // Will be updated from API if fetched
+          paymentStatus: 'pending',
+        };
+        setBooking(constructedBooking);
+
+        // Try to fetch full booking data in background
+        fetchBookingData();
+        return;
+      }
+
+      // Third try: Fetch from API
+      if (bookingCode) {
+        fetchBookingData();
+      }
+    };
+
+    const fetchBookingData = async () => {
+      try {
+        setLoading(true);
+        const phoneParam = phone || contactInfo?.phone;
+
+        if (!phoneParam) {
+          console.warn('No phone number available for booking lookup');
+          return;
+        }
+
+        console.log('Fetching booking from API:', { bookingCode, phone: phoneParam });
+        const response = await api.get(`/bookings/code/${bookingCode}`, {
+          params: { phone: phoneParam },
+        });
+
+        console.log('Booking fetched from API:', response);
+        if (response.status === 'success' && response.data) {
+          setBooking(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch booking:', error);
+        // Don't show error to user if we already have partial data from store
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBooking();
+  }, [bookingCode, phone, currentBooking, selectedTrip, selectedSeats, pickupPoint, dropoffPoint, contactInfo]);
 
   const handlePrintTicket = () => {
     window.print();
