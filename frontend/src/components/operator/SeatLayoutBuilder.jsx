@@ -1,28 +1,18 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Select, InputNumber, message, Tabs, Spin, Radio } from 'antd';
+import { Button, InputNumber, message, Radio } from 'antd';
 import { seatLayoutApi } from '../../services/operatorApi';
 
-const { Option } = Select;
-const { TabPane } = Tabs;
-
 const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
-  const [templates, setTemplates] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [customLayout, setCustomLayout] = useState(null);
   const [rows, setRows] = useState(10);
   const [columns, setColumns] = useState(4);
   const [floors, setFloors] = useState(1);
-  const [mode, setMode] = useState('template'); // 'template' or 'custom'
-  const [loadingTemplates, setLoadingTemplates] = useState(false);
-  const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [buildingLayout, setBuildingLayout] = useState(false);
 
   // Reset states when busType changes
   useEffect(() => {
     if (busType) {
-      loadTemplates();
       // Reset custom layout states when busType changes
-      setSelectedTemplate(null);
       setCustomLayout(null);
       setRows(10);
       setColumns(4);
@@ -34,67 +24,12 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
     // Set initial layout if provided
     if (initialLayout) {
       setCustomLayout(initialLayout);
-      // Auto-switch to custom mode if there's an initial layout
-      if (mode === 'template' && !selectedTemplate) {
-        setMode('custom');
-      }
+      // Also set the input values from initial layout
+      setRows(initialLayout.rows || 10);
+      setColumns(initialLayout.columns || 4);
+      setFloors(initialLayout.floors || 1);
     }
-  }, [initialLayout, mode, selectedTemplate]);
-
-  const loadTemplates = async () => {
-    if (!busType) return;
-
-    setLoadingTemplates(true);
-    try {
-      const response = await seatLayoutApi.getAllTemplates();
-      console.log('All templates response:', response);
-      console.log('Current busType:', busType);
-
-      const filtered = response.data.templates.filter(
-        (t) => !busType || t.busType === busType
-      );
-      console.log('Filtered templates:', filtered);
-
-      setTemplates(filtered);
-
-      if (filtered.length === 0) {
-        message.warning(`Không tìm thấy template nào cho loại xe "${busType}"`);
-      }
-    } catch (error) {
-      console.error('Load templates error:', error);
-      message.error(error?.response?.data?.message || error?.message || 'Không thể tải templates');
-    } finally {
-      setLoadingTemplates(false);
-    }
-  };
-
-  const handleSelectTemplate = async (templateKey) => {
-    if (!busType) {
-      message.warning('Vui lòng chọn loại xe trước');
-      return;
-    }
-
-    console.log('Selected template key:', templateKey);
-
-    setLoadingTemplate(true);
-    try {
-      // Use templateKey instead of template name
-      const response = await seatLayoutApi.getTemplate(busType, templateKey);
-      console.log('Template response:', response);
-
-      if (response.status === 'success' && response.data?.template) {
-        setSelectedTemplate(response.data.template);
-        message.success('Đã tải template thành công');
-      } else {
-        message.error('Không thể tải template');
-      }
-    } catch (error) {
-      console.error('Get template error:', error);
-      message.error(error?.response?.data?.message || error?.message || 'Không thể tải template');
-    } finally {
-      setLoadingTemplate(false);
-    }
-  };
+  }, [initialLayout]);
 
   const handleBuildCustom = async () => {
     if (!busType) {
@@ -142,22 +77,19 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
   };
 
   const handleSave = useCallback(() => {
-    const layoutToSave = mode === 'template' ? selectedTemplate : customLayout;
-    if (layoutToSave) {
-      onSave(layoutToSave);
+    if (customLayout) {
+      onSave(customLayout);
     } else {
-      message.warning('Vui lòng tạo hoặc chọn sơ đồ ghế');
+      message.warning('Vui lòng tạo sơ đồ ghế trước');
     }
-  }, [mode, selectedTemplate, customLayout, onSave]);
+  }, [customLayout, onSave]);
 
   const handleCancel = useCallback(() => {
     // Reset all states when cancelling
-    setSelectedTemplate(null);
     setCustomLayout(null);
     setRows(10);
     setColumns(4);
     setFloors(1);
-    setMode('template');
     onSave(null);
   }, [onSave]);
 
@@ -183,7 +115,6 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
               {Array.isArray(row) &&
                 row.map((seat, seatIndex) => {
                   const seatClass = getSeatClass(seat);
-                  const isSpecial = seat === 'DRIVER' || seat === 'FLOOR_2';
                   const displayText = seat === 'DRIVER' ? '🚗' :
                                      seat === 'FLOOR_2' ? 'T2' :
                                      (seat && !seat.toLowerCase().includes('aisle') ? seat : '');
@@ -235,14 +166,9 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
     );
   };
 
-  // Memoize the current layout to save
-  const currentLayout = useMemo(() => {
-    return mode === 'template' ? selectedTemplate : customLayout;
-  }, [mode, selectedTemplate, customLayout]);
-
   const hasValidLayout = useMemo(() => {
-    return currentLayout !== null && currentLayout !== undefined;
-  }, [currentLayout]);
+    return customLayout !== null && customLayout !== undefined;
+  }, [customLayout]);
 
   // Determine if floors input should be shown based on bus type
   const canHaveMultipleFloors = useMemo(() => {
@@ -251,132 +177,87 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
 
   return (
     <div className="space-y-4">
-      <Tabs activeKey={mode} onChange={setMode}>
-        <TabPane tab="Chọn Template" key="template">
-          <Spin spinning={loadingTemplates || loadingTemplate}>
-            <div className="space-y-4">
-              <Select
+      <div className="bg-white p-6 rounded-lg border border-gray-200">
+        <h3 className="text-lg font-semibold mb-4">Tạo Sơ Đồ Ghế Tùy Chỉnh</h3>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-1 text-sm font-medium">
+                Số Hàng: <span className="text-gray-500">(1-20)</span>
+              </label>
+              <InputNumber
+                min={1}
+                max={20}
+                value={rows}
+                onChange={setRows}
                 className="w-full"
-                placeholder={
-                  !busType
-                    ? "Vui lòng chọn loại xe trước"
-                    : loadingTemplates
-                    ? "Đang tải templates..."
-                    : templates.length === 0
-                    ? "Không có template nào"
-                    : "Chọn template sơ đồ ghế"
-                }
-                onChange={handleSelectTemplate}
-                disabled={!busType || loadingTemplates || loadingTemplate || templates.length === 0}
-                loading={loadingTemplates}
-                notFoundContent={loadingTemplates ? "Đang tải..." : "Không có template"}
-              >
-                {templates.map((template) => (
-                  <Option key={template.templateKey} value={template.templateKey}>
-                    {template.name} - {template.totalSeats} ghế
-                    {template.floors > 1 ? ` (${template.floors} tầng)` : ''}
-                  </Option>
-                ))}
-              </Select>
-
-              {!busType && (
-                <div className="text-amber-600 text-sm p-3 bg-amber-50 rounded">
-                  ⚠️ Vui lòng chọn loại xe trước khi chọn template
-                </div>
-              )}
-
-              {templates.length === 0 && busType && !loadingTemplates && (
-                <div className="text-gray-500 text-sm p-3 bg-gray-50 rounded">
-                  Không có template nào cho loại xe này
-                </div>
-              )}
-
-              {selectedTemplate && renderSeatGrid(selectedTemplate)}
-            </div>
-          </Spin>
-        </TabPane>
-
-        <TabPane tab="Tùy Chỉnh" key="custom">
-          <Spin spinning={buildingLayout}>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block mb-1 text-sm font-medium">
-                    Số Hàng: <span className="text-gray-500">(1-20)</span>
-                  </label>
-                  <InputNumber
-                    min={1}
-                    max={20}
-                    value={rows}
-                    onChange={setRows}
-                    className="w-full"
-                    disabled={!busType || buildingLayout}
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 text-sm font-medium">
-                    Số Cột: <span className="text-gray-500">(2-6)</span>
-                  </label>
-                  <InputNumber
-                    min={2}
-                    max={6}
-                    value={columns}
-                    onChange={setColumns}
-                    className="w-full"
-                    disabled={!busType || buildingLayout}
-                  />
-                </div>
-              </div>
-
-              {/* Floors input - only show for sleeper and double_decker */}
-              {canHaveMultipleFloors && (
-                <div>
-                  <label className="block mb-2 text-sm font-medium">Số Tầng:</label>
-                  <Radio.Group
-                    value={floors}
-                    onChange={(e) => setFloors(e.target.value)}
-                    disabled={!busType || buildingLayout}
-                  >
-                    <Radio value={1}>1 Tầng</Radio>
-                    <Radio value={2}>2 Tầng</Radio>
-                  </Radio.Group>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {floors === 2 && '⚠️ Xe 2 tầng sẽ có thêm dấu phân cách giữa các tầng'}
-                  </div>
-                </div>
-              )}
-
-              <Button
-                type="primary"
-                onClick={handleBuildCustom}
                 disabled={!busType || buildingLayout}
-                loading={buildingLayout}
-                block
-              >
-                {buildingLayout ? 'Đang tạo sơ đồ...' : 'Tạo Sơ Đồ'}
-              </Button>
-
-              {!busType && (
-                <div className="text-amber-600 text-sm p-3 bg-amber-50 rounded">
-                  ⚠️ Vui lòng chọn loại xe trước khi tạo sơ đồ tùy chỉnh
-                </div>
-              )}
-
-              {customLayout && renderSeatGrid(customLayout)}
+              />
             </div>
-          </Spin>
-        </TabPane>
-      </Tabs>
+            <div>
+              <label className="block mb-1 text-sm font-medium">
+                Số Cột: <span className="text-gray-500">(2-6)</span>
+              </label>
+              <InputNumber
+                min={2}
+                max={6}
+                value={columns}
+                onChange={setColumns}
+                className="w-full"
+                disabled={!busType || buildingLayout}
+              />
+            </div>
+          </div>
+
+          {/* Floors input - only show for sleeper and double_decker */}
+          {canHaveMultipleFloors && (
+            <div>
+              <label className="block mb-2 text-sm font-medium">Số Tầng:</label>
+              <Radio.Group
+                value={floors}
+                onChange={(e) => setFloors(e.target.value)}
+                disabled={!busType || buildingLayout}
+              >
+                <Radio value={1}>1 Tầng</Radio>
+                <Radio value={2}>2 Tầng</Radio>
+              </Radio.Group>
+              <div className="text-xs text-gray-500 mt-1">
+                {floors === 2 && '⚠️ Xe 2 tầng sẽ có thêm dấu phân cách giữa các tầng'}
+              </div>
+            </div>
+          )}
+
+          <Button
+            type="primary"
+            onClick={handleBuildCustom}
+            disabled={!busType || buildingLayout}
+            loading={buildingLayout}
+            block
+            size="large"
+          >
+            {buildingLayout ? 'Đang tạo sơ đồ...' : 'Tạo Sơ Đồ'}
+          </Button>
+
+          {!busType && (
+            <div className="text-amber-600 text-sm p-3 bg-amber-50 rounded">
+              ⚠️ Vui lòng chọn loại xe trước khi tạo sơ đồ
+            </div>
+          )}
+
+          {customLayout && renderSeatGrid(customLayout)}
+        </div>
+      </div>
 
       <div className="flex justify-between items-center pt-4 border-t">
         <div className="text-sm text-gray-600">
           {hasValidLayout ? (
             <span className="text-green-600 font-medium">
-              ✓ Sơ đồ đã sẵn sàng ({currentLayout.totalSeats} ghế
-              {currentLayout.floors > 1 ? `, ${currentLayout.floors} tầng` : ''})
+              ✓ Sơ đồ đã sẵn sàng ({customLayout.totalSeats} ghế
+              {customLayout.floors > 1 ? `, ${customLayout.floors} tầng` : ''})
             </span>
           ) : (
-            <span className="text-gray-500">Chưa có sơ đồ nào được chọn</span>
+            <span className="text-gray-500">Chưa có sơ đồ nào được tạo</span>
           )}
         </div>
         <div className="flex space-x-2">

@@ -50,13 +50,21 @@ class BusService {
         }
       }
 
-      // Validate floors (if double_decker, should have 2 floors)
-      if (busData.busType === 'double_decker' && floors !== 2) {
-        throw new Error('Xe 2 tầng phải có 2 tầng ghế');
-      }
+      // Validate floors based on bus type
+      // sleeper and double_decker can have 1 or 2 floors
+      // seater and limousine can only have 1 floor
+      const canHaveMultipleFloors = ['sleeper', 'double_decker'].includes(busData.busType);
 
-      if (busData.busType !== 'double_decker' && floors !== 1) {
-        throw new Error('Xe không phải 2 tầng chỉ được có 1 tầng ghế');
+      if (canHaveMultipleFloors) {
+        // sleeper and double_decker: 1 or 2 floors
+        if (floors < 1 || floors > 2) {
+          throw new Error('Xe giường nằm và 2 tầng chỉ có thể có 1 hoặc 2 tầng');
+        }
+      } else {
+        // seater and limousine: only 1 floor
+        if (floors !== 1) {
+          throw new Error('Xe ghế ngồi và limousine chỉ có thể có 1 tầng');
+        }
       }
     }
 
@@ -194,16 +202,21 @@ class BusService {
         }
       }
 
-      // Validate floors
+      // Validate floors based on bus type
       const busType = updateData.busType || bus.busType;
       const floorCount = floors || bus.seatLayout.floors;
+      const canHaveMultipleFloors = ['sleeper', 'double_decker'].includes(busType);
 
-      if (busType === 'double_decker' && floorCount !== 2) {
-        throw new Error('Xe 2 tầng phải có 2 tầng ghế');
-      }
-
-      if (busType !== 'double_decker' && floorCount !== 1) {
-        throw new Error('Xe không phải 2 tầng chỉ được có 1 tầng ghế');
+      if (canHaveMultipleFloors) {
+        // sleeper and double_decker: 1 or 2 floors
+        if (floorCount < 1 || floorCount > 2) {
+          throw new Error('Xe giường nằm và 2 tầng chỉ có thể có 1 hoặc 2 tầng');
+        }
+      } else {
+        // seater and limousine: only 1 floor
+        if (floorCount !== 1) {
+          throw new Error('Xe ghế ngồi và limousine chỉ có thể có 1 tầng');
+        }
       }
     }
 
