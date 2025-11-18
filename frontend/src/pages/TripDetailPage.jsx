@@ -291,6 +291,8 @@ const TripDetailPage = () => {
                 seatLayout={trip.bus?.seatLayout}
                 bookedSeats={trip.seats?.bookedSeatNumbers || []}
                 availableSeats={availableSeats}
+                seatPrice={trip.finalPrice || trip.pricing?.finalPrice || 0}
+                showPrice={true}
               />
 
               <Divider />
