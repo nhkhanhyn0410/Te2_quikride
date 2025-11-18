@@ -19,6 +19,7 @@ const SEAT_TYPES = {
 const SeatMapComponent = ({
   seatLayout,
   bookedSeats = [],
+  heldSeats = [],
   availableSeats = [],
   maxSeatsAllowed = MAX_SEATS_SELECTION,
   seatPrice = 0,
@@ -45,6 +46,11 @@ const SeatMapComponent = ({
   const bookedSeatsSet = useMemo(() => {
     return new Set(bookedSeats);
   }, [bookedSeats]);
+
+  // Memoize heldSeats as a Set for O(1) lookup
+  const heldSeatsSet = useMemo(() => {
+    return new Set(heldSeats);
+  }, [heldSeats]);
 
   // Memoize selectedSeats as a Set for O(1) lookup
   const selectedSeatsSet = useMemo(() => {
@@ -127,8 +133,8 @@ const SeatMapComponent = ({
       return;
     }
 
-    // Can't select already booked seats
-    if (bookedSeatsSet.has(seat.seatNumber)) {
+    // Can't select already booked or held seats
+    if (bookedSeatsSet.has(seat.seatNumber) || heldSeatsSet.has(seat.seatNumber)) {
       return;
     }
 
@@ -143,11 +149,15 @@ const SeatMapComponent = ({
       }
       addSeat(seat);
     }
-  }, [bookedSeatsSet, selectedSeatsSet, selectedSeats.length, maxSeatsAllowed, addSeat, removeSeat]);
+  }, [bookedSeatsSet, heldSeatsSet, selectedSeatsSet, selectedSeats.length, maxSeatsAllowed, addSeat, removeSeat]);
 
   const isSeatBooked = useCallback((seatNumber) => {
     return bookedSeatsSet.has(seatNumber);
   }, [bookedSeatsSet]);
+
+  const isSeatHeld = useCallback((seatNumber) => {
+    return heldSeatsSet.has(seatNumber);
+  }, [heldSeatsSet]);
 
   const isSeatSelected = useCallback((seatNumber) => {
     return selectedSeatsSet.has(seatNumber);
@@ -160,11 +170,13 @@ const SeatMapComponent = ({
 
     const isSelected = isSeatSelected(seat.seatNumber);
     const isBooked = isSeatBooked(seat.seatNumber);
+    const isHeld = isSeatHeld(seat.seatNumber);
 
     if (isBooked) return 'seat-booked';
+    if (isHeld) return 'seat-held';
     if (isSelected) return 'seat-selected';
     return 'seat-available';
-  }, [isSeatBooked, isSeatSelected]);
+  }, [isSeatBooked, isSeatHeld, isSeatSelected]);
 
   const getSeatIcon = useCallback((seat) => {
     if (!seat || seat.type === SEAT_TYPES.AISLE) return null;
@@ -173,11 +185,13 @@ const SeatMapComponent = ({
 
     const isSelected = isSeatSelected(seat.seatNumber);
     const isBooked = isSeatBooked(seat.seatNumber);
+    const isHeld = isSeatHeld(seat.seatNumber);
 
     if (isBooked) return <CloseCircleOutlined />;
+    if (isHeld) return '⏱';
     if (isSelected) return <CheckCircleFilled />;
     return seat.seatNumber;
-  }, [isSeatBooked, isSeatSelected]);
+  }, [isSeatBooked, isSeatHeld, isSeatSelected]);
 
   const getSeatTitle = useCallback((seat) => {
     if (!seat || seat.type === SEAT_TYPES.AISLE) return '';
@@ -204,6 +218,12 @@ const SeatMapComponent = ({
             {selectedSeats.length + 1}
           </div>
           <Text className="text-xs">Còn trống</Text>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="seat-legend seat-legend-held">
+            ⏱
+          </div>
+          <Text className="text-xs">Đang giữ</Text>
         </div>
         <div className="flex items-center gap-2">
           <div className="seat-legend seat-legend-booked">
@@ -240,7 +260,8 @@ const SeatMapComponent = ({
                                   seat.type === SEAT_TYPES.AISLE ||
                                   seat.type === SEAT_TYPES.DRIVER ||
                                   seat.type === SEAT_TYPES.FLOOR_SEPARATOR ||
-                                  isSeatBooked(seat?.seatNumber);
+                                  isSeatBooked(seat?.seatNumber) ||
+                                  isSeatHeld(seat?.seatNumber);
 
                 // Show price below seat number for regular seats
                 const showSeatPrice = showPrice && seatPrice > 0 && seat.type === SEAT_TYPES.SEAT;
@@ -349,6 +370,15 @@ const SeatMapComponent = ({
           background-color: #059669;
         }
 
+        .seat-held {
+          background-color: #fbbf24;
+          border-color: #f59e0b;
+          color: #78350f;
+          cursor: not-allowed;
+          opacity: 0.85;
+          font-weight: 700;
+        }
+
         .seat-booked {
           background-color: #f87171;
           border-color: #ef4444;
@@ -405,6 +435,12 @@ const SeatMapComponent = ({
         .seat-legend-available {
           background-color: #e5e7eb;
           color: #374151;
+        }
+
+        .seat-legend-held {
+          background-color: #fbbf24;
+          color: #78350f;
+          font-weight: 700;
         }
 
         .seat-legend-booked {

@@ -314,6 +314,7 @@ const TripDetailPage = () => {
               <SeatMapComponent
                 seatLayout={trip.bus?.seatLayout}
                 bookedSeats={trip.seats?.bookedSeatNumbers || []}
+                heldSeats={trip.seats?.heldSeatNumbers || []}
                 availableSeats={availableSeats}
               />
 

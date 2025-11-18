@@ -641,6 +641,10 @@ class TripService {
     // Get booked seat numbers (for seat selection, but not customer details)
     const bookedSeatNumbers = trip.bookedSeats.map(seat => seat.seatNumber);
 
+    // Get held/locked seat numbers from Redis
+    const SeatLockService = require('./seatLock.service');
+    const heldSeatNumbers = await SeatLockService.getLockedSeats(tripId);
+
     // Build enhanced response
     const publicTrip = {
       // Trip basic info
@@ -669,6 +673,7 @@ class TripService {
         available: trip.availableSeats,
         booked: trip.totalSeats - trip.availableSeats,
         bookedSeatNumbers, // Array of booked seat numbers
+        heldSeatNumbers, // Array of temporarily held/locked seat numbers
         occupancyRate: parseFloat(occupancyRate),
       },
 
