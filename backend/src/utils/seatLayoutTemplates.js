@@ -261,6 +261,8 @@ const buildCustomTemplate = (options) => {
 
   let layout;
   let totalSeats;
+  let actualRows = rows;
+  let actualColumns = columns;
 
   switch (busType) {
     case 'seater':
@@ -277,9 +279,9 @@ const buildCustomTemplate = (options) => {
       const sleeperConfig = generateSleeperLayout(rows, floors, columns);
       layout = sleeperConfig.layout;
       totalSeats = sleeperConfig.totalSeats;
-      // Update columns and rows from generated config
-      columns = sleeperConfig.columns;
-      rows = sleeperConfig.rows;
+      // Update from generated config (important for 2-floor layouts)
+      actualColumns = sleeperConfig.columns;
+      actualRows = sleeperConfig.rows;
       break;
 
     case 'limousine':
@@ -291,6 +293,8 @@ const buildCustomTemplate = (options) => {
       const doubleDeckerConfig = generateDoubleDecker(rows, columns);
       layout = doubleDeckerConfig.layout;
       totalSeats = doubleDeckerConfig.totalSeats;
+      actualRows = doubleDeckerConfig.rows;
+      actualColumns = doubleDeckerConfig.columns;
       break;
 
     default:
@@ -300,8 +304,8 @@ const buildCustomTemplate = (options) => {
   return {
     busType,
     floors,
-    rows,
-    columns,
+    rows: actualRows,
+    columns: actualColumns,
     layout,
     totalSeats,
     custom: true,
