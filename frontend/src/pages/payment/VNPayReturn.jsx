@@ -31,7 +31,10 @@ const VNPayReturn = () => {
 
       console.log('VNPay callback response:', response);
 
-      if (response.status === 'success') {
+      // Support both response formats: {success: true} and {status: 'success'}
+      const isSuccess = response.success === true || response.status === 'success';
+
+      if (isSuccess && response.data) {
         setResult({
           success: true,
           message: response.message || 'Thanh toán thành công',
