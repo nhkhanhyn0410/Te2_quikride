@@ -43,6 +43,10 @@ import PassengersPage from './pages/trip-manager/PassengersPage';
 
 // Admin Pages
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
+import OperatorManagementPage from './pages/admin/OperatorManagementPage';
+import ComplaintManagementPage from './pages/admin/ComplaintManagementPage';
+import ContentManagementPage from './pages/admin/ContentManagementPage';
 
 function App() {
   return (
@@ -161,7 +165,10 @@ function App() {
         >
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboardPage />} />
-          {/* TODO: Add other admin pages (users, operators, complaints, content, reports) */}
+          <Route path="users" element={<UserManagementPage />} />
+          <Route path="operators" element={<OperatorManagementPage />} />
+          <Route path="complaints" element={<ComplaintManagementPage />} />
+          <Route path="content" element={<ContentManagementPage />} />
         </Route>
 
         {/* 404 Not Found */}
