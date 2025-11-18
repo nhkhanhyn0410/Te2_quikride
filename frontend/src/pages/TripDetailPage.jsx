@@ -12,6 +12,7 @@ import {
   Spin,
   Descriptions,
   message,
+  InputNumber,
 } from 'antd';
 import {
   ClockCircleOutlined,
@@ -33,8 +34,16 @@ const { Title, Text } = Typography;
 const TripDetailPage = () => {
   const { tripId } = useParams();
   const navigate = useNavigate();
-  const { selectedTrip, setSelectedTrip, selectedSeats, setPickupPoint, setDropoffPoint } =
-    useBookingStore();
+  const {
+    selectedTrip,
+    setSelectedTrip,
+    selectedSeats,
+    setPickupPoint,
+    setDropoffPoint,
+    searchCriteria,
+    setSearchCriteria,
+    clearSeats,
+  } = useBookingStore();
 
   const [loading, setLoading] = useState(false);
   const [trip, setTrip] = useState(null);
@@ -80,6 +89,18 @@ const TripDetailPage = () => {
       }
     } catch (error) {
       console.error('Fetch available seats error:', error);
+    }
+  };
+
+  const handlePassengersChange = (value) => {
+    if (value && value > 0) {
+      setSearchCriteria({ passengers: value });
+
+      // If new number is less than selected seats, clear excess seats
+      if (selectedSeats.length > value) {
+        message.info(`Đã giảm số ghế xuống ${value}. Vui lòng chọn lại ghế.`);
+        clearSeats();
+      }
     }
   };
 
@@ -279,6 +300,23 @@ const TripDetailPage = () => {
           <Col xs={24} lg={8}>
             {/* Seat Map */}
             <Card title="Chọn ghế" className="mb-6 sticky top-4">
+              {/* Passengers Count */}
+              <div className="mb-4 p-3 bg-blue-50 rounded">
+                <div className="flex items-center justify-between">
+                  <Text strong>Số lượng ghế:</Text>
+                  <InputNumber
+                    min={1}
+                    max={Math.min(10, trip.seats?.available || 10)}
+                    value={searchCriteria.passengers}
+                    onChange={handlePassengersChange}
+                    className="w-20"
+                  />
+                </div>
+                <Text className="text-xs text-gray-500 mt-1 block">
+                  Tối đa {Math.min(10, trip.seats?.available || 10)} ghế
+                </Text>
+              </div>
+
               <SeatMapComponent
                 seatLayout={trip.bus?.seatLayout}
                 bookedSeats={trip.seats?.bookedSeatNumbers || []}
