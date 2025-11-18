@@ -6,7 +6,7 @@ import useBookingStore from '../store/bookingStore';
 const { Text } = Typography;
 
 const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] }) => {
-  const { selectedSeats, addSeat, removeSeat, searchCriteria, clearSeats } = useBookingStore();
+  const { selectedSeats, addSeat, removeSeat, clearSeats } = useBookingStore();
   const [seats, setSeats] = useState([]);
 
   useEffect(() => {
@@ -65,35 +65,23 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
   };
 
   const handleSeatClick = (seat) => {
-    console.log('Seat clicked:', seat);
-    console.log('Current selectedSeats:', selectedSeats);
-
     if (!seat || seat.type === 'aisle' || seat.type === 'driver') {
-      console.log('Seat click ignored: invalid seat type');
       return;
     }
 
     if (isSeatBooked(seat.seatNumber)) {
-      console.log('Seat click ignored: seat is booked');
       return;
     }
 
     const isSelected = selectedSeats.some(s => s.seatNumber === seat.seatNumber);
-    console.log('Is seat selected:', isSelected);
 
     if (isSelected) {
-      console.log('Removing seat:', seat.seatNumber);
       removeSeat(seat.seatNumber);
     } else {
-      // Check if max passengers reached
-      if (selectedSeats.length >= searchCriteria.passengers) {
-        console.log('Max passengers reached - replacing first seat');
-        // Auto-replace: remove first seat and add new one
-        if (selectedSeats.length > 0) {
-          removeSeat(selectedSeats[0].seatNumber);
-        }
+      // Allow selecting up to 10 seats maximum
+      if (selectedSeats.length >= 10) {
+        return;
       }
-      console.log('Adding seat:', seat);
       addSeat(seat);
     }
   };

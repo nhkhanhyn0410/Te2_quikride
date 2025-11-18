@@ -33,8 +33,13 @@ const { Title, Text } = Typography;
 const TripDetailPage = () => {
   const { tripId } = useParams();
   const navigate = useNavigate();
-  const { selectedTrip, setSelectedTrip, selectedSeats, setPickupPoint, setDropoffPoint } =
-    useBookingStore();
+  const {
+    selectedTrip,
+    setSelectedTrip,
+    selectedSeats,
+    setPickupPoint,
+    setDropoffPoint,
+  } = useBookingStore();
 
   const [loading, setLoading] = useState(false);
   const [trip, setTrip] = useState(null);
