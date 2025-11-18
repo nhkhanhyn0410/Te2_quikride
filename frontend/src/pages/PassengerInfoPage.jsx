@@ -69,6 +69,17 @@ const PassengerInfoPage = () => {
   const [guestData, setGuestData] = useState(null);
 
   useEffect(() => {
+    // Debug logging
+    console.log('PassengerInfoPage - Booking state:', {
+      selectedTrip,
+      selectedSeats,
+      pickupPoint,
+      dropoffPoint,
+      hasTrip: !!selectedTrip,
+      hasTripId: !!selectedTrip?._id,
+      seatsCount: selectedSeats?.length || 0,
+    });
+
     // Validate booking state
     if (!selectedTrip || selectedSeats.length === 0 || !pickupPoint || !dropoffPoint) {
       toast.error('Thông tin đặt vé không hợp lệ');
