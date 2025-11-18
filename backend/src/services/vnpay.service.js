@@ -98,16 +98,18 @@ class VNPayService {
     vnp_Params = this.sortObject(vnp_Params);
 
     // Create signature data using raw values (no encoding)
-    // This must match the verification method which also uses raw values
-    const signData = querystring.stringify(vnp_Params, { encode: false });
+    // VNPay requires signature to be calculated from unencoded values
+    const signData = Object.keys(vnp_Params)
+      .map(key => `${key}=${vnp_Params[key]}`)
+      .join('&');
 
     // Create signature
     const secureHash = this.createSignature(signData, this.vnp_HashSecret);
     vnp_Params['vnp_SecureHash'] = secureHash;
 
-    // Create payment URL with raw values (no encoding)
-    // VNPay expects the URL to have the same format as the signature
-    const paymentUrl = this.vnp_Url + '?' + querystring.stringify(vnp_Params, { encode: false });
+    // Create payment URL with URL encoding
+    // Use default querystring.stringify which properly encodes values
+    const paymentUrl = this.vnp_Url + '?' + querystring.stringify(vnp_Params);
 
     return paymentUrl;
   }
@@ -128,8 +130,11 @@ class VNPayService {
     // Sort parameters
     const sortedParams = this.sortObject(vnpParams);
 
-    // Create signature data
-    const signData = querystring.stringify(sortedParams, { encode: false });
+    // Create signature data using raw values (no encoding)
+    // This must match how the signature was created
+    const signData = Object.keys(sortedParams)
+      .map(key => `${key}=${sortedParams[key]}`)
+      .join('&');
 
     // Create signature
     const checkSum = this.createSignature(signData, this.vnp_HashSecret);
