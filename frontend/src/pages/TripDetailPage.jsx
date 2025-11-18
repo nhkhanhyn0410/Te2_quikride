@@ -61,8 +61,15 @@ const TripDetailPage = () => {
       console.log('Trip detail response:', response);
 
       if (response.status === 'success' && response.data?.trip) {
-        setTrip(response.data.trip);
-        setSelectedTrip(response.data.trip);
+        const tripData = response.data.trip;
+        setTrip(tripData);
+        setSelectedTrip(tripData);
+
+        console.log('TripDetailPage - Set selected trip:', {
+          tripId: tripData._id,
+          hasId: !!tripData._id,
+          trip: tripData,
+        });
       } else {
         toast.error('Không tìm thấy thông tin chuyến xe');
         navigate('/');
@@ -108,6 +115,16 @@ const TripDetailPage = () => {
     // Store pickup/dropoff points
     setPickupPoint(selectedPickup);
     setDropoffPoint(selectedDropoff);
+
+    // Debug logging
+    console.log('TripDetailPage - Before navigate to passenger info:', {
+      selectedTrip,
+      selectedSeats,
+      selectedPickup,
+      selectedDropoff,
+      hasTripId: !!selectedTrip?._id,
+      seatsCount: selectedSeats?.length || 0,
+    });
 
     // Navigate to passenger info
     navigate('/booking/passenger-info');
