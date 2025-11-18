@@ -5,6 +5,9 @@ import {
   FileTextOutlined,
   QuestionCircleOutlined,
 } from '@ant-design/icons';
+import BannerManagement from '../../components/admin/content/BannerManagement';
+import BlogManagement from '../../components/admin/content/BlogManagement';
+import FAQManagement from '../../components/admin/content/FAQManagement';
 
 const ContentManagementPage = () => {
   const [activeTab, setActiveTab] = useState('banners');
@@ -20,18 +23,7 @@ const ContentManagementPage = () => {
       ),
       children: (
         <Card>
-          <div className="text-center py-12">
-            <FileImageOutlined className="text-6xl text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700">
-              Banner Management
-            </h3>
-            <p className="text-gray-500 mt-2">
-              Quản lý banner hiển thị trên trang chủ
-            </p>
-            <p className="text-sm text-gray-400 mt-4">
-              Tính năng đang được phát triển...
-            </p>
-          </div>
+          <BannerManagement />
         </Card>
       ),
     },
@@ -45,18 +37,7 @@ const ContentManagementPage = () => {
       ),
       children: (
         <Card>
-          <div className="text-center py-12">
-            <FileTextOutlined className="text-6xl text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700">
-              Blog Management
-            </h3>
-            <p className="text-gray-500 mt-2">
-              Quản lý bài viết blog và tin tức
-            </p>
-            <p className="text-sm text-gray-400 mt-4">
-              Tính năng đang được phát triển...
-            </p>
-          </div>
+          <BlogManagement />
         </Card>
       ),
     },
@@ -70,18 +51,7 @@ const ContentManagementPage = () => {
       ),
       children: (
         <Card>
-          <div className="text-center py-12">
-            <QuestionCircleOutlined className="text-6xl text-gray-300 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700">
-              FAQ Management
-            </h3>
-            <p className="text-gray-500 mt-2">
-              Quản lý câu hỏi thường gặp
-            </p>
-            <p className="text-sm text-gray-400 mt-4">
-              Tính năng đang được phát triển...
-            </p>
-          </div>
+          <FAQManagement />
         </Card>
       ),
     },

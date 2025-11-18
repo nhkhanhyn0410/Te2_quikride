@@ -47,6 +47,7 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 import OperatorManagementPage from './pages/admin/OperatorManagementPage';
 import ComplaintManagementPage from './pages/admin/ComplaintManagementPage';
 import ContentManagementPage from './pages/admin/ContentManagementPage';
+import ReportsPage from './pages/admin/ReportsPage';
 
 function App() {
   return (
@@ -169,6 +170,7 @@ function App() {
           <Route path="operators" element={<OperatorManagementPage />} />
           <Route path="complaints" element={<ComplaintManagementPage />} />
           <Route path="content" element={<ContentManagementPage />} />
+          <Route path="reports" element={<ReportsPage />} />
         </Route>
 
         {/* 404 Not Found */}
