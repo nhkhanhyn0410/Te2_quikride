@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, Select, InputNumber, message, Tabs, Spin } from 'antd';
+import { Button, Select, InputNumber, message, Tabs, Spin, Radio } from 'antd';
 import { seatLayoutApi } from '../../services/operatorApi';
 
 const { Option } = Select;
@@ -11,17 +11,22 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
   const [customLayout, setCustomLayout] = useState(null);
   const [rows, setRows] = useState(10);
   const [columns, setColumns] = useState(4);
+  const [floors, setFloors] = useState(1);
   const [mode, setMode] = useState('template'); // 'template' or 'custom'
   const [loadingTemplates, setLoadingTemplates] = useState(false);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [buildingLayout, setBuildingLayout] = useState(false);
 
+  // Reset states when busType changes
   useEffect(() => {
     if (busType) {
       loadTemplates();
-    }
-    if (initialLayout) {
-      setCustomLayout(initialLayout);
+      // Reset custom layout states when busType changes
+      setSelectedTemplate(null);
+      setCustomLayout(null);
+      setRows(10);
+      setColumns(4);
+      setFloors(1);
     }
   }, [busType]);
 
@@ -34,7 +39,7 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
         setMode('custom');
       }
     }
-  }, [initialLayout]);
+  }, [initialLayout, mode, selectedTemplate]);
 
   const loadTemplates = async () => {
     if (!busType) return;
@@ -54,15 +59,18 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
     }
   };
 
-  const handleSelectTemplate = async (templateName) => {
+  const handleSelectTemplate = async (templateKey) => {
     if (!busType) {
       message.warning('Vui lòng chọn loại xe trước');
       return;
     }
 
+    console.log('Selected template key:', templateKey);
+
     setLoadingTemplate(true);
     try {
-      const response = await seatLayoutApi.getTemplate(busType, templateName);
+      // Use templateKey instead of template name
+      const response = await seatLayoutApi.getTemplate(busType, templateKey);
       console.log('Template response:', response);
 
       if (response.status === 'success' && response.data?.template) {
@@ -95,12 +103,18 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
       return;
     }
 
+    if (!floors || floors < 1 || floors > 2) {
+      message.warning('Số tầng phải là 1 hoặc 2');
+      return;
+    }
+
     setBuildingLayout(true);
     try {
       const response = await seatLayoutApi.buildLayout({
         busType,
         rows,
         columns,
+        floors,
       });
       console.log('Build custom layout response:', response);
 
@@ -128,6 +142,13 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
   }, [mode, selectedTemplate, customLayout, onSave]);
 
   const handleCancel = useCallback(() => {
+    // Reset all states when cancelling
+    setSelectedTemplate(null);
+    setCustomLayout(null);
+    setRows(10);
+    setColumns(4);
+    setFloors(1);
+    setMode('template');
     onSave(null);
   }, [onSave]);
 
@@ -214,6 +235,11 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
     return currentLayout !== null && currentLayout !== undefined;
   }, [currentLayout]);
 
+  // Determine if floors input should be shown based on bus type
+  const canHaveMultipleFloors = useMemo(() => {
+    return busType === 'sleeper' || busType === 'double_decker';
+  }, [busType]);
+
   return (
     <div className="space-y-4">
       <Tabs activeKey={mode} onChange={setMode}>
@@ -228,8 +254,9 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
                 loading={loadingTemplates}
               >
                 {templates.map((template) => (
-                  <Option key={template.name} value={template.name}>
+                  <Option key={template.templateKey} value={template.templateKey}>
                     {template.name} - {template.totalSeats} ghế
+                    {template.floors > 1 ? ` (${template.floors} tầng)` : ''}
                   </Option>
                 ))}
               </Select>
@@ -283,6 +310,24 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
                 </div>
               </div>
 
+              {/* Floors input - only show for sleeper and double_decker */}
+              {canHaveMultipleFloors && (
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Số Tầng:</label>
+                  <Radio.Group
+                    value={floors}
+                    onChange={(e) => setFloors(e.target.value)}
+                    disabled={!busType || buildingLayout}
+                  >
+                    <Radio value={1}>1 Tầng</Radio>
+                    <Radio value={2}>2 Tầng</Radio>
+                  </Radio.Group>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {floors === 2 && '⚠️ Xe 2 tầng sẽ có thêm dấu phân cách giữa các tầng'}
+                  </div>
+                </div>
+              )}
+
               <Button
                 type="primary"
                 onClick={handleBuildCustom}
@@ -308,7 +353,10 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
       <div className="flex justify-between items-center pt-4 border-t">
         <div className="text-sm text-gray-600">
           {hasValidLayout ? (
-            <span className="text-green-600 font-medium">✓ Sơ đồ đã sẵn sàng ({currentLayout.totalSeats} ghế)</span>
+            <span className="text-green-600 font-medium">
+              ✓ Sơ đồ đã sẵn sàng ({currentLayout.totalSeats} ghế
+              {currentLayout.floors > 1 ? `, ${currentLayout.floors} tầng` : ''})
+            </span>
           ) : (
             <span className="text-gray-500">Chưa có sơ đồ nào được chọn</span>
           )}
