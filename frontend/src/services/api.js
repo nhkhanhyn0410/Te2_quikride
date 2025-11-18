@@ -60,7 +60,9 @@ api.interceptors.response.use(
 
         // Redirect based on current path
         const currentPath = window.location.pathname;
-        if (currentPath.startsWith('/operator')) {
+        if (currentPath.startsWith('/admin')) {
+          window.location.href = '/admin/login';
+        } else if (currentPath.startsWith('/operator')) {
           window.location.href = '/operator/login';
         } else if (currentPath.startsWith('/trip-manager')) {
           window.location.href = '/trip-manager/login';

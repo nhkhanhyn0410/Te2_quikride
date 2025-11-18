@@ -3,11 +3,13 @@ import { Toaster } from 'react-hot-toast';
 
 // Layouts
 import DashboardLayout from './components/operator/DashboardLayout';
+import AdminDashboardLayout from './components/admin/AdminDashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Auth Pages
 import OperatorLoginPage from './pages/auth/OperatorLoginPage';
 import TripManagerLoginPage from './pages/auth/TripManagerLoginPage';
+import AdminLoginPage from './pages/auth/AdminLoginPage';
 import CustomerLoginPage from './pages/auth/CustomerLoginPage';
 import CustomerRegisterPage from './pages/auth/CustomerRegisterPage';
 
@@ -38,6 +40,9 @@ import BookingFailure from './pages/payment/BookingFailure';
 import TripManagerDashboard from './pages/trip-manager/TripManagerDashboard';
 import QRScannerPage from './pages/trip-manager/QRScannerPage';
 import PassengersPage from './pages/trip-manager/PassengersPage';
+
+// Admin Pages
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 
 function App() {
   return (
@@ -141,6 +146,23 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Admin Auth Routes */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+
+        {/* Admin Dashboard Routes - Protected */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          {/* TODO: Add other admin pages (users, operators, complaints, content, reports) */}
+        </Route>
 
         {/* 404 Not Found */}
         <Route
