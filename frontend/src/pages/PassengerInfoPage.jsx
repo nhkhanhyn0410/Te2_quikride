@@ -214,17 +214,58 @@ const PassengerInfoPage = () => {
 
       const holdResponse = await holdSeats(holdData);
 
+      console.log('Hold seats response:', holdResponse);
+
       if (holdResponse.success && holdResponse.data) {
+        console.log('Setting current booking:', holdResponse.data.booking);
+        console.log('Lock info:', holdResponse.data.lockInfo);
+
         setCurrentBooking(holdResponse.data.booking);
         setSessionId(holdResponse.data.lockInfo.sessionId);
         setExpiresAt(holdResponse.data.lockInfo.expiresAt);
 
         message.success('Giữ chỗ thành công! Vui lòng hoàn tất thanh toán trong 15 phút');
+
+        console.log('Changing step to 1 (payment)');
         setCurrentStep(1);
+      } else {
+        console.error('Hold seats response invalid:', holdResponse);
+        toast.error('Phản hồi từ server không hợp lệ');
       }
     } catch (error) {
       console.error('Hold seats error:', error);
-      toast.error(error || 'Có lỗi xảy ra khi giữ chỗ');
+
+      // Check if error is about seat already taken
+      if (error && typeof error === 'string' && error.includes('đang được người khác chọn')) {
+        const tripId = selectedTrip?.id || selectedTrip?._id;
+
+        // Parse the failed seat numbers from error message
+        // Error format: "Ghế A1, A2 đang được người khác chọn"
+        const match = error.match(/Ghế\s+([A-Z0-9,\s]+)\s+đang được/);
+        if (match) {
+          const failedSeatsStr = match[1];
+          const failedSeats = failedSeatsStr.split(',').map(s => s.trim());
+
+          // Remove the failed seats from selectedSeats
+          const { removeSeat } = useBookingStore.getState();
+          failedSeats.forEach(seatNumber => {
+            removeSeat(seatNumber);
+          });
+
+          console.log('Removed failed seats:', failedSeats);
+        }
+
+        toast.error(`${error}. Vui lòng chọn ghế khác.`, {
+          duration: 5000,
+        });
+
+        // Navigate back to trip detail page to select different seats
+        setTimeout(() => {
+          navigate(`/trip/${tripId}`);
+        }, 2000);
+      } else {
+        toast.error(error || 'Có lỗi xảy ra khi giữ chỗ');
+      }
     } finally {
       setLoading(false);
     }
@@ -236,30 +277,48 @@ const PassengerInfoPage = () => {
 
       const { currentBooking } = useBookingStore.getState();
 
+      console.log('handlePayment - currentBooking:', currentBooking);
+
       if (!currentBooking) {
         toast.error('Không tìm thấy thông tin booking');
         return;
       }
 
+      // Support both 'id' and '_id' fields
+      const bookingId = currentBooking.id || currentBooking._id;
+      if (!bookingId) {
+        toast.error('Thông tin booking không hợp lệ');
+        console.error('Booking ID not found:', currentBooking);
+        return;
+      }
+
       // Create payment
       const paymentData = {
-        bookingId: currentBooking._id,
+        bookingId: bookingId,
         paymentMethod: selectedPaymentMethod,
         amount: currentBooking.finalPrice,
         bankCode: selectedBank,
         locale: 'vn',
       };
 
+      console.log('Creating payment with data:', paymentData);
+
       const paymentResponse = await createPayment(paymentData);
+
+      console.log('Payment response:', paymentResponse);
 
       if (paymentResponse.success && paymentResponse.data) {
         // Redirect to payment URL
         if (paymentResponse.data.paymentUrl) {
+          console.log('Redirecting to payment URL:', paymentResponse.data.paymentUrl);
           window.location.href = paymentResponse.data.paymentUrl;
         } else {
           toast.success('Thanh toán thành công!');
           navigate(`/booking/confirmation/${currentBooking.bookingCode}`);
         }
+      } else {
+        console.error('Payment response invalid:', paymentResponse);
+        toast.error('Phản hồi thanh toán không hợp lệ');
       }
     } catch (error) {
       console.error('Payment error:', error);
