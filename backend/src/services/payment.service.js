@@ -158,10 +158,14 @@ class PaymentService {
    * @returns {Object} Processing result
    */
   static async processVNPayCallback(vnpParams, ipAddress) {
+    console.log('📥 VNPay callback received:', vnpParams);
+
     // Process callback with VNPay service
     const result = vnpayService.processCallback(vnpParams);
+    console.log('🔐 VNPay signature verification result:', result);
 
     if (!result.success) {
+      console.error('❌ VNPay callback failed:', result);
       return {
         success: false,
         message: result.message,
@@ -170,9 +174,11 @@ class PaymentService {
     }
 
     const { paymentCode, transactionId, amount, bankCode, cardType, payDate } = result;
+    console.log('💳 VNPay payment details:', { paymentCode, transactionId, amount, bankCode });
 
     // Find payment
     const payment = await Payment.findOne({ paymentCode }).populate('bookingId');
+    console.log('🔍 Payment found:', payment ? payment.paymentCode : 'NOT FOUND');
 
     if (!payment) {
       return {
@@ -193,7 +199,9 @@ class PaymentService {
     }
 
     // Verify amount
+    console.log('💰 Amount verification:', { vnpayAmount: amount, paymentAmount: payment.amount });
     if (amount !== payment.amount) {
+      console.error('❌ Amount mismatch!');
       payment.markAsFailed(
         `Số tiền không khớp: ${amount} !== ${payment.amount}`,
         'AMOUNT_MISMATCH',
@@ -209,6 +217,8 @@ class PaymentService {
     }
 
     try {
+      console.log('✅ Processing successful payment...');
+
       // Mark payment as completed
       payment.markAsCompleted(transactionId, {
         ...result.rawData,
@@ -217,9 +227,12 @@ class PaymentService {
         payDate,
       });
       await payment.save();
+      console.log('✅ Payment marked as completed');
 
       // Update booking payment status
       const booking = await Booking.findById(payment.bookingId);
+      console.log('📝 Booking found:', booking ? booking.bookingCode : 'NOT FOUND');
+
       if (booking) {
         booking.paymentStatus = 'paid';
         booking.paymentMethod = 'vnpay';
@@ -232,6 +245,7 @@ class PaymentService {
         }
 
         await booking.save();
+        console.log('✅ Booking updated successfully');
 
         // Generate digital ticket in background (UC-7)
         const TicketServiceClass = getTicketService();
@@ -251,6 +265,7 @@ class PaymentService {
           });
       }
 
+      console.log('🎉 VNPay callback processed successfully!');
       return {
         success: true,
         message: 'Thanh toán thành công',
@@ -258,6 +273,7 @@ class PaymentService {
         booking,
       };
     } catch (error) {
+      console.error('❌ Error processing VNPay callback:', error);
       payment.markAsFailed(error.message, 'PROCESSING_ERROR', result.rawData);
       await payment.save();
 
