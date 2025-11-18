@@ -46,12 +46,12 @@ const BookingSuccess = () => {
           contactInfo,
           finalPrice,
           paymentMethod: 'vnpay', // Will be updated from API if fetched
-          paymentStatus: 'pending',
+          paymentStatus: 'paid', // Assume paid if coming from VNPay return
         };
         setBooking(constructedBooking);
 
-        // Try to fetch full booking data in background
-        fetchBookingData();
+        // Try to fetch full booking data in background to merge with constructed data
+        fetchBookingData(constructedBooking);
         return;
       }
 
@@ -61,7 +61,7 @@ const BookingSuccess = () => {
       }
     };
 
-    const fetchBookingData = async () => {
+    const fetchBookingData = async (existingBooking = null) => {
       try {
         setLoading(true);
         const phoneParam = phone || contactInfo?.phone;
@@ -80,7 +80,21 @@ const BookingSuccess = () => {
         // Support both response formats
         const isSuccess = response.success === true || response.status === 'success';
         if (isSuccess && response.data) {
-          setBooking(response.data);
+          // API returns { data: { booking: {...} } }, extract the booking object
+          const bookingData = response.data.booking || response.data;
+
+          // Merge with existing booking if available (preserve constructed data)
+          if (existingBooking) {
+            setBooking({
+              ...existingBooking,
+              ...bookingData,
+              // Preserve payment info from constructed booking if API doesn't have it
+              paymentMethod: bookingData.paymentMethod || existingBooking.paymentMethod,
+              paymentStatus: bookingData.paymentStatus || existingBooking.paymentStatus,
+            });
+          } else {
+            setBooking(bookingData);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch booking:', error);
