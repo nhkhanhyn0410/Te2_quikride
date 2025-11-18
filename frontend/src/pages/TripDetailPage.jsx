@@ -27,6 +27,7 @@ import toast from 'react-hot-toast';
 import { getTripDetails, getAvailableSeats } from '../services/bookingApi';
 import useBookingStore from '../store/bookingStore';
 import SeatMapComponent from '../components/SeatMapComponent';
+import { getAmenityIcon } from '../utils/constants';
 
 const { Title, Text } = Typography;
 
@@ -217,7 +218,9 @@ const TripDetailPage = () => {
                 <Descriptions.Item label="Tiện nghi" span={2}>
                   <Space wrap>
                     {trip.bus?.amenities?.map(amenity => (
-                      <Tag key={amenity} color="blue">{amenity}</Tag>
+                      <Tag key={amenity} color="blue">
+                        {getAmenityIcon(amenity)} {amenity}
+                      </Tag>
                     ))}
                   </Space>
                 </Descriptions.Item>

@@ -132,6 +132,60 @@ export const SUCCESS_MESSAGES = {
   UPDATE_SUCCESS: 'Cập nhật thành công!',
 };
 
+// Amenities Icons
+export const AMENITIES_ICONS = {
+  'WiFi': '📶',
+  'AC': '❄️',
+  'Điều hòa': '❄️',
+  'Nước uống': '💧',
+  'Khăn lạnh': '🧊',
+  'TV': '📺',
+  'Phim': '🎬',
+  'Sạc điện thoại': '🔌',
+  'Cổng sạc': '🔌',
+  'USB': '🔌',
+  'Chăn': '🛏️',
+  'Gối': '🛏️',
+  'Toilet': '🚻',
+  'WC': '🚻',
+  'Nhà vệ sinh': '🚻',
+  'Ghế massage': '💆',
+  'Massage': '💆',
+  'Giường nằm': '🛏️',
+  'Sleeper': '🛏️',
+  'Rèm': '🪟',
+  'Cửa sổ': '🪟',
+  'Không khói': '🚭',
+  'Nước miễn phí': '💧',
+  'Snack': '🍪',
+  'Đồ ăn nhẹ': '🍪',
+  'Bluetooth': '📶',
+  'Camera': '📹',
+  'An toàn': '🛡️',
+  'Dây an toàn': '🔒',
+};
+
+// Helper function to get amenity icon
+export const getAmenityIcon = (amenity) => {
+  if (!amenity) return '✓';
+
+  // Try exact match first
+  if (AMENITIES_ICONS[amenity]) {
+    return AMENITIES_ICONS[amenity];
+  }
+
+  // Try case-insensitive match
+  const lowerAmenity = amenity.toLowerCase();
+  for (const [key, icon] of Object.entries(AMENITIES_ICONS)) {
+    if (key.toLowerCase() === lowerAmenity || lowerAmenity.includes(key.toLowerCase())) {
+      return icon;
+    }
+  }
+
+  // Default icon
+  return '✓';
+};
+
 export default {
   API_ENDPOINTS,
   USER_ROLES,
@@ -145,4 +199,5 @@ export default {
   DATE_FORMATS,
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
+  AMENITIES_ICONS,
 };

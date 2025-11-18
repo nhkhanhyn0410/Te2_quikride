@@ -27,6 +27,7 @@ import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import { searchTrips } from '../services/bookingApi';
 import useBookingStore from '../store/bookingStore';
+import { getAmenityIcon } from '../utils/constants';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -347,7 +348,9 @@ const TripsPage = () => {
                             {trip.availableSeats}/{trip.totalSeats} ghế trống
                           </Tag>
                           {trip.busId?.amenities?.map(amenity => (
-                            <Tag key={amenity} color="blue">{amenity}</Tag>
+                            <Tag key={amenity} color="blue">
+                              {getAmenityIcon(amenity)} {amenity}
+                            </Tag>
                           ))}
                         </div>
                       </Col>
