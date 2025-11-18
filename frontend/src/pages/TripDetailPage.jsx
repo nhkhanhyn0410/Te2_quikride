@@ -118,12 +118,19 @@ const TripDetailPage = () => {
   };
 
   const formatPrice = (price) => {
+    if (!price || isNaN(price)) return '0đ';
     return price.toLocaleString('vi-VN') + 'đ';
   };
 
+  const getSeatPrice = () => {
+    // Try multiple price fields in order of preference
+    return trip?.pricing?.finalPrice || trip?.finalPrice || trip?.pricing?.basePrice || 0;
+  };
+
   const calculateTotalPrice = () => {
-    if (!trip) return 0;
-    return trip.finalPrice * selectedSeats.length;
+    if (!trip || selectedSeats.length === 0) return 0;
+    const price = getSeatPrice();
+    return price * selectedSeats.length;
   };
 
   if (loading || !trip) {
@@ -291,8 +298,6 @@ const TripDetailPage = () => {
                 seatLayout={trip.bus?.seatLayout}
                 bookedSeats={trip.seats?.bookedSeatNumbers || []}
                 availableSeats={availableSeats}
-                seatPrice={trip.finalPrice || trip.pricing?.finalPrice || 0}
-                showPrice={true}
               />
 
               <Divider />
@@ -321,16 +326,10 @@ const TripDetailPage = () => {
               <div className="mb-4">
                 <div className="flex justify-between mb-2">
                   <Text>Giá vé ({selectedSeats.length} ghế)</Text>
-                  <Text>{formatPrice(calculateTotalPrice())}</Text>
+                  <Text strong className="text-blue-600">
+                    {selectedSeats.length > 0 ? formatPrice(getSeatPrice()) : '0đ'} x {selectedSeats.length}
+                  </Text>
                 </div>
-                {trip.pricing?.discount > 0 && (
-                  <div className="flex justify-between mb-2">
-                    <Text>Giảm giá ({trip.pricing.discount}%)</Text>
-                    <Text className="text-red-500">
-                      -{formatPrice(trip.pricing.basePrice * selectedSeats.length - calculateTotalPrice())}
-                    </Text>
-                  </div>
-                )}
                 <Divider className="my-2" />
                 <div className="flex justify-between">
                   <Text strong className="text-lg">Tổng cộng</Text>
