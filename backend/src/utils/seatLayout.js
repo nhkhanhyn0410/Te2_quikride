@@ -75,27 +75,72 @@ const generateAisleLayout = (rows, hasBackRow = false) => {
 };
 
 /**
- * Generate a sleeper bus layout (2 columns with beds)
- * @param {Number} rows - Number of rows
+ * Generate a sleeper bus layout
+ * @param {Number} rows - Number of rows (per floor if 2 floors)
  * @param {Number} floors - Number of floors (1 or 2)
+ * @param {Number} columns - Number of columns (default 2)
  * @returns {Object} Layout configuration for sleeper
  */
-const generateSleeperLayout = (rows, floors = 1) => {
+const generateSleeperLayout = (rows, floors = 1, columns = 2) => {
   const layout = [];
 
-  for (let row = 0; row < rows; row++) {
-    const rowPrefix = String.fromCharCode(65 + row);
-    // Sleeper typically has 2 columns (lower and upper berths on each side)
-    layout.push([`${rowPrefix}L`, `${rowPrefix}U`]); // L=Lower, U=Upper
-  }
+  if (floors === 1) {
+    // Single floor sleeper
+    for (let row = 0; row < rows; row++) {
+      const rowPrefix = String.fromCharCode(65 + row);
+      const rowArray = [];
+      for (let col = 0; col < columns; col++) {
+        rowArray.push(`${rowPrefix}${col + 1}`);
+      }
+      layout.push(rowArray);
+    }
 
-  return {
-    floors,
-    rows,
-    columns: 2,
-    layout,
-    totalSeats: rows * 2 * floors,
-  };
+    return {
+      floors: 1,
+      rows,
+      columns,
+      layout,
+      totalSeats: rows * columns,
+    };
+  } else {
+    // Two floor sleeper (similar to double-decker)
+    // Lower floor
+    layout.push(['DRIVER', ...Array(columns - 1).fill('')]);
+
+    for (let row = 0; row < rows; row++) {
+      const rowPrefix = `L${String.fromCharCode(65 + row)}`;
+      const rowArray = [];
+      for (let col = 0; col < columns; col++) {
+        rowArray.push(`${rowPrefix}${col + 1}`);
+      }
+      layout.push(rowArray);
+    }
+
+    // Floor separator
+    layout.push(['FLOOR_2', ...Array(columns - 1).fill('')]);
+
+    // Upper floor
+    for (let row = 0; row < rows; row++) {
+      const rowPrefix = `U${String.fromCharCode(65 + row)}`;
+      const rowArray = [];
+      for (let col = 0; col < columns; col++) {
+        rowArray.push(`${rowPrefix}${col + 1}`);
+      }
+      layout.push(rowArray);
+    }
+
+    return {
+      floors: 2,
+      rows: rows * 2 + 2, // Total rows including driver and floor separator
+      columns,
+      layout,
+      totalSeats: rows * columns * 2,
+      floorInfo: {
+        lowerFloorRows: rows + 1, // Including driver row
+        upperFloorStart: rows + 2, // After driver and floor separator
+      },
+    };
+  }
 };
 
 /**
