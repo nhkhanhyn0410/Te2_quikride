@@ -108,6 +108,36 @@ class PaymentService {
       // Update payment with URL and expiry
       payment.setPaymentUrl(paymentUrl, 15);
       await payment.save();
+    } else if (paymentMethod === 'cash') {
+      // For cash payment, mark as pending and confirm booking
+      payment.status = 'pending';
+      payment.metadata = {
+        ...payment.metadata,
+        paymentType: 'cash_on_boarding',
+        note: 'Thanh toán tiền mặt khi lên xe',
+      };
+      await payment.save();
+
+      // Confirm booking immediately for cash payment
+      booking.paymentStatus = 'pending'; // Will be marked as 'paid' when driver confirms cash received
+      booking.paymentMethod = 'cash';
+      booking.paymentId = payment._id;
+      booking.confirm(); // Confirm booking
+      await booking.save();
+
+      // Generate digital ticket in background
+      const TicketServiceClass = getTicketService();
+      TicketServiceClass.generateTicket(booking._id)
+        .then((ticket) => {
+          console.log('✅ Ticket generated for cash booking:', booking.bookingCode);
+          return TicketServiceClass.sendTicketNotifications(ticket._id);
+        })
+        .then((notificationResult) => {
+          console.log('✅ Ticket notifications sent:', notificationResult);
+        })
+        .catch((error) => {
+          console.error('❌ Ticket generation failed:', error);
+        });
     }
 
     // Populate payment details

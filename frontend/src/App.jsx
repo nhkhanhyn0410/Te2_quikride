@@ -29,6 +29,11 @@ import BookingConfirmationPage from './pages/BookingConfirmationPage';
 import MyTicketsPage from './pages/customer/MyTicketsPage';
 import GuestTicketLookupPage from './pages/GuestTicketLookupPage';
 
+// Payment Pages
+import VNPayReturn from './pages/payment/VNPayReturn';
+import BookingSuccess from './pages/payment/BookingSuccess';
+import BookingFailure from './pages/payment/BookingFailure';
+
 // Trip Manager Pages
 import TripManagerDashboard from './pages/trip-manager/TripManagerDashboard';
 import QRScannerPage from './pages/trip-manager/QRScannerPage';
@@ -78,41 +83,13 @@ function App() {
         <Route path="/my-tickets" element={<MyTicketsPage />} />
         <Route path="/tickets/lookup" element={<GuestTicketLookupPage />} />
 
-        {/* Payment Success/Failure Pages */}
-        <Route
-          path="/payment/success"
-          element={<BookingConfirmationPage />}
-        />
-        <Route
-          path="/payment/failure"
-          element={
-            <div className="flex items-center justify-center h-screen bg-gray-50">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold text-red-600">❌</h1>
-                <h2 className="text-2xl font-semibold mt-4">Thanh toán thất bại</h2>
-                <p className="text-gray-600 mt-2">Đã có lỗi xảy ra trong quá trình thanh toán</p>
-                <a href="/" className="text-blue-600 hover:underline mt-4 inline-block">
-                  Về trang chủ
-                </a>
-              </div>
-            </div>
-          }
-        />
-        <Route
-          path="/payment/error"
-          element={
-            <div className="flex items-center justify-center h-screen bg-gray-50">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold text-orange-600">⚠️</h1>
-                <h2 className="text-2xl font-semibold mt-4">Lỗi hệ thống</h2>
-                <p className="text-gray-600 mt-2">Vui lòng thử lại sau</p>
-                <a href="/" className="text-blue-600 hover:underline mt-4 inline-block">
-                  Về trang chủ
-                </a>
-              </div>
-            </div>
-          }
-        />
+        {/* Payment Routes */}
+        <Route path="/payment/vnpay-return" element={<VNPayReturn />} />
+        <Route path="/booking/success" element={<BookingSuccess />} />
+        <Route path="/booking/failure" element={<BookingFailure />} />
+        <Route path="/payment/success" element={<BookingSuccess />} />
+        <Route path="/payment/failure" element={<BookingFailure />} />
+        <Route path="/payment/error" element={<BookingFailure />} />
 
         {/* Operator Auth Routes */}
         <Route path="/operator/login" element={<OperatorLoginPage />} />
