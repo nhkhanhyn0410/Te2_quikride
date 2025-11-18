@@ -77,7 +77,9 @@ const BookingSuccess = () => {
         });
 
         console.log('Booking fetched from API:', response);
-        if (response.status === 'success' && response.data) {
+        // Support both response formats
+        const isSuccess = response.success === true || response.status === 'success';
+        if (isSuccess && response.data) {
           setBooking(response.data);
         }
       } catch (error) {
@@ -135,38 +137,42 @@ const BookingSuccess = () => {
 
             <Descriptions bordered column={1}>
               <Descriptions.Item label="Tuyến xe">
-                {booking.tripId?.routeId?.fromCity} → {booking.tripId?.routeId?.toCity}
+                {booking.tripId?.routeId?.fromCity || booking.tripInfo?.origin?.city || 'N/A'} → {booking.tripId?.routeId?.toCity || booking.tripInfo?.destination?.city || 'N/A'}
               </Descriptions.Item>
               <Descriptions.Item label="Thời gian khởi hành">
-                {dayjs(booking.tripId?.departureTime).format('HH:mm, DD/MM/YYYY')}
+                {booking.tripId?.departureTime ? dayjs(booking.tripId.departureTime).format('HH:mm, DD/MM/YYYY') : 'N/A'}
               </Descriptions.Item>
               <Descriptions.Item label="Điểm đón">
-                {booking.pickupPoint?.name}
+                {booking.pickupPoint?.name || booking.tripInfo?.pickupPoint?.name || 'N/A'}
               </Descriptions.Item>
               <Descriptions.Item label="Điểm trả">
-                {booking.dropoffPoint?.name}
+                {booking.dropoffPoint?.name || booking.tripInfo?.dropoffPoint?.name || 'N/A'}
               </Descriptions.Item>
               <Descriptions.Item label="Số ghế">
                 <div className="flex gap-2 flex-wrap">
-                  {booking.seats?.map((seat) => (
-                    <Tag key={seat.seatNumber} color="blue">
-                      {seat.seatNumber}
-                    </Tag>
-                  ))}
+                  {booking.seats && booking.seats.length > 0 ? (
+                    booking.seats.map((seat, index) => (
+                      <Tag key={seat.seatNumber || index} color="blue">
+                        {seat.seatNumber || seat}
+                      </Tag>
+                    ))
+                  ) : (
+                    <span>N/A</span>
+                  )}
                 </div>
               </Descriptions.Item>
               <Descriptions.Item label="Hành khách">
-                {booking.contactInfo?.name}
+                {booking.contactInfo?.name || 'N/A'}
               </Descriptions.Item>
               <Descriptions.Item label="Số điện thoại">
-                {booking.contactInfo?.phone}
+                {booking.contactInfo?.phone || 'N/A'}
               </Descriptions.Item>
               <Descriptions.Item label="Email">
-                {booking.contactInfo?.email}
+                {booking.contactInfo?.email || 'N/A'}
               </Descriptions.Item>
               <Descriptions.Item label="Phương thức thanh toán">
                 <Tag color={booking.paymentMethod === 'cash' ? 'green' : 'blue'}>
-                  {booking.paymentMethod === 'cash' ? 'Tiền mặt khi lên xe' : 'VNPay'}
+                  {booking.paymentMethod === 'cash' ? 'Tiền mặt khi lên xe' : booking.paymentMethod === 'vnpay' ? 'VNPay' : booking.paymentMethod || 'N/A'}
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Trạng thái thanh toán">
@@ -176,7 +182,7 @@ const BookingSuccess = () => {
               </Descriptions.Item>
               <Descriptions.Item label="Tổng tiền">
                 <strong className="text-xl text-blue-600">
-                  {booking.finalPrice?.toLocaleString('vi-VN')}đ
+                  {booking.finalPrice ? booking.finalPrice.toLocaleString('vi-VN') : '0'}đ
                 </strong>
               </Descriptions.Item>
             </Descriptions>

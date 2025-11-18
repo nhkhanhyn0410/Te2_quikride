@@ -398,7 +398,13 @@ class BookingService {
    */
   static async getBookingByCode(bookingCode, phone) {
     const booking = await Booking.findOne({ bookingCode })
-      .populate('tripId')
+      .populate({
+        path: 'tripId',
+        populate: {
+          path: 'routeId',
+          select: 'fromCity toCity origin destination',
+        },
+      })
       .populate('operatorId', 'companyName phone email');
 
     if (!booking) {
