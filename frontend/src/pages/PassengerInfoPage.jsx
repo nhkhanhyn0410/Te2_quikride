@@ -70,13 +70,15 @@ const PassengerInfoPage = () => {
 
   useEffect(() => {
     // Debug logging
+    const tripId = selectedTrip?.id || selectedTrip?._id;
     console.log('PassengerInfoPage - Booking state:', {
       selectedTrip,
       selectedSeats,
       pickupPoint,
       dropoffPoint,
       hasTrip: !!selectedTrip,
-      hasTripId: !!selectedTrip?._id,
+      tripId: tripId,
+      hasTripId: !!tripId,
       seatsCount: selectedSeats?.length || 0,
     });
 
@@ -117,9 +119,10 @@ const PassengerInfoPage = () => {
     try {
       setVoucherValidating(true);
       const totalAmount = getSeatPrice() * selectedSeats.length;
+      const tripId = selectedTrip?.id || selectedTrip?._id;
 
       const response = await validateVoucher(voucherCode, {
-        tripId: selectedTrip._id,
+        tripId: tripId,
         totalAmount,
       });
 
@@ -156,8 +159,11 @@ const PassengerInfoPage = () => {
     try {
       setLoading(true);
 
+      // Get tripId (support both 'id' and '_id' fields)
+      const tripId = selectedTrip?.id || selectedTrip?._id;
+
       // Validate booking state before submitting
-      if (!selectedTrip || !selectedTrip._id) {
+      if (!selectedTrip || !tripId) {
         toast.error('Thông tin chuyến xe không hợp lệ. Vui lòng chọn lại chuyến xe.');
         navigate('/');
         return;
@@ -165,13 +171,13 @@ const PassengerInfoPage = () => {
 
       if (!selectedSeats || selectedSeats.length === 0) {
         toast.error('Vui lòng chọn ghế trước khi tiếp tục.');
-        navigate(`/trip/${selectedTrip._id}`);
+        navigate(`/trip/${tripId}`);
         return;
       }
 
       if (!pickupPoint || !dropoffPoint) {
         toast.error('Vui lòng chọn điểm đón và trả khách.');
-        navigate(`/trip/${selectedTrip._id}`);
+        navigate(`/trip/${tripId}`);
         return;
       }
 
@@ -192,7 +198,7 @@ const PassengerInfoPage = () => {
 
       // Hold seats
       const holdData = {
-        tripId: selectedTrip._id,
+        tripId: tripId,
         seats: passengers,
         contactInfo: {
           name: values.name,
