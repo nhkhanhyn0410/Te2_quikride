@@ -224,7 +224,38 @@ const PassengerInfoPage = () => {
       }
     } catch (error) {
       console.error('Hold seats error:', error);
-      toast.error(error || 'Có lỗi xảy ra khi giữ chỗ');
+
+      // Check if error is about seat already taken
+      if (error && typeof error === 'string' && error.includes('đang được người khác chọn')) {
+        const tripId = selectedTrip?.id || selectedTrip?._id;
+
+        // Parse the failed seat numbers from error message
+        // Error format: "Ghế A1, A2 đang được người khác chọn"
+        const match = error.match(/Ghế\s+([A-Z0-9,\s]+)\s+đang được/);
+        if (match) {
+          const failedSeatsStr = match[1];
+          const failedSeats = failedSeatsStr.split(',').map(s => s.trim());
+
+          // Remove the failed seats from selectedSeats
+          const { removeSeat } = useBookingStore.getState();
+          failedSeats.forEach(seatNumber => {
+            removeSeat(seatNumber);
+          });
+
+          console.log('Removed failed seats:', failedSeats);
+        }
+
+        toast.error(`${error}. Vui lòng chọn ghế khác.`, {
+          duration: 5000,
+        });
+
+        // Navigate back to trip detail page to select different seats
+        setTimeout(() => {
+          navigate(`/trip/${tripId}`);
+        }, 2000);
+      } else {
+        toast.error(error || 'Có lỗi xảy ra khi giữ chỗ');
+      }
     } finally {
       setLoading(false);
     }
