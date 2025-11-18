@@ -42,7 +42,9 @@ const VNPayReturn = () => {
         // Redirect to success page after 2 seconds
         setTimeout(() => {
           if (response.data?.booking?.bookingCode) {
-            navigate(`/booking/success?bookingCode=${response.data.booking.bookingCode}`);
+            const phone = response.data?.booking?.contactInfo?.phone || '';
+            const redirectUrl = `/booking/success?bookingCode=${response.data.booking.bookingCode}${phone ? `&phone=${phone}` : ''}`;
+            navigate(redirectUrl);
           } else {
             navigate('/booking/success');
           }
