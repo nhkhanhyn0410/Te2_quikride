@@ -176,7 +176,7 @@ const TripsPage = () => {
               </Title>
             </Space>
             <Text className="text-gray-600">
-              {formatDate(searchCriteria.date)} • {searchCriteria.passengers} ghế
+              {formatDate(searchCriteria.date)}
             </Text>
           </div>
         </div>

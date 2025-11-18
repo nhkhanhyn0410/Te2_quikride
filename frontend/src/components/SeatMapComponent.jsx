@@ -215,7 +215,7 @@ const SeatMapComponent = ({
         </div>
         <div className="flex items-center gap-2">
           <div className="seat-legend seat-legend-available">
-            {selectedSeats.length + 1}
+            A1
           </div>
           <Text className="text-xs">Còn trống</Text>
         </div>
