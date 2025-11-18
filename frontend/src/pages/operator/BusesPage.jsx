@@ -35,6 +35,8 @@ const BusesPage = () => {
     setEditingBus(null);
     setSeatLayout(null);
     form.resetFields();
+    // Set default status to 'active'
+    form.setFieldsValue({ status: 'active' });
     setModalVisible(true);
   };
 
@@ -55,12 +57,27 @@ const BusesPage = () => {
       const values = await form.validateFields();
 
       if (!seatLayout) {
-        message.error('Vui lòng tạo sơ đồ ghế');
+        message.error('Vui lòng tạo sơ đồ ghế trước khi lưu');
         return;
       }
 
+      // Validate seat layout structure
+      if (!seatLayout.layout || !Array.isArray(seatLayout.layout) || seatLayout.layout.length === 0) {
+        message.error('Sơ đồ ghế không hợp lệ');
+        return;
+      }
+
+      if (!seatLayout.totalSeats || seatLayout.totalSeats < 1) {
+        message.error('Sơ đồ ghế phải có ít nhất 1 ghế');
+        return;
+      }
+
+      // Ensure amenities are lowercase to match backend validation
+      const amenities = values.amenities ? values.amenities.map(a => a.toLowerCase()) : [];
+
       const busData = {
         ...values,
+        amenities,
         seatLayout,
       };
 
@@ -73,9 +90,13 @@ const BusesPage = () => {
       }
 
       setModalVisible(false);
+      form.resetFields();
+      setSeatLayout(null);
       loadBuses();
     } catch (error) {
-      message.error(error.message || 'Có lỗi xảy ra');
+      console.error('Submit bus error:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Có lỗi xảy ra';
+      message.error(errorMessage);
     }
   };
 
@@ -211,6 +232,9 @@ const BusesPage = () => {
               <Option value="toilet">Toilet</Option>
               <Option value="tv">TV</Option>
               <Option value="water">Nước Uống</Option>
+              <Option value="blanket">Chăn</Option>
+              <Option value="pillow">Gối</Option>
+              <Option value="snack">Đồ Ăn Nhẹ</Option>
             </Select>
           </Form.Item>
 
@@ -251,6 +275,11 @@ const BusesPage = () => {
           busType={form.getFieldValue('busType')}
           initialLayout={seatLayout}
           onSave={(layout) => {
+            if (layout === null) {
+              // User cancelled
+              setLayoutModalVisible(false);
+              return;
+            }
             setSeatLayout(layout);
             setLayoutModalVisible(false);
             message.success('Đã lưu sơ đồ ghế');

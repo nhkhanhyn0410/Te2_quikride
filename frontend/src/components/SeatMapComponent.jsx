@@ -1,30 +1,78 @@
-import { useState, useEffect } from 'react';
-import { Typography, Tag } from 'antd';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Typography } from 'antd';
 import { CheckCircleFilled, CloseCircleOutlined } from '@ant-design/icons';
 import useBookingStore from '../store/bookingStore';
 
 const { Text } = Typography;
 
-const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] }) => {
+// Configuration constants
+const MAX_SEATS_SELECTION = 10;
+
+// Special seat type identifiers
+const SEAT_TYPES = {
+  AISLE: 'aisle',
+  DRIVER: 'driver',
+  FLOOR_SEPARATOR: 'floor_separator',
+  SEAT: 'seat',
+};
+
+const SeatMapComponent = ({
+  seatLayout,
+  bookedSeats = [],
+  availableSeats = [],
+  maxSeatsAllowed = MAX_SEATS_SELECTION
+}) => {
   const { selectedSeats, addSeat, removeSeat, clearSeats } = useBookingStore();
   const [seats, setSeats] = useState([]);
 
+  // Clean up invalid old data on mount (one-time operation)
   useEffect(() => {
     // Clear invalid old data from localStorage
     // Old data has arrays instead of seat objects
-    if (selectedSeats.length > 0 && Array.isArray(selectedSeats[0]) && !selectedSeats[0].seatNumber) {
-      console.log('Clearing invalid old seat data');
-      clearSeats();
+    if (selectedSeats.length > 0) {
+      const firstSeat = selectedSeats[0];
+      // Check if it's an old format (array or missing seatNumber)
+      if (Array.isArray(firstSeat) || (typeof firstSeat === 'object' && !firstSeat?.seatNumber)) {
+        console.log('Clearing invalid old seat data from localStorage');
+        clearSeats();
+      }
     }
-  }, []);
+  }, []); // Run only once on mount
 
+  // Memoize bookedSeats as a Set for O(1) lookup
+  const bookedSeatsSet = useMemo(() => {
+    return new Set(bookedSeats);
+  }, [bookedSeats]);
+
+  // Memoize selectedSeats as a Set for O(1) lookup
+  const selectedSeatsSet = useMemo(() => {
+    return new Set(selectedSeats.map(s => s.seatNumber));
+  }, [selectedSeats]);
+
+  // Generate seats structure from layout - only when seatLayout changes
   useEffect(() => {
     if (seatLayout && seatLayout.layout) {
       generateSeats();
     }
-  }, [seatLayout, bookedSeats]);
+  }, [seatLayout]); // Only depend on seatLayout, not bookedSeats
 
-  const generateSeats = () => {
+  const determineSeatType = useCallback((seatNumber) => {
+    if (!seatNumber || seatNumber === '') {
+      return SEAT_TYPES.AISLE;
+    }
+
+    if (seatNumber === 'DRIVER' || seatNumber === '🚗' || seatNumber.includes('Driver')) {
+      return SEAT_TYPES.DRIVER;
+    }
+
+    if (seatNumber === 'FLOOR_2') {
+      return SEAT_TYPES.FLOOR_SEPARATOR;
+    }
+
+    return SEAT_TYPES.SEAT;
+  }, []);
+
+  const generateSeats = useCallback(() => {
     const { layout, rows, columns } = seatLayout;
 
     // Backend returns 2D array: [['A1', 'A2'], ['B1', 'B2'], ...]
@@ -37,26 +85,26 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
       const rowSeats = [];
       for (let col = 0; col < columns; col++) {
         const seatNumber = layout[row]?.[col];
+        const seatType = determineSeatType(seatNumber);
 
-        // Create seat object
         let seat;
-        if (!seatNumber || seatNumber === '') {
-          // Empty space / aisle
-          seat = { type: 'aisle', seatNumber: null };
-        } else if (seatNumber === 'DRIVER' || seatNumber === '🚗' || seatNumber.includes('Driver')) {
-          // Driver seat
-          seat = { type: 'driver', seatNumber: null };
-        } else if (seatNumber === 'FLOOR_2') {
-          // Floor separator for double decker
-          seat = { type: 'floor_separator', seatNumber: null };
+        if (seatType === SEAT_TYPES.AISLE) {
+          seat = { type: SEAT_TYPES.AISLE, seatNumber: null };
+        } else if (seatType === SEAT_TYPES.DRIVER) {
+          seat = { type: SEAT_TYPES.DRIVER, seatNumber: null };
+        } else if (seatType === SEAT_TYPES.FLOOR_SEPARATOR) {
+          seat = { type: SEAT_TYPES.FLOOR_SEPARATOR, seatNumber: null };
         } else {
-          // Regular seat
+          // Regular seat - determine floor based on seat naming convention
+          // L prefix = Lower (floor 1), U prefix = Upper (floor 2)
+          const floor = seatNumber.startsWith('U') ? 2 : 1;
+
           seat = {
-            type: 'seat',
+            type: SEAT_TYPES.SEAT,
             seatNumber: seatNumber,
             row: row,
             col: col,
-            floor: seatNumber.startsWith('L') ? 1 : seatNumber.startsWith('U') ? 2 : 1,
+            floor: floor,
           };
         }
 
@@ -66,42 +114,47 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
     }
 
     setSeats(seatArray);
-  };
+  }, [seatLayout, determineSeatType]);
 
-  const handleSeatClick = (seat) => {
-    if (!seat || seat.type === 'aisle' || seat.type === 'driver' || seat.type === 'floor_separator') {
+  const handleSeatClick = useCallback((seat) => {
+    // Ignore non-clickable seats
+    if (!seat ||
+        seat.type === SEAT_TYPES.AISLE ||
+        seat.type === SEAT_TYPES.DRIVER ||
+        seat.type === SEAT_TYPES.FLOOR_SEPARATOR) {
       return;
     }
 
-    if (isSeatBooked(seat.seatNumber)) {
+    // Can't select already booked seats
+    if (bookedSeatsSet.has(seat.seatNumber)) {
       return;
     }
 
-    const isSelected = selectedSeats.some(s => s.seatNumber === seat.seatNumber);
+    const isSelected = selectedSeatsSet.has(seat.seatNumber);
 
     if (isSelected) {
       removeSeat(seat.seatNumber);
     } else {
-      // Allow selecting up to 10 seats maximum
-      if (selectedSeats.length >= 10) {
+      // Check max seats limit
+      if (selectedSeats.length >= maxSeatsAllowed) {
         return;
       }
       addSeat(seat);
     }
-  };
+  }, [bookedSeatsSet, selectedSeatsSet, selectedSeats.length, maxSeatsAllowed, addSeat, removeSeat]);
 
-  const isSeatSelected = (seatNumber) => {
-    return selectedSeats.some(s => s.seatNumber === seatNumber);
-  };
+  const isSeatBooked = useCallback((seatNumber) => {
+    return bookedSeatsSet.has(seatNumber);
+  }, [bookedSeatsSet]);
 
-  const isSeatBooked = (seatNumber) => {
-    return bookedSeats.includes(seatNumber);
-  };
+  const isSeatSelected = useCallback((seatNumber) => {
+    return selectedSeatsSet.has(seatNumber);
+  }, [selectedSeatsSet]);
 
-  const getSeatClass = (seat) => {
-    if (!seat || seat.type === 'aisle') return 'invisible';
-    if (seat.type === 'driver') return 'seat-driver';
-    if (seat.type === 'floor_separator') return 'floor-separator';
+  const getSeatClass = useCallback((seat) => {
+    if (!seat || seat.type === SEAT_TYPES.AISLE) return 'seat-invisible';
+    if (seat.type === SEAT_TYPES.DRIVER) return 'seat-driver';
+    if (seat.type === SEAT_TYPES.FLOOR_SEPARATOR) return 'seat-floor-separator';
 
     const isSelected = isSeatSelected(seat.seatNumber);
     const isBooked = isSeatBooked(seat.seatNumber);
@@ -109,12 +162,12 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
     if (isBooked) return 'seat-booked';
     if (isSelected) return 'seat-selected';
     return 'seat-available';
-  };
+  }, [isSeatBooked, isSeatSelected]);
 
-  const getSeatIcon = (seat) => {
-    if (!seat || seat.type === 'aisle') return null;
-    if (seat.type === 'driver') return '🚗';
-    if (seat.type === 'floor_separator') return '--- Tầng 2 ---';
+  const getSeatIcon = useCallback((seat) => {
+    if (!seat || seat.type === SEAT_TYPES.AISLE) return null;
+    if (seat.type === SEAT_TYPES.DRIVER) return '🚗';
+    if (seat.type === SEAT_TYPES.FLOOR_SEPARATOR) return '--- Tầng 2 ---';
 
     const isSelected = isSeatSelected(seat.seatNumber);
     const isBooked = isSeatBooked(seat.seatNumber);
@@ -122,31 +175,49 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
     if (isBooked) return <CloseCircleOutlined />;
     if (isSelected) return <CheckCircleFilled />;
     return seat.seatNumber;
-  };
+  }, [isSeatBooked, isSeatSelected]);
+
+  const getSeatTitle = useCallback((seat) => {
+    if (!seat || seat.type === SEAT_TYPES.AISLE) return '';
+    if (seat.type === SEAT_TYPES.DRIVER) return 'Ghế lái';
+    if (seat.type === SEAT_TYPES.FLOOR_SEPARATOR) return 'Dấu phân tách tầng 2';
+
+    const floorText = seat.floor === 2 ? ' (Tầng 2)' : '';
+    return `Ghế ${seat.seatNumber}${floorText}`;
+  }, []);
 
   return (
-    <div>
+    <div className="seat-map-wrapper">
       {/* Legend */}
       <div className="flex gap-4 mb-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center text-white">
+          <div className="seat-legend seat-legend-selected">
             ✓
           </div>
           <Text className="text-xs">Đang chọn</Text>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gray-300 rounded flex items-center justify-center">
-            1
+          <div className="seat-legend seat-legend-available">
+            {selectedSeats.length + 1}
           </div>
           <Text className="text-xs">Còn trống</Text>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-red-400 rounded flex items-center justify-center text-white">
+          <div className="seat-legend seat-legend-booked">
             ✕
           </div>
           <Text className="text-xs">Đã đặt</Text>
         </div>
       </div>
+
+      {/* Selection Info */}
+      {selectedSeats.length > 0 && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+          <Text className="text-sm text-blue-700">
+            Đã chọn: <strong>{selectedSeats.length}</strong> / {maxSeatsAllowed} ghế
+          </Text>
+        </div>
+      )}
 
       {/* Seat Map */}
       <div className="bg-gray-100 p-4 rounded-lg">
@@ -157,34 +228,48 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
 
         <div className="seat-map-container">
           {seats.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex justify-center gap-2 mb-2">
-              {row.map((seat, colIndex) => (
-                <button
-                  key={`${rowIndex}-${colIndex}`}
-                  className={`seat ${getSeatClass(seat)}`}
-                  onClick={() => handleSeatClick(seat)}
-                  disabled={
-                    !seat ||
-                    seat.type === 'aisle' ||
-                    seat.type === 'driver' ||
-                    isSeatBooked(seat?.seatNumber)
-                  }
-                  title={
-                    seat && seat.type !== 'aisle' && seat.type !== 'driver'
-                      ? `Ghế ${seat.seatNumber}${seat.floor === 2 ? ' (Tầng 2)' : ''}`
-                      : ''
-                  }
-                >
-                  {getSeatIcon(seat)}
-                </button>
-              ))}
+            <div key={rowIndex} className="seat-row">
+              {row.map((seat, colIndex) => {
+                const seatClass = getSeatClass(seat);
+                const seatIcon = getSeatIcon(seat);
+                const seatTitle = getSeatTitle(seat);
+                const isDisabled = !seat ||
+                                  seat.type === SEAT_TYPES.AISLE ||
+                                  seat.type === SEAT_TYPES.DRIVER ||
+                                  seat.type === SEAT_TYPES.FLOOR_SEPARATOR ||
+                                  isSeatBooked(seat?.seatNumber);
+
+                return (
+                  <button
+                    key={`${rowIndex}-${colIndex}`}
+                    className={`seat ${seatClass}`}
+                    onClick={() => handleSeatClick(seat)}
+                    disabled={isDisabled}
+                    title={seatTitle}
+                    aria-label={seatTitle}
+                  >
+                    {seatIcon}
+                  </button>
+                );
+              })}
             </div>
           ))}
         </div>
       </div>
 
       {/* Seat Map Styles */}
-      <style jsx>{`
+      <style>{`
+        .seat-map-wrapper {
+          width: 100%;
+        }
+
+        .seat-row {
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+          margin-bottom: 8px;
+        }
+
         .seat {
           width: 40px;
           height: 40px;
@@ -193,15 +278,21 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
           font-size: 12px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.2s ease;
           display: flex;
           align-items: center;
-          justify-center;
+          justify-content: center;
+          padding: 0;
         }
 
         .seat:hover:not(:disabled) {
           transform: scale(1.1);
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .seat:focus-visible {
+          outline: 2px solid #3b82f6;
+          outline-offset: 2px;
         }
 
         .seat-available {
@@ -221,6 +312,10 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
           color: white;
         }
 
+        .seat-selected:hover {
+          background-color: #059669;
+        }
+
         .seat-booked {
           background-color: #f87171;
           border-color: #ef4444;
@@ -237,9 +332,8 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
           font-size: 18px;
         }
 
-        .floor-separator {
-          width: auto;
-          grid-column: 1 / -1;
+        .seat-floor-separator {
+          width: 100%;
           background-color: #fbbf24;
           border-color: #f59e0b;
           color: #78350f;
@@ -250,8 +344,52 @@ const SeatMapComponent = ({ seatLayout, bookedSeats = [], availableSeats = [] })
           padding: 4px 8px;
         }
 
+        .seat-invisible {
+          visibility: hidden;
+          pointer-events: none;
+        }
+
         .seat:disabled {
           cursor: not-allowed;
+        }
+
+        .seat-legend {
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .seat-legend-selected {
+          background-color: #10b981;
+          color: white;
+        }
+
+        .seat-legend-available {
+          background-color: #e5e7eb;
+          color: #374151;
+        }
+
+        .seat-legend-booked {
+          background-color: #f87171;
+          color: white;
+        }
+
+        @media (max-width: 640px) {
+          .seat {
+            width: 36px;
+            height: 36px;
+            font-size: 11px;
+          }
+
+          .seat-row {
+            gap: 6px;
+            margin-bottom: 6px;
+          }
         }
       `}</style>
     </div>
