@@ -99,11 +99,11 @@ const PassengerInfoPage = () => {
         getBankList(),
       ]);
 
-      if (methodsRes.success) {
+      if (methodsRes.status === 'success') {
         setPaymentMethods(methodsRes.data.filter(m => m.enabled));
       }
 
-      if (banksRes.success) {
+      if (banksRes.status === 'success') {
         setBankList(banksRes.data);
       }
     } catch (error) {
@@ -126,7 +126,7 @@ const PassengerInfoPage = () => {
         totalAmount,
       });
 
-      if (response.success && response.data) {
+      if (response.status === 'success' && response.data) {
         setAppliedVoucher(response.data);
         message.success(`Áp dụng voucher thành công! Giảm ${formatPrice(response.data.discountAmount)}`);
       }
@@ -216,7 +216,7 @@ const PassengerInfoPage = () => {
 
       console.log('Hold seats response:', holdResponse);
 
-      if (holdResponse.success && holdResponse.data) {
+      if (holdResponse.status === 'success' && holdResponse.data) {
         console.log('Setting current booking:', holdResponse.data.booking);
         console.log('Lock info:', holdResponse.data.lockInfo);
 
@@ -307,7 +307,7 @@ const PassengerInfoPage = () => {
 
       console.log('Payment response:', paymentResponse);
 
-      if (paymentResponse.success && paymentResponse.data) {
+      if (paymentResponse.status === 'success' && paymentResponse.data) {
         // Redirect to payment URL
         if (paymentResponse.data.paymentUrl) {
           console.log('Redirecting to payment URL:', paymentResponse.data.paymentUrl);
