@@ -17,6 +17,13 @@ const Route = require('../src/models/Route');
 const Bus = require('../src/models/Bus');
 const Trip = require('../src/models/Trip');
 
+// Import seat layout utilities
+const {
+  generateLimousineLayout,
+  generateAisleLayout,
+  generateDoubleDecker,
+} = require('../src/utils/seatLayout');
+
 // Connect to MongoDB
 const connectDB = async () => {
   try {
@@ -406,9 +413,10 @@ const seedData = async () => {
         busType: 'limousine',
         seatLayout: {
           floors: 1,
-          rows: 6,
+          rows: 7, // 1 DRIVER row + 6 seat rows
           columns: 3,
           layout: [
+            ['DRIVER', '', ''], // Driver seat
             ['A1', 'A2', 'A3'],
             ['B1', 'B2', 'B3'],
             ['C1', 'C2', 'C3'],
@@ -418,7 +426,7 @@ const seedData = async () => {
           ],
           totalSeats: 18,
         },
-        amenities: ['wifi', 'ac', 'blanket', 'water', 'charging'],
+        amenities: ['WiFi', 'AC', 'Chăn', 'Nước uống', 'Sạc điện thoại'],
         model: 'Mercedes-Benz Sprinter',
         registrationExpiry: new Date('2026-12-31'),
         insuranceExpiry: new Date('2025-12-31'),
@@ -431,21 +439,27 @@ const seedData = async () => {
         busType: 'sleeper',
         seatLayout: {
           floors: 2,
-          rows: 8,
+          rows: 11, // 1 DRIVER + 4 lower + 1 FLOOR_2 + 5 upper
           columns: 3,
           layout: [
-            ['1A', '1B', '1C'],
-            ['2A', '2B', '2C'],
-            ['3A', '3B', '3C'],
-            ['4A', '4B', '4C'],
-            ['5A', '5B', '5C'],
-            ['6A', '6B', '6C'],
-            ['7A', '7B', '7C'],
-            ['8A', '8B', '8C'],
+            ['DRIVER', '', ''], // Driver seat
+            // Lower floor
+            ['L1A', 'L1B', 'L1C'],
+            ['L2A', 'L2B', 'L2C'],
+            ['L3A', 'L3B', 'L3C'],
+            ['L4A', 'L4B', 'L4C'],
+            // Floor separator
+            ['FLOOR_2', '', ''], // Second floor marker
+            // Upper floor
+            ['U1A', 'U1B', 'U1C'],
+            ['U2A', 'U2B', 'U2C'],
+            ['U3A', 'U3B', 'U3C'],
+            ['U4A', 'U4B', 'U4C'],
+            ['U5A', 'U5B', 'U5C'],
           ],
-          totalSeats: 40,
+          totalSeats: 27, // 4*3 lower + 5*3 upper
         },
-        amenities: ['wifi', 'ac', 'blanket', 'pillow', 'water', 'charging', 'tv'],
+        amenities: ['WiFi', 'AC', 'Chăn', 'Gối', 'Nước uống', 'Sạc điện thoại', 'TV'],
         model: 'Thaco Universe',
         registrationExpiry: new Date('2027-06-30'),
         insuranceExpiry: new Date('2025-12-31'),
@@ -459,9 +473,10 @@ const seedData = async () => {
         busType: 'seater',
         seatLayout: {
           floors: 1,
-          rows: 11,
+          rows: 12, // 1 DRIVER row + 11 seat rows
           columns: 4,
           layout: [
+            ['DRIVER', '', '', ''], // Driver seat
             ['A1', 'A2', '', 'A3'],
             ['B1', 'B2', '', 'B3'],
             ['C1', 'C2', '', 'C3'],
@@ -472,11 +487,11 @@ const seedData = async () => {
             ['H1', 'H2', '', 'H3'],
             ['I1', 'I2', '', 'I3'],
             ['J1', 'J2', '', 'J3'],
-            ['K1', 'K2', 'K3', 'K4'],
+            ['K1', 'K2', 'K3', 'K4'], // Back row with 4 seats
           ],
           totalSeats: 34,
         },
-        amenities: ['ac', 'water'],
+        amenities: ['AC', 'Nước uống'],
         model: 'Hyundai Universe',
         registrationExpiry: new Date('2026-08-31'),
         insuranceExpiry: new Date('2025-12-31'),
