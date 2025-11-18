@@ -145,6 +145,25 @@ const PassengerInfoPage = () => {
     try {
       setLoading(true);
 
+      // Validate booking state before submitting
+      if (!selectedTrip || !selectedTrip._id) {
+        toast.error('Thông tin chuyến xe không hợp lệ. Vui lòng chọn lại chuyến xe.');
+        navigate('/');
+        return;
+      }
+
+      if (!selectedSeats || selectedSeats.length === 0) {
+        toast.error('Vui lòng chọn ghế trước khi tiếp tục.');
+        navigate(`/trip/${selectedTrip._id}`);
+        return;
+      }
+
+      if (!pickupPoint || !dropoffPoint) {
+        toast.error('Vui lòng chọn điểm đón và trả khách.');
+        navigate(`/trip/${selectedTrip._id}`);
+        return;
+      }
+
       // Store contact info
       setContactInfo({
         name: values.name,
@@ -173,6 +192,8 @@ const PassengerInfoPage = () => {
         dropoffPoint: dropoffPoint,
         voucherCode: appliedVoucher ? voucherCode : undefined,
       };
+
+      console.log('Hold seats request:', holdData);
 
       const holdResponse = await holdSeats(holdData);
 
