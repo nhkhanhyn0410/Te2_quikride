@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Button, InputNumber, message, Radio } from 'antd';
+import { Button, InputNumber, message, Radio, Space, Tag } from 'antd';
+import { EditOutlined, SaveOutlined } from '@ant-design/icons';
 import { seatLayoutApi } from '../../services/operatorApi';
 
 const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
@@ -8,6 +9,8 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
   const [columns, setColumns] = useState(4);
   const [floors, setFloors] = useState(1);
   const [buildingLayout, setBuildingLayout] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedTool, setSelectedTool] = useState('aisle'); // 'seat', 'aisle', 'empty'
 
   // Reset states when busType changes
   useEffect(() => {
@@ -90,15 +93,84 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
     setRows(10);
     setColumns(4);
     setFloors(1);
+    setEditMode(false);
     onSave(null);
   }, [onSave]);
 
-  const getSeatClass = (seat) => {
-    if (!seat || seat === '') return 'bg-transparent';
-    if (seat === 'DRIVER' || seat === '🚗') return 'bg-blue-500 text-white border-blue-600';
-    if (seat === 'FLOOR_2') return 'bg-amber-500 text-white border-amber-600';
-    if (seat.toLowerCase().includes('aisle')) return 'bg-gray-300';
-    return 'bg-green-500 text-white border-green-600';
+  // Calculate total seats from layout
+  const calculateTotalSeats = useCallback((layout) => {
+    if (!layout || !Array.isArray(layout)) return 0;
+
+    let count = 0;
+    layout.forEach(row => {
+      if (Array.isArray(row)) {
+        row.forEach(seat => {
+          // Count only actual seats (not empty, not aisle, not driver, not floor marker)
+          if (seat &&
+              seat !== '' &&
+              seat !== 'DRIVER' &&
+              seat !== 'FLOOR_2' &&
+              seat !== '🚗' &&
+              !seat.toLowerCase().includes('aisle')) {
+            count++;
+          }
+        });
+      }
+    });
+    return count;
+  }, []);
+
+  // Handle seat click in edit mode
+  const handleSeatClick = useCallback((rowIndex, seatIndex) => {
+    if (!editMode || !customLayout) return;
+
+    const newLayout = JSON.parse(JSON.stringify(customLayout.layout)); // Deep copy
+    const currentSeat = newLayout[rowIndex][seatIndex];
+
+    // Don't allow editing driver seat or floor markers
+    if (currentSeat === 'DRIVER' || currentSeat === '🚗' || currentSeat === 'FLOOR_2') {
+      message.warning('Không thể chỉnh sửa vị trí ghế lái hoặc dấu phân tầng');
+      return;
+    }
+
+    // Apply the selected tool
+    let newValue;
+    switch (selectedTool) {
+      case 'aisle':
+        newValue = 'AISLE';
+        break;
+      case 'empty':
+        newValue = '';
+        break;
+      case 'seat':
+        // Generate seat number
+        newValue = `${String.fromCharCode(65 + rowIndex)}${seatIndex + 1}`;
+        break;
+      default:
+        newValue = currentSeat;
+    }
+
+    newLayout[rowIndex][seatIndex] = newValue;
+
+    // Recalculate total seats
+    const totalSeats = calculateTotalSeats(newLayout);
+
+    setCustomLayout({
+      ...customLayout,
+      layout: newLayout,
+      totalSeats: totalSeats,
+    });
+
+    message.success(`Đã thay đổi thành ${selectedTool === 'aisle' ? 'lối đi' : selectedTool === 'empty' ? 'ô trống' : 'ghế'}`);
+  }, [editMode, customLayout, selectedTool, calculateTotalSeats]);
+
+  const getSeatClass = (seat, isClickable = false) => {
+    const baseClass = isClickable ? 'cursor-pointer hover:opacity-80 transition-opacity' : '';
+    if (!seat || seat === '') return `bg-transparent ${baseClass}`;
+    if (seat === 'DRIVER' || seat === '🚗') return `bg-blue-500 text-white border-blue-600 ${isClickable ? 'cursor-not-allowed' : ''}`;
+    if (seat === 'FLOOR_2') return `bg-amber-500 text-white border-amber-600 ${isClickable ? 'cursor-not-allowed' : ''}`;
+    if (seat.toLowerCase().includes('aisle')) return `bg-gray-300 ${baseClass}`;
+    return `bg-green-500 text-white border-green-600 ${baseClass}`;
   };
 
   const renderSeatGrid = (layout) => {
@@ -109,12 +181,42 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
 
     return (
       <div className="p-4 bg-gray-100 rounded overflow-auto max-h-96">
+        {editMode && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+            <p className="text-sm font-semibold text-blue-800 mb-2">🖱️ Chế độ chỉnh sửa</p>
+            <p className="text-xs text-blue-600 mb-3">Click vào ô để thay đổi. Chọn công cụ bên dưới:</p>
+            <Space>
+              <Button
+                type={selectedTool === 'seat' ? 'primary' : 'default'}
+                size="small"
+                onClick={() => setSelectedTool('seat')}
+              >
+                🪑 Ghế
+              </Button>
+              <Button
+                type={selectedTool === 'aisle' ? 'primary' : 'default'}
+                size="small"
+                onClick={() => setSelectedTool('aisle')}
+              >
+                🚶 Lối đi
+              </Button>
+              <Button
+                type={selectedTool === 'empty' ? 'primary' : 'default'}
+                size="small"
+                onClick={() => setSelectedTool('empty')}
+              >
+                ⬜ Trống
+              </Button>
+            </Space>
+          </div>
+        )}
+
         <div className="inline-block">
           {seatLayout.map((row, rowIndex) => (
             <div key={rowIndex} className="flex gap-1 mb-1">
               {Array.isArray(row) &&
                 row.map((seat, seatIndex) => {
-                  const seatClass = getSeatClass(seat);
+                  const seatClass = getSeatClass(seat, editMode);
                   const displayText = seat === 'DRIVER' ? '🚗' :
                                      seat === 'FLOOR_2' ? 'T2' :
                                      (seat && !seat.toLowerCase().includes('aisle') ? seat : '');
@@ -124,6 +226,7 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
                       key={seatIndex}
                       className={`w-10 h-10 flex items-center justify-center text-xs font-medium rounded border-2 ${seatClass}`}
                       title={seat === 'DRIVER' ? 'Ghế lái' : seat === 'FLOOR_2' ? 'Tầng 2' : seat}
+                      onClick={() => editMode && handleSeatClick(rowIndex, seatIndex)}
                     >
                       {displayText}
                     </div>
@@ -245,7 +348,27 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
             </div>
           )}
 
-          {customLayout && renderSeatGrid(customLayout)}
+          {customLayout && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h4 className="text-base font-semibold">Xem trước sơ đồ ghế</h4>
+                <Button
+                  type={editMode ? 'primary' : 'default'}
+                  icon={editMode ? <SaveOutlined /> : <EditOutlined />}
+                  onClick={() => {
+                    if (editMode) {
+                      message.success('Đã lưu chỉnh sửa');
+                    }
+                    setEditMode(!editMode);
+                  }}
+                  size="small"
+                >
+                  {editMode ? 'Xong' : 'Chỉnh sửa sơ đồ'}
+                </Button>
+              </div>
+              {renderSeatGrid(customLayout)}
+            </div>
+          )}
         </div>
       </div>
 
