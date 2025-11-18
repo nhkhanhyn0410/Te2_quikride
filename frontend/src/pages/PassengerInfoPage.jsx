@@ -343,9 +343,14 @@ const PassengerInfoPage = () => {
 
       console.log('Payment response:', paymentResponse);
 
-      if (paymentResponse.status === 'success' && paymentResponse.data) {
+      // Support both response formats: {status: 'success', data: ...} and {success: true, data: ...}
+      const isSuccess = (paymentResponse.status === 'success' || paymentResponse.success === true) && paymentResponse.data;
+
+      if (isSuccess) {
         const { payment, paymentUrl } = paymentResponse.data;
         const bookingCode = payment?.bookingId?.bookingCode || currentBooking.bookingCode;
+
+        console.log('Payment created successfully:', { payment, paymentUrl, bookingCode });
 
         // Handle different payment methods
         if (selectedPaymentMethod === 'cash') {
