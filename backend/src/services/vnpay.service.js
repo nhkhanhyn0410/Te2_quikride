@@ -97,15 +97,19 @@ class VNPayService {
     // Sort parameters
     vnp_Params = this.sortObject(vnp_Params);
 
-    // Create signature data
-    const signData = querystring.stringify(vnp_Params, { encode: false });
+    // Create signature data - encode values properly
+    const signData = Object.keys(vnp_Params)
+      .map(key => `${key}=${encodeURIComponent(String(vnp_Params[key])).replace(/%20/g, '+')}`)
+      .join('&');
 
     // Create signature
     const secureHash = this.createSignature(signData, this.vnp_HashSecret);
     vnp_Params['vnp_SecureHash'] = secureHash;
 
-    // Create payment URL
-    const paymentUrl = this.vnp_Url + '?' + querystring.stringify(vnp_Params, { encode: false });
+    // Create payment URL with properly encoded parameters
+    const paymentUrl = this.vnp_Url + '?' + Object.keys(vnp_Params)
+      .map(key => `${key}=${encodeURIComponent(String(vnp_Params[key])).replace(/%20/g, '+')}`)
+      .join('&');
 
     return paymentUrl;
   }
