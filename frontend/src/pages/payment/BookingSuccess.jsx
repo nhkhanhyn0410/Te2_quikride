@@ -24,88 +24,90 @@ const BookingSuccess = () => {
 
   useEffect(() => {
     const loadBooking = async () => {
-      // First try: Use currentBooking from store if available and matches
-      if (currentBooking && currentBooking.bookingCode === bookingCode) {
-        console.log('Using currentBooking from store:', currentBooking);
-        setBooking(currentBooking);
+      if (!bookingCode) {
+        console.warn('No booking code provided');
+        setLoading(false);
         return;
       }
 
-      // Second try: Construct from store data if available
-      if (selectedTrip && bookingCode) {
-        console.log('Constructing booking from store data');
-        const seatPrice = selectedTrip?.pricing?.finalPrice || selectedTrip?.finalPrice || selectedTrip?.pricing?.basePrice || 0;
-        const finalPrice = seatPrice * (selectedSeats?.length || 0);
+      // If we have a bookingCode, always fetch from API for most up-to-date data
+      const phoneParam = phone || contactInfo?.phone || currentBooking?.contactInfo?.phone;
 
-        const constructedBooking = {
-          bookingCode,
-          tripId: selectedTrip,
-          seats: selectedSeats,
-          pickupPoint,
-          dropoffPoint,
-          contactInfo,
-          finalPrice,
-          paymentMethod: 'vnpay', // Will be updated from API if fetched
-          paymentStatus: 'paid', // Assume paid if coming from VNPay return
-        };
-        setBooking(constructedBooking);
+      if (!phoneParam) {
+        console.warn('No phone number available for booking lookup');
 
-        // Try to fetch full booking data in background to merge with constructed data
-        fetchBookingData(constructedBooking);
+        // Fallback: try to use currentBooking from store if it matches
+        if (currentBooking && currentBooking.bookingCode === bookingCode) {
+          console.log('Using currentBooking from store as fallback:', currentBooking);
+          setBooking(currentBooking);
+        }
+        setLoading(false);
         return;
       }
 
-      // Third try: Fetch from API
-      if (bookingCode) {
-        fetchBookingData();
-      }
-    };
-
-    const fetchBookingData = async (existingBooking = null) => {
       try {
         setLoading(true);
-        const phoneParam = phone || contactInfo?.phone;
-
-        if (!phoneParam) {
-          console.warn('No phone number available for booking lookup');
-          return;
-        }
-
         console.log('Fetching booking from API:', { bookingCode, phone: phoneParam });
+
         const response = await api.get(`/bookings/code/${bookingCode}`, {
           params: { phone: phoneParam },
         });
 
-        console.log('Booking fetched from API:', response);
+        console.log('API response:', response);
+
         // Support both response formats
         const isSuccess = response.success === true || response.status === 'success';
         if (isSuccess && response.data) {
-          // API returns { data: { booking: {...} } }, extract the booking object
-          const bookingData = response.data.booking || response.data;
+          // Extract booking from response (handle nested structure)
+          let bookingData = response.data.booking || response.data;
 
-          // Merge with existing booking if available (preserve constructed data)
-          if (existingBooking) {
-            setBooking({
-              ...existingBooking,
-              ...bookingData,
-              // Preserve payment info from constructed booking if API doesn't have it
-              paymentMethod: bookingData.paymentMethod || existingBooking.paymentMethod,
-              paymentStatus: bookingData.paymentStatus || existingBooking.paymentStatus,
-            });
-          } else {
-            setBooking(bookingData);
+          console.log('Extracted booking data:', bookingData);
+          console.log('Payment method:', bookingData.paymentMethod);
+          console.log('Payment status:', bookingData.paymentStatus);
+          console.log('Trip route:', bookingData.tripId?.routeId);
+
+          setBooking(bookingData);
+        } else {
+          console.error('API response not successful:', response);
+
+          // Fallback: try store data
+          if (currentBooking && currentBooking.bookingCode === bookingCode) {
+            console.log('Using currentBooking from store as fallback');
+            setBooking(currentBooking);
           }
         }
       } catch (error) {
         console.error('Failed to fetch booking:', error);
-        // Don't show error to user if we already have partial data from store
+
+        // Fallback: try to construct from store data
+        if (currentBooking && currentBooking.bookingCode === bookingCode) {
+          console.log('Using currentBooking from store after error');
+          setBooking(currentBooking);
+        } else if (selectedTrip && contactInfo) {
+          console.log('Constructing booking from store data after error');
+          const seatPrice = selectedTrip?.pricing?.finalPrice || selectedTrip?.finalPrice || selectedTrip?.pricing?.basePrice || 0;
+          const finalPrice = seatPrice * (selectedSeats?.length || 0);
+
+          const fallbackBooking = {
+            bookingCode,
+            tripId: selectedTrip,
+            seats: selectedSeats,
+            pickupPoint,
+            dropoffPoint,
+            contactInfo,
+            finalPrice,
+            paymentMethod: 'unknown',
+            paymentStatus: 'unknown',
+          };
+          setBooking(fallbackBooking);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     loadBooking();
-  }, [bookingCode, phone, currentBooking, selectedTrip, selectedSeats, pickupPoint, dropoffPoint, contactInfo]);
+  }, [bookingCode, phone]); // Simplified dependencies - only bookingCode and phone
 
   const handlePrintTicket = () => {
     window.print();
