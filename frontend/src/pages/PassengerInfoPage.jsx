@@ -13,6 +13,8 @@ import {
   message,
   Spin,
   Alert,
+  Radio,
+  Badge,
 } from 'antd';
 import {
   UserOutlined,
@@ -22,14 +24,17 @@ import {
   CreditCardOutlined,
   TagOutlined,
   SafetyOutlined,
+  WalletOutlined,
+  BankOutlined,
+  DollarOutlined,
+  QrcodeOutlined,
+  MobileOutlined,
 } from '@ant-design/icons';
 import toast from 'react-hot-toast';
 import dayjs from 'dayjs';
 import {
   holdSeats,
   validateVoucher,
-  getPaymentMethods,
-  getBankList,
   createPayment,
 } from '../services/bookingApi';
 import useBookingStore from '../store/bookingStore';
@@ -38,6 +43,62 @@ import GuestOTPModal from '../components/GuestOTPModal';
 const { Title, Text } = Typography;
 const { Step } = Steps;
 const { Option } = Select;
+
+// Payment methods configuration
+const PAYMENT_METHODS = [
+  {
+    code: 'cash',
+    name: 'Thanh toán khi lên xe',
+    description: 'Thanh toán tiền mặt cho tài xế khi lên xe',
+    icon: <DollarOutlined />,
+    color: '#52c41a',
+    enabled: true,
+  },
+  {
+    code: 'vnpay',
+    name: 'VNPay',
+    description: 'Thanh toán qua cổng VNPay (ATM, Visa, MasterCard)',
+    icon: <CreditCardOutlined />,
+    color: '#1890ff',
+    enabled: true,
+  },
+  {
+    code: 'momo',
+    name: 'Ví MoMo',
+    description: 'Thanh toán qua ví điện tử MoMo',
+    icon: <MobileOutlined />,
+    color: '#d4237a',
+    enabled: false,
+    comingSoon: true,
+  },
+  {
+    code: 'zalopay',
+    name: 'ZaloPay',
+    description: 'Thanh toán qua ví điện tử ZaloPay',
+    icon: <WalletOutlined />,
+    color: '#0068ff',
+    enabled: false,
+    comingSoon: true,
+  },
+  {
+    code: 'banking',
+    name: 'Chuyển khoản ngân hàng',
+    description: 'Chuyển khoản qua Internet Banking hoặc QR Code',
+    icon: <BankOutlined />,
+    color: '#722ed1',
+    enabled: false,
+    comingSoon: true,
+  },
+  {
+    code: 'paypal',
+    name: 'PayPal',
+    description: 'Thanh toán quốc tế qua PayPal',
+    icon: <QrcodeOutlined />,
+    color: '#0070ba',
+    enabled: false,
+    comingSoon: true,
+  },
+];
 
 const PassengerInfoPage = () => {
   const navigate = useNavigate();
@@ -59,10 +120,7 @@ const PassengerInfoPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [paymentMethods, setPaymentMethods] = useState([]);
-  const [bankList, setBankList] = useState([]);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('vnpay');
-  const [selectedBank, setSelectedBank] = useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash');
   const [voucherValidating, setVoucherValidating] = useState(false);
   const [showGuestOTPModal, setShowGuestOTPModal] = useState(false);
   const [isGuest, setIsGuest] = useState(false);
@@ -88,28 +146,7 @@ const PassengerInfoPage = () => {
       navigate('/');
       return;
     }
-
-    fetchPaymentData();
   }, []);
-
-  const fetchPaymentData = async () => {
-    try {
-      const [methodsRes, banksRes] = await Promise.all([
-        getPaymentMethods(),
-        getBankList(),
-      ]);
-
-      if (methodsRes.status === 'success') {
-        setPaymentMethods(methodsRes.data.filter(m => m.enabled));
-      }
-
-      if (banksRes.status === 'success') {
-        setBankList(banksRes.data);
-      }
-    } catch (error) {
-      console.error('Fetch payment data error:', error);
-    }
-  };
 
   const handleValidateVoucher = async () => {
     if (!voucherCode || !voucherCode.trim()) {
@@ -297,7 +334,6 @@ const PassengerInfoPage = () => {
         bookingId: bookingId,
         paymentMethod: selectedPaymentMethod,
         amount: currentBooking.finalPrice,
-        bankCode: selectedBank,
         locale: 'vn',
       };
 
@@ -523,22 +559,56 @@ const PassengerInfoPage = () => {
           </Card>
         ) : (
           /* Step 2: Payment */
-          <Card title="Phương thức thanh toán">
+          <Card
+            title={
+              <div className="flex items-center gap-2">
+                <WalletOutlined className="text-xl" />
+                <span>Phương thức thanh toán</span>
+              </div>
+            }
+          >
             <div className="mb-6">
-              <Text strong>Chọn phương thức thanh toán</Text>
+              <Text strong className="text-base">Chọn phương thức thanh toán</Text>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                {paymentMethods.map(method => (
+                {PAYMENT_METHODS.map(method => (
                   <Card
                     key={method.code}
-                    className={`cursor-pointer ${
-                      selectedPaymentMethod === method.code ? 'border-blue-500 border-2' : ''
-                    }`}
-                    onClick={() => setSelectedPaymentMethod(method.code)}
+                    className={`cursor-pointer transition-all ${
+                      selectedPaymentMethod === method.code
+                        ? 'border-2 shadow-md'
+                        : 'hover:shadow-sm'
+                    } ${!method.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    style={{
+                      borderColor: selectedPaymentMethod === method.code ? method.color : undefined,
+                    }}
+                    onClick={() => method.enabled && setSelectedPaymentMethod(method.code)}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="text-2xl">{method.icon === 'vnpay' ? '💳' : '💰'}</div>
-                      <div>
-                        <Text strong>{method.name}</Text>
+                    <div className="flex items-start gap-3">
+                      <div
+                        className="text-3xl p-2 rounded-lg"
+                        style={{
+                          color: method.color,
+                          backgroundColor: `${method.color}15`,
+                        }}
+                      >
+                        {method.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Text strong className="text-base">{method.name}</Text>
+                          {method.comingSoon && (
+                            <Badge
+                              count="Sắp ra mắt"
+                              style={{ backgroundColor: '#faad14' }}
+                            />
+                          )}
+                          {method.enabled && selectedPaymentMethod === method.code && (
+                            <Badge
+                              count="✓"
+                              style={{ backgroundColor: method.color }}
+                            />
+                          )}
+                        </div>
                         <div className="text-sm text-gray-500">{method.description}</div>
                       </div>
                     </div>
@@ -547,34 +617,48 @@ const PassengerInfoPage = () => {
               </div>
             </div>
 
+            {/* Payment Info Alert */}
             {selectedPaymentMethod === 'vnpay' && (
-              <div className="mb-6">
-                <Text strong>Chọn ngân hàng</Text>
-                <Select
-                  size="large"
-                  className="w-full mt-2"
-                  placeholder="Chọn ngân hàng"
-                  value={selectedBank}
-                  onChange={setSelectedBank}
-                  showSearch
-                  filterOption={(input, option) =>
-                    option.children.toLowerCase().includes(input.toLowerCase())
-                  }
-                >
-                  {bankList.map(bank => (
-                    <Option key={bank.code} value={bank.code}>
-                      {bank.name}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
+              <Alert
+                message="Thanh toán VNPay"
+                description="Bạn sẽ được chuyển đến cổng thanh toán VNPay để hoàn tất giao dịch. Hỗ trợ thanh toán qua thẻ ATM, Visa, MasterCard và JCB."
+                type="info"
+                showIcon
+                icon={<CreditCardOutlined />}
+                className="mb-6"
+              />
             )}
 
-            <Card className="mb-6 bg-blue-50">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Text>Tổng thanh toán</Text>
-                  <Text strong className="text-xl text-blue-600">
+            {selectedPaymentMethod === 'cash' && (
+              <Alert
+                message="Thanh toán khi lên xe"
+                description="Vui lòng chuẩn bị tiền mặt và thanh toán cho tài xế khi lên xe. Vé của bạn đã được giữ chỗ."
+                type="success"
+                showIcon
+                icon={<DollarOutlined />}
+                className="mb-6"
+              />
+            )}
+
+            <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Text className="text-gray-600">Tổng tiền vé</Text>
+                  <Text strong>{formatPrice(getSeatPrice() * selectedSeats.length)}</Text>
+                </div>
+                {appliedVoucher && (
+                  <div className="flex justify-between items-center text-green-600">
+                    <div className="flex items-center gap-2">
+                      <TagOutlined />
+                      <Text className="text-green-600">Giảm giá voucher</Text>
+                    </div>
+                    <Text strong className="text-green-600">-{formatPrice(appliedVoucher.discountAmount)}</Text>
+                  </div>
+                )}
+                <Divider className="my-2" />
+                <div className="flex justify-between items-center">
+                  <Text strong className="text-lg">Tổng thanh toán</Text>
+                  <Text strong className="text-2xl text-blue-600">
                     {formatPrice(calculateTotal())}
                   </Text>
                 </div>
@@ -587,9 +671,15 @@ const PassengerInfoPage = () => {
               block
               loading={loading}
               onClick={handlePayment}
+              icon={selectedPaymentMethod === 'cash' ? <DollarOutlined /> : <CreditCardOutlined />}
+              disabled={!selectedPaymentMethod}
             >
-              Thanh toán
+              {selectedPaymentMethod === 'cash' ? 'Xác nhận đặt vé' : 'Tiến hành thanh toán'}
             </Button>
+
+            <div className="text-center mt-4 text-gray-500 text-sm">
+              <SafetyOutlined /> Giao dịch được bảo mật và an toàn
+            </div>
           </Card>
         )}
       </div>
