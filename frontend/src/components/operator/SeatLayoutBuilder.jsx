@@ -47,10 +47,19 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
     setLoadingTemplates(true);
     try {
       const response = await seatLayoutApi.getAllTemplates();
+      console.log('All templates response:', response);
+      console.log('Current busType:', busType);
+
       const filtered = response.data.templates.filter(
         (t) => !busType || t.busType === busType
       );
+      console.log('Filtered templates:', filtered);
+
       setTemplates(filtered);
+
+      if (filtered.length === 0) {
+        message.warning(`Không tìm thấy template nào cho loại xe "${busType}"`);
+      }
     } catch (error) {
       console.error('Load templates error:', error);
       message.error(error?.response?.data?.message || error?.message || 'Không thể tải templates');
@@ -248,10 +257,19 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
             <div className="space-y-4">
               <Select
                 className="w-full"
-                placeholder="Chọn template sơ đồ ghế"
+                placeholder={
+                  !busType
+                    ? "Vui lòng chọn loại xe trước"
+                    : loadingTemplates
+                    ? "Đang tải templates..."
+                    : templates.length === 0
+                    ? "Không có template nào"
+                    : "Chọn template sơ đồ ghế"
+                }
                 onChange={handleSelectTemplate}
-                disabled={!busType || loadingTemplates || loadingTemplate}
+                disabled={!busType || loadingTemplates || loadingTemplate || templates.length === 0}
                 loading={loadingTemplates}
+                notFoundContent={loadingTemplates ? "Đang tải..." : "Không có template"}
               >
                 {templates.map((template) => (
                   <Option key={template.templateKey} value={template.templateKey}>

@@ -72,7 +72,7 @@ const sleeperTemplates = {
   standard: {
     name: 'Xe giường nằm 20 giường',
     busType: 'sleeper',
-    ...generateSleeperLayout(10, 1),
+    ...generateSleeperLayout(10, 1, 2),
     description: 'Xe giường nằm tiêu chuẩn 20 giường, 1 tầng',
   },
 
@@ -80,7 +80,7 @@ const sleeperTemplates = {
   large: {
     name: 'Xe giường nằm 30 giường',
     busType: 'sleeper',
-    ...generateSleeperLayout(15, 1),
+    ...generateSleeperLayout(15, 1, 2),
     description: 'Xe giường nằm lớn 30 giường, thoải mái cho hành trình dài',
   },
 
@@ -88,7 +88,7 @@ const sleeperTemplates = {
   doubleDecker: {
     name: 'Xe giường nằm 2 tầng 40 giường',
     busType: 'sleeper',
-    ...generateSleeperLayout(10, 2),
+    ...generateSleeperLayout(10, 2, 2),
     description: 'Xe giường nằm 2 tầng 40 giường, hiện đại và sang trọng',
   },
 };
@@ -274,9 +274,12 @@ const buildCustomTemplate = (options) => {
       break;
 
     case 'sleeper':
-      const sleeperConfig = generateSleeperLayout(rows, floors);
+      const sleeperConfig = generateSleeperLayout(rows, floors, columns);
       layout = sleeperConfig.layout;
       totalSeats = sleeperConfig.totalSeats;
+      // Update columns and rows from generated config
+      columns = sleeperConfig.columns;
+      rows = sleeperConfig.rows;
       break;
 
     case 'limousine':
