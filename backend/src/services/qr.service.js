@@ -9,7 +9,22 @@ class QRService {
   constructor() {
     // Encryption settings
     this.algorithm = 'aes-256-cbc';
-    this.secretKey = process.env.QR_ENCRYPTION_KEY || crypto.randomBytes(32);
+
+    // Convert hex string from env to Buffer (32 bytes for aes-256)
+    // QR_ENCRYPTION_KEY should be a 64-character hex string (32 bytes)
+    if (process.env.QR_ENCRYPTION_KEY) {
+      this.secretKey = Buffer.from(process.env.QR_ENCRYPTION_KEY, 'hex');
+    } else {
+      // Generate random 32 bytes if not set
+      this.secretKey = crypto.randomBytes(32);
+      console.warn('⚠️  QR_ENCRYPTION_KEY not set, using random key. This will break QR verification after restart!');
+    }
+
+    // Verify key length
+    if (this.secretKey.length !== 32) {
+      throw new Error(`QR_ENCRYPTION_KEY must be 32 bytes (64 hex characters), got ${this.secretKey.length} bytes`);
+    }
+
     this.iv = crypto.randomBytes(16);
   }
 
