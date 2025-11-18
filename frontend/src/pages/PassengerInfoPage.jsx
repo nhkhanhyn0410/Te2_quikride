@@ -105,7 +105,7 @@ const PassengerInfoPage = () => {
 
     try {
       setVoucherValidating(true);
-      const totalAmount = selectedTrip.finalPrice * selectedSeats.length;
+      const totalAmount = getSeatPrice() * selectedSeats.length;
 
       const response = await validateVoucher(voucherCode, {
         tripId: selectedTrip._id,
@@ -232,11 +232,18 @@ const PassengerInfoPage = () => {
   };
 
   const formatPrice = (price) => {
+    if (!price || isNaN(price)) return '0đ';
     return price.toLocaleString('vi-VN') + 'đ';
   };
 
+  const getSeatPrice = () => {
+    // Try multiple price fields in order of preference
+    return selectedTrip?.pricing?.finalPrice || selectedTrip?.finalPrice || selectedTrip?.pricing?.basePrice || 0;
+  };
+
   const calculateTotal = () => {
-    const baseTotal = selectedTrip.finalPrice * selectedSeats.length;
+    if (!selectedTrip || selectedSeats.length === 0) return 0;
+    const baseTotal = getSeatPrice() * selectedSeats.length;
     const voucherDiscount = appliedVoucher?.discountAmount || 0;
     return Math.max(0, baseTotal - voucherDiscount);
   };
@@ -382,7 +389,13 @@ const PassengerInfoPage = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Text>Giá vé ({selectedSeats.length} ghế)</Text>
-                    <Text>{formatPrice(selectedTrip.finalPrice * selectedSeats.length)}</Text>
+                    <Text strong className="text-blue-600">
+                      {selectedSeats.length > 0 ? formatPrice(getSeatPrice()) : '0đ'} x {selectedSeats.length}
+                    </Text>
+                  </div>
+                  <div className="flex justify-between">
+                    <Text className="text-gray-600">Tổng giá vé</Text>
+                    <Text>{formatPrice(getSeatPrice() * selectedSeats.length)}</Text>
                   </div>
                   {appliedVoucher && (
                     <div className="flex justify-between text-green-600">
