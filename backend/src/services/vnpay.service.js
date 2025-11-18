@@ -105,8 +105,9 @@ class VNPayService {
     const secureHash = this.createSignature(signData, this.vnp_HashSecret);
     vnp_Params['vnp_SecureHash'] = secureHash;
 
-    // Create payment URL with properly encoded parameters
-    const paymentUrl = this.vnp_Url + '?' + querystring.stringify(vnp_Params);
+    // Create payment URL with raw values (no encoding)
+    // VNPay expects the URL to have the same format as the signature
+    const paymentUrl = this.vnp_Url + '?' + querystring.stringify(vnp_Params, { encode: false });
 
     return paymentUrl;
   }
