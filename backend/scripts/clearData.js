@@ -56,11 +56,47 @@ const seedData = async () => {
     await Booking.deleteMany({});
     await Ticket.deleteMany({});
     console.log('✅ Cleared all existing data\n');
+
+    const users = await User.create([
+          // Admin
+          {
+            email: 'admin@quikride.com',
+            phone: '0900000000',
+            password: 'admin123',
+            fullName: 'Quản Trị Viên Hệ Thống',
+            role: 'admin',
+            isEmailVerified: true,
+            isPhoneVerified: true,
+          },
+        ]);
+
+        const operators = await BusOperator.create([
+              {
+                email: 'operator1@quikride.com',
+                phone: '0281234567',
+                password: 'operator123',
+                companyName: 'Phương Trang Express',
+                companyAddress: '272 Đường Đệ Tam, Phường 12, Quận 11, TP.HCM',
+                businessLicense: 'BL-PT-2020-001',
+                taxCode: 'TAX-PT-001',
+                representativeName: 'Nguyễn Văn Trang',
+                representativePhone: '0281234567',
+                representativeEmail: 'trang@phuongtrang.com',
+                status: 'active',
+                isVerified: true,
+                averageRating: 4.7,
+                totalTrips: 2450,
+              },
+            ]);     
+
+
     } catch (error) {
     console.error('❌ Error seeding database:', error);
     console.error(error.stack);
     process.exit(1);
   }
+
+
 };
 
 const main = async () => {
