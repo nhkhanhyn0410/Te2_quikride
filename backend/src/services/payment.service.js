@@ -1,6 +1,8 @@
 const Payment = require('../models/Payment');
 const Booking = require('../models/Booking');
+const Trip = require('../models/Trip');
 const vnpayService = require('./vnpay.service');
+const SeatLockService = require('./seatLock.service');
 const moment = require('moment');
 
 // Lazy-load TicketService to avoid circular dependency
@@ -241,6 +243,51 @@ class PaymentService {
 
         // Auto-confirm booking if it's in pending/held status
         if (booking.status === 'pending' || booking.isHeld) {
+          console.log('🔄 Confirming seats on trip...');
+
+          // Get trip and update booked seats
+          const trip = await Trip.findById(booking.tripId);
+
+          if (trip) {
+            // Add seats to trip's booked seats
+            const seatNumbers = booking.seats.map((s) => s.seatNumber);
+
+            for (const seat of booking.seats) {
+              // Only add if not already booked
+              const alreadyBooked = trip.bookedSeats.some(
+                (bookedSeat) => bookedSeat.seatNumber === seat.seatNumber
+              );
+
+              if (!alreadyBooked) {
+                trip.bookedSeats.push({
+                  seatNumber: seat.seatNumber,
+                  bookingId: booking._id,
+                  passengerName: seat.passengerName,
+                });
+              }
+            }
+
+            // Update available seats count
+            trip.availableSeats = Math.max(0, trip.totalSeats - trip.bookedSeats.length);
+            await trip.save();
+            console.log('✅ Trip seats updated:', {
+              bookedSeats: trip.bookedSeats.length,
+              availableSeats: trip.availableSeats,
+            });
+
+            // Release Redis locks (best effort - sessionId unknown in callback)
+            try {
+              await SeatLockService.releaseSeats(booking.tripId, seatNumbers);
+              console.log('✅ Redis seat locks released');
+            } catch (lockError) {
+              console.warn('⚠️  Could not release Redis locks (they will expire):', lockError.message);
+              // Don't fail payment if lock release fails - they will auto-expire
+            }
+          } else {
+            console.error('❌ Trip not found for booking:', booking.tripId);
+          }
+
+          // Confirm booking (updates status to confirmed, isHeld to false)
           booking.confirm();
         }
 
