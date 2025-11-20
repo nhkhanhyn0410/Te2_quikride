@@ -403,14 +403,25 @@ class EmployeeService {
 
     // Get trips with populated data
     const trips = await Trip.find(query)
-      .populate('route', 'routeName departureCity arrivalCity')
-      .populate('bus', 'busNumber plateNumber seatCapacity')
+      .populate('routeId', 'routeName departureCity arrivalCity')
+      .populate('busId', 'busNumber plateNumber seatCapacity')
       .populate('driverId', 'fullName phone employeeCode')
       .populate('tripManagerId', 'fullName phone employeeCode')
       .populate('operatorId', 'companyName')
-      .sort({ departureTime: -1 });
+      .sort({ departureTime: -1 })
+      .lean();
 
-    return trips;
+    // Transform data to match frontend expectations (route instead of routeId, etc.)
+    const transformedTrips = trips.map(trip => ({
+      ...trip,
+      route: trip.routeId,
+      bus: trip.busId,
+      driver: trip.driverId,
+      tripManager: trip.tripManagerId,
+      operator: trip.operatorId,
+    }));
+
+    return transformedTrips;
   }
 
   /**
