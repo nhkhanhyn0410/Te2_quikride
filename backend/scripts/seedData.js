@@ -1,6 +1,6 @@
 /**
- * Seed Script for QuikRide Database
- * Creates sample data for development and testing
+ * Enhanced Seed Script for QuikRide Database
+ * Creates comprehensive sample data with journey tracking and stops
  *
  * Usage: node scripts/seedData.js
  */
@@ -16,6 +16,8 @@ const Employee = require('../src/models/Employee');
 const Route = require('../src/models/Route');
 const Bus = require('../src/models/Bus');
 const Trip = require('../src/models/Trip');
+const Booking = require('../src/models/Booking');
+const Ticket = require('../src/models/Ticket');
 
 // Import seat layout utilities
 const {
@@ -38,20 +40,22 @@ const connectDB = async () => {
   }
 };
 
-// Sample data
+// Enhanced seed data with full journey tracking
 const seedData = async () => {
   try {
-    console.log('\n🌱 Starting to seed database...\n');
+    console.log('\n🌱 Starting to seed database with enhanced data...\n');
 
-    // Clear existing data
-    console.log('🗑️  Clearing existing data...');
+    // ==================== CLEAR ALL EXISTING DATA ====================
+    console.log('🗑️  Clearing ALL existing data...');
     await User.deleteMany({});
     await BusOperator.deleteMany({});
     await Employee.deleteMany({});
     await Route.deleteMany({});
     await Bus.deleteMany({});
     await Trip.deleteMany({});
-    console.log('✅ Cleared existing data\n');
+    await Booking.deleteMany({});
+    await Ticket.deleteMany({});
+    console.log('✅ Cleared all existing data\n');
 
     // ==================== USERS ====================
     console.log('👥 Creating Users...');
@@ -62,7 +66,7 @@ const seedData = async () => {
         email: 'admin@quikride.com',
         phone: '0900000000',
         password: 'admin123',
-        fullName: 'Quản Trị Viên',
+        fullName: 'Quản Trị Viên Hệ Thống',
         role: 'admin',
         isEmailVerified: true,
         isPhoneVerified: true,
@@ -96,615 +100,748 @@ const seedData = async () => {
         password: '123456',
         fullName: 'Lê Hoàng Cường',
         role: 'customer',
-        isEmailVerified: false,
+        isEmailVerified: true,
         isPhoneVerified: true,
+        loyaltyTier: 'bronze',
+        totalPoints: 1200,
+      },
+      {
+        email: 'customer4@gmail.com',
+        phone: '0945678901',
+        password: '123456',
+        fullName: 'Phạm Thị Dung',
+        role: 'customer',
+        isEmailVerified: true,
+        isPhoneVerified: true,
+        loyaltyTier: 'bronze',
+        totalPoints: 500,
       },
     ]);
 
-    console.log(`✅ Created ${users.length} users`);
+    console.log(`✅ Created ${users.length} users\n`);
 
     // ==================== BUS OPERATORS ====================
-    console.log('\n🚌 Creating Bus Operators...');
+    console.log('🏢 Creating Bus Operators...');
 
     const operators = await BusOperator.create([
       {
-        companyName: 'Phương Trang (FUTA Bus Lines)',
-        email: 'futabus@example.com',
+        email: 'operator1@quikride.com',
         phone: '0281234567',
         password: 'operator123',
-        businessLicense: 'GP-001234567',
-        taxCode: '0312345678',
-        description: 'Nhà xe uy tín hàng đầu Việt Nam với hơn 20 năm kinh nghiệm vận chuyển hành khách',
-        website: 'https://futabus.vn',
-        address: {
-          street: '272 Đường 3/2',
-          ward: 'Phường 12',
-          district: 'Quận 10',
-          city: 'TP. Hồ Chí Minh',
-          country: 'Vietnam',
-        },
-        bankInfo: {
-          bankName: 'Vietcombank',
-          accountNumber: '0123456789',
-          accountHolder: 'CÔNG TY TNHH PHƯƠNG TRANG',
-        },
-        verificationStatus: 'approved',
-        verifiedAt: new Date(),
+        companyName: 'Phương Trang Express',
+        companyAddress: '272 Đường Đệ Tam, Phường 12, Quận 11, TP.HCM',
+        businessLicense: 'BL-PT-2020-001',
+        taxCode: 'TAX-PT-001',
+        representativeName: 'Nguyễn Văn Trang',
+        representativePhone: '0281234567',
+        representativeEmail: 'trang@phuongtrang.com',
+        status: 'active',
+        isVerified: true,
+        averageRating: 4.7,
+        totalTrips: 2450,
+      },
+      {
+        email: 'operator2@quikride.com',
+        phone: '0282345678',
+        password: 'operator123',
+        companyName: 'Thành Bưởi Limousine',
+        companyAddress: '199 Nguyễn Văn Linh, Quận 7, TP.HCM',
+        businessLicense: 'BL-TB-2019-002',
+        taxCode: 'TAX-TB-002',
+        representativeName: 'Trần Thành Bưởi',
+        representativePhone: '0282345678',
+        representativeEmail: 'buoi@thanhbuoi.com',
+        status: 'active',
+        isVerified: true,
+        averageRating: 4.8,
+        totalTrips: 1890,
+      },
+      {
+        email: 'operator3@quikride.com',
+        phone: '0283456789',
+        password: 'operator123',
+        companyName: 'Hải Âu Express',
+        companyAddress: '45 Lê Duẩn, Quận 1, TP.HCM',
+        businessLicense: 'BL-HA-2021-003',
+        taxCode: 'TAX-HA-003',
+        representativeName: 'Lê Văn Hải',
+        representativePhone: '0283456789',
+        representativeEmail: 'hai@haiau.com',
+        status: 'active',
+        isVerified: true,
         averageRating: 4.5,
-        totalReviews: 1250,
-        totalTrips: 5420,
-        totalRevenue: 45000000000,
-        commissionRate: 5,
-        isActive: true,
-      },
-      {
-        companyName: 'Thanh Bưởi',
-        email: 'thanhbuoi@example.com',
-        phone: '0287654321',
-        password: 'operator123',
-        businessLicense: 'GP-007654321',
-        taxCode: '0387654321',
-        description: 'Chuyên tuyến Sài Gòn - Vũng Tàu chất lượng cao',
-        website: 'https://thanhbuoi.vn',
-        address: {
-          street: '123 Lê Lợi',
-          ward: 'Phường 4',
-          district: 'Quận 5',
-          city: 'TP. Hồ Chí Minh',
-          country: 'Vietnam',
-        },
-        verificationStatus: 'approved',
-        verifiedAt: new Date(),
-        averageRating: 4.3,
-        totalReviews: 840,
-        totalTrips: 3200,
-        totalRevenue: 28000000000,
-        commissionRate: 5,
-        isActive: true,
-      },
-      {
-        companyName: 'Hải Vân',
-        email: 'haivan@example.com',
-        phone: '0289876543',
-        password: 'operator123',
-        businessLicense: 'GP-009876543',
-        taxCode: '0389876543',
-        description: 'Tuyến miền Trung chuyên nghiệp, giá cả hợp lý',
-        verificationStatus: 'pending',
-        address: {
-          street: '456 Trần Hưng Đạo',
-          ward: 'Phường 1',
-          district: 'Quận 5',
-          city: 'TP. Hồ Chí Minh',
-          country: 'Vietnam',
-        },
-        isActive: true,
+        totalTrips: 1250,
       },
     ]);
 
-    console.log(`✅ Created ${operators.length} bus operators`);
+    console.log(`✅ Created ${operators.length} bus operators\n`);
 
     // ==================== EMPLOYEES ====================
-    console.log('\n👷 Creating Employees...');
+    console.log('👨‍✈️ Creating Employees (Drivers & Trip Managers)...');
 
-    const employees = [];
-
-    // Employees for FUTA (operator 0)
-    const futaEmployees = await Employee.create([
-      // Trip Managers
+    const employees = await Employee.create([
+      // Phương Trang - Drivers
       {
         operatorId: operators[0]._id,
-        employeeCode: 'TM001',
-        fullName: 'Nguyễn Minh Quản',
-        phone: '0901111111',
-        email: 'tripmanager1@futa.com',
-        password: 'tripmanager123',
-        role: 'trip_manager',
-        status: 'active',
-        hireDate: new Date('2020-01-15'),
-      },
-      {
-        operatorId: operators[0]._id,
-        employeeCode: 'TM002',
-        fullName: 'Trần Văn Hùng',
-        phone: '0901111112',
-        email: 'tripmanager2@futa.com',
-        password: 'tripmanager123',
-        role: 'trip_manager',
-        status: 'active',
-        hireDate: new Date('2021-03-20'),
-      },
-      // Drivers
-      {
-        operatorId: operators[0]._id,
-        employeeCode: 'DR001',
-        fullName: 'Phạm Văn Tài',
-        phone: '0902222221',
-        email: 'driver1@futa.com',
-        password: 'driver123',
+        employeeCode: 'DRV-PT-001',
+        fullName: 'Nguyễn Văn Long',
+        phone: '0901234567',
+        email: 'long.driver@phuongtrang.com',
+        password: await bcrypt.hash('driver123', 10),
         role: 'driver',
-        licenseNumber: 'B1234567',
-        licenseClass: 'D',
+        status: 'active',
+        licenseNumber: 'B2-123456',
         licenseExpiry: new Date('2026-12-31'),
-        status: 'active',
-        hireDate: new Date('2019-05-10'),
       },
       {
         operatorId: operators[0]._id,
-        employeeCode: 'DR002',
-        fullName: 'Lê Minh Phong',
-        phone: '0902222222',
-        password: 'driver123',
+        employeeCode: 'DRV-PT-002',
+        fullName: 'Trần Minh Tâm',
+        phone: '0902345678',
+        email: 'tam.driver@phuongtrang.com',
+        password: await bcrypt.hash('driver123', 10),
         role: 'driver',
-        licenseNumber: 'B2345678',
-        licenseClass: 'D',
-        licenseExpiry: new Date('2027-06-30'),
         status: 'active',
-        hireDate: new Date('2020-08-15'),
+        licenseNumber: 'B2-234567',
+        licenseExpiry: new Date('2027-06-30'),
       },
-    ]);
-    employees.push(...futaEmployees);
-
-    // Employees for Thanh Bưởi (operator 1)
-    const thanhBuoiEmployees = await Employee.create([
+      // Phương Trang - Trip Managers
       {
-        operatorId: operators[1]._id,
-        employeeCode: 'TM001',
-        fullName: 'Võ Thị Mai',
-        phone: '0903333331',
-        email: 'tripmanager@thanhbuoi.com',
-        password: 'tripmanager123',
+        operatorId: operators[0]._id,
+        employeeCode: 'TM-PT-001',
+        fullName: 'Lê Thị Hoa',
+        phone: '0903456789',
+        email: 'hoa.manager@phuongtrang.com',
+        password: await bcrypt.hash('manager123', 10),
         role: 'trip_manager',
         status: 'active',
-        hireDate: new Date('2021-06-01'),
+      },
+      {
+        operatorId: operators[0]._id,
+        employeeCode: 'TM-PT-002',
+        fullName: 'Phạm Văn Nam',
+        phone: '0904567890',
+        email: 'nam.manager@phuongtrang.com',
+        password: await bcrypt.hash('manager123', 10),
+        role: 'trip_manager',
+        status: 'active',
+      },
+      // Thành Bưởi - Drivers
+      {
+        operatorId: operators[1]._id,
+        employeeCode: 'DRV-TB-001',
+        fullName: 'Võ Văn Thắng',
+        phone: '0905678901',
+        email: 'thang.driver@thanhbuoi.com',
+        password: await bcrypt.hash('driver123', 10),
+        role: 'driver',
+        status: 'active',
+        licenseNumber: 'B2-345678',
+        licenseExpiry: new Date('2026-09-30'),
       },
       {
         operatorId: operators[1]._id,
-        employeeCode: 'DR001',
-        fullName: 'Hoàng Văn Sơn',
-        phone: '0904444441',
-        password: 'driver123',
+        employeeCode: 'DRV-TB-002',
+        fullName: 'Đặng Văn Tuấn',
+        phone: '0906789012',
+        email: 'tuan.driver@thanhbuoi.com',
+        password: await bcrypt.hash('driver123', 10),
         role: 'driver',
-        licenseNumber: 'C3456789',
-        licenseClass: 'D',
-        licenseExpiry: new Date('2026-09-30'),
         status: 'active',
-        hireDate: new Date('2020-02-20'),
+        licenseNumber: 'B2-456789',
+        licenseExpiry: new Date('2027-03-31'),
+      },
+      // Thành Bưởi - Trip Managers
+      {
+        operatorId: operators[1]._id,
+        employeeCode: 'TM-TB-001',
+        fullName: 'Nguyễn Thị Lan',
+        phone: '0907890123',
+        email: 'lan.manager@thanhbuoi.com',
+        password: await bcrypt.hash('manager123', 10),
+        role: 'trip_manager',
+        status: 'active',
+      },
+      // Hải Âu - Drivers
+      {
+        operatorId: operators[2]._id,
+        employeeCode: 'DRV-HA-001',
+        fullName: 'Huỳnh Văn Hùng',
+        phone: '0908901234',
+        email: 'hung.driver@haiau.com',
+        password: await bcrypt.hash('driver123', 10),
+        role: 'driver',
+        status: 'active',
+        licenseNumber: 'B2-567890',
+        licenseExpiry: new Date('2026-11-30'),
+      },
+      // Hải Âu - Trip Managers
+      {
+        operatorId: operators[2]._id,
+        employeeCode: 'TM-HA-001',
+        fullName: 'Trương Thị Mai',
+        phone: '0909012345',
+        email: 'mai.manager@haiau.com',
+        password: await bcrypt.hash('manager123', 10),
+        role: 'trip_manager',
+        status: 'active',
       },
     ]);
-    employees.push(...thanhBuoiEmployees);
 
-    console.log(`✅ Created ${employees.length} employees`);
+    console.log(`✅ Created ${employees.length} employees\n`);
 
-    // ==================== ROUTES ====================
-    console.log('\n🛣️  Creating Routes...');
+    // ==================== BUSES ====================
+    console.log('🚌 Creating Buses with Seat Layouts...');
+
+    const buses = await Bus.create([
+      // Phương Trang - Limousine 24 ghế
+      {
+        operatorId: operators[0]._id,
+        busNumber: 'PT-001',
+        plateNumber: '51B-12345',
+        busType: 'limousine',
+        manufacturer: 'Hyundai Universe',
+        model: 'Limousine VIP',
+        year: 2022,
+        seatLayout: generateLimousineLayout(),
+        status: 'active',
+      },
+      {
+        operatorId: operators[0]._id,
+        busNumber: 'PT-002',
+        plateNumber: '51B-23456',
+        busType: 'limousine',
+        manufacturer: 'Hyundai Universe',
+        model: 'Limousine VIP',
+        year: 2023,
+        seatLayout: generateLimousineLayout(),
+        status: 'active',
+      },
+      // Phương Trang - Giường nằm 40 ghế
+      {
+        operatorId: operators[0]._id,
+        busNumber: 'PT-003',
+        plateNumber: '51B-34567',
+        busType: 'sleeper',
+        manufacturer: 'Thaco',
+        model: 'TB120SL',
+        year: 2021,
+        seatLayout: generateAisleLayout(40),
+        status: 'active',
+      },
+      // Thành Bưởi - Limousine 22 ghế
+      {
+        operatorId: operators[1]._id,
+        busNumber: 'TB-001',
+        plateNumber: '50B-11111',
+        busType: 'limousine',
+        manufacturer: 'Mercedes-Benz',
+        model: 'Sprinter Limousine',
+        year: 2023,
+        seatLayout: generateLimousineLayout(),
+        status: 'active',
+      },
+      {
+        operatorId: operators[1]._id,
+        busNumber: 'TB-002',
+        plateNumber: '50B-22222',
+        busType: 'limousine',
+        manufacturer: 'Mercedes-Benz',
+        model: 'Sprinter Limousine',
+        year: 2023,
+        seatLayout: generateLimousineLayout(),
+        status: 'active',
+      },
+      // Hải Âu - Xe 2 tầng 45 ghế
+      {
+        operatorId: operators[2]._id,
+        busNumber: 'HA-001',
+        plateNumber: '51C-99999',
+        busType: 'double_decker',
+        manufacturer: 'Hyundai',
+        model: 'Universe Noble',
+        year: 2022,
+        seatLayout: generateDoubleDecker(),
+        status: 'active',
+      },
+    ]);
+
+    console.log(`✅ Created ${buses.length} buses with seat layouts\n`);
+
+    // ==================== ROUTES WITH STOPS ====================
+    console.log('🗺️  Creating Routes with Stops...');
 
     const routes = await Route.create([
+      // Route 1: TP.HCM → Đà Lạt (có 3 điểm dừng)
       {
         operatorId: operators[0]._id,
-        routeName: 'Sài Gòn - Đà Lạt',
-        routeCode: 'SGN-DLT-001',
+        routeCode: 'HCM-DL-001',
+        routeName: 'TP. Hồ Chí Minh - Đà Lạt',
         origin: {
           city: 'TP. Hồ Chí Minh',
           province: 'TP. Hồ Chí Minh',
           station: 'Bến xe Miền Đông',
-          address: '292 Đinh Bộ Lĩnh, Phường 26, Bình Thạnh',
-          coordinates: { lat: 10.8142, lng: 106.7107 },
+          address: '292 Đinh Bộ Lĩnh, P.26, Q. Bình Thạnh',
+          coordinates: { lat: 10.8142, lng: 106.7053 },
         },
         destination: {
           city: 'Đà Lạt',
           province: 'Lâm Đồng',
           station: 'Bến xe Đà Lạt',
-          address: '1 Tô Hiến Thành, Phường 3, Đà Lạt',
-          coordinates: { lat: 11.9404, lng: 108.4583 },
+          address: '1 Tô Hiến Thành, P.3, TP. Đà Lạt',
+          coordinates: { lat: 11.9344, lng: 108.4419 },
         },
+        stops: [
+          {
+            name: 'Trạm dừng chân Dầu Giây',
+            address: 'KM 50 QL1A, Dầu Giây, Đồng Nai',
+            coordinates: { lat: 10.9876, lng: 107.1234 },
+            order: 1,
+            estimatedArrivalMinutes: 90, // 1.5 giờ từ xuất phát
+            stopDuration: 15,
+          },
+          {
+            name: 'Trạm Bảo Lộc',
+            address: 'QL20, TP. Bảo Lộc, Lâm Đồng',
+            coordinates: { lat: 11.5480, lng: 107.8065 },
+            order: 2,
+            estimatedArrivalMinutes: 240, // 4 giờ từ xuất phát
+            stopDuration: 20,
+          },
+          {
+            name: 'Ngã ba Liên Khương',
+            address: 'Ngã ba Liên Khương, Đức Trọng, Lâm Đồng',
+            coordinates: { lat: 11.7500, lng: 108.3670 },
+            order: 3,
+            estimatedArrivalMinutes: 330, // 5.5 giờ từ xuất phát
+            stopDuration: 10,
+          },
+        ],
         distance: 308,
-        estimatedDuration: 420,
-        pickupPoints: [
-          {
-            name: 'Bến xe Miền Đông',
-            address: '292 Đinh Bộ Lĩnh, Bình Thạnh, TP.HCM',
-          },
-          {
-            name: 'VP Phương Trang Q1',
-            address: '272 Đường 3/2, Quận 10, TP.HCM',
-          },
-        ],
-        dropoffPoints: [
-          {
-            name: 'Bến xe Đà Lạt',
-            address: '1 Tô Hiến Thành, Phường 3, Đà Lạt',
-          },
-          {
-            name: 'Chợ Đà Lạt',
-            address: 'Nguyễn Thị Minh Khai, Phường 1, Đà Lạt',
-          },
-        ],
-        status: 'active',
+        estimatedDuration: 420, // 7 giờ
+        isActive: true,
       },
+      // Route 2: TP.HCM → Vũng Tàu (có 2 điểm dừng)
       {
         operatorId: operators[0]._id,
-        routeName: 'Sài Gòn - Nha Trang',
-        routeCode: 'SGN-NTR-001',
+        routeCode: 'HCM-VT-001',
+        routeName: 'TP. Hồ Chí Minh - Vũng Tàu',
         origin: {
           city: 'TP. Hồ Chí Minh',
           province: 'TP. Hồ Chí Minh',
           station: 'Bến xe Miền Đông',
-          address: '292 Đinh Bộ Lĩnh, Phường 26, Bình Thạnh',
-          coordinates: { lat: 10.8142, lng: 106.7107 },
-        },
-        destination: {
-          city: 'Nha Trang',
-          province: 'Khánh Hòa',
-          station: 'Bến xe Nha Trang',
-          address: '23 Tháng 10, Phường Phước Long, Nha Trang',
-          coordinates: { lat: 12.2388, lng: 109.1967 },
-        },
-        distance: 450,
-        estimatedDuration: 540,
-        pickupPoints: [
-          {
-            name: 'Bến xe Miền Đông',
-            address: '292 Đinh Bộ Lĩnh, Bình Thạnh, TP.HCM',
-          },
-        ],
-        dropoffPoints: [
-          {
-            name: 'Bến xe Nha Trang',
-            address: '23 Tháng 10, Phước Long, Nha Trang',
-          },
-        ],
-        status: 'active',
-      },
-      {
-        operatorId: operators[1]._id,
-        routeName: 'Sài Gòn - Vũng Tàu',
-        routeCode: 'SGN-VT-001',
-        origin: {
-          city: 'TP. Hồ Chí Minh',
-          province: 'TP. Hồ Chí Minh',
-          station: 'Bến xe Miền Đông',
-          address: '292 Đinh Bộ Lĩnh, Phường 26, Bình Thạnh',
-          coordinates: { lat: 10.8142, lng: 106.7107 },
+          address: '292 Đinh Bộ Lĩnh, P.26, Q. Bình Thạnh',
+          coordinates: { lat: 10.8142, lng: 106.7053 },
         },
         destination: {
           city: 'Vũng Tàu',
           province: 'Bà Rịa - Vũng Tàu',
           station: 'Bến xe Vũng Tàu',
-          address: '192 Nam Kỳ Khởi Nghĩa, Phường 7, Vũng Tàu',
-          coordinates: { lat: 10.3459, lng: 107.0843 },
+          address: '192 Nam Kỳ Khởi Nghĩa, P.9, TP. Vũng Tàu',
+          coordinates: { lat: 10.3460, lng: 107.0844 },
         },
+        stops: [
+          {
+            name: 'Trạm dừng Long Thành',
+            address: 'QL51, Long Thành, Đồng Nai',
+            coordinates: { lat: 10.7300, lng: 106.9500 },
+            order: 1,
+            estimatedArrivalMinutes: 45,
+            stopDuration: 10,
+          },
+          {
+            name: 'Ngã tư Bà Rịa',
+            address: 'Ngã tư Bà Rịa, TP. Bà Rịa',
+            coordinates: { lat: 10.5050, lng: 107.1700 },
+            order: 2,
+            estimatedArrivalMinutes: 90,
+            stopDuration: 10,
+          },
+        ],
         distance: 125,
-        estimatedDuration: 120,
-        pickupPoints: [
-          {
-            name: 'Bến xe Miền Đông',
-            address: '292 Đinh Bộ Lĩnh, Bình Thạnh, TP.HCM',
-          },
-          {
-            name: 'VP Thanh Bưởi Q5',
-            address: '123 Lê Lợi, Quận 5, TP.HCM',
-          },
-        ],
-        dropoffPoints: [
-          {
-            name: 'Bến xe Vũng Tàu',
-            address: '192 Nam Kỳ Khởi Nghĩa, Phường 7, Vũng Tàu',
-          },
-          {
-            name: 'Bãi Sau',
-            address: 'Thùy Vân, Phường Thắng Tam, Vũng Tàu',
-          },
-        ],
-        status: 'active',
+        estimatedDuration: 150, // 2.5 giờ
+        isActive: true,
       },
-    ]);
-
-    console.log(`✅ Created ${routes.length} routes`);
-
-    // ==================== BUSES ====================
-    console.log('\n🚐 Creating Buses...');
-
-    const buses = await Bus.create([
-      // FUTA buses
-      {
-        operatorId: operators[0]._id,
-        busNumber: '51B-12345',
-        busType: 'limousine',
-        seatLayout: {
-          floors: 1,
-          rows: 7, // 1 DRIVER row + 6 seat rows
-          columns: 3,
-          layout: [
-            ['DRIVER', '', ''], // Driver seat
-            ['A1', 'A2', 'A3'],
-            ['B1', 'B2', 'B3'],
-            ['C1', 'C2', 'C3'],
-            ['D1', 'D2', 'D3'],
-            ['E1', 'E2', 'E3'],
-            ['F1', 'F2', 'F3'],
-          ],
-          totalSeats: 18,
-        },
-        amenities: ['wifi', 'ac', 'blanket', 'water', 'charging'],
-        model: 'Mercedes-Benz Sprinter',
-        registrationExpiry: new Date('2026-12-31'),
-        insuranceExpiry: new Date('2025-12-31'),
-        lastMaintenanceDate: new Date('2024-10-01'),
-        status: 'active',
-      },
-      {
-        operatorId: operators[0]._id,
-        busNumber: '51B-67890',
-        busType: 'sleeper',
-        seatLayout: {
-          floors: 2,
-          rows: 11, // 1 DRIVER + 4 lower + 1 FLOOR_2 + 5 upper
-          columns: 3,
-          layout: [
-            ['DRIVER', '', ''], // Driver seat
-            // Lower floor
-            ['L1A', 'L1B', 'L1C'],
-            ['L2A', 'L2B', 'L2C'],
-            ['L3A', 'L3B', 'L3C'],
-            ['L4A', 'L4B', 'L4C'],
-            // Floor separator
-            ['FLOOR_2', '', ''], // Second floor marker
-            // Upper floor
-            ['U1A', 'U1B', 'U1C'],
-            ['U2A', 'U2B', 'U2C'],
-            ['U3A', 'U3B', 'U3C'],
-            ['U4A', 'U4B', 'U4C'],
-            ['U5A', 'U5B', 'U5C'],
-          ],
-          totalSeats: 27, // 4*3 lower + 5*3 upper
-        },
-        amenities: ['wifi', 'ac', 'blanket', 'pillow', 'water', 'charging', 'tv'],
-        model: 'Thaco Universe',
-        registrationExpiry: new Date('2027-06-30'),
-        insuranceExpiry: new Date('2025-12-31'),
-        lastMaintenanceDate: new Date('2024-09-15'),
-        status: 'active',
-      },
-      // Thanh Bưởi buses
+      // Route 3: TP.HCM → Nha Trang (có 4 điểm dừng)
       {
         operatorId: operators[1]._id,
-        busNumber: '51G-11111',
-        busType: 'seater',
-        seatLayout: {
-          floors: 1,
-          rows: 12, // 1 DRIVER row + 11 seat rows
-          columns: 4,
-          layout: [
-            ['DRIVER', '', '', ''], // Driver seat
-            ['A1', 'A2', '', 'A3'],
-            ['B1', 'B2', '', 'B3'],
-            ['C1', 'C2', '', 'C3'],
-            ['D1', 'D2', '', 'D3'],
-            ['E1', 'E2', '', 'E3'],
-            ['F1', 'F2', '', 'F3'],
-            ['G1', 'G2', '', 'G3'],
-            ['H1', 'H2', '', 'H3'],
-            ['I1', 'I2', '', 'I3'],
-            ['J1', 'J2', '', 'J3'],
-            ['K1', 'K2', 'K3', 'K4'], // Back row with 4 seats
-          ],
-          totalSeats: 34,
+        routeCode: 'HCM-NT-001',
+        routeName: 'TP. Hồ Chí Minh - Nha Trang',
+        origin: {
+          city: 'TP. Hồ Chí Minh',
+          province: 'TP. Hồ Chí Minh',
+          station: 'Bến xe Miền Đông',
+          address: '292 Đinh Bộ Lĩnh, P.26, Q. Bình Thạnh',
+          coordinates: { lat: 10.8142, lng: 106.7053 },
         },
-        amenities: ['ac', 'water'],
-        model: 'Hyundai Universe',
-        registrationExpiry: new Date('2026-08-31'),
-        insuranceExpiry: new Date('2025-12-31'),
-        lastMaintenanceDate: new Date('2024-11-01'),
-        status: 'active',
+        destination: {
+          city: 'Nha Trang',
+          province: 'Khánh Hòa',
+          station: 'Bến xe Phía Nam',
+          address: '23 Tháng 10, P. Phước Hải, TP. Nha Trang',
+          coordinates: { lat: 12.2388, lng: 109.1967 },
+        },
+        stops: [
+          {
+            name: 'Trạm Dầu Giây',
+            address: 'KM 50 QL1A, Dầu Giây',
+            coordinates: { lat: 10.9876, lng: 107.1234 },
+            order: 1,
+            estimatedArrivalMinutes: 90,
+            stopDuration: 15,
+          },
+          {
+            name: 'Phan Rang',
+            address: 'QL1A, TP. Phan Rang, Ninh Thuận',
+            coordinates: { lat: 11.5657, lng: 108.9890 },
+            order: 2,
+            estimatedArrivalMinutes: 300,
+            stopDuration: 20,
+          },
+          {
+            name: 'Cam Ranh',
+            address: 'QL1A, TP. Cam Ranh, Khánh Hòa',
+            coordinates: { lat: 11.9214, lng: 109.1593 },
+            order: 3,
+            estimatedArrivalMinutes: 390,
+            stopDuration: 15,
+          },
+          {
+            name: 'Ngã ba Đại Lãnh',
+            address: 'Đại Lãnh, Cam Lâm, Khánh Hòa',
+            coordinates: { lat: 12.0500, lng: 109.1800 },
+            order: 4,
+            estimatedArrivalMinutes: 420,
+            stopDuration: 10,
+          },
+        ],
+        distance: 448,
+        estimatedDuration: 480, // 8 giờ
+        isActive: true,
+      },
+      // Route 4: TP.HCM → Đà Nẵng (có 5 điểm dừng)
+      {
+        operatorId: operators[1]._id,
+        routeCode: 'HCM-DN-001',
+        routeName: 'TP. Hồ Chí Minh - Đà Nẵng',
+        origin: {
+          city: 'TP. Hồ Chí Minh',
+          province: 'TP. Hồ Chí Minh',
+          station: 'Bến xe Miền Đông',
+          address: '292 Đinh Bộ Lĩnh, P.26, Q. Bình Thạnh',
+          coordinates: { lat: 10.8142, lng: 106.7053 },
+        },
+        destination: {
+          city: 'Đà Nẵng',
+          province: 'Đà Nẵng',
+          station: 'Bến xe Trung tâm Đà Nẵng',
+          address: 'Đường Điện Biên Phủ, Q. Thanh Khê',
+          coordinates: { lat: 16.0544, lng: 108.2022 },
+        },
+        stops: [
+          {
+            name: 'Dầu Giây',
+            address: 'KM 50 QL1A, Dầu Giây',
+            coordinates: { lat: 10.9876, lng: 107.1234 },
+            order: 1,
+            estimatedArrivalMinutes: 90,
+            stopDuration: 15,
+          },
+          {
+            name: 'Nha Trang',
+            address: 'QL1A, TP. Nha Trang',
+            coordinates: { lat: 12.2388, lng: 109.1967 },
+            order: 2,
+            estimatedArrivalMinutes: 480,
+            stopDuration: 30,
+          },
+          {
+            name: 'Tuy Hòa',
+            address: 'QL1A, TP. Tuy Hòa, Phú Yên',
+            coordinates: { lat: 13.0882, lng: 109.2977 },
+            order: 3,
+            estimatedArrivalMinutes: 600,
+            stopDuration: 20,
+          },
+          {
+            name: 'Quy Nhơn',
+            address: 'QL1A, TP. Quy Nhơn, Bình Định',
+            coordinates: { lat: 13.7563, lng: 109.2235 },
+            order: 4,
+            estimatedArrivalMinutes: 720,
+            stopDuration: 25,
+          },
+          {
+            name: 'Quảng Ngãi',
+            address: 'QL1A, TP. Quảng Ngãi',
+            coordinates: { lat: 15.1208, lng: 108.8044 },
+            order: 5,
+            estimatedArrivalMinutes: 840,
+            stopDuration: 20,
+          },
+        ],
+        distance: 964,
+        estimatedDuration: 960, // 16 giờ
+        isActive: true,
+      },
+      // Route 5: TP.HCM → Phan Thiết (có 1 điểm dừng)
+      {
+        operatorId: operators[2]._id,
+        routeCode: 'HCM-PT-001',
+        routeName: 'TP. Hồ Chí Minh - Phan Thiết',
+        origin: {
+          city: 'TP. Hồ Chí Minh',
+          province: 'TP. Hồ Chí Minh',
+          station: 'Bến xe Miền Đông',
+          address: '292 Đinh Bộ Lĩnh, P.26, Q. Bình Thạnh',
+          coordinates: { lat: 10.8142, lng: 106.7053 },
+        },
+        destination: {
+          city: 'Phan Thiết',
+          province: 'Bình Thuận',
+          station: 'Bến xe Phan Thiết',
+          address: 'Đường Tô Hiến Thành, P. Phú Thủy',
+          coordinates: { lat: 10.9281, lng: 108.1014 },
+        },
+        stops: [
+          {
+            name: 'Trạm nghỉ Hàm Thuận Nam',
+            address: 'QL1A, Hàm Thuận Nam, Bình Thuận',
+            coordinates: { lat: 10.8000, lng: 107.7000 },
+            order: 1,
+            estimatedArrivalMinutes: 120,
+            stopDuration: 15,
+          },
+        ],
+        distance: 200,
+        estimatedDuration: 180, // 3 giờ
+        isActive: true,
       },
     ]);
 
-    console.log(`✅ Created ${buses.length} buses`);
+    console.log(`✅ Created ${routes.length} routes with stops\n`);
 
-    // ==================== TRIPS ====================
-    console.log('\n🚌 Creating Trips...');
+    // ==================== TRIPS WITH JOURNEY TRACKING ====================
+    console.log('🚍 Creating Trips with Journey Tracking...');
 
-    // Helper function to create date for trips
-    const createTripDate = (daysFromNow, hours, minutes) => {
-      const date = new Date();
-      date.setDate(date.getDate() + daysFromNow);
-      date.setHours(hours, minutes, 0, 0);
-      return date;
-    };
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     const trips = await Trip.create([
-      // FUTA - Sài Gòn Đà Lạt (Tomorrow - Day after tomorrow)
+      // Trip 1: HCM → Đà Lạt - Hôm nay 6:00 (đang di chuyển)
       {
-        operatorId: operators[0]._id,
-        routeId: routes[0]._id,
-        busId: buses[0]._id, // Limousine
-        driverId: futaEmployees[2]._id, // Driver 1
-        tripManagerId: futaEmployees[0]._id, // Trip Manager 1
-        departureTime: createTripDate(1, 6, 0), // Tomorrow 6:00 AM
-        arrivalTime: createTripDate(1, 13, 0), // Tomorrow 1:00 PM
-        basePrice: 250000,
-        finalPrice: 250000,
-        totalSeats: 18,
-        status: 'scheduled',
-        availableSeats: 18,
-        bookedSeats: [],
-      },
-      {
-        operatorId: operators[0]._id,
-        routeId: routes[0]._id,
-        busId: buses[1]._id, // Sleeper
-        driverId: futaEmployees[3]._id, // Driver 2
-        tripManagerId: futaEmployees[1]._id, // Trip Manager 2
-        departureTime: createTripDate(1, 22, 0), // Tomorrow 10:00 PM
-        arrivalTime: createTripDate(2, 5, 0), // Day after tomorrow 5:00 AM
-        basePrice: 300000,
-        finalPrice: 300000,
-        totalSeats: 40,
-        status: 'scheduled',
-        availableSeats: 40,
-        bookedSeats: [],
-      },
-      {
-        operatorId: operators[0]._id,
         routeId: routes[0]._id,
         busId: buses[0]._id,
-        driverId: futaEmployees[2]._id,
-        tripManagerId: futaEmployees[0]._id,
-        departureTime: createTripDate(2, 6, 0), // Day after tomorrow 6:00 AM
-        arrivalTime: createTripDate(2, 13, 0), // Day after tomorrow 1:00 PM
+        operatorId: operators[0]._id,
+        driverId: employees[0]._id, // Nguyễn Văn Long
+        tripManagerId: employees[2]._id, // Lê Thị Hoa
+        departureTime: new Date(today.getTime() + 6 * 60 * 60 * 1000), // 6:00 AM today
+        arrivalTime: new Date(today.getTime() + 13 * 60 * 60 * 1000), // 1:00 PM today
         basePrice: 250000,
         finalPrice: 250000,
-        totalSeats: 18,
-        status: 'scheduled',
-        availableSeats: 18,
-        bookedSeats: [],
+        totalSeats: buses[0].seatLayout.totalSeats,
+        availableSeats: buses[0].seatLayout.totalSeats - 18,
+        status: 'ongoing',
+        journey: {
+          currentStopIndex: 1, // Đang ở điểm dừng thứ 2
+          currentStatus: 'at_stop',
+          actualDepartureTime: new Date(today.getTime() + 6 * 60 * 60 * 1000),
+          statusHistory: [
+            {
+              status: 'preparing',
+              stopIndex: -1,
+              timestamp: new Date(today.getTime() + 5 * 60 * 60 * 1000 + 30 * 60 * 1000), // 5:30 AM
+              notes: 'Chuẩn bị xe và kiểm tra hành khách',
+              updatedBy: employees[2]._id,
+            },
+            {
+              status: 'checking_tickets',
+              stopIndex: 0,
+              timestamp: new Date(today.getTime() + 5 * 60 * 60 * 1000 + 45 * 60 * 1000), // 5:45 AM
+              notes: 'Bắt đầu soát vé',
+              updatedBy: employees[2]._id,
+            },
+            {
+              status: 'in_transit',
+              stopIndex: 0,
+              timestamp: new Date(today.getTime() + 6 * 60 * 60 * 1000), // 6:00 AM
+              notes: 'Khởi hành đúng giờ',
+              updatedBy: employees[2]._id,
+            },
+            {
+              status: 'at_stop',
+              stopIndex: 1,
+              timestamp: new Date(today.getTime() + 7 * 60 * 60 * 1000 + 30 * 60 * 1000), // 7:30 AM
+              notes: 'Dừng chân tại Dầu Giây',
+              updatedBy: employees[2]._id,
+            },
+          ],
+        },
       },
-
-      // FUTA - Sài Gòn Nha Trang
+      // Trip 2: HCM → Đà Lạt - Hôm nay 14:00 (scheduled)
       {
-        operatorId: operators[0]._id,
-        routeId: routes[1]._id,
+        routeId: routes[0]._id,
         busId: buses[1]._id,
-        driverId: futaEmployees[3]._id,
-        tripManagerId: futaEmployees[1]._id,
-        departureTime: createTripDate(1, 20, 0), // Tomorrow 8:00 PM
-        arrivalTime: createTripDate(2, 5, 0), // Day after tomorrow 5:00 AM
+        operatorId: operators[0]._id,
+        driverId: employees[1]._id, // Trần Minh Tâm
+        tripManagerId: employees[3]._id, // Phạm Văn Nam
+        departureTime: new Date(today.getTime() + 14 * 60 * 60 * 1000), // 2:00 PM today
+        arrivalTime: new Date(today.getTime() + 21 * 60 * 60 * 1000), // 9:00 PM today
+        basePrice: 250000,
+        finalPrice: 250000,
+        totalSeats: buses[1].seatLayout.totalSeats,
+        availableSeats: buses[1].seatLayout.totalSeats - 12,
+        status: 'scheduled',
+        journey: {
+          currentStopIndex: -1,
+          currentStatus: 'preparing',
+          statusHistory: [],
+        },
+      },
+      // Trip 3: HCM → Vũng Tàu - Hôm nay 8:00 (ongoing)
+      {
+        routeId: routes[1]._id,
+        busId: buses[2]._id,
+        operatorId: operators[0]._id,
+        driverId: employees[0]._id,
+        tripManagerId: employees[2]._id,
+        departureTime: new Date(today.getTime() + 8 * 60 * 60 * 1000), // 8:00 AM
+        arrivalTime: new Date(today.getTime() + 10 * 60 * 60 * 1000 + 30 * 60 * 1000), // 10:30 AM
+        basePrice: 120000,
+        finalPrice: 120000,
+        totalSeats: buses[2].seatLayout.totalSeats,
+        availableSeats: buses[2].seatLayout.totalSeats - 28,
+        status: 'ongoing',
+        journey: {
+          currentStopIndex: 0,
+          currentStatus: 'in_transit',
+          actualDepartureTime: new Date(today.getTime() + 8 * 60 * 60 * 1000),
+          statusHistory: [
+            {
+              status: 'preparing',
+              stopIndex: -1,
+              timestamp: new Date(today.getTime() + 7 * 60 * 60 * 1000 + 30 * 60 * 1000),
+              notes: 'Chuẩn bị khởi hành',
+              updatedBy: employees[2]._id,
+            },
+            {
+              status: 'checking_tickets',
+              stopIndex: 0,
+              timestamp: new Date(today.getTime() + 7 * 60 * 60 * 1000 + 50 * 60 * 1000),
+              notes: 'Soát vé',
+              updatedBy: employees[2]._id,
+            },
+            {
+              status: 'in_transit',
+              stopIndex: 0,
+              timestamp: new Date(today.getTime() + 8 * 60 * 60 * 1000),
+              notes: 'Đã khởi hành',
+              updatedBy: employees[2]._id,
+            },
+          ],
+        },
+      },
+      // Trip 4: HCM → Nha Trang - Ngày mai 6:00
+      {
+        routeId: routes[2]._id,
+        busId: buses[3]._id,
+        operatorId: operators[1]._id,
+        driverId: employees[4]._id, // Võ Văn Thắng
+        tripManagerId: employees[6]._id, // Nguyễn Thị Lan
+        departureTime: new Date(today.getTime() + 24 * 60 * 60 * 1000 + 6 * 60 * 60 * 1000), // Tomorrow 6:00 AM
+        arrivalTime: new Date(today.getTime() + 24 * 60 * 60 * 1000 + 14 * 60 * 60 * 1000), // Tomorrow 2:00 PM
         basePrice: 350000,
         finalPrice: 350000,
-        totalSeats: 40,
+        totalSeats: buses[3].seatLayout.totalSeats,
+        availableSeats: buses[3].seatLayout.totalSeats - 15,
         status: 'scheduled',
-        availableSeats: 40,
-        bookedSeats: [],
+        journey: {
+          currentStopIndex: -1,
+          currentStatus: 'preparing',
+          statusHistory: [],
+        },
       },
+      // Trip 5: HCM → Đà Nẵng - Ngày mai 18:00
       {
-        operatorId: operators[0]._id,
-        routeId: routes[1]._id,
-        busId: buses[1]._id,
-        driverId: futaEmployees[2]._id,
-        tripManagerId: futaEmployees[0]._id,
-        departureTime: createTripDate(3, 20, 0), // 3 days from now 8:00 PM
-        arrivalTime: createTripDate(4, 5, 0), // 4 days from now 5:00 AM
-        basePrice: 350000,
-        finalPrice: 350000,
-        totalSeats: 40,
-        status: 'scheduled',
-        availableSeats: 40,
-        bookedSeats: [],
-      },
-
-      // Thanh Bưởi - Sài Gòn Vũng Tàu
-      {
+        routeId: routes[3]._id,
+        busId: buses[4]._id,
         operatorId: operators[1]._id,
-        routeId: routes[2]._id,
-        busId: buses[2]._id,
-        driverId: thanhBuoiEmployees[1]._id,
-        tripManagerId: thanhBuoiEmployees[0]._id,
-        departureTime: createTripDate(1, 7, 0), // Tomorrow 7:00 AM
-        arrivalTime: createTripDate(1, 9, 0), // Tomorrow 9:00 AM
-        basePrice: 120000,
-        finalPrice: 120000,
-        totalSeats: 34,
+        driverId: employees[5]._id, // Đặng Văn Tuấn
+        tripManagerId: employees[6]._id, // Nguyễn Thị Lan
+        departureTime: new Date(today.getTime() + 24 * 60 * 60 * 1000 + 18 * 60 * 60 * 1000), // Tomorrow 6:00 PM
+        arrivalTime: new Date(today.getTime() + 48 * 60 * 60 * 1000 + 10 * 60 * 60 * 1000), // Day after 10:00 AM
+        basePrice: 450000,
+        finalPrice: 450000,
+        totalSeats: buses[4].seatLayout.totalSeats,
+        availableSeats: buses[4].seatLayout.totalSeats - 10,
         status: 'scheduled',
-        availableSeats: 34,
-        bookedSeats: [],
+        journey: {
+          currentStopIndex: -1,
+          currentStatus: 'preparing',
+          statusHistory: [],
+        },
       },
+      // Trip 6: HCM → Phan Thiết - Hôm nay 16:00
       {
-        operatorId: operators[1]._id,
-        routeId: routes[2]._id,
-        busId: buses[2]._id,
-        driverId: thanhBuoiEmployees[1]._id,
-        tripManagerId: thanhBuoiEmployees[0]._id,
-        departureTime: createTripDate(1, 14, 0), // Tomorrow 2:00 PM
-        arrivalTime: createTripDate(1, 16, 0), // Tomorrow 4:00 PM
-        basePrice: 120000,
-        finalPrice: 120000,
-        totalSeats: 34,
+        routeId: routes[4]._id,
+        busId: buses[5]._id,
+        operatorId: operators[2]._id,
+        driverId: employees[7]._id, // Huỳnh Văn Hùng
+        tripManagerId: employees[8]._id, // Trương Thị Mai
+        departureTime: new Date(today.getTime() + 16 * 60 * 60 * 1000), // 4:00 PM today
+        arrivalTime: new Date(today.getTime() + 19 * 60 * 60 * 1000), // 7:00 PM today
+        basePrice: 150000,
+        finalPrice: 150000,
+        totalSeats: buses[5].seatLayout.totalSeats,
+        availableSeats: buses[5].seatLayout.totalSeats - 20,
         status: 'scheduled',
-        availableSeats: 34,
-        bookedSeats: [],
-      },
-      {
-        operatorId: operators[1]._id,
-        routeId: routes[2]._id,
-        busId: buses[2]._id,
-        driverId: thanhBuoiEmployees[1]._id,
-        tripManagerId: thanhBuoiEmployees[0]._id,
-        departureTime: createTripDate(2, 7, 0), // Day after tomorrow 7:00 AM
-        arrivalTime: createTripDate(2, 9, 0), // Day after tomorrow 9:00 AM
-        basePrice: 120000,
-        finalPrice: 120000,
-        totalSeats: 34,
-        status: 'scheduled',
-        availableSeats: 34,
-        bookedSeats: [],
-      },
-      {
-        operatorId: operators[1]._id,
-        routeId: routes[2]._id,
-        busId: buses[2]._id,
-        driverId: thanhBuoiEmployees[1]._id,
-        tripManagerId: thanhBuoiEmployees[0]._id,
-        departureTime: createTripDate(2, 14, 0), // Day after tomorrow 2:00 PM
-        arrivalTime: createTripDate(2, 16, 0), // Day after tomorrow 4:00 PM
-        basePrice: 120000,
-        finalPrice: 120000,
-        totalSeats: 34,
-        status: 'scheduled',
-        availableSeats: 34,
-        bookedSeats: [],
+        journey: {
+          currentStopIndex: -1,
+          currentStatus: 'preparing',
+          statusHistory: [],
+        },
       },
     ]);
 
-    console.log(`✅ Created ${trips.length} trips`);
+    console.log(`✅ Created ${trips.length} trips with journey tracking\n`);
 
-    console.log('\n✅ Seed completed successfully!\n');
+    // ==================== SUMMARY ====================
+    console.log('\n📊 ==================== SEED SUMMARY ====================');
+    console.log(`✅ Users: ${users.length}`);
+    console.log(`✅ Bus Operators: ${operators.length}`);
+    console.log(`✅ Employees: ${employees.length}`);
+    console.log(`   - Drivers: ${employees.filter(e => e.role === 'driver').length}`);
+    console.log(`   - Trip Managers: ${employees.filter(e => e.role === 'trip_manager').length}`);
+    console.log(`✅ Buses: ${buses.length}`);
+    console.log(`✅ Routes: ${routes.length}`);
+    console.log(`   - Total Stops Configured: ${routes.reduce((sum, r) => sum + r.stops.length, 0)}`);
+    console.log(`✅ Trips: ${trips.length}`);
+    console.log(`   - Scheduled: ${trips.filter(t => t.status === 'scheduled').length}`);
+    console.log(`   - Ongoing: ${trips.filter(t => t.status === 'ongoing').length}`);
+    console.log('========================================================\n');
 
-    // Print summary
-    console.log('📊 SUMMARY:');
-    console.log('═'.repeat(50));
-    console.log(`Users: ${users.length}`);
-    console.log(`  - Admin: 1`);
-    console.log(`  - Customers: ${users.length - 1}`);
-    console.log(`\nBus Operators: ${operators.length}`);
-    console.log(`  - Approved: ${operators.filter(o => o.verificationStatus === 'approved').length}`);
-    console.log(`  - Pending: ${operators.filter(o => o.verificationStatus === 'pending').length}`);
-    console.log(`\nEmployees: ${employees.length}`);
-    console.log(`  - Trip Managers: ${employees.filter(e => e.role === 'trip_manager').length}`);
-    console.log(`  - Drivers: ${employees.filter(e => e.role === 'driver').length}`);
-    console.log(`\nRoutes: ${routes.length}`);
-    console.log(`Buses: ${buses.length}`);
-    console.log(`Trips: ${trips.length}`);
-    console.log(`  - Tomorrow: ${trips.filter(t => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      return t.departureTime.toDateString() === tomorrow.toDateString();
-    }).length}`);
-    console.log(`  - All upcoming: ${trips.filter(t => t.departureTime > new Date()).length}`);
-    console.log('═'.repeat(50));
+    console.log('🎉 Database seeding completed successfully!\n');
+    console.log('📝 Login Credentials:');
+    console.log('   Admin: admin@quikride.com / admin123');
+    console.log('   Operator: operator1@quikride.com / operator123');
+    console.log('   Trip Manager: hoa.manager@phuongtrang.com / manager123');
+    console.log('   Driver: long.driver@phuongtrang.com / driver123');
+    console.log('   Customer: customer1@gmail.com / 123456\n');
 
   } catch (error) {
-    console.error('❌ Error seeding data:', error);
-    throw error;
-  }
-};
-
-// Main function
-const main = async () => {
-  try {
-    await connectDB();
-    await seedData();
-    console.log('\n🎉 All done! You can now use the application.\n');
-    process.exit(0);
-  } catch (error) {
-    console.error('\n❌ Fatal error:', error);
+    console.error('❌ Error seeding database:', error);
+    console.error(error.stack);
     process.exit(1);
   }
 };
 
-// Run if called directly
-if (require.main === module) {
-  main();
-}
+// Main execution
+const main = async () => {
+  await connectDB();
+  await seedData();
+  await mongoose.connection.close();
+  console.log('👋 Database connection closed. Goodbye!\n');
+  process.exit(0);
+};
 
-module.exports = { seedData, connectDB };
+main();
