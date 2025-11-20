@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 /**
  * Ticket Schema
- * Represents a digital ticket with QR code and PDF
+ * Represents a digital ticket with QR code for scanning and verification
  */
 const TicketSchema = new mongoose.Schema(
   {
@@ -56,13 +56,13 @@ const TicketSchema = new mongoose.Schema(
       select: false, // Don't return this by default for security
     },
 
-    // PDF
+    // PDF (legacy, no longer generated)
     pdfUrl: {
-      type: String, // Cloudinary URL or file path
+      type: String, // Deprecated: kept for backward compatibility
     },
 
     pdfFileName: {
-      type: String,
+      type: String, // Deprecated: kept for backward compatibility
     },
 
     // Passenger Info (Denormalized for quick access)

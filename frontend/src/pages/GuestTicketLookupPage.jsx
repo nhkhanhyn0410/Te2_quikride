@@ -15,7 +15,6 @@ import {
   SearchOutlined,
   PhoneOutlined,
   SafetyOutlined,
-  DownloadOutlined,
   QrcodeOutlined,
   CalendarOutlined,
   EnvironmentOutlined,
@@ -25,7 +24,6 @@ import dayjs from 'dayjs';
 import {
   requestTicketLookupOTP,
   verifyTicketLookupOTP,
-  downloadTicket,
 } from '../services/ticketApi';
 
 const { Step } = Steps;
@@ -91,26 +89,6 @@ const GuestTicketLookupPage = () => {
     }
   };
 
-  // Handle download ticket
-  const handleDownload = async () => {
-    if (!ticket) return;
-
-    try {
-      const blob = await downloadTicket(ticket._id);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `ticket-${ticket.ticketCode}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      message.success('Tải vé thành công');
-    } catch (error) {
-      console.error('Download ticket error:', error);
-      message.error(error || 'Không thể tải vé');
-    }
-  };
 
   // Reset form
   const handleReset = () => {
@@ -370,14 +348,6 @@ const GuestTicketLookupPage = () => {
             <div className="mt-6 flex gap-4 justify-center">
               <Button
                 type="primary"
-                size="large"
-                icon={<DownloadOutlined />}
-                onClick={handleDownload}
-              >
-                Tải vé PDF
-              </Button>
-
-              <Button
                 size="large"
                 icon={<QrcodeOutlined />}
                 onClick={() => setQrModalVisible(true)}
