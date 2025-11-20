@@ -15,6 +15,7 @@ import {
   Form,
   Input,
   Popconfirm,
+  Alert,
 } from 'antd';
 import {
   CarOutlined,
@@ -27,15 +28,18 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   InfoCircleOutlined,
+  WarningOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import useAuthStore from '../../store/authStore';
+import useActiveTripStore from '../../store/activeTripStore';
 import api from '../../services/api';
 import tripManagerApi from '../../services/tripManagerApi';
 
 const TripManagerDashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+  const { startTrip, hasActiveTrip, getActiveTripId } = useActiveTripStore();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
@@ -78,6 +82,11 @@ const TripManagerDashboard = () => {
 
   useEffect(() => {
     fetchTrips();
+    // Check if there's an active trip, redirect to it
+    if (hasActiveTrip()) {
+      message.info('Đang chuyển đến chuyến xe đang hoạt động...');
+      navigate('/trip-manager/active-trip');
+    }
   }, []);
 
   // Handle logout
@@ -109,15 +118,50 @@ const TripManagerDashboard = () => {
     }
   };
 
-  // Handle start trip
-  const handleStartTrip = (trip) => {
+  // Handle start trip - navigate to active trip page
+  const handleStartTrip = async (trip) => {
     Modal.confirm({
-      title: 'Xác nhận bắt đầu chuyến xe',
-      content: `Bạn có chắc muốn bắt đầu chuyến ${trip.route?.routeName}?`,
+      title: 'Bắt đầu chuyến xe',
+      content: (
+        <div>
+          <p>Bạn có chắc muốn bắt đầu chuyến <strong>{trip.route?.routeName}</strong>?</p>
+          <Alert
+            message="Lưu ý"
+            description="Sau khi bắt đầu, bạn sẽ được chuyển đến trang quản lý chuyến xe và không thể quay về cho đến khi hoàn thành chuyến."
+            type="info"
+            showIcon
+            className="mt-3"
+          />
+        </div>
+      ),
       icon: <PlayCircleOutlined />,
       okText: 'Bắt đầu',
       cancelText: 'Hủy',
-      onOk: () => handleUpdateStatus(trip._id, 'ongoing'),
+      width: 500,
+      onOk: async () => {
+        setActionLoading(true);
+        try {
+          // Update trip status to ongoing
+          const response = await tripManagerApi.updateTripStatus(trip._id, {
+            status: 'ongoing',
+          });
+
+          if (response.success) {
+            // Save to active trip store
+            startTrip(trip);
+            message.success('Đã bắt đầu chuyến xe!');
+            // Navigate to active trip page
+            navigate('/trip-manager/active-trip');
+          } else {
+            message.error(response.message || 'Không thể bắt đầu chuyến');
+          }
+        } catch (error) {
+          console.error('Start trip error:', error);
+          message.error(error.message || 'Có lỗi xảy ra');
+        } finally {
+          setActionLoading(false);
+        }
+      },
     });
   };
 

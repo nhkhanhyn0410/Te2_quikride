@@ -38,6 +38,7 @@ import BookingFailure from './pages/payment/BookingFailure';
 
 // Trip Manager Pages
 import TripManagerDashboard from './pages/trip-manager/TripManagerDashboard';
+import ActiveTripPage from './pages/trip-manager/ActiveTripPage';
 import QRScannerPage from './pages/trip-manager/QRScannerPage';
 import PassengersPage from './pages/trip-manager/PassengersPage';
 
@@ -132,6 +133,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['trip_manager']}>
               <TripManagerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/trip-manager/active-trip"
+          element={
+            <ProtectedRoute allowedRoles={['trip_manager']}>
+              <ActiveTripPage />
             </ProtectedRoute>
           }
         />
