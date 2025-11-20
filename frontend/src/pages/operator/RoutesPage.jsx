@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Modal, Form, Input, InputNumber, message, Popconfirm, Tag, Space } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Form, Input, InputNumber, message, Popconfirm, Tag, Space, Divider } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, CheckCircleOutlined, StopOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { routesApi } from '../../services/operatorApi';
 
 const RoutesPage = () => {
@@ -29,6 +29,11 @@ const RoutesPage = () => {
   const handleCreate = () => {
     setEditingRoute(null);
     form.resetFields();
+    // Set default empty pickup and dropoff points
+    form.setFieldsValue({
+      pickupPoints: [{ name: '', address: '' }],
+      dropoffPoints: [{ name: '', address: '' }],
+    });
     setModalVisible(true);
   };
 
@@ -39,12 +44,16 @@ const RoutesPage = () => {
       routeCode: record.routeCode,
       originProvince: record.origin?.province,
       originCity: record.origin?.city,
-      originStation: record.origin?.station,
       originAddress: record.origin?.address,
       destinationProvince: record.destination?.province,
       destinationCity: record.destination?.city,
-      destinationStation: record.destination?.station,
       destinationAddress: record.destination?.address,
+      pickupPoints: record.pickupPoints && record.pickupPoints.length > 0
+        ? record.pickupPoints
+        : [{ name: '', address: '' }],
+      dropoffPoints: record.dropoffPoints && record.dropoffPoints.length > 0
+        ? record.dropoffPoints
+        : [{ name: '', address: '' }],
       distance: record.distance,
       estimatedDuration: record.estimatedDuration,
     });
@@ -54,21 +63,32 @@ const RoutesPage = () => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+
+      // Validate pickup and dropoff points
+      if (!values.pickupPoints || values.pickupPoints.length === 0) {
+        message.error('Vui lòng thêm ít nhất 1 điểm đón');
+        return;
+      }
+      if (!values.dropoffPoints || values.dropoffPoints.length === 0) {
+        message.error('Vui lòng thêm ít nhất 1 điểm trả');
+        return;
+      }
+
       const routeData = {
         routeName: values.routeName,
         routeCode: values.routeCode,
         origin: {
           province: values.originProvince,
           city: values.originCity,
-          station: values.originStation,
           address: values.originAddress,
         },
         destination: {
           province: values.destinationProvince,
           city: values.destinationCity,
-          station: values.destinationStation,
           address: values.destinationAddress,
         },
+        pickupPoints: values.pickupPoints || [],
+        dropoffPoints: values.dropoffPoints || [],
         distance: values.distance,
         estimatedDuration: values.estimatedDuration,
       };
@@ -214,9 +234,10 @@ const RoutesPage = () => {
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
-        width={700}
+        width={900}
         okText={editingRoute ? 'Cập Nhật' : 'Tạo'}
         cancelText="Hủy"
+        style={{ top: 20 }}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="routeName" label="Tên Tuyến" rules={[{ required: true }]}>
@@ -243,14 +264,6 @@ const RoutesPage = () => {
               >
                 <Input placeholder="Ví dụ: Quận 1" />
               </Form.Item>
-              <Form.Item
-                name="originStation"
-                label="Điểm đón"
-                rules={[{ required: true, message: 'Vui lòng nhập điểm đón' }]}
-                extra="Điểm đón hành khách sẽ hiển thị khi đặt vé"
-              >
-                <Input placeholder="Ví dụ: Bến xe Miền Đông" />
-              </Form.Item>
               <Form.Item name="originAddress" label="Địa chỉ chi tiết">
                 <Input placeholder="Ví dụ: 292 Đinh Bộ Lĩnh, P.26" />
               </Form.Item>
@@ -272,19 +285,109 @@ const RoutesPage = () => {
               >
                 <Input placeholder="Ví dụ: Phường 3" />
               </Form.Item>
-              <Form.Item
-                name="destinationStation"
-                label="Điểm trả"
-                rules={[{ required: true, message: 'Vui lòng nhập điểm trả' }]}
-                extra="Điểm trả hành khách sẽ hiển thị khi đặt vé"
-              >
-                <Input placeholder="Ví dụ: Bến xe Đà Lạt" />
-              </Form.Item>
               <Form.Item name="destinationAddress" label="Địa chỉ chi tiết">
                 <Input placeholder="Ví dụ: 1 Tô Hiến Thành" />
               </Form.Item>
             </div>
           </div>
+
+          <Divider orientation="left">Điểm Đón (Hành khách chọn khi đặt vé)</Divider>
+          <Form.List name="pickupPoints">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }, index) => (
+                  <div key={key} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium text-gray-700">Điểm đón #{index + 1}</h4>
+                      {fields.length > 1 && (
+                        <Button
+                          type="text"
+                          danger
+                          size="small"
+                          icon={<MinusCircleOutlined />}
+                          onClick={() => remove(name)}
+                        >
+                          Xóa
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'name']}
+                        label="Tên điểm đón"
+                        rules={[{ required: true, message: 'Vui lòng nhập tên điểm đón' }]}
+                      >
+                        <Input placeholder="Ví dụ: Bến xe Miền Đông" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'address']}
+                        label="Địa chỉ chi tiết"
+                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+                      >
+                        <Input placeholder="Ví dụ: 292 Đinh Bộ Lĩnh, P.26, Q. Bình Thạnh" />
+                      </Form.Item>
+                    </div>
+                  </div>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Thêm điểm đón
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+
+          <Divider orientation="left">Điểm Trả (Hành khách chọn khi đặt vé)</Divider>
+          <Form.List name="dropoffPoints">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }, index) => (
+                  <div key={key} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium text-gray-700">Điểm trả #{index + 1}</h4>
+                      {fields.length > 1 && (
+                        <Button
+                          type="text"
+                          danger
+                          size="small"
+                          icon={<MinusCircleOutlined />}
+                          onClick={() => remove(name)}
+                        >
+                          Xóa
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'name']}
+                        label="Tên điểm trả"
+                        rules={[{ required: true, message: 'Vui lòng nhập tên điểm trả' }]}
+                      >
+                        <Input placeholder="Ví dụ: Bến xe Đà Lạt" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'address']}
+                        label="Địa chỉ chi tiết"
+                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+                      >
+                        <Input placeholder="Ví dụ: 1 Tô Hiến Thành, P.3, Tp. Đà Lạt" />
+                      </Form.Item>
+                    </div>
+                  </div>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Thêm điểm trả
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
 
           <div className="grid grid-cols-2 gap-4">
             <Form.Item name="distance" label="Khoảng Cách (km)" rules={[{ required: true }]}>
