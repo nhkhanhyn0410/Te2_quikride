@@ -149,11 +149,28 @@ const BookingSuccess = () => {
     window.print();
   };
 
-  const handleDownloadTicket = async () => {
+  const handleResendEmail = async () => {
+    if (!ticket || !ticket._id) {
+      message.warning('Không tìm thấy thông tin vé. Vui lòng thử lại sau.');
+      return;
+    }
+
     try {
-      message.info('Vé điện tử đã được gửi đến email của bạn!');
+      message.loading('Đang gửi email...', 0);
+
+      const response = await api.post(`/tickets/${ticket._id}/resend`);
+
+      message.destroy(); // Close loading message
+
+      if (response.success) {
+        message.success('Đã gửi lại vé đến email của bạn!');
+      } else {
+        message.error(response.message || 'Gửi email thất bại');
+      }
     } catch (error) {
-      console.error('Download ticket error:', error);
+      message.destroy();
+      console.error('Resend email error:', error);
+      message.error('Không thể gửi email. Vui lòng thử lại sau.');
     }
   };
 
@@ -331,8 +348,9 @@ const BookingSuccess = () => {
               </Button>
               <Button
                 icon={<MailOutlined />}
-                onClick={handleDownloadTicket}
+                onClick={handleResendEmail}
                 size="large"
+                disabled={!ticket}
               >
                 Gửi lại email
               </Button>
