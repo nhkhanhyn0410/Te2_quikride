@@ -29,10 +29,11 @@ const RoutesPage = () => {
   const handleCreate = () => {
     setEditingRoute(null);
     form.resetFields();
-    // Set default empty pickup and dropoff points
+    // Set default empty pickup, dropoff points and stops
     form.setFieldsValue({
       pickupPoints: [{ name: '', address: '' }],
       dropoffPoints: [{ name: '', address: '' }],
+      stops: [],
     });
     setModalVisible(true);
   };
@@ -52,6 +53,7 @@ const RoutesPage = () => {
       dropoffPoints: record.dropoffPoints && record.dropoffPoints.length > 0
         ? record.dropoffPoints
         : [{ name: '', address: '' }],
+      stops: record.stops || [],
       distance: record.distance,
       estimatedDuration: record.estimatedDuration,
     });
@@ -72,6 +74,12 @@ const RoutesPage = () => {
         return;
       }
 
+      // Auto-assign order to stops based on index
+      const stops = (values.stops || []).map((stop, index) => ({
+        ...stop,
+        order: index + 1,
+      }));
+
       const routeData = {
         routeName: values.routeName,
         routeCode: values.routeCode,
@@ -85,6 +93,7 @@ const RoutesPage = () => {
         },
         pickupPoints: values.pickupPoints || [],
         dropoffPoints: values.dropoffPoints || [],
+        stops: stops,
         distance: values.distance,
         estimatedDuration: values.estimatedDuration,
       };
@@ -373,6 +382,92 @@ const RoutesPage = () => {
                 <Form.Item>
                   <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
                     Thêm điểm trả
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+
+          <Divider orientation="left">Điểm Dừng Chân</Divider>
+          <Form.List name="stops">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }, index) => (
+                  <div key={key} className="mb-4 p-4 border border-blue-200 rounded-lg bg-blue-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium text-blue-700">Điểm dừng chân #{index + 1}</h4>
+                      <Button
+                        type="text"
+                        danger
+                        size="small"
+                        icon={<MinusCircleOutlined />}
+                        onClick={() => remove(name)}
+                      >
+                        Xóa
+                      </Button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'name']}
+                        label="Tên điểm dừng"
+                        rules={[{ required: true, message: 'Vui lòng nhập tên điểm dừng' }]}
+                      >
+                        <Input placeholder="Ví dụ: Trạm dừng chân Dầu Giây" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'address']}
+                        label="Địa chỉ chi tiết"
+                        rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+                      >
+                        <Input placeholder="Ví dụ: KM 50 QL1A, Dầu Giây, Đồng Nai" />
+                      </Form.Item>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'order']}
+                        label="Thứ tự"
+                        initialValue={index + 1}
+                        hidden
+                      >
+                        <InputNumber min={1} className="w-full" />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'estimatedArrivalMinutes']}
+                        label="Thời gian đến (phút từ điểm xuất phát)"
+                        rules={[{ required: true, message: 'Vui lòng nhập thời gian đến' }]}
+                      >
+                        <InputNumber
+                          min={1}
+                          className="w-full"
+                          placeholder="Ví dụ: 90"
+                          addonAfter="phút"
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        name={[name, 'stopDuration']}
+                        label="Thời gian dừng"
+                        initialValue={15}
+                        rules={[{ required: true, message: 'Vui lòng nhập thời gian dừng' }]}
+                      >
+                        <InputNumber
+                          min={5}
+                          max={120}
+                          className="w-full"
+                          placeholder="15"
+                          addonAfter="phút"
+                        />
+                      </Form.Item>
+                    </div>
+                  </div>
+                ))}
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    Thêm điểm dừng chân
                   </Button>
                 </Form.Item>
               </>
