@@ -37,12 +37,14 @@ const RoutesPage = () => {
     form.setFieldsValue({
       routeName: record.routeName,
       routeCode: record.routeCode,
-      originCity: record.origin?.city,
       originProvince: record.origin?.province,
+      originCity: record.origin?.city,
       originStation: record.origin?.station,
-      destinationCity: record.destination?.city,
+      originAddress: record.origin?.address,
       destinationProvince: record.destination?.province,
+      destinationCity: record.destination?.city,
       destinationStation: record.destination?.station,
+      destinationAddress: record.destination?.address,
       distance: record.distance,
       estimatedDuration: record.estimatedDuration,
     });
@@ -56,14 +58,16 @@ const RoutesPage = () => {
         routeName: values.routeName,
         routeCode: values.routeCode,
         origin: {
-          city: values.originCity,
           province: values.originProvince,
+          city: values.originCity,
           station: values.originStation,
+          address: values.originAddress,
         },
         destination: {
-          city: values.destinationCity,
           province: values.destinationProvince,
+          city: values.destinationCity,
           station: values.destinationStation,
+          address: values.destinationAddress,
         },
         distance: values.distance,
         estimatedDuration: values.estimatedDuration,
@@ -225,27 +229,59 @@ const RoutesPage = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h3 className="font-semibold mb-2">Điểm Đi</h3>
-              <Form.Item name="originCity" label="Thành Phố" rules={[{ required: true }]}>
-                <Input />
+              <Form.Item
+                name="originProvince"
+                label="Tỉnh/Thành Phố"
+                rules={[{ required: true, message: 'Vui lòng nhập tỉnh/thành phố' }]}
+              >
+                <Input placeholder="Ví dụ: TP. Hồ Chí Minh" />
               </Form.Item>
-              <Form.Item name="originProvince" label="Tỉnh" rules={[{ required: true }]}>
-                <Input />
+              <Form.Item
+                name="originCity"
+                label="Quận/Huyện/Xã"
+                rules={[{ required: true, message: 'Vui lòng nhập quận/huyện/xã' }]}
+              >
+                <Input placeholder="Ví dụ: Quận 1" />
               </Form.Item>
-              <Form.Item name="originStation" label="Bến Xe">
-                <Input />
+              <Form.Item
+                name="originStation"
+                label="Điểm đón"
+                rules={[{ required: true, message: 'Vui lòng nhập điểm đón' }]}
+                extra="Điểm đón hành khách sẽ hiển thị khi đặt vé"
+              >
+                <Input placeholder="Ví dụ: Bến xe Miền Đông" />
+              </Form.Item>
+              <Form.Item name="originAddress" label="Địa chỉ chi tiết">
+                <Input placeholder="Ví dụ: 292 Đinh Bộ Lĩnh, P.26" />
               </Form.Item>
             </div>
 
             <div>
               <h3 className="font-semibold mb-2">Điểm Đến</h3>
-              <Form.Item name="destinationCity" label="Thành Phố" rules={[{ required: true }]}>
-                <Input />
+              <Form.Item
+                name="destinationProvince"
+                label="Tỉnh/Thành Phố"
+                rules={[{ required: true, message: 'Vui lòng nhập tỉnh/thành phố' }]}
+              >
+                <Input placeholder="Ví dụ: Đà Lạt" />
               </Form.Item>
-              <Form.Item name="destinationProvince" label="Tỉnh" rules={[{ required: true }]}>
-                <Input />
+              <Form.Item
+                name="destinationCity"
+                label="Quận/Huyện/Xã"
+                rules={[{ required: true, message: 'Vui lòng nhập quận/huyện/xã' }]}
+              >
+                <Input placeholder="Ví dụ: Phường 3" />
               </Form.Item>
-              <Form.Item name="destinationStation" label="Bến Xe">
-                <Input />
+              <Form.Item
+                name="destinationStation"
+                label="Điểm trả"
+                rules={[{ required: true, message: 'Vui lòng nhập điểm trả' }]}
+                extra="Điểm trả hành khách sẽ hiển thị khi đặt vé"
+              >
+                <Input placeholder="Ví dụ: Bến xe Đà Lạt" />
+              </Form.Item>
+              <Form.Item name="destinationAddress" label="Địa chỉ chi tiết">
+                <Input placeholder="Ví dụ: 1 Tô Hiến Thành" />
               </Form.Item>
             </div>
           </div>
