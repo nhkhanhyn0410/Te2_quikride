@@ -250,19 +250,28 @@ TripSchema.index({ recurringGroupId: 1 });
  */
 TripSchema.pre('save', async function (next) {
   try {
-    // Calculate final price
-    if (this.isModified('basePrice') || this.isModified('discount')) {
-      this.finalPrice = this.basePrice * (1 - this.discount / 100);
+    // Calculate final price if not already set
+    if (!this.finalPrice || this.isModified('basePrice') || this.isModified('discount')) {
+      const discount = this.discount || 0;
+      this.finalPrice = this.basePrice * (1 - discount / 100);
     }
 
     // Set totalSeats from bus if not set
     if (this.isNew && !this.totalSeats) {
       const Bus = mongoose.model('Bus');
       const bus = await Bus.findById(this.busId);
-      if (bus && bus.seatLayout) {
+      if (bus && bus.seatLayout && bus.seatLayout.totalSeats) {
         this.totalSeats = bus.seatLayout.totalSeats;
         this.availableSeats = this.totalSeats;
+      } else {
+        // Fallback: set default values if bus seatLayout is not available
+        throw new Error('Bus không có thông tin sơ đồ ghế (seatLayout). Vui lòng cập nhật thông tin xe trước.');
       }
+    }
+
+    // Initialize availableSeats if not set
+    if (this.isNew && !this.availableSeats && this.totalSeats) {
+      this.availableSeats = this.totalSeats;
     }
 
     // Update available seats based on booked seats
