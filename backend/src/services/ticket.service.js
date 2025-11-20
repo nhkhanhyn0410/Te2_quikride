@@ -209,6 +209,7 @@ class TicketService {
             to: contactEmail,
             subject: emailTemplate.subject,
             html: emailTemplate.html,
+            qrCodeDataUrl: ticket.qrCode, // Pass QR as data URL for CID conversion
           });
 
           ticket.markEmailSent();
