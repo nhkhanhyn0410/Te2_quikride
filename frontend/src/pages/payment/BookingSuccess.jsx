@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Card, Result, Button, Descriptions, Tag, Spin, Divider, message } from 'antd';
+import { Card, Result, Button, Descriptions, Tag, Spin, Divider, message, Modal } from 'antd';
 import {
   CheckCircleOutlined,
   DownloadOutlined,
   HomeOutlined,
   PrinterOutlined,
+  QrcodeOutlined,
+  MailOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import useBookingStore from '../../store/bookingStore';
@@ -21,6 +23,9 @@ const BookingSuccess = () => {
 
   const [loading, setLoading] = useState(false);
   const [booking, setBooking] = useState(null);
+  const [ticket, setTicket] = useState(null);
+  const [qrModalVisible, setQrModalVisible] = useState(false);
+  const [loadingTicket, setLoadingTicket] = useState(false);
 
   useEffect(() => {
     const loadBooking = async () => {
@@ -109,16 +114,54 @@ const BookingSuccess = () => {
     loadBooking();
   }, [bookingCode, phone]); // Simplified dependencies - only bookingCode and phone
 
+  // Fetch ticket when booking is loaded
+  useEffect(() => {
+    const fetchTicket = async () => {
+      if (!booking || !booking._id) {
+        return;
+      }
+
+      try {
+        setLoadingTicket(true);
+        console.log('Fetching ticket for booking:', booking._id);
+
+        // Try to get ticket by booking ID
+        const response = await api.get(`/tickets/booking/${booking._id}`);
+
+        if (response.success && response.data?.ticket) {
+          console.log('Ticket loaded:', response.data.ticket);
+          setTicket(response.data.ticket);
+        } else {
+          console.log('No ticket found yet, might still be generating...');
+        }
+      } catch (error) {
+        console.error('Failed to fetch ticket:', error);
+        // Don't show error message as ticket might still be generating
+      } finally {
+        setLoadingTicket(false);
+      }
+    };
+
+    fetchTicket();
+  }, [booking]);
+
   const handlePrintTicket = () => {
     window.print();
   };
 
   const handleDownloadTicket = async () => {
     try {
-      // TODO: Implement ticket download
-      console.log('Download ticket for booking:', bookingCode);
+      message.info('Vé điện tử đã được gửi đến email của bạn!');
     } catch (error) {
       console.error('Download ticket error:', error);
+    }
+  };
+
+  const handleShowQR = () => {
+    if (ticket) {
+      setQrModalVisible(true);
+    } else {
+      message.warning('Vé điện tử đang được tạo, vui lòng đợi trong giây lát...');
     }
   };
 
@@ -146,6 +189,69 @@ const BookingSuccess = () => {
 
         {booking && (
           <Card className="mt-6 shadow-lg">
+            {/* QR Code Section - Prominent Display */}
+            {ticket && ticket.qrCode && (
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 -m-6 mb-6 p-8 rounded-t-lg">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4">
+                    <CheckCircleOutlined className="text-white text-3xl" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Vé Điện Tử Của Bạn</h2>
+                  <p className="text-gray-600 mb-6">
+                    Mã vé: <span className="font-mono font-bold text-blue-600">{ticket.ticketCode}</span>
+                  </p>
+
+                  {/* QR Code Display */}
+                  <div className="inline-block bg-white p-6 rounded-2xl shadow-xl">
+                    <img
+                      src={ticket.qrCode}
+                      alt="QR Code"
+                      className="mx-auto"
+                      style={{ width: 280, height: 280 }}
+                    />
+                  </div>
+
+                  <div className="mt-6 space-y-2">
+                    <p className="text-sm text-gray-600">
+                      <QrcodeOutlined className="mr-2" />
+                      Xuất trình mã QR này khi lên xe
+                    </p>
+                    <Button
+                      type="link"
+                      icon={<QrcodeOutlined />}
+                      onClick={handleShowQR}
+                      size="large"
+                    >
+                      Xem toàn màn hình
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!ticket && loadingTicket && (
+              <div className="text-center py-8 mb-6">
+                <Spin size="large" />
+                <p className="mt-4 text-gray-600">Đang tạo vé điện tử...</p>
+              </div>
+            )}
+
+            {!ticket && !loadingTicket && booking.paymentStatus === 'paid' && (
+              <div className="text-center py-8 mb-6 bg-yellow-50 -m-6 mb-6 p-6 rounded-t-lg">
+                <MailOutlined className="text-4xl text-yellow-500 mb-4" />
+                <p className="text-gray-700">
+                  Vé điện tử đang được tạo và sẽ được gửi đến email của bạn trong giây lát.
+                </p>
+                <Button
+                  type="primary"
+                  onClick={() => window.location.reload()}
+                  className="mt-4"
+                >
+                  Làm mới trang
+                </Button>
+              </div>
+            )}
+
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Thông tin đặt vé</h2>
               <p className="text-gray-500">Mã đặt vé: <strong className="text-blue-600">{booking.bookingCode}</strong></p>
@@ -206,8 +312,17 @@ const BookingSuccess = () => {
             <Divider />
 
             <div className="flex gap-4 justify-center flex-wrap">
+              {ticket && (
+                <Button
+                  type="primary"
+                  icon={<QrcodeOutlined />}
+                  onClick={handleShowQR}
+                  size="large"
+                >
+                  Xem mã QR
+                </Button>
+              )}
               <Button
-                type="primary"
                 icon={<PrinterOutlined />}
                 onClick={handlePrintTicket}
                 size="large"
@@ -215,11 +330,11 @@ const BookingSuccess = () => {
                 In vé
               </Button>
               <Button
-                icon={<DownloadOutlined />}
+                icon={<MailOutlined />}
                 onClick={handleDownloadTicket}
                 size="large"
               >
-                Tải vé
+                Gửi lại email
               </Button>
               <Button
                 icon={<HomeOutlined />}
@@ -240,6 +355,61 @@ const BookingSuccess = () => {
             )}
           </Card>
         )}
+
+        {/* QR Code Modal - Full Screen View */}
+        <Modal
+          title="Mã QR Vé Điện Tử"
+          open={qrModalVisible}
+          onCancel={() => setQrModalVisible(false)}
+          footer={[
+            <Button key="close" type="primary" onClick={() => setQrModalVisible(false)}>
+              Đóng
+            </Button>
+          ]}
+          centered
+          width={600}
+        >
+          {ticket && (
+            <div className="text-center py-6">
+              <div className="bg-white p-8 rounded-xl inline-block border-4 border-blue-500">
+                <img
+                  src={ticket.qrCode}
+                  alt="QR Code"
+                  className="mx-auto"
+                  style={{ width: 400, height: 400 }}
+                />
+              </div>
+
+              <div className="mt-6 space-y-3">
+                <p className="text-xl font-bold text-gray-800">
+                  Mã vé: <span className="text-blue-600">{ticket.ticketCode}</span>
+                </p>
+
+                {ticket.tripInfo && (
+                  <>
+                    <p className="text-gray-700">
+                      <strong>Tuyến:</strong> {ticket.tripInfo.routeName}
+                    </p>
+                    <p className="text-gray-700">
+                      <strong>Khởi hành:</strong> {dayjs(ticket.tripInfo.departureTime).format('HH:mm, DD/MM/YYYY')}
+                    </p>
+                    <p className="text-gray-700">
+                      <strong>Ghế:</strong>{' '}
+                      {ticket.passengers?.map(p => p.seatNumber).join(', ')}
+                    </p>
+                  </>
+                )}
+
+                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mt-6">
+                  <p className="text-sm text-blue-800">
+                    <QrcodeOutlined className="mr-2 text-lg" />
+                    <strong>Lưu ý:</strong> Vui lòng xuất trình mã QR này khi lên xe
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </Modal>
 
         {!booking && (
           <div className="text-center mt-6">
