@@ -364,6 +364,56 @@ class EmployeeService {
   }
 
   /**
+   * Get trips assigned to employee (driver or trip manager)
+   * @param {ObjectId} employeeId
+   * @param {Object} filters - { status, fromDate, toDate }
+   * @returns {Promise<Array>}
+   */
+  static async getAssignedTrips(employeeId, filters = {}) {
+    const Trip = require('../models/Trip');
+
+    // Find employee to get role
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      throw new Error('Không tìm thấy nhân viên');
+    }
+
+    // Build query based on employee role
+    const query = {};
+
+    if (employee.role === 'driver') {
+      query.driverId = employeeId;
+    } else if (employee.role === 'trip_manager') {
+      query.tripManagerId = employeeId;
+    } else {
+      return []; // Invalid role for trip assignment
+    }
+
+    // Apply filters
+    if (filters.status) {
+      query.status = filters.status;
+    }
+
+    if (filters.fromDate && filters.toDate) {
+      query.departureTime = {
+        $gte: new Date(filters.fromDate),
+        $lte: new Date(filters.toDate),
+      };
+    }
+
+    // Get trips with populated data
+    const trips = await Trip.find(query)
+      .populate('route', 'routeName departureCity arrivalCity')
+      .populate('bus', 'busNumber plateNumber seatCapacity')
+      .populate('driverId', 'fullName phone employeeCode')
+      .populate('tripManagerId', 'fullName phone employeeCode')
+      .populate('operatorId', 'companyName')
+      .sort({ departureTime: -1 });
+
+    return trips;
+  }
+
+  /**
    * Authenticate employee (for trip manager login)
    * @param {String} employeeCode
    * @param {String} password
