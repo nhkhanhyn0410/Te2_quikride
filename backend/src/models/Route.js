@@ -70,6 +70,52 @@ const PointSchema = new mongoose.Schema(
   { _id: true } // Keep _id for points for easier reference
 );
 
+// Sub-schema for stops/waypoints along the route
+const StopSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Tên điểm dừng là bắt buộc'],
+      trim: true,
+    },
+    address: {
+      type: String,
+      trim: true,
+    },
+    coordinates: {
+      lat: {
+        type: Number,
+        min: [-90, 'Vĩ độ phải từ -90 đến 90'],
+        max: [90, 'Vĩ độ phải từ -90 đến 90'],
+      },
+      lng: {
+        type: Number,
+        min: [-180, 'Kinh độ phải từ -180 đến 180'],
+        max: [180, 'Kinh độ phải từ -180 đến 180'],
+      },
+    },
+    order: {
+      type: Number,
+      required: [true, 'Thứ tự điểm dừng là bắt buộc'],
+      min: [1, 'Thứ tự phải bắt đầu từ 1'],
+    },
+    estimatedArrivalMinutes: {
+      type: Number,
+      required: [true, 'Thời gian đến ước tính là bắt buộc'],
+      min: [0, 'Thời gian không thể âm'],
+      // Số phút từ điểm xuất phát
+    },
+    stopDuration: {
+      type: Number,
+      default: 15,
+      min: [5, 'Thời gian dừng tối thiểu 5 phút'],
+      max: [120, 'Thời gian dừng tối đa 120 phút'],
+      // Thời gian dừng tại điểm này (phút)
+    },
+  },
+  { _id: true }
+);
+
 const RouteSchema = new mongoose.Schema(
   {
     // Owner
@@ -125,6 +171,18 @@ const RouteSchema = new mongoose.Schema(
           return points.length <= 20;
         },
         message: 'Không được có quá 20 điểm trả',
+      },
+    },
+
+    // Stops/Waypoints along the route
+    stops: {
+      type: [StopSchema],
+      default: [],
+      validate: {
+        validator: function (stops) {
+          return stops.length <= 15;
+        },
+        message: 'Không được có quá 15 điểm dừng',
       },
     },
 

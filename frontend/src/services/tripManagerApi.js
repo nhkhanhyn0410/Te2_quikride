@@ -79,6 +79,23 @@ export const tripManagerApi = {
    */
   verifyTicketQR: (tripId, data) =>
     api.post(`/trip-manager/trips/${tripId}/verify-ticket`, data),
+
+  /**
+   * Get journey details with stops and status history
+   * @param {string} tripId - Trip ID
+   * @returns {Promise}
+   */
+  getJourneyDetails: (tripId) =>
+    api.get(`/trip-manager/trips/${tripId}/journey`),
+
+  /**
+   * Update journey status
+   * @param {string} tripId - Trip ID
+   * @param {Object} data - { status, stopIndex, location, notes }
+   * @returns {Promise}
+   */
+  updateJourneyStatus: (tripId, data) =>
+    api.put(`/trip-manager/trips/${tripId}/journey/status`, data),
 };
 
 export default tripManagerApi;
