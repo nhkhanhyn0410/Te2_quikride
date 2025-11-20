@@ -158,17 +158,23 @@ const TripSchema = new mongoose.Schema(
       min: [0, 'Available seats không thể âm'],
     },
 
-    bookedSeats: {
-      type: [String],
-      default: [],
-      validate: {
-        validator: function (seats) {
-          // Check no duplicate seats
-          return seats.length === new Set(seats).size;
+    bookedSeats: [
+      {
+        seatNumber: {
+          type: String,
+          required: true,
         },
-        message: 'Có ghế bị trùng lặp',
+        bookingId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Booking',
+          required: true,
+        },
+        passengerName: {
+          type: String,
+          required: true,
+        },
       },
-    },
+    ],
 
     // Status
     status: {
