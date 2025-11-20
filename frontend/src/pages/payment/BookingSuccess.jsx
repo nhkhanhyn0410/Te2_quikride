@@ -151,26 +151,43 @@ const BookingSuccess = () => {
 
   const handleResendEmail = async () => {
     if (!ticket || !ticket._id) {
-      message.warning('Không tìm thấy thông tin vé. Vui lòng thử lại sau.');
+      console.warn('Cannot resend email - ticket not found:', { ticket, hasTicket: !!ticket, hasId: !!ticket?._id });
+      message.warning('Vé điện tử đang được tạo, vui lòng đợi trong giây lát rồi thử lại.');
       return;
     }
 
     try {
-      message.loading('Đang gửi email...', 0);
+      console.log('Resending email for ticket:', ticket._id, ticket.ticketCode);
+      message.loading({ content: 'Đang gửi email...', key: 'resend', duration: 0 });
 
       const response = await api.post(`/tickets/${ticket._id}/resend`);
 
-      message.destroy(); // Close loading message
+      console.log('Resend email response:', response);
+      message.destroy('resend');
 
       if (response.success) {
-        message.success('Đã gửi lại vé đến email của bạn!');
+        message.success({
+          content: `Đã gửi lại vé đến email: ${booking?.contactInfo?.email || 'của bạn'}`,
+          duration: 5,
+        });
       } else {
-        message.error(response.message || 'Gửi email thất bại');
+        console.error('Resend failed:', response);
+        message.error(response.message || 'Gửi email thất bại. Vui lòng thử lại.');
       }
     } catch (error) {
-      message.destroy();
+      message.destroy('resend');
       console.error('Resend email error:', error);
-      message.error('Không thể gửi email. Vui lòng thử lại sau.');
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+
+      const errorMessage = error.response?.data?.message || error.message || 'Không thể gửi email';
+      message.error({
+        content: `Lỗi: ${errorMessage}. Vui lòng thử lại sau.`,
+        duration: 5,
+      });
     }
   };
 
