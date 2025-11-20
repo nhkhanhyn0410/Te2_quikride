@@ -212,7 +212,7 @@ const seedData = async () => {
         fullName: 'Lê Thị Hoa',
         phone: '0903456789',
         email: 'hoa.manager@phuongtrang.com',
-        password: await bcrypt.hash('manager123', 10),
+        password: 'manager123',
         role: 'trip_manager',
         status: 'active',
       },
