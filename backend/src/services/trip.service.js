@@ -17,7 +17,23 @@ class TripService {
    */
   static async create(operatorId, tripData) {
     // Validate references
-    await this.validateReferences(operatorId, tripData);
+    const { bus } = await this.validateReferences(operatorId, tripData);
+
+    // Get totalSeats from bus if not provided
+    if (!tripData.totalSeats && bus && bus.seatLayout) {
+      tripData.totalSeats = bus.seatLayout.totalSeats;
+    }
+
+    // Set availableSeats = totalSeats if not provided
+    if (!tripData.availableSeats && tripData.totalSeats) {
+      tripData.availableSeats = tripData.totalSeats;
+    }
+
+    // Calculate finalPrice if not provided
+    if (!tripData.finalPrice && tripData.basePrice) {
+      const discount = tripData.discount || 0;
+      tripData.finalPrice = tripData.basePrice * (1 - discount / 100);
+    }
 
     // Create trip
     const trip = await Trip.create({
@@ -107,6 +123,7 @@ class TripService {
    * Validate all references (route, bus, employees)
    * @param {ObjectId} operatorId
    * @param {Object} tripData
+   * @returns {Promise<Object>} { route, bus, driver, tripManager }
    */
   static async validateReferences(operatorId, tripData) {
     const { routeId, busId, driverId, tripManagerId } = tripData;
@@ -129,6 +146,11 @@ class TripService {
 
     if (bus.status !== 'active') {
       throw new Error('Xe không ở trạng thái hoạt động');
+    }
+
+    // Check if bus has seatLayout
+    if (!bus.seatLayout || !bus.seatLayout.totalSeats) {
+      throw new Error('Xe không có thông tin sơ đồ ghế (seatLayout). Vui lòng cập nhật xe trước khi tạo chuyến.');
     }
 
     // Verify driver
@@ -165,6 +187,9 @@ class TripService {
     if (tripManager.status !== 'active') {
       throw new Error('Quản lý chuyến không ở trạng thái hoạt động');
     }
+
+    // Return validated objects
+    return { route, bus, driver, tripManager };
   }
 
   /**
