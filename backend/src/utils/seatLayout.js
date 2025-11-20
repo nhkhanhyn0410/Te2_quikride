@@ -35,17 +35,22 @@ const generateSeatLayout = (rows, columns, prefix = null, emptyPositions = []) =
 
 /**
  * Generate a bus aisle layout (2-aisle-2 pattern common in buses)
- * @param {Number} rows - Number of rows
+ * @param {Number} totalSeats - Total number of seats (excluding driver)
  * @param {Boolean} hasBackRow - Whether to include a back row (5 seats)
- * @returns {Array} 2D array with aisle in the middle
+ * @returns {Object} Layout configuration with floors, rows, columns, layout, totalSeats
  */
-const generateAisleLayout = (rows, hasBackRow = false) => {
+const generateAisleLayout = (totalSeats = 40, hasBackRow = false) => {
   const layout = [];
+  const columns = 5;
+
+  // Calculate rows needed
+  const seatsPerRow = hasBackRow ? 4 : 4;
+  const regularRows = hasBackRow ? Math.floor((totalSeats - 5) / 4) : Math.floor(totalSeats / 4);
 
   // Add driver seat at front
   layout.push(['DRIVER', '', '', '', '']);
 
-  for (let row = 0; row < rows; row++) {
+  for (let row = 0; row < regularRows; row++) {
     const rowArray = [];
     const rowPrefix = String.fromCharCode(65 + row);
 
@@ -61,7 +66,7 @@ const generateAisleLayout = (rows, hasBackRow = false) => {
 
   // Add back row if requested (common in buses)
   if (hasBackRow) {
-    const backRowPrefix = String.fromCharCode(65 + rows);
+    const backRowPrefix = String.fromCharCode(65 + regularRows);
     layout.push([
       `${backRowPrefix}1`,
       `${backRowPrefix}2`,
@@ -71,7 +76,16 @@ const generateAisleLayout = (rows, hasBackRow = false) => {
     ]);
   }
 
-  return layout;
+  const actualTotalSeats = hasBackRow ? regularRows * 4 + 5 : regularRows * 4;
+  const totalRows = regularRows + 1 + (hasBackRow ? 1 : 0); // Including driver row
+
+  return {
+    floors: 1,
+    rows: totalRows,
+    columns,
+    layout,
+    totalSeats: actualTotalSeats,
+  };
 };
 
 /**
@@ -145,12 +159,13 @@ const generateSleeperLayout = (rows, floors = 1, columns = 2) => {
 
 /**
  * Generate a limousine layout (2-1 or 1-1 pattern)
- * @param {Number} rows - Number of rows
+ * @param {Number} rows - Number of seat rows (default: 8 for standard 24-seat, 12 for vip 24-seat)
  * @param {String} pattern - 'vip' (1-1) or 'standard' (2-1)
- * @returns {Array} 2D array
+ * @returns {Object} Layout configuration with floors, rows, columns, layout, totalSeats
  */
-const generateLimousineLayout = (rows, pattern = 'standard') => {
+const generateLimousineLayout = (rows = 8, pattern = 'standard') => {
   const layout = [];
+  const columns = pattern === 'vip' ? 3 : 4;
 
   // Add driver seat at front
   if (pattern === 'vip') {
@@ -171,16 +186,25 @@ const generateLimousineLayout = (rows, pattern = 'standard') => {
     }
   }
 
-  return layout;
+  const totalSeats = pattern === 'vip' ? rows * 2 : rows * 3;
+  const totalRows = rows + 1; // Including driver row
+
+  return {
+    floors: 1,
+    rows: totalRows,
+    columns,
+    layout,
+    totalSeats,
+  };
 };
 
 /**
  * Generate double-decker layout
- * @param {Number} rowsPerFloor - Rows per floor
- * @param {Number} columns - Columns per row
+ * @param {Number} rowsPerFloor - Rows per floor (default: 6)
+ * @param {Number} columns - Columns per row (default: 4)
  * @returns {Object} Layout configuration for double decker
  */
-const generateDoubleDecker = (rowsPerFloor, columns = 4) => {
+const generateDoubleDecker = (rowsPerFloor = 6, columns = 4) => {
   const layout = [];
 
   // Lower floor - add driver seat at front
