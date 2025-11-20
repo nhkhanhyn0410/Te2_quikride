@@ -4,6 +4,43 @@ const mongoose = require('mongoose');
  * Trip Schema
  * Quản lý lịch trình chuyến xe
  */
+
+// Sub-schema for journey status history
+const JourneyStatusSchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      required: true,
+      enum: ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'],
+    },
+    stopIndex: {
+      type: Number,
+      default: -1,
+      // -1: Không liên quan đến stop
+      // 0: Điểm xuất phát
+      // 1+: Stop thứ N
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now,
+      required: true,
+    },
+    location: {
+      lat: Number,
+      lng: Number,
+    },
+    notes: {
+      type: String,
+      maxlength: [500, 'Ghi chú không quá 500 ký tự'],
+    },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Employee',
+    },
+  },
+  { _id: true }
+);
+
 const TripSchema = new mongoose.Schema(
   {
     // References
@@ -219,6 +256,35 @@ const TripSchema = new mongoose.Schema(
       type: String,
       maxlength: [1000, 'Ghi chú không quá 1000 ký tự'],
     },
+
+    // Journey Tracking
+    journey: {
+      currentStopIndex: {
+        type: Number,
+        default: -1,
+        // -1: Chưa bắt đầu
+        // 0: Đang ở điểm xuất phát
+        // 1+: Đang ở stop thứ N
+        // Khi đến đích: số lượng stops + 1
+      },
+      currentStatus: {
+        type: String,
+        enum: ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'],
+        default: 'preparing',
+      },
+      statusHistory: {
+        type: [JourneyStatusSchema],
+        default: [],
+      },
+      actualDepartureTime: {
+        type: Date,
+        // Thời gian khởi hành thực tế
+      },
+      actualArrivalTime: {
+        type: Date,
+        // Thời gian đến đích thực tế
+      },
+    },
   },
   {
     timestamps: true,
@@ -414,6 +480,15 @@ TripSchema.methods.updateStatus = async function (newStatus, options = {}) {
     this.cancelledAt = new Date();
     this.cancelReason = options.reason || 'Không có lý do';
     this.cancelledBy = options.userId || null;
+    // Also update journey status
+    if (this.journey) {
+      this.journey.currentStatus = 'cancelled';
+    }
+  }
+
+  // Sync journey status when starting trip
+  if (newStatus === 'ongoing' && this.journey && this.journey.currentStatus === 'preparing') {
+    this.journey.currentStatus = 'checking_tickets';
   }
 
   await this.save();
@@ -434,6 +509,79 @@ TripSchema.methods.updateStatus = async function (newStatus, options = {}) {
   }
 
   return { oldStatus, newStatus };
+};
+
+/**
+ * Update journey status - for Trip Manager to update current location and status
+ * @param {Object} data - Update data
+ * @param {string} data.status - New journey status
+ * @param {number} data.stopIndex - Current stop index
+ * @param {Object} data.location - Current location {lat, lng}
+ * @param {string} data.notes - Notes for this update
+ * @param {ObjectId} data.updatedBy - Employee ID who made the update
+ * @returns {Promise<Object>}
+ */
+TripSchema.methods.updateJourneyStatus = async function (data) {
+  const { status, stopIndex, location, notes, updatedBy } = data;
+
+  // Validate status
+  const validJourneyStatuses = ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'];
+  if (!validJourneyStatuses.includes(status)) {
+    throw new Error(`Trạng thái hành trình không hợp lệ: ${status}`);
+  }
+
+  // Initialize journey if not exists
+  if (!this.journey) {
+    this.journey = {
+      currentStopIndex: -1,
+      currentStatus: 'preparing',
+      statusHistory: [],
+    };
+  }
+
+  // Create status history entry
+  const historyEntry = {
+    status,
+    stopIndex: stopIndex !== undefined ? stopIndex : this.journey.currentStopIndex,
+    timestamp: new Date(),
+    location,
+    notes,
+    updatedBy,
+  };
+
+  // Update current status
+  const oldStatus = this.journey.currentStatus;
+  this.journey.currentStatus = status;
+
+  if (stopIndex !== undefined) {
+    this.journey.currentStopIndex = stopIndex;
+  }
+
+  // Update actual times
+  if (status === 'in_transit' && !this.journey.actualDepartureTime) {
+    this.journey.actualDepartureTime = new Date();
+  }
+
+  if (status === 'completed' && !this.journey.actualArrivalTime) {
+    this.journey.actualArrivalTime = new Date();
+    // Also update main trip status
+    this.status = 'completed';
+  }
+
+  // Add to history
+  this.journey.statusHistory.push(historyEntry);
+
+  // Mark journey as modified for Mongoose
+  this.markModified('journey');
+
+  await this.save();
+
+  return {
+    success: true,
+    oldStatus,
+    newStatus: status,
+    currentStop: this.journey.currentStopIndex,
+  };
 };
 
 /**

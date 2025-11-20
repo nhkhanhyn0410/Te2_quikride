@@ -16,6 +16,11 @@ import {
   Descriptions,
   Space,
   Divider,
+  Timeline,
+  Select,
+  Badge,
+  Tooltip,
+  Spin,
 } from 'antd';
 import {
   QrcodeOutlined,
@@ -27,6 +32,11 @@ import {
   EnvironmentOutlined,
   ClockCircleOutlined,
   WarningOutlined,
+  CheckOutlined,
+  LoadingOutlined,
+  AimOutlined,
+  HomeOutlined,
+  FlagOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import useActiveTripStore from '../../store/activeTripStore';
@@ -34,20 +44,36 @@ import useAuthStore from '../../store/authStore';
 import tripManagerApi from '../../services/tripManagerApi';
 import { getTripPassengers } from '../../services/ticketApi';
 
+const { TextArea } = Input;
+
 const ActiveTripPage = () => {
   const navigate = useNavigate();
   const { activeTrip, updateTrip, completeTrip, cancelTrip, hasActiveTrip } = useActiveTripStore();
   const { user, logout } = useAuthStore();
+
+  // Passengers & Stats
   const [passengers, setPassengers] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
     boarded: 0,
     notBoarded: 0,
   });
+
+  // Journey tracking
+  const [journey, setJourney] = useState(null);
+  const [stops, setStops] = useState([]);
+  const [statusHistory, setStatusHistory] = useState([]);
+
+  // UI State
   const [loading, setLoading] = useState(false);
+  const [journeyLoading, setJourneyLoading] = useState(false);
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [completeModalVisible, setCompleteModalVisible] = useState(false);
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
+
+  // Forms
   const [form] = Form.useForm();
+  const [statusForm] = Form.useForm();
 
   // Redirect if no active trip
   useEffect(() => {
@@ -61,7 +87,6 @@ const ActiveTripPage = () => {
   const fetchPassengers = async () => {
     if (!activeTrip?._id) return;
 
-    setLoading(true);
     try {
       const response = await getTripPassengers(activeTrip._id);
       if (response.status === 'success') {
@@ -78,18 +103,63 @@ const ActiveTripPage = () => {
       }
     } catch (error) {
       console.error('Fetch passengers error:', error);
-      message.error('Không thể tải danh sách hành khách');
+    }
+  };
+
+  // Fetch journey details with stops
+  const fetchJourneyDetails = async () => {
+    if (!activeTrip?._id) return;
+
+    setJourneyLoading(true);
+    try {
+      const response = await tripManagerApi.getJourneyDetails(activeTrip._id);
+      if (response.data) {
+        setJourney(response.data.journey);
+        setStops(response.data.stops || []);
+        setStatusHistory(response.data.statusHistory || []);
+      }
+    } catch (error) {
+      console.error('Fetch journey error:', error);
+      // Silently fail - journey tracking is optional
     } finally {
-      setLoading(false);
+      setJourneyLoading(false);
     }
   };
 
   useEffect(() => {
     fetchPassengers();
+    fetchJourneyDetails();
+
     // Auto refresh every 30 seconds
-    const interval = setInterval(fetchPassengers, 30000);
+    const interval = setInterval(() => {
+      fetchPassengers();
+      fetchJourneyDetails();
+    }, 30000);
+
     return () => clearInterval(interval);
   }, [activeTrip?._id]);
+
+  // Handle update journey status
+  const handleUpdateJourneyStatus = async (values) => {
+    try {
+      setLoading(true);
+      const response = await tripManagerApi.updateJourneyStatus(activeTrip._id, values);
+
+      if (response.success) {
+        message.success(response.message || 'Cập nhật trạng thái thành công');
+        fetchJourneyDetails(); // Reload journey data
+        setStatusModalVisible(false);
+        statusForm.resetFields();
+      } else {
+        message.error(response.message || 'Không thể cập nhật trạng thái');
+      }
+    } catch (error) {
+      console.error('Update journey status error:', error);
+      message.error(error.message || 'Có lỗi xảy ra');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle complete trip
   const handleCompleteTrip = async () => {
@@ -169,11 +239,215 @@ const ActiveTripPage = () => {
     });
   };
 
+  // Get status label and color
+  const getStatusInfo = (status) => {
+    const statusMap = {
+      preparing: { label: 'Chuẩn bị', color: 'blue' },
+      checking_tickets: { label: 'Soát vé', color: 'cyan' },
+      in_transit: { label: 'Đang di chuyển', color: 'processing' },
+      at_stop: { label: 'Tại điểm dừng', color: 'orange' },
+      completed: { label: 'Hoàn thành', color: 'success' },
+      cancelled: { label: 'Đã hủy', color: 'error' },
+    };
+    return statusMap[status] || { label: status, color: 'default' };
+  };
+
+  // Render seat map
+  const renderSeatMap = () => {
+    if (passengers.length === 0) {
+      return (
+        <Alert
+          message="Chưa có dữ liệu ghế"
+          description="Chưa có hành khách đặt vé cho chuyến này"
+          type="info"
+          showIcon
+        />
+      );
+    }
+
+    // Group passengers by seat
+    const seatMap = {};
+    passengers.forEach((passenger) => {
+      const seatNum = passenger.seatNumber;
+      if (seatNum) {
+        seatMap[seatNum] = {
+          ...passenger,
+          isBoarded: passenger.isUsed || passenger.isBoarded,
+        };
+      }
+    });
+
+    // Get all seat numbers and sort
+    const allSeats = Object.keys(seatMap).sort((a, b) => {
+      const aNum = parseInt(a.replace(/\D/g, ''));
+      const bNum = parseInt(b.replace(/\D/g, ''));
+      return aNum - bNum;
+    });
+
+    return (
+      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+        {allSeats.map((seatNum) => {
+          const passenger = seatMap[seatNum];
+          return (
+            <Tooltip
+              key={seatNum}
+              title={
+                <div>
+                  <div><strong>{passenger.fullName}</strong></div>
+                  <div>{passenger.phone}</div>
+                  <div>{passenger.isBoarded ? 'Đã lên xe' : 'Chưa lên xe'}</div>
+                </div>
+              }
+            >
+              <div
+                className={`
+                  border-2 rounded-lg p-3 text-center cursor-pointer transition-all
+                  ${passenger.isBoarded
+                    ? 'bg-green-100 border-green-500 text-green-700'
+                    : 'bg-yellow-50 border-yellow-400 text-yellow-700'
+                  }
+                  hover:shadow-md
+                `}
+              >
+                <div className="text-xs font-semibold">{seatNum}</div>
+                <div className="text-[10px] mt-1 truncate">
+                  {passenger.fullName.split(' ').pop()}
+                </div>
+                {passenger.isBoarded && (
+                  <CheckCircleOutlined className="text-xs mt-1" />
+                )}
+              </div>
+            </Tooltip>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Render journey timeline
+  const renderJourneyTimeline = () => {
+    if (journeyLoading) {
+      return (
+        <div className="text-center py-8">
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+          <p className="text-gray-500 mt-2">Đang tải thông tin hành trình...</p>
+        </div>
+      );
+    }
+
+    if (!journey || stops.length === 0) {
+      return (
+        <Alert
+          message="Chưa có điểm dừng"
+          description="Tuyến đường này không có điểm dừng trung gian được cấu hình"
+          type="info"
+          showIcon
+        />
+      );
+    }
+
+    const currentStopIndex = journey.currentStopIndex || -1;
+
+    // Build timeline items: Origin -> Stops -> Destination
+    const timelineItems = [];
+
+    // Origin
+    timelineItems.push({
+      key: 'origin',
+      dot: currentStopIndex >= 0 ? <CheckOutlined /> : <HomeOutlined />,
+      color: currentStopIndex >= 0 ? 'green' : 'blue',
+      children: (
+        <div>
+          <div className="font-semibold">Điểm xuất phát</div>
+          <div className="text-sm text-gray-600">
+            {activeTrip.route?.origin?.city || activeTrip.route?.departureCity}
+          </div>
+          {journey.actualDepartureTime && (
+            <div className="text-xs text-gray-500">
+              Khởi hành: {dayjs(journey.actualDepartureTime).format('HH:mm DD/MM')}
+            </div>
+          )}
+        </div>
+      ),
+    });
+
+    // Stops
+    stops.forEach((stop, index) => {
+      const stopNumber = index + 1;
+      const isPassed = currentStopIndex > stopNumber;
+      const isCurrent = currentStopIndex === stopNumber;
+      const estimatedTime = dayjs(activeTrip.departureTime).add(
+        stop.estimatedArrivalMinutes,
+        'minute'
+      );
+
+      timelineItems.push({
+        key: `stop-${stopNumber}`,
+        dot: isPassed ? <CheckOutlined /> : isCurrent ? <LoadingOutlined /> : <EnvironmentOutlined />,
+        color: isPassed ? 'green' : isCurrent ? 'blue' : 'gray',
+        children: (
+          <div>
+            <div className="font-semibold">
+              Điểm dừng {stopNumber}: {stop.name}
+              {isCurrent && <Badge status="processing" className="ml-2" />}
+            </div>
+            <div className="text-sm text-gray-600">{stop.address}</div>
+            <div className="text-xs text-gray-500">
+              Dự kiến: {estimatedTime.format('HH:mm')} • Dừng {stop.stopDuration || 15} phút
+            </div>
+          </div>
+        ),
+      });
+    });
+
+    // Destination
+    const isCompleted = journey.currentStatus === 'completed';
+    timelineItems.push({
+      key: 'destination',
+      dot: isCompleted ? <CheckOutlined /> : <FlagOutlined />,
+      color: isCompleted ? 'green' : 'gray',
+      children: (
+        <div>
+          <div className="font-semibold">Điểm đến</div>
+          <div className="text-sm text-gray-600">
+            {activeTrip.route?.destination?.city || activeTrip.route?.arrivalCity}
+          </div>
+          {journey.actualArrivalTime && (
+            <div className="text-xs text-gray-500">
+              Đến: {dayjs(journey.actualArrivalTime).format('HH:mm DD/MM')}
+            </div>
+          )}
+        </div>
+      ),
+    });
+
+    return (
+      <div>
+        <Timeline items={timelineItems} />
+
+        {/* Progress bar */}
+        <div className="mt-4">
+          <div className="text-sm text-gray-600 mb-2">Tiến trình chuyến đi</div>
+          <Progress
+            percent={parseFloat(journey.progressPercentage || 0)}
+            status={isCompleted ? 'success' : 'active'}
+            strokeColor={{
+              '0%': '#108ee9',
+              '100%': '#87d068',
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
   if (!activeTrip) {
     return null;
   }
 
   const boardingPercentage = stats.total > 0 ? Math.round((stats.boarded / stats.total) * 100) : 0;
+  const currentStatus = journey?.currentStatus || 'preparing';
+  const statusInfo = getStatusInfo(currentStatus);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -206,8 +480,8 @@ const ActiveTripPage = () => {
             </div>
 
             <div className="text-right">
-              <Tag color="green" className="text-base px-4 py-1 mb-2">
-                ĐANG HOẠT ĐỘNG
+              <Tag color={statusInfo.color} className="text-base px-4 py-1 mb-2">
+                {statusInfo.label.toUpperCase()}
               </Tag>
               <p className="text-white text-sm">
                 Quản lý: <strong>{user?.fullName}</strong>
@@ -286,6 +560,55 @@ const ActiveTripPage = () => {
             </Card>
           </Col>
         </Row>
+      </div>
+
+      {/* Journey Timeline */}
+      {stops.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <Card
+            title={
+              <div className="flex justify-between items-center">
+                <span>
+                  <EnvironmentOutlined className="mr-2" />
+                  Hành trình chuyến đi
+                </span>
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<AimOutlined />}
+                  onClick={() => setStatusModalVisible(true)}
+                  disabled={currentStatus === 'completed'}
+                >
+                  Cập nhật vị trí
+                </Button>
+              </div>
+            }
+          >
+            {renderJourneyTimeline()}
+          </Card>
+        </div>
+      )}
+
+      {/* Seat Map */}
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <Card title={
+          <span>
+            <TeamOutlined className="mr-2" />
+            Sơ đồ ghế đã đặt
+          </span>
+        }>
+          <div className="mb-4 flex gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-green-100 border-2 border-green-500 rounded"></div>
+              <span>Đã lên xe ({stats.boarded})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-yellow-50 border-2 border-yellow-400 rounded"></div>
+              <span>Chưa lên xe ({stats.notBoarded})</span>
+            </div>
+          </div>
+          {renderSeatMap()}
+        </Card>
       </div>
 
       {/* Main Actions */}
@@ -379,6 +702,79 @@ const ActiveTripPage = () => {
         </Card>
       </div>
 
+      {/* Update Journey Status Modal */}
+      <Modal
+        title={
+          <span>
+            <AimOutlined className="mr-2" />
+            Cập nhật trạng thái hành trình
+          </span>
+        }
+        open={statusModalVisible}
+        onOk={() => statusForm.submit()}
+        onCancel={() => {
+          setStatusModalVisible(false);
+          statusForm.resetFields();
+        }}
+        okText="Cập nhật"
+        cancelText="Hủy"
+        okButtonProps={{ loading }}
+        width={600}
+      >
+        <Form
+          form={statusForm}
+          layout="vertical"
+          onFinish={handleUpdateJourneyStatus}
+        >
+          <Form.Item
+            name="status"
+            label="Trạng thái"
+            rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+            initialValue={currentStatus}
+          >
+            <Select size="large">
+              <Select.Option value="preparing">Chuẩn bị khởi hành</Select.Option>
+              <Select.Option value="checking_tickets">Đang soát vé</Select.Option>
+              <Select.Option value="in_transit">Đang di chuyển</Select.Option>
+              <Select.Option value="at_stop">Tại điểm dừng</Select.Option>
+              <Select.Option value="completed">Hoàn thành</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            noStyle
+            shouldUpdate={(prev, curr) => prev.status !== curr.status}
+          >
+            {({ getFieldValue }) =>
+              getFieldValue('status') === 'at_stop' ? (
+                <Form.Item
+                  name="stopIndex"
+                  label="Điểm dừng"
+                  rules={[{ required: true, message: 'Vui lòng chọn điểm dừng' }]}
+                >
+                  <Select size="large" placeholder="Chọn điểm dừng">
+                    {stops.map((stop, index) => (
+                      <Select.Option key={index} value={index + 1}>
+                        Điểm dừng {index + 1}: {stop.name}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              ) : null
+            }
+          </Form.Item>
+
+          <Form.Item name="notes" label="Ghi chú">
+            <TextArea
+              rows={3}
+              placeholder="Nhập ghi chú (tùy chọn)"
+              maxLength={500}
+              showCount
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
       {/* Complete Trip Modal */}
       <Modal
         title={
@@ -449,7 +845,7 @@ const ActiveTripPage = () => {
               { max: 500, message: 'Lý do không quá 500 ký tự' },
             ]}
           >
-            <Input.TextArea
+            <TextArea
               rows={4}
               placeholder="Nhập lý do hủy chuyến (VD: Xe gặp sự cố, thời tiết xấu, ...)"
               maxLength={500}

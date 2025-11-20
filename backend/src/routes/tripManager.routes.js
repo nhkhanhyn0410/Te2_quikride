@@ -130,4 +130,48 @@ router.post(
   TicketController.verifyTicketQR
 );
 
+/**
+ * Journey Tracking Routes
+ * For tracking trip progress through stops/waypoints
+ */
+
+// Get journey details with stops and status history
+// GET /api/trip-manager/trips/:tripId/journey
+router.get(
+  '/trips/:tripId/journey',
+  protectTripManager,
+  validateTripId,
+  TripManagerController.getJourneyDetails
+);
+
+// Update journey status (preparing, checking_tickets, in_transit, at_stop, completed)
+// PUT /api/trip-manager/trips/:tripId/journey/status
+router.put(
+  '/trips/:tripId/journey/status',
+  protectTripManager,
+  authorizeTripManager('trip_manager', 'driver'),
+  validateTripId,
+  [
+    body('status')
+      .notEmpty()
+      .withMessage('Trạng thái hành trình là bắt buộc')
+      .isIn(['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'])
+      .withMessage('Trạng thái không hợp lệ'),
+    body('stopIndex')
+      .optional()
+      .isInt({ min: -1 })
+      .withMessage('stopIndex phải là số nguyên >= -1'),
+    body('location')
+      .optional()
+      .isObject()
+      .withMessage('location phải là object có lat và lng'),
+    body('notes')
+      .optional()
+      .trim()
+      .isLength({ max: 500 })
+      .withMessage('Ghi chú không quá 500 ký tự'),
+  ],
+  TripManagerController.updateJourneyStatus
+);
+
 module.exports = router;

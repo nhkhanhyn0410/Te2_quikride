@@ -506,6 +506,178 @@ class TripManagerController {
       });
     }
   }
+
+  /**
+   * Get journey details with stops and status history
+   * GET /api/trip-manager/trips/:tripId/journey
+   */
+  static async getJourneyDetails(req, res) {
+    try {
+      const { tripId } = req.params;
+      const Trip = require('../models/Trip');
+
+      const trip = await Trip.findById(tripId)
+        .populate('routeId')
+        .populate({
+          path: 'journey.statusHistory.updatedBy',
+          select: 'fullName employeeCode',
+        });
+
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy chuyến xe',
+        });
+      }
+
+      // Get stops from route
+      const stops = trip.routeId.stops || [];
+
+      // Calculate journey progress
+      const totalStops = stops.length;
+      const currentStopIndex = trip.journey?.currentStopIndex || -1;
+      const progressPercentage = totalStops > 0
+        ? Math.min(100, Math.max(0, ((currentStopIndex + 1) / (totalStops + 1)) * 100))
+        : 0;
+
+      res.json({
+        success: true,
+        data: {
+          journey: {
+            currentStopIndex: trip.journey?.currentStopIndex || -1,
+            currentStatus: trip.journey?.currentStatus || 'preparing',
+            actualDepartureTime: trip.journey?.actualDepartureTime,
+            actualArrivalTime: trip.journey?.actualArrivalTime,
+            progressPercentage: progressPercentage.toFixed(1),
+          },
+          stops: stops.sort((a, b) => a.order - b.order),
+          statusHistory: trip.journey?.statusHistory || [],
+          route: {
+            origin: trip.routeId.origin,
+            destination: trip.routeId.destination,
+            routeName: trip.routeId.routeName,
+          },
+          trip: {
+            _id: trip._id,
+            departureTime: trip.departureTime,
+            arrivalTime: trip.arrivalTime,
+            status: trip.status,
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Get journey details error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Lỗi lấy thông tin hành trình',
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * Update journey status
+   * PUT /api/trip-manager/trips/:tripId/journey/status
+   * Body: { status, stopIndex, location: {lat, lng}, notes }
+   */
+  static async updateJourneyStatus(req, res) {
+    try {
+      const { tripId } = req.params;
+      const { status, stopIndex, location, notes } = req.body;
+
+      // Validate input
+      if (!status) {
+        return res.status(400).json({
+          success: false,
+          message: 'Trạng thái hành trình là bắt buộc',
+        });
+      }
+
+      const validJourneyStatuses = ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'];
+      if (!validJourneyStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: `Trạng thái không hợp lệ. Chỉ chấp nhận: ${validJourneyStatuses.join(', ')}`,
+        });
+      }
+
+      const Trip = require('../models/Trip');
+
+      // Find trip
+      const trip = await Trip.findById(tripId);
+
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy chuyến xe',
+        });
+      }
+
+      // Update journey status using the model method
+      const result = await trip.updateJourneyStatus({
+        status,
+        stopIndex,
+        location,
+        notes,
+        updatedBy: req.userId || req.tripManager?.id,
+      });
+
+      // Prepare response message
+      let message = '';
+      switch (status) {
+        case 'preparing':
+          message = 'Đang chuẩn bị khởi hành';
+          break;
+        case 'checking_tickets':
+          message = 'Đang soát vé hành khách';
+          break;
+        case 'in_transit':
+          message = 'Xe đang di chuyển';
+          break;
+        case 'at_stop':
+          message = `Đã đến điểm dừng ${stopIndex !== undefined ? stopIndex : ''}`;
+          break;
+        case 'completed':
+          message = 'Chuyến xe đã hoàn thành';
+          break;
+        case 'cancelled':
+          message = 'Chuyến xe đã bị hủy';
+          break;
+        default:
+          message = 'Trạng thái hành trình đã được cập nhật';
+      }
+
+      res.json({
+        success: true,
+        message,
+        data: {
+          journey: {
+            currentStatus: trip.journey.currentStatus,
+            currentStopIndex: trip.journey.currentStopIndex,
+            oldStatus: result.oldStatus,
+            newStatus: result.newStatus,
+            updatedAt: new Date(),
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Update journey status error:', error);
+
+      // Handle specific error messages
+      if (error.message.includes('Trạng thái hành trình không hợp lệ')) {
+        return res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Lỗi cập nhật trạng thái hành trình',
+        error: error.message,
+      });
+    }
+  }
 }
 
 module.exports = TripManagerController;
