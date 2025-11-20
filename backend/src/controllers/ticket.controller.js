@@ -72,6 +72,31 @@ class TicketController {
   }
 
   /**
+   * Get ticket by booking ID
+   * GET /api/tickets/booking/:bookingId
+   */
+  static async getTicketByBooking(req, res) {
+    try {
+      const { bookingId } = req.params;
+
+      const ticket = await TicketService.getTicketByBooking(bookingId);
+
+      res.json({
+        success: true,
+        data: {
+          ticket,
+        },
+      });
+    } catch (error) {
+      console.error('Get ticket by booking error:', error);
+      res.status(404).json({
+        success: false,
+        message: error.message || 'Không tìm thấy vé',
+      });
+    }
+  }
+
+  /**
    * UC-27: Request OTP for ticket lookup (Step 1)
    * POST /api/tickets/lookup/request-otp
    */

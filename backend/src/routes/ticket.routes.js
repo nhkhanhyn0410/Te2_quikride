@@ -228,6 +228,13 @@ router.post(
   TicketController.resendTicket
 );
 
+// Get ticket by booking ID
+// GET /api/tickets/booking/:bookingId
+router.get(
+  '/booking/:bookingId',
+  TicketController.getTicketByBooking
+);
+
 // Get ticket by ID
 // GET /api/tickets/:id
 router.get(
