@@ -18,10 +18,15 @@ const createTransporter = () => {
   } else if (process.env.EMAIL_SERVICE === 'gmail') {
     // Gmail configuration (for development)
     transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // true for 465, false for other ports
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false, // For development - accept self-signed certificates
       },
     });
   } else {
