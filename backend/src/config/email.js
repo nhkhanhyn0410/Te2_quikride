@@ -53,21 +53,51 @@ const createTransporter = () => {
  * @param {string} options.html - HTML content
  * @param {string} options.text - Plain text content
  * @param {Array} options.attachments - Email attachments
+ * @param {string} options.qrCodeDataUrl - QR code as data URL (will be converted to inline attachment)
  * @returns {Promise<object>} - Email send result
  */
-const sendEmail = async ({ to, subject, html, text, attachments = [] }) => {
+const sendEmail = async ({ to, subject, html, text, attachments = [], qrCodeDataUrl = null }) => {
   try {
     if (!transporter) {
       transporter = createTransporter();
+    }
+
+    // Convert QR code data URL to inline attachment for better email client compatibility
+    const finalAttachments = [...attachments];
+    let finalHtml = html;
+
+    if (qrCodeDataUrl && qrCodeDataUrl.startsWith('data:image')) {
+      // Extract base64 data from data URL
+      const matches = qrCodeDataUrl.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/);
+      if (matches) {
+        const imageType = matches[1];
+        const base64Data = matches[2];
+
+        // Add as inline attachment with CID
+        finalAttachments.push({
+          filename: 'qrcode.png',
+          content: base64Data,
+          encoding: 'base64',
+          cid: 'qrcode@quikride', // CID for referencing in HTML
+        });
+
+        // Replace data URL with CID reference in HTML
+        finalHtml = html.replace(
+          new RegExp(qrCodeDataUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+          'cid:qrcode@quikride'
+        );
+
+        console.log('📎 QR code converted to inline attachment (CID)');
+      }
     }
 
     const mailOptions = {
       from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
       to,
       subject,
-      html,
+      html: finalHtml,
       text,
-      attachments,
+      attachments: finalAttachments,
     };
 
     const info = await transporter.sendMail(mailOptions);
