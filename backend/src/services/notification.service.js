@@ -7,16 +7,21 @@ const SMSService = require('./sms.service');
  */
 class NotificationService {
   constructor() {
-    // Email transporter setup
-    this.emailTransporter = nodemailer.createTransporter({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: process.env.SMTP_PORT || 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    // Email transporter setup with error handling
+    try {
+      this.emailTransporter = nodemailer.createTransporter({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: process.env.SMTP_PORT || 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+    } catch (error) {
+      console.warn('⚠️ Failed to create email transporter:', error.message);
+      this.emailTransporter = null;
+    }
 
     // SMS service
     this.smsService = new SMSService();
@@ -39,6 +44,11 @@ class NotificationService {
       if (!this.emailEnabled) {
         console.log('📧 Email disabled, skipping:', to);
         return { success: true, skipped: true, reason: 'Email disabled' };
+      }
+
+      if (!this.emailTransporter) {
+        console.log('⚠️ Email transporter not available');
+        return { success: false, error: 'Email transporter not configured' };
       }
 
       if (!to) {
@@ -463,6 +473,10 @@ class NotificationService {
    */
   async testEmailConfiguration() {
     try {
+      if (!this.emailTransporter) {
+        console.error('❌ Email transporter not configured');
+        return false;
+      }
       await this.emailTransporter.verify();
       console.log('✅ Email configuration is valid');
       return true;
