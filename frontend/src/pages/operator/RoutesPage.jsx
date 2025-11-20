@@ -44,10 +44,8 @@ const RoutesPage = () => {
       routeCode: record.routeCode,
       originProvince: record.origin?.province,
       originCity: record.origin?.city,
-      originAddress: record.origin?.address,
       destinationProvince: record.destination?.province,
       destinationCity: record.destination?.city,
-      destinationAddress: record.destination?.address,
       pickupPoints: record.pickupPoints && record.pickupPoints.length > 0
         ? record.pickupPoints
         : [{ name: '', address: '' }],
@@ -80,12 +78,10 @@ const RoutesPage = () => {
         origin: {
           province: values.originProvince,
           city: values.originCity,
-          address: values.originAddress,
         },
         destination: {
           province: values.destinationProvince,
           city: values.destinationCity,
-          address: values.destinationAddress,
         },
         pickupPoints: values.pickupPoints || [],
         dropoffPoints: values.dropoffPoints || [],
@@ -259,13 +255,10 @@ const RoutesPage = () => {
               </Form.Item>
               <Form.Item
                 name="originCity"
-                label="Quận/Huyện/Xã"
-                rules={[{ required: true, message: 'Vui lòng nhập quận/huyện/xã' }]}
+                label="Quận/Xã"
+                rules={[{ required: true, message: 'Vui lòng nhập quận/xã' }]}
               >
                 <Input placeholder="Ví dụ: Quận 1" />
-              </Form.Item>
-              <Form.Item name="originAddress" label="Địa chỉ chi tiết">
-                <Input placeholder="Ví dụ: 292 Đinh Bộ Lĩnh, P.26" />
               </Form.Item>
             </div>
 
@@ -280,18 +273,15 @@ const RoutesPage = () => {
               </Form.Item>
               <Form.Item
                 name="destinationCity"
-                label="Quận/Huyện/Xã"
-                rules={[{ required: true, message: 'Vui lòng nhập quận/huyện/xã' }]}
+                label="Quận/Xã"
+                rules={[{ required: true, message: 'Vui lòng nhập quận/xã' }]}
               >
                 <Input placeholder="Ví dụ: Phường 3" />
-              </Form.Item>
-              <Form.Item name="destinationAddress" label="Địa chỉ chi tiết">
-                <Input placeholder="Ví dụ: 1 Tô Hiến Thành" />
               </Form.Item>
             </div>
           </div>
 
-          <Divider orientation="left">Điểm Đón (Hành khách chọn khi đặt vé)</Divider>
+          <Divider orientation="left">Điểm Đón</Divider>
           <Form.List name="pickupPoints">
             {(fields, { add, remove }) => (
               <>
@@ -340,7 +330,7 @@ const RoutesPage = () => {
             )}
           </Form.List>
 
-          <Divider orientation="left">Điểm Trả (Hành khách chọn khi đặt vé)</Divider>
+          <Divider orientation="left">Điểm Trả</Divider>
           <Form.List name="dropoffPoints">
             {(fields, { add, remove }) => (
               <>
