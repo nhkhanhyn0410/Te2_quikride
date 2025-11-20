@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const Employee = require('../models/Employee');
 
 /**
  * Trip Manager Authentication Middleware
@@ -6,9 +7,9 @@ const jwt = require('jsonwebtoken');
  */
 
 /**
- * Protect routes - require trip manager authentication
+ * Protect routes - require trip manager/driver authentication
  */
-const protectTripManager = (req, res, next) => {
+const protectTripManager = async (req, res, next) => {
   try {
     let token;
 
@@ -27,20 +28,39 @@ const protectTripManager = (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
 
-    // Check if token is for trip manager
-    if (decoded.type !== 'trip_manager') {
+    // Check if token type is access
+    if (decoded.type !== 'access') {
       return res.status(403).json({
         success: false,
-        message: 'Chỉ Trip Manager mới có quyền truy cập',
+        message: 'Token không hợp lệ',
+      });
+    }
+
+    // Check if role is trip_manager or driver
+    if (decoded.role !== 'trip_manager' && decoded.role !== 'driver') {
+      return res.status(403).json({
+        success: false,
+        message: 'Chỉ Trip Manager hoặc Driver mới có quyền truy cập',
+      });
+    }
+
+    // Verify employee exists and is active
+    const employee = await Employee.findById(decoded.userId);
+    if (!employee || employee.status !== 'active') {
+      return res.status(403).json({
+        success: false,
+        message: 'Tài khoản không hoạt động',
       });
     }
 
     // Attach trip manager info to request
     req.tripManager = {
-      id: decoded.id,
-      username: decoded.username,
+      id: decoded.userId,
       role: decoded.role,
+      operatorId: decoded.operatorId,
     };
+    req.userId = decoded.userId;
+    req.user = employee;
 
     next();
   } catch (error) {
