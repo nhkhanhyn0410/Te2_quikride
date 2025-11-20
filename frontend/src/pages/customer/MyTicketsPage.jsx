@@ -16,7 +16,6 @@ import {
 } from 'antd';
 import {
   SearchOutlined,
-  DownloadOutlined,
   CloseCircleOutlined,
   SwapOutlined,
   MailOutlined,
@@ -28,7 +27,6 @@ import {
 import dayjs from 'dayjs';
 import {
   getCustomerTickets,
-  downloadTicket,
   cancelTicket,
   resendTicket
 } from '../../services/ticketApi';
@@ -51,6 +49,8 @@ const MyTicketsPage = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [cancelModalVisible, setCancelModalVisible] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [qrModalVisible, setQrModalVisible] = useState(false);
+  const [qrTicket, setQrTicket] = useState(null);
 
   // Fetch tickets
   const fetchTickets = async (page = 1) => {
@@ -94,23 +94,10 @@ const MyTicketsPage = () => {
     fetchTickets(1);
   }, [activeTab, searchText, dateRange]);
 
-  // Handle download ticket
-  const handleDownload = async (ticketId) => {
-    try {
-      const blob = await downloadTicket(ticketId);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `ticket-${ticketId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      message.success('Tải vé thành công');
-    } catch (error) {
-      console.error('Download ticket error:', error);
-      message.error(error || 'Không thể tải vé');
-    }
+  // Handle show QR code
+  const handleShowQR = (ticket) => {
+    setQrTicket(ticket);
+    setQrModalVisible(true);
   };
 
   // Handle resend ticket
@@ -230,12 +217,12 @@ const MyTicketsPage = () => {
       key: 'actions',
       render: (_, record) => (
         <Space>
-          <Tooltip title="Tải vé">
+          <Tooltip title="Xem mã QR">
             <Button
               type="primary"
               size="small"
-              icon={<DownloadOutlined />}
-              onClick={() => handleDownload(record._id)}
+              icon={<QrcodeOutlined />}
+              onClick={() => handleShowQR(record)}
             />
           </Tooltip>
 
@@ -365,6 +352,53 @@ const MyTicketsPage = () => {
             )}
           </Spin>
         </Card>
+
+        {/* QR Code Modal */}
+        <Modal
+          title="Mã QR vé điện tử"
+          open={qrModalVisible}
+          onCancel={() => {
+            setQrModalVisible(false);
+            setQrTicket(null);
+          }}
+          footer={[
+            <Button key="close" onClick={() => setQrModalVisible(false)}>
+              Đóng
+            </Button>
+          ]}
+          centered
+          width={500}
+        >
+          {qrTicket && (
+            <div className="text-center">
+              <div className="bg-white p-4 rounded-lg border-2 border-blue-500 inline-block mb-4">
+                <img
+                  src={qrTicket.qrCode}
+                  alt="QR Code"
+                  className="mx-auto"
+                  style={{ width: 300, height: 300 }}
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg font-semibold text-gray-800">
+                  Mã vé: <span className="text-blue-600">{qrTicket.ticketCode}</span>
+                </p>
+                <p className="text-gray-600">
+                  {qrTicket.tripInfo?.routeName || qrTicket.tripInfo?.route}
+                </p>
+                <p className="text-gray-600">
+                  {dayjs(qrTicket.tripInfo?.departureTime).format('DD/MM/YYYY HH:mm')}
+                </p>
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded mt-4">
+                  <p className="text-sm text-blue-800">
+                    <QrcodeOutlined className="mr-1" />
+                    Vui lòng xuất trình mã QR này khi lên xe
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </Modal>
 
         {/* Cancel Modal */}
         <Modal
