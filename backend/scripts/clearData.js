@@ -56,7 +56,7 @@ const seedData = async () => {
     await Booking.deleteMany({});
     await Ticket.deleteMany({});
     console.log('✅ Cleared all existing data\n');
-
+    console.log('👥 Creating Users...');
     const users = await User.create([
           // Admin
           {
@@ -69,7 +69,8 @@ const seedData = async () => {
             isPhoneVerified: true,
           },
         ]);
-
+        console.log(`✅ Created ${users.length} users\n`);
+        console.log('🏢 Creating Bus Operators...');
         const operators = await BusOperator.create([
               {
                 email: 'operator1@quikride.com',
@@ -89,7 +90,7 @@ const seedData = async () => {
               },
             ]);     
 
-
+            console.log(`✅ Created ${operators.length} bus operators\n`);
     } catch (error) {
     console.error('❌ Error seeding database:', error);
     console.error(error.stack);
