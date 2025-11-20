@@ -262,93 +262,62 @@ const TripManagerDashboard = () => {
     {
       title: 'Thao tác',
       key: 'actions',
-      width: 450,
+      width: 200,
       fixed: 'right',
       render: (_, record) => (
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
-          {/* Row 1: Status Update Actions */}
-          <Space wrap size="small">
-            {record.status === 'scheduled' && (
-              <>
-                <Button
-                  type="primary"
-                  size="small"
-                  icon={<PlayCircleOutlined />}
-                  onClick={() => handleStartTrip(record)}
-                  loading={actionLoading}
-                >
-                  Bắt đầu
-                </Button>
-                <Button
-                  danger
-                  size="small"
-                  icon={<CloseCircleOutlined />}
-                  onClick={() => handleCancelTrip(record)}
-                  loading={actionLoading}
-                >
-                  Hủy
-                </Button>
-              </>
-            )}
+        <Space wrap size="small">
+          {record.status === 'scheduled' && (
+            <>
+              <Button
+                type="primary"
+                size="small"
+                icon={<PlayCircleOutlined />}
+                onClick={() => handleStartTrip(record)}
+                loading={actionLoading}
+              >
+                Bắt đầu
+              </Button>
+              <Button
+                danger
+                size="small"
+                icon={<CloseCircleOutlined />}
+                onClick={() => handleCancelTrip(record)}
+                loading={actionLoading}
+              >
+                Hủy
+              </Button>
+            </>
+          )}
 
-            {record.status === 'ongoing' && (
-              <>
-                <Button
-                  type="primary"
-                  size="small"
-                  icon={<CheckCircleOutlined />}
-                  onClick={() => handleCompleteTrip(record)}
-                  loading={actionLoading}
-                  style={{ backgroundColor: '#52c41a' }}
-                >
-                  Hoàn thành
-                </Button>
-                <Button
-                  danger
-                  size="small"
-                  icon={<CloseCircleOutlined />}
-                  onClick={() => handleCancelTrip(record)}
-                  loading={actionLoading}
-                >
-                  Hủy
-                </Button>
-              </>
-            )}
+          {record.status === 'ongoing' && (
+            <>
+              <Button
+                type="primary"
+                size="small"
+                icon={<CheckCircleOutlined />}
+                onClick={() => handleCompleteTrip(record)}
+                loading={actionLoading}
+                style={{ backgroundColor: '#52c41a' }}
+              >
+                Hoàn thành
+              </Button>
+              <Button
+                danger
+                size="small"
+                icon={<CloseCircleOutlined />}
+                onClick={() => handleCancelTrip(record)}
+                loading={actionLoading}
+              >
+                Hủy
+              </Button>
+            </>
+          )}
 
-            {(record.status === 'completed' || record.status === 'cancelled') && (
-              <Tag color={record.status === 'completed' ? 'green' : 'red'}>
-                {record.status === 'completed' ? 'Đã hoàn thành' : 'Đã hủy'}
-              </Tag>
-            )}
-          </Space>
-
-          {/* Row 2: Regular Actions */}
-          <Space wrap size="small">
-            <Button
-              type={record.status === 'ongoing' ? 'primary' : 'default'}
-              size="small"
-              icon={<QrcodeOutlined />}
-              onClick={() => navigate(`/trip-manager/trips/${record._id}/scan`)}
-            >
-              Quét vé
-            </Button>
-
-            <Button
-              size="small"
-              icon={<TeamOutlined />}
-              onClick={() => navigate(`/trip-manager/trips/${record._id}/passengers`)}
-            >
-              Hành khách
-            </Button>
-
-            <Button
-              size="small"
-              icon={<InfoCircleOutlined />}
-              onClick={() => navigate(`/trip-manager/trips/${record._id}/details`)}
-            >
-              Chi tiết
-            </Button>
-          </Space>
+          {(record.status === 'completed' || record.status === 'cancelled') && (
+            <Tag color={record.status === 'completed' ? 'green' : 'red'}>
+              {record.status === 'completed' ? 'Đã hoàn thành' : 'Đã hủy'}
+            </Tag>
+          )}
         </Space>
       ),
     },
