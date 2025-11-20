@@ -351,6 +351,19 @@ class EmployeeService {
   }
 
   /**
+   * Find employee by employee code (for login)
+   * @param {String} employeeCode
+   * @returns {Promise<Employee>}
+   */
+  static async findByEmployeeCode(employeeCode) {
+    const employee = await Employee.findOne({
+      employeeCode: employeeCode.toUpperCase(),
+    }).select('+password');
+
+    return employee;
+  }
+
+  /**
    * Authenticate employee (for trip manager login)
    * @param {String} employeeCode
    * @param {String} password
