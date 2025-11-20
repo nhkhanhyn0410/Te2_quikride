@@ -254,12 +254,15 @@ const ActiveTripPage = () => {
 
   // Render seat map
   const renderSeatMap = () => {
-    if (passengers.length === 0) {
+    // Get total seats from bus info
+    const totalSeats = activeTrip?.bus?.seatCapacity || activeTrip?.totalSeats || 0;
+
+    if (totalSeats === 0) {
       return (
         <Alert
-          message="Chưa có dữ liệu ghế"
-          description="Chưa có hành khách đặt vé cho chuyến này"
-          type="info"
+          message="Không có thông tin ghế"
+          description="Không tìm thấy thông tin số ghế của xe"
+          type="warning"
           showIcon
         />
       );
@@ -277,44 +280,62 @@ const ActiveTripPage = () => {
       }
     });
 
-    // Get all seat numbers and sort
-    const allSeats = Object.keys(seatMap).sort((a, b) => {
-      const aNum = parseInt(a.replace(/\D/g, ''));
-      const bNum = parseInt(b.replace(/\D/g, ''));
-      return aNum - bNum;
-    });
+    // Generate all seat numbers (A1, A2, ... or 1, 2, 3...)
+    const allSeats = [];
+    for (let i = 1; i <= totalSeats; i++) {
+      allSeats.push(i.toString());
+    }
 
     return (
       <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
         {allSeats.map((seatNum) => {
           const passenger = seatMap[seatNum];
+          const isEmpty = !passenger;
+          const isBoarded = passenger?.isBoarded || false;
+
           return (
             <Tooltip
               key={seatNum}
               title={
-                <div>
-                  <div><strong>{passenger.fullName}</strong></div>
-                  <div>{passenger.phone}</div>
-                  <div>{passenger.isBoarded ? 'Đã lên xe' : 'Chưa lên xe'}</div>
-                </div>
+                isEmpty ? (
+                  <div>
+                    <div><strong>Ghế {seatNum}</strong></div>
+                    <div>Ghế trống</div>
+                  </div>
+                ) : (
+                  <div>
+                    <div><strong>{passenger.fullName}</strong></div>
+                    <div>{passenger.phone}</div>
+                    <div>{isBoarded ? 'Đã lên xe ✓' : 'Chưa lên xe'}</div>
+                  </div>
+                )
               }
             >
               <div
                 className={`
-                  border-2 rounded-lg p-3 text-center cursor-pointer transition-all
-                  ${passenger.isBoarded
-                    ? 'bg-green-100 border-green-500 text-green-700'
-                    : 'bg-yellow-50 border-yellow-400 text-yellow-700'
+                  border-2 rounded-lg p-3 text-center transition-all
+                  ${
+                    isEmpty
+                      ? 'bg-gray-50 border-gray-300 text-gray-400 cursor-default'
+                      : isBoarded
+                      ? 'bg-green-100 border-green-500 text-green-700 cursor-pointer hover:shadow-md'
+                      : 'bg-yellow-50 border-yellow-400 text-yellow-700 cursor-pointer hover:shadow-md'
                   }
-                  hover:shadow-md
                 `}
               >
                 <div className="text-xs font-semibold">{seatNum}</div>
-                <div className="text-[10px] mt-1 truncate">
-                  {passenger.fullName.split(' ').pop()}
-                </div>
-                {passenger.isBoarded && (
-                  <CheckCircleOutlined className="text-xs mt-1" />
+                {!isEmpty && (
+                  <>
+                    <div className="text-[10px] mt-1 truncate">
+                      {passenger.fullName.split(' ').pop()}
+                    </div>
+                    {isBoarded && (
+                      <CheckCircleOutlined className="text-xs mt-1" />
+                    )}
+                  </>
+                )}
+                {isEmpty && (
+                  <div className="text-[10px] mt-1">Trống</div>
                 )}
               </div>
             </Tooltip>
@@ -594,10 +615,10 @@ const ActiveTripPage = () => {
         <Card title={
           <span>
             <TeamOutlined className="mr-2" />
-            Sơ đồ ghế đã đặt
+            Sơ đồ ghế xe
           </span>
         }>
-          <div className="mb-4 flex gap-4 text-sm">
+          <div className="mb-4 flex flex-wrap gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-green-100 border-2 border-green-500 rounded"></div>
               <span>Đã lên xe ({stats.boarded})</span>
@@ -605,6 +626,10 @@ const ActiveTripPage = () => {
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-yellow-50 border-2 border-yellow-400 rounded"></div>
               <span>Chưa lên xe ({stats.notBoarded})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-gray-50 border-2 border-gray-300 rounded"></div>
+              <span>Ghế trống ({(activeTrip?.bus?.seatCapacity || activeTrip?.totalSeats || 0) - stats.total})</span>
             </div>
           </div>
           {renderSeatMap()}
