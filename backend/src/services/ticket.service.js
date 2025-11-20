@@ -286,6 +286,24 @@ class TicketService {
   }
 
   /**
+   * Get ticket by booking ID
+   * @param {string} bookingId - Booking ID
+   * @returns {Promise<Ticket>} Ticket details
+   */
+  static async getTicketByBooking(bookingId) {
+    const ticket = await Ticket.findOne({ bookingId })
+      .populate('tripId')
+      .populate('operatorId', 'companyName phone email logo')
+      .populate('bookingId');
+
+    if (!ticket) {
+      throw new Error('Không tìm thấy vé cho booking này');
+    }
+
+    return ticket;
+  }
+
+  /**
    * Request OTP for guest ticket lookup
    * @param {string} ticketCode - Ticket code
    * @param {string} phone - Contact phone
