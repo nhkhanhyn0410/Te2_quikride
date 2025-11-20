@@ -2,14 +2,10 @@ const Ticket = require('../models/Ticket');
 const Booking = require('../models/Booking');
 const Trip = require('../models/Trip');
 const QRService = require('./qr.service');
-const PDFService = require('./pdf.service');
 const { sendEmail, emailTemplates } = require('../config/email');
 const SMSService = require('./sms.service');
 const CancellationService = require('./cancellation.service');
-const cloudinary = require('../config/cloudinary');
 const redisClient = require('../config/redis');
-const fs = require('fs');
-const path = require('path');
 const moment = require('moment-timezone');
 
 // Lazy-load BookingService to avoid circular dependency
@@ -23,7 +19,7 @@ const getBookingService = () => {
 
 /**
  * Ticket Service
- * UC-7: Generate digital tickets with QR codes and PDF
+ * UC-7: Generate digital tickets with QR codes
  */
 class TicketService {
   /**
@@ -130,17 +126,7 @@ class TicketService {
         status: 'valid',
       });
 
-      // Generate PDF in background (don't block response)
-      this.generateAndUploadPDF(ticket, booking, trip, qrData.qrCodeData)
-        .then((pdfUrl) => {
-          ticket.pdfUrl = pdfUrl;
-          ticket.save();
-        })
-        .catch((error) => {
-          console.error('❌ PDF generation failed:', error);
-        });
-
-      console.log('✅ Ticket generated successfully:', ticketCode);
+      console.log('✅ Ticket with QR code generated successfully:', ticketCode);
       return ticket;
     } catch (error) {
       console.error('❌ Ticket generation error:', error);
@@ -148,93 +134,6 @@ class TicketService {
     }
   }
 
-  /**
-   * Generate PDF and upload to Cloudinary
-   * @param {Ticket} ticket - Ticket document
-   * @param {Booking} booking - Booking document
-   * @param {Trip} trip - Trip document
-   * @param {string} qrCodeData - QR code encrypted data
-   * @returns {Promise<string>} PDF URL
-   */
-  static async generateAndUploadPDF(ticket, booking, trip, qrCodeData) {
-    try {
-      // Check if demo mode
-      const isDemoMode = process.env.DEMO_MODE === 'true';
-
-      if (isDemoMode) {
-        console.log('📝 Demo mode: Skipping PDF generation and upload');
-        return `${process.env.FRONTEND_URL || 'http://localhost:3000'}/tickets/${ticket.ticketCode}`;
-      }
-
-      // Generate QR buffer for PDF
-      const qrBuffer = await QRService.generateQRBuffer(qrCodeData);
-
-      // Create temp directory if not exists
-      const tempDir = path.join(__dirname, '../../temp/tickets');
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
-
-      // Generate PDF
-      const pdfFileName = `ticket_${ticket.ticketCode}.pdf`;
-      const pdfPath = path.join(tempDir, pdfFileName);
-
-      const pdfData = {
-        ticketCode: ticket.ticketCode,
-        bookingCode: booking.bookingCode,
-        qrCodeBuffer: qrBuffer,
-        passengers: ticket.passengers,
-        tripInfo: {
-          routeName: ticket.tripInfo.routeName,
-          departureTime: ticket.tripInfo.departureTime,
-          arrivalTime: ticket.tripInfo.arrivalTime,
-          origin: ticket.tripInfo.origin,
-          destination: ticket.tripInfo.destination,
-          pickupPoint: ticket.tripInfo.pickupPoint,
-          dropoffPoint: ticket.tripInfo.dropoffPoint,
-          busNumber: ticket.tripInfo.busNumber,
-          busType: ticket.tripInfo.busType,
-        },
-        operator: {
-          companyName: booking.operatorId.companyName,
-          phone: booking.operatorId.phone,
-          email: booking.operatorId.email,
-        },
-        pricing: {
-          total: ticket.totalPrice,
-        },
-        contactInfo: booking.contactInfo,
-      };
-
-      await PDFService.generateTicket(pdfData, pdfPath);
-
-      // Check if Cloudinary is configured
-      if (!cloudinary.uploader) {
-        console.warn('⚠️  Cloudinary not configured, saving PDF locally');
-        ticket.pdfFileName = pdfFileName;
-        return pdfPath;
-      }
-
-      // Upload to Cloudinary
-      const uploadResult = await cloudinary.uploader.upload(pdfPath, {
-        folder: 'quikride/tickets',
-        resource_type: 'raw',
-        public_id: `ticket_${ticket.ticketCode}`,
-      });
-
-      // Delete temp file
-      fs.unlinkSync(pdfPath);
-
-      ticket.pdfFileName = pdfFileName;
-      console.log('✅ PDF uploaded to Cloudinary:', uploadResult.secure_url);
-
-      return uploadResult.secure_url;
-    } catch (error) {
-      console.error('❌ PDF upload error:', error);
-      // Don't throw error, return fallback URL
-      return `${process.env.FRONTEND_URL || 'http://localhost:3000'}/tickets/${ticket.ticketCode}`;
-    }
-  }
 
   /**
    * Send ticket via email and SMS
@@ -295,7 +194,7 @@ class TicketService {
         seatNumbers: ticket.passengers.map((p) => p.seatNumber).join(', '),
         totalPrice: `${ticket.totalPrice.toLocaleString('vi-VN')} VNĐ`,
         qrCodeImage: ticket.qrCode, // Base64 data URL
-        ticketUrl: ticket.pdfUrl || `${process.env.FRONTEND_URL}/tickets/${ticket.ticketCode}`,
+        ticketUrl: `${process.env.FRONTEND_URL}/tickets/${ticket.ticketCode}`,
         operatorName: ticket.operatorId.companyName,
         operatorPhone: ticket.operatorId.phone,
         operatorEmail: ticket.operatorId.email,
@@ -306,20 +205,10 @@ class TicketService {
         try {
           const emailTemplate = emailTemplates.ticketConfirmation(ticketData);
 
-          // Prepare attachments if PDF is ready
-          const attachments = [];
-          if (ticket.pdfUrl) {
-            attachments.push({
-              filename: ticket.pdfFileName || `ticket_${ticket.ticketCode}.pdf`,
-              path: ticket.pdfUrl,
-            });
-          }
-
           await sendEmail({
             to: contactEmail,
             subject: emailTemplate.subject,
             html: emailTemplate.html,
-            attachments,
           });
 
           ticket.markEmailSent();
