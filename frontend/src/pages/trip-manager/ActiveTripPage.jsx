@@ -254,21 +254,21 @@ const ActiveTripPage = () => {
 
   // Render seat map
   const renderSeatMap = () => {
-    // Get total seats from bus info
-    const totalSeats = activeTrip?.bus?.seatCapacity || activeTrip?.totalSeats || 0;
+    // Get bus layout
+    const seatLayout = activeTrip?.bus?.seatLayout;
 
-    if (totalSeats === 0) {
+    if (!seatLayout || !seatLayout.layout) {
       return (
         <Alert
-          message="Không có thông tin ghế"
-          description="Không tìm thấy thông tin số ghế của xe"
+          message="Không có thông tin sơ đồ ghế"
+          description="Không tìm thấy thông tin sơ đồ ghế của xe"
           type="warning"
           showIcon
         />
       );
     }
 
-    // Group passengers by seat
+    // Group passengers by seat number
     const seatMap = {};
     passengers.forEach((passenger) => {
       const seatNum = passenger.seatNumber;
@@ -280,67 +280,258 @@ const ActiveTripPage = () => {
       }
     });
 
-    // Generate all seat numbers (A1, A2, ... or 1, 2, 3...)
-    const allSeats = [];
-    for (let i = 1; i <= totalSeats; i++) {
-      allSeats.push(i.toString());
-    }
+    const { layout, rows, columns } = seatLayout;
+
+    // Helper function to determine seat type
+    const determineSeatType = (seatNumber) => {
+      if (!seatNumber || seatNumber === '') return 'aisle';
+      if (seatNumber === 'DRIVER' || seatNumber === '🚗' || seatNumber.includes('Driver')) return 'driver';
+      if (seatNumber === 'FLOOR_2') return 'floor_separator';
+      return 'seat';
+    };
+
+    // Helper function to get seat class
+    const getSeatClass = (seatNumber) => {
+      const seatType = determineSeatType(seatNumber);
+
+      if (seatType === 'aisle') return 'seat-invisible';
+      if (seatType === 'driver') return 'seat-driver';
+      if (seatType === 'floor_separator') return 'seat-floor-separator';
+
+      const passenger = seatMap[seatNumber];
+      if (!passenger) return 'seat-empty'; // Empty seat
+      if (passenger.isBoarded) return 'seat-boarded'; // Boarded
+      return 'seat-pending'; // Booked but not boarded
+    };
+
+    // Helper function to get seat display content
+    const getSeatContent = (seatNumber) => {
+      const seatType = determineSeatType(seatNumber);
+
+      if (seatType === 'aisle') return null;
+      if (seatType === 'driver') return '🚗';
+      if (seatType === 'floor_separator') return '--- Tầng 2 ---';
+
+      const passenger = seatMap[seatNumber];
+      if (!passenger) {
+        return (
+          <div className="seat-content">
+            <div className="seat-number">{seatNumber}</div>
+            <div className="seat-label">Trống</div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="seat-content">
+          <div className="seat-number">{seatNumber}</div>
+          <div className="seat-label">
+            {passenger.fullName.split(' ').pop()}
+          </div>
+          {passenger.isBoarded && <CheckCircleOutlined className="seat-icon" />}
+        </div>
+      );
+    };
+
+    // Helper function to get tooltip
+    const getSeatTooltip = (seatNumber) => {
+      const seatType = determineSeatType(seatNumber);
+
+      if (seatType === 'driver') return 'Ghế lái';
+      if (seatType === 'floor_separator') return 'Dấu phân tách tầng 2';
+      if (seatType === 'aisle') return '';
+
+      const passenger = seatMap[seatNumber];
+      if (!passenger) {
+        return `Ghế ${seatNumber} - Trống`;
+      }
+
+      return (
+        <div>
+          <div><strong>Ghế {seatNumber}</strong></div>
+          <div>{passenger.fullName}</div>
+          <div>{passenger.phone}</div>
+          <div>{passenger.isBoarded ? 'Đã lên xe ✓' : 'Chưa lên xe'}</div>
+        </div>
+      );
+    };
 
     return (
-      <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-        {allSeats.map((seatNum) => {
-          const passenger = seatMap[seatNum];
-          const isEmpty = !passenger;
-          const isBoarded = passenger?.isBoarded || false;
+      <div className="seat-map-wrapper">
+        {/* Driver indicator */}
+        <div className="text-center mb-3 text-sm text-gray-600 font-medium">
+          ↑ Đầu xe
+        </div>
 
-          return (
-            <Tooltip
-              key={seatNum}
-              title={
-                isEmpty ? (
-                  <div>
-                    <div><strong>Ghế {seatNum}</strong></div>
-                    <div>Ghế trống</div>
-                  </div>
-                ) : (
-                  <div>
-                    <div><strong>{passenger.fullName}</strong></div>
-                    <div>{passenger.phone}</div>
-                    <div>{isBoarded ? 'Đã lên xe ✓' : 'Chưa lên xe'}</div>
-                  </div>
-                )
-              }
-            >
-              <div
-                className={`
-                  border-2 rounded-lg p-3 text-center transition-all
-                  ${
-                    isEmpty
-                      ? 'bg-gray-50 border-gray-300 text-gray-400 cursor-default'
-                      : isBoarded
-                      ? 'bg-green-100 border-green-500 text-green-700 cursor-pointer hover:shadow-md'
-                      : 'bg-yellow-50 border-yellow-400 text-yellow-700 cursor-pointer hover:shadow-md'
-                  }
-                `}
-              >
-                <div className="text-xs font-semibold">{seatNum}</div>
-                {!isEmpty && (
-                  <>
-                    <div className="text-[10px] mt-1 truncate">
-                      {passenger.fullName.split(' ').pop()}
+        <div className="seat-map-container bg-gray-100 p-4 rounded-lg">
+          {layout.map((row, rowIndex) => (
+            <div key={rowIndex} className="seat-row">
+              {row.map((seatNumber, colIndex) => {
+                const seatClass = getSeatClass(seatNumber);
+                const seatContent = getSeatContent(seatNumber);
+                const seatTooltip = getSeatTooltip(seatNumber);
+
+                return (
+                  <Tooltip key={`${rowIndex}-${colIndex}`} title={seatTooltip}>
+                    <div className={`seat ${seatClass}`}>
+                      {seatContent}
                     </div>
-                    {isBoarded && (
-                      <CheckCircleOutlined className="text-xs mt-1" />
-                    )}
-                  </>
-                )}
-                {isEmpty && (
-                  <div className="text-[10px] mt-1">Trống</div>
-                )}
-              </div>
-            </Tooltip>
-          );
-        })}
+                  </Tooltip>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+
+        {/* Seat Map Styles */}
+        <style>{`
+          .seat-map-wrapper {
+            width: 100%;
+          }
+
+          .seat-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+          }
+
+          .seat {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            position: relative;
+            transition: all 0.2s ease;
+          }
+
+          .seat-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            width: 100%;
+            text-align: center;
+          }
+
+          .seat-number {
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+          }
+
+          .seat-label {
+            font-size: 9px;
+            font-weight: 500;
+            opacity: 0.9;
+            line-height: 1.1;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .seat-icon {
+            font-size: 10px;
+            margin-top: 1px;
+          }
+
+          .seat-empty {
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+            color: #9ca3af;
+          }
+
+          .seat-pending {
+            background-color: #fef3c7;
+            border-color: #fbbf24;
+            color: #92400e;
+          }
+
+          .seat-pending:hover {
+            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+          }
+
+          .seat-boarded {
+            background-color: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+          }
+
+          .seat-boarded:hover {
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+          }
+
+          .seat-driver {
+            background-color: #3b82f6;
+            border-color: #2563eb;
+            color: white;
+            font-size: 20px;
+          }
+
+          .seat-floor-separator {
+            width: 100%;
+            background-color: #fbbf24;
+            border-color: #f59e0b;
+            color: #78350f;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            padding: 4px 8px;
+          }
+
+          .seat-invisible {
+            visibility: hidden;
+            pointer-events: none;
+          }
+
+          @media (max-width: 768px) {
+            .seat {
+              width: 48px;
+              height: 48px;
+            }
+
+            .seat-number {
+              font-size: 11px;
+            }
+
+            .seat-label {
+              font-size: 8px;
+            }
+
+            .seat-row {
+              gap: 6px;
+              margin-bottom: 6px;
+            }
+          }
+
+          @media (max-width: 640px) {
+            .seat {
+              width: 44px;
+              height: 44px;
+            }
+
+            .seat-number {
+              font-size: 10px;
+            }
+
+            .seat-label {
+              font-size: 7px;
+            }
+
+            .seat-row {
+              gap: 4px;
+              margin-bottom: 4px;
+            }
+          }
+        `}</style>
       </div>
     );
   };
@@ -618,17 +809,23 @@ const ActiveTripPage = () => {
             Sơ đồ ghế xe
           </span>
         }>
-          <div className="mb-4 flex flex-wrap gap-4 text-sm">
+          <div className="mb-4 flex flex-wrap gap-3 text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-100 border-2 border-green-500 rounded"></div>
+              <div className="w-8 h-8 flex items-center justify-center bg-green-100 border-2 border-green-500 rounded text-xs font-semibold text-green-700">
+                ✓
+              </div>
               <span>Đã lên xe ({stats.boarded})</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-yellow-50 border-2 border-yellow-400 rounded"></div>
+              <div className="w-8 h-8 flex items-center justify-center bg-yellow-50 border-2 border-yellow-400 rounded text-xs font-semibold text-yellow-800">
+                A1
+              </div>
               <span>Chưa lên xe ({stats.notBoarded})</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-50 border-2 border-gray-300 rounded"></div>
+              <div className="w-8 h-8 flex items-center justify-center bg-gray-50 border-2 border-gray-300 rounded text-xs text-gray-400">
+                B1
+              </div>
               <span>Ghế trống ({(activeTrip?.bus?.seatCapacity || activeTrip?.totalSeats || 0) - stats.total})</span>
             </div>
           </div>
