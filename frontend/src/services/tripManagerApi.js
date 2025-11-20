@@ -3,10 +3,8 @@ import api from './api';
 /**
  * Trip Manager API Service
  * API calls for trip managers and drivers
+ * Now uses axios api instance instead of fetch for better error handling
  */
-
-// Base URL for trip manager endpoints
-const BASE_URL = '/trip-manager';
 
 export const tripManagerApi = {
   /**
@@ -15,22 +13,14 @@ export const tripManagerApi = {
    * @returns {Promise}
    */
   login: (credentials) =>
-    fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials),
-    }).then((res) => res.json()),
+    api.post('/trip-manager/login', credentials),
 
   /**
    * Get current trip manager info
    * @returns {Promise}
    */
   getMe: () =>
-    fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/me`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('trip_manager_token')}`,
-      },
-    }).then((res) => res.json()),
+    api.get('/trip-manager/me'),
 
   /**
    * Get assigned trips
@@ -38,14 +28,7 @@ export const tripManagerApi = {
    * @returns {Promise}
    */
   getAssignedTrips: (params = {}) =>
-    fetch(
-      `${import.meta.env.VITE_API_URL}${BASE_URL}/trips?${new URLSearchParams(params)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('trip_manager_token')}`,
-        },
-      }
-    ).then((res) => res.json()),
+    api.get('/trip-manager/trips', { params }),
 
   /**
    * Get trip details with passengers
@@ -53,11 +36,7 @@ export const tripManagerApi = {
    * @returns {Promise}
    */
   getTripDetails: (tripId) =>
-    fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/trips/${tripId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('trip_manager_token')}`,
-      },
-    }).then((res) => res.json()),
+    api.get(`/trip-manager/trips/${tripId}`),
 
   /**
    * Get trip passengers
@@ -65,11 +44,7 @@ export const tripManagerApi = {
    * @returns {Promise}
    */
   getTripPassengers: (tripId) =>
-    fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/trips/${tripId}/passengers`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('trip_manager_token')}`,
-      },
-    }).then((res) => res.json()),
+    api.get(`/trip-manager/trips/${tripId}/passengers`),
 
   /**
    * Update trip status (UC-21)
@@ -78,14 +53,7 @@ export const tripManagerApi = {
    * @returns {Promise}
    */
   updateTripStatus: (tripId, data) =>
-    fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/trips/${tripId}/status`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('trip_manager_token')}`,
-      },
-      body: JSON.stringify(data),
-    }).then((res) => res.json()),
+    api.put(`/trip-manager/trips/${tripId}/status`, data),
 
   /**
    * Start trip (legacy - use updateTripStatus instead)
@@ -93,12 +61,7 @@ export const tripManagerApi = {
    * @returns {Promise}
    */
   startTrip: (tripId) =>
-    fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/trips/${tripId}/start`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('trip_manager_token')}`,
-      },
-    }).then((res) => res.json()),
+    api.post(`/trip-manager/trips/${tripId}/start`),
 
   /**
    * Complete trip (legacy - use updateTripStatus instead)
@@ -106,12 +69,7 @@ export const tripManagerApi = {
    * @returns {Promise}
    */
   completeTrip: (tripId) =>
-    fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/trips/${tripId}/complete`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('trip_manager_token')}`,
-      },
-    }).then((res) => res.json()),
+    api.post(`/trip-manager/trips/${tripId}/complete`),
 
   /**
    * Verify ticket QR code
@@ -120,14 +78,7 @@ export const tripManagerApi = {
    * @returns {Promise}
    */
   verifyTicketQR: (tripId, data) =>
-    fetch(`${import.meta.env.VITE_API_URL}${BASE_URL}/trips/${tripId}/verify-ticket`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('trip_manager_token')}`,
-      },
-      body: JSON.stringify(data),
-    }).then((res) => res.json()),
+    api.post(`/trip-manager/trips/${tripId}/verify-ticket`, data),
 };
 
 export default tripManagerApi;
