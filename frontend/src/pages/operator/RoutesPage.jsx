@@ -424,7 +424,7 @@ const RoutesPage = () => {
                         <Input placeholder="Ví dụ: KM 50 QL1A, Dầu Giây, Đồng Nai" />
                       </Form.Item>
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       <Form.Item
                         {...restField}
                         name={[name, 'order']}
