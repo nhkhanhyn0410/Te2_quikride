@@ -58,9 +58,13 @@ exports.login = async (req, res, next) => {
         userId: employee._id,
         role: employee.role, // 'trip_manager' or 'driver'
         operatorId: employee.operatorId,
+        type: 'access', // Required by auth middleware
       },
       process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
+      {
+        expiresIn: '7d',
+        issuer: 'quikride'
+      }
     );
 
     // Remove password from response
