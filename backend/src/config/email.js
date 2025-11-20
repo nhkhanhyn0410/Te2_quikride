@@ -214,13 +214,10 @@ const emailTemplates = {
             <div style="background: white; display: inline-block; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 10px 0;">
               <img src="${ticketData.qrCodeImage}" alt="QR Code" style="width: 200px; height: 200px;" />
             </div>
-          </div>
-
-          <!-- Download Button -->
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${ticketData.ticketUrl}" style="display: inline-block; background: #0ea5e9; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
-              📥 Tải vé PDF
-            </a>
+            <p style="color: #64748b; font-size: 13px; margin-top: 15px;">
+              💡 <em>Bạn cũng có thể xem vé trực tuyến tại</em>
+              <a href="${ticketData.ticketUrl}" style="color: #0ea5e9; text-decoration: none; font-weight: bold;">quikride.com</a>
+            </p>
           </div>
 
           <!-- Important Notes -->
@@ -228,7 +225,7 @@ const emailTemplates = {
             <h4 style="color: #92400e; margin-top: 0; font-size: 14px;">⚠️ LƯU Ý QUAN TRỌNG:</h4>
             <ul style="color: #78350f; font-size: 13px; margin: 10px 0; padding-left: 20px;">
               <li style="margin: 5px 0;">Vui lòng có mặt trước 15 phút so với giờ khởi hành</li>
-              <li style="margin: 5px 0;">Xuất trình mã QR hoặc vé PDF khi lên xe</li>
+              <li style="margin: 5px 0;">Xuất trình mã QR này khi lên xe</li>
               <li style="margin: 5px 0;">Mang theo CMND/CCCD để đối chiếu</li>
               <li style="margin: 5px 0;">Liên hệ nhà xe nếu cần hỗ trợ</li>
             </ul>
