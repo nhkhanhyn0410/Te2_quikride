@@ -539,23 +539,60 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
     };
   }
 
+  // Get route to check total stops
+  await this.populate('routeId');
+  const totalStops = this.routeId?.stops?.length || 0;
+
+  // Update current status
+  const oldStatus = this.journey.currentStatus;
+
+  // Automatic progression logic
+  // currentStopIndex represents the last stop we've reached (0-based)
+  // -1 = haven't reached any stop yet (at origin or on the way to first stop)
+  // 0 = reached stop 0 (first stop)
+  // 1 = reached stop 1 (second stop), etc.
+  let newStopIndex = this.journey.currentStopIndex;
+
+  if (status === 'at_stop') {
+    // When arriving at a stop, update to that stop's index (0-based)
+    if (stopIndex !== undefined) {
+      // stopIndex from UI is 1-based, convert to 0-based
+      newStopIndex = stopIndex - 1;
+    }
+  } else if (status === 'in_transit') {
+    // When changing from checking_tickets to in_transit (starting journey)
+    if (oldStatus === 'checking_tickets') {
+      // Start heading to first stop (still at origin, so index = -1)
+      newStopIndex = -1;
+    }
+    // When changing from at_stop to in_transit (leaving a stop)
+    else if (oldStatus === 'at_stop') {
+      // Check if we're leaving the last stop
+      const currentStop = this.journey.currentStopIndex;
+      if (currentStop >= totalStops - 1) {
+        // Just left the last stop, heading to destination
+        // Auto-complete the journey
+        this.journey.currentStatus = 'completed';
+        this.journey.actualArrivalTime = new Date();
+        this.status = 'completed';
+        newStopIndex = totalStops; // Past all stops
+      }
+      // Otherwise keep the same stopIndex (we're between stops)
+    }
+  }
+
   // Create status history entry
   const historyEntry = {
     status,
-    stopIndex: stopIndex !== undefined ? stopIndex : this.journey.currentStopIndex,
+    stopIndex: newStopIndex,
     timestamp: new Date(),
     location,
     notes,
     updatedBy,
   };
 
-  // Update current status
-  const oldStatus = this.journey.currentStatus;
   this.journey.currentStatus = status;
-
-  if (stopIndex !== undefined) {
-    this.journey.currentStopIndex = stopIndex;
-  }
+  this.journey.currentStopIndex = newStopIndex;
 
   // Update actual times
   if (status === 'in_transit' && !this.journey.actualDepartureTime) {
@@ -579,7 +616,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
   return {
     success: true,
     oldStatus,
-    newStatus: status,
+    newStatus: this.journey.currentStatus,
     currentStop: this.journey.currentStopIndex,
   };
 };

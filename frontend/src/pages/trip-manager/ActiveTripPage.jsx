@@ -83,6 +83,21 @@ const ActiveTripPage = () => {
     }
   }, [hasActiveTrip, navigate]);
 
+  // Fetch trip details to get full bus info including seatLayout
+  const fetchTripDetails = async () => {
+    if (!activeTrip?._id) return;
+
+    try {
+      const response = await tripManagerApi.getTripDetails(activeTrip._id);
+      if (response.success && response.data.trip) {
+        // Update active trip in store with full details
+        updateTrip(response.data.trip);
+      }
+    } catch (error) {
+      console.error('Fetch trip details error:', error);
+    }
+  };
+
   // Fetch passengers data
   const fetchPassengers = async () => {
     if (!activeTrip?._id) return;
@@ -127,11 +142,13 @@ const ActiveTripPage = () => {
   };
 
   useEffect(() => {
+    fetchTripDetails();
     fetchPassengers();
     fetchJourneyDetails();
 
     // Auto refresh every 30 seconds
     const interval = setInterval(() => {
+      fetchTripDetails();
       fetchPassengers();
       fetchJourneyDetails();
     }, 30000);
@@ -558,16 +575,18 @@ const ActiveTripPage = () => {
       );
     }
 
-    const currentStopIndex = journey.currentStopIndex || -1;
+    const currentStopIndex = journey.currentStopIndex ?? -1;
+    const currentStatus = journey.currentStatus || 'preparing';
 
     // Build timeline items: Origin -> Stops -> Destination
     const timelineItems = [];
 
-    // Origin
+    // Origin - passed if we've left (in_transit with index >= -1 or reached any stop)
+    const hasLeftOrigin = currentStatus === 'in_transit' || currentStopIndex >= 0;
     timelineItems.push({
       key: 'origin',
-      dot: currentStopIndex >= 0 ? <CheckOutlined /> : <HomeOutlined />,
-      color: currentStopIndex >= 0 ? 'green' : 'blue',
+      dot: hasLeftOrigin ? <CheckOutlined /> : <HomeOutlined />,
+      color: hasLeftOrigin ? 'green' : 'blue',
       children: (
         <div>
           <div className="font-semibold">Điểm xuất phát</div>
@@ -586,22 +605,35 @@ const ActiveTripPage = () => {
     // Stops
     stops.forEach((stop, index) => {
       const stopNumber = index + 1;
-      const isPassed = currentStopIndex > stopNumber;
-      const isCurrent = currentStopIndex === stopNumber;
+      // Stop status logic:
+      // - Passed: if currentStopIndex > index (we've been to this stop and left)
+      // - Current: if currentStopIndex === index AND status === 'at_stop' (currently at this stop)
+      //            OR if currentStopIndex === index - 1 AND status === 'in_transit' (heading to this stop)
+      const isPassed = currentStopIndex > index;
+      const isAtThisStop = currentStopIndex === index && currentStatus === 'at_stop';
+      const isHeadingToThisStop = currentStopIndex === index - 1 && currentStatus === 'in_transit';
+      const isCurrent = isAtThisStop || isHeadingToThisStop;
+
       const estimatedTime = dayjs(activeTrip.departureTime).add(
         stop.estimatedArrivalMinutes,
         'minute'
       );
 
+      let statusText = '';
+      if (isPassed) statusText = 'Đã qua';
+      else if (isAtThisStop) statusText = 'Đang tại đây';
+      else if (isHeadingToThisStop) statusText = 'Đang đến';
+
       timelineItems.push({
         key: `stop-${stopNumber}`,
-        dot: isPassed ? <CheckOutlined /> : isCurrent ? <LoadingOutlined /> : <EnvironmentOutlined />,
+        dot: isPassed ? <CheckOutlined /> : isCurrent ? <LoadingOutlined spin /> : <EnvironmentOutlined />,
         color: isPassed ? 'green' : isCurrent ? 'blue' : 'gray',
         children: (
           <div>
             <div className="font-semibold">
               Điểm dừng {stopNumber}: {stop.name}
-              {isCurrent && <Badge status="processing" className="ml-2" />}
+              {isCurrent && <Badge status="processing" text={statusText} className="ml-2" />}
+              {isPassed && <Badge status="success" text={statusText} className="ml-2" />}
             </div>
             <div className="text-sm text-gray-600">{stop.address}</div>
             <div className="text-xs text-gray-500">
@@ -941,8 +973,29 @@ const ActiveTripPage = () => {
         okText="Cập nhật"
         cancelText="Hủy"
         okButtonProps={{ loading }}
-        width={600}
+        width={700}
       >
+        <Alert
+          message="Hướng dẫn cập nhật trạng thái"
+          description={
+            <div className="text-sm">
+              <p className="mb-2"><strong>Quy trình cập nhật:</strong></p>
+              <ol className="list-decimal ml-4 space-y-1">
+                <li><strong>Chuẩn bị khởi hành</strong> → Xe đang chuẩn bị tại bến</li>
+                <li><strong>Đang soát vé</strong> → Kiểm tra vé hành khách trước khi xuất phát</li>
+                <li><strong>Đang di chuyển</strong> → Xe đã khởi hành và đang di chuyển (tự động chuyển đến điểm dừng 1)</li>
+                <li><strong>Tại điểm dừng</strong> → Chọn điểm dừng đã đến</li>
+                <li><strong>Đang di chuyển</strong> → Rời điểm dừng, tiếp tục hành trình (tự động chuyển đến điểm dừng tiếp theo)</li>
+                <li>Lặp lại bước 4-5 cho các điểm dừng tiếp theo</li>
+                <li>Sau điểm dừng cuối cùng, khi chọn "Đang di chuyển" sẽ <strong>tự động hoàn thành</strong> chuyến đi</li>
+              </ol>
+            </div>
+          }
+          type="info"
+          showIcon
+          className="mb-4"
+        />
+
         <Form
           form={statusForm}
           layout="vertical"
@@ -955,11 +1008,11 @@ const ActiveTripPage = () => {
             initialValue={currentStatus}
           >
             <Select size="large">
-              <Select.Option value="preparing">Chuẩn bị khởi hành</Select.Option>
-              <Select.Option value="checking_tickets">Đang soát vé</Select.Option>
-              <Select.Option value="in_transit">Đang di chuyển</Select.Option>
-              <Select.Option value="at_stop">Tại điểm dừng</Select.Option>
-              <Select.Option value="completed">Hoàn thành</Select.Option>
+              <Select.Option value="preparing">🚏 Chuẩn bị khởi hành</Select.Option>
+              <Select.Option value="checking_tickets">🎫 Đang soát vé</Select.Option>
+              <Select.Option value="in_transit">🚌 Đang di chuyển</Select.Option>
+              <Select.Option value="at_stop">📍 Tại điểm dừng</Select.Option>
+              <Select.Option value="completed">✅ Hoàn thành</Select.Option>
             </Select>
           </Form.Item>
 
