@@ -67,7 +67,12 @@ class BusService {
 
       // Recalculate totalSeats from layout to ensure accuracy
       if (layout) {
-        busData.seatLayout.totalSeats = this.calculateTotalSeats(layout);
+        const originalSeats = busData.seatLayout.totalSeats;
+        const recalculatedSeats = this.calculateTotalSeats(layout);
+        console.log('🔍 CREATE BUS - Original totalSeats:', originalSeats);
+        console.log('🔍 CREATE BUS - Recalculated totalSeats:', recalculatedSeats);
+        console.log('🔍 CREATE BUS - Layout dimensions:', layout.length, 'x', layout[0]?.length);
+        busData.seatLayout.totalSeats = recalculatedSeats;
       }
 
       // Validate layout dimensions match rows and columns
@@ -217,7 +222,17 @@ class BusService {
 
       if (layout) {
         // Recalculate totalSeats from layout to ensure accuracy
-        updateData.seatLayout.totalSeats = this.calculateTotalSeats(layout);
+        const originalSeats = updateData.seatLayout.totalSeats;
+        const recalculatedSeats = this.calculateTotalSeats(layout);
+        console.log('🔍 UPDATE BUS - Bus ID:', busId);
+        console.log('🔍 UPDATE BUS - Original totalSeats:', originalSeats);
+        console.log('🔍 UPDATE BUS - Recalculated totalSeats:', recalculatedSeats);
+        console.log('🔍 UPDATE BUS - Layout dimensions:', layout.length, 'x', layout[0]?.length);
+
+        // Sample first few rows to see what's in the layout
+        console.log('🔍 UPDATE BUS - First 3 rows of layout:', JSON.stringify(layout.slice(0, 3)));
+
+        updateData.seatLayout.totalSeats = recalculatedSeats;
 
         // Validate layout dimensions match rows and columns
         const rowCount = rows || bus.seatLayout.rows;
@@ -262,6 +277,9 @@ class BusService {
     // Update bus
     Object.assign(bus, updateData);
     await bus.save();
+
+    console.log('✅ UPDATE BUS - Saved totalSeats:', bus.seatLayout.totalSeats);
+    console.log('✅ UPDATE BUS - Bus object saved successfully');
 
     return bus;
   }

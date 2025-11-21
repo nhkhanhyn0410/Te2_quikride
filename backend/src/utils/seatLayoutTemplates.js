@@ -267,8 +267,11 @@ const buildCustomTemplate = (options) => {
   switch (busType) {
     case 'seater':
       if (pattern === 'aisle') {
-        layout = generateAisleLayout(rows, false);
-        totalSeats = rows * 4; // 2-aisle-2
+        const aisleConfig = generateAisleLayout(rows * 4, false);
+        layout = aisleConfig.layout;
+        totalSeats = aisleConfig.totalSeats;
+        actualRows = aisleConfig.rows;
+        actualColumns = aisleConfig.columns;
       } else {
         layout = generateSeatLayout(rows, columns, null, emptyPositions);
         totalSeats = rows * columns - emptyPositions.length;
@@ -285,8 +288,11 @@ const buildCustomTemplate = (options) => {
       break;
 
     case 'limousine':
-      layout = generateLimousineLayout(rows, pattern);
-      totalSeats = pattern === 'vip' ? rows * 2 : rows * 3;
+      const limousineConfig = generateLimousineLayout(rows, pattern);
+      layout = limousineConfig.layout;
+      totalSeats = limousineConfig.totalSeats;
+      actualRows = limousineConfig.rows;
+      actualColumns = limousineConfig.columns;
       break;
 
     case 'double_decker':
