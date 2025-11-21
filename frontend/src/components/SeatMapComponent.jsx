@@ -69,6 +69,11 @@ const SeatMapComponent = ({
       return SEAT_TYPES.AISLE;
     }
 
+    // Check for AISLE (case-insensitive)
+    if (seatNumber.toUpperCase() === 'AISLE' || seatNumber.toLowerCase().includes('aisle')) {
+      return SEAT_TYPES.AISLE;
+    }
+
     if (seatNumber === 'DRIVER' || seatNumber === '🚗' || seatNumber.includes('Driver')) {
       return SEAT_TYPES.DRIVER;
     }
@@ -263,6 +268,17 @@ const SeatMapComponent = ({
 
                 // Show price below seat number for regular seats
                 const showSeatPrice = showPrice && seatPrice > 0 && seat.type === SEAT_TYPES.SEAT;
+
+                // For AISLE (empty) seats, render an empty placeholder div instead of button
+                if (!seat || seat.type === SEAT_TYPES.AISLE) {
+                  return (
+                    <div
+                      key={`${rowIndex}-${colIndex}`}
+                      className="seat seat-invisible"
+                      aria-hidden="true"
+                    />
+                  );
+                }
 
                 return (
                   <button
