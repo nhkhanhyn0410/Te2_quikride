@@ -570,26 +570,42 @@ class TripService {
     }
 
     // Filter by cities (after populate)
+    // Search in both province and city fields for flexibility
     if (fromCity && toCity) {
       trips = trips.filter(
-        (trip) =>
-          trip.routeId &&
-          trip.routeId.origin.city.toLowerCase().includes(fromCity.toLowerCase()) &&
-          trip.routeId.destination.city.toLowerCase().includes(toCity.toLowerCase())
+        (trip) => {
+          if (!trip.routeId) return false;
+
+          const fromMatch =
+            trip.routeId.origin.province?.toLowerCase().includes(fromCity.toLowerCase()) ||
+            trip.routeId.origin.city?.toLowerCase().includes(fromCity.toLowerCase());
+
+          const toMatch =
+            trip.routeId.destination.province?.toLowerCase().includes(toCity.toLowerCase()) ||
+            trip.routeId.destination.city?.toLowerCase().includes(toCity.toLowerCase());
+
+          return fromMatch && toMatch;
+        }
       );
       console.log(`🏙️  After city filter (${fromCity} → ${toCity}): ${trips.length} trips`);
     } else if (fromCity) {
       trips = trips.filter(
-        (trip) =>
-          trip.routeId &&
-          trip.routeId.origin.city.toLowerCase().includes(fromCity.toLowerCase())
+        (trip) => {
+          if (!trip.routeId) return false;
+
+          return trip.routeId.origin.province?.toLowerCase().includes(fromCity.toLowerCase()) ||
+                 trip.routeId.origin.city?.toLowerCase().includes(fromCity.toLowerCase());
+        }
       );
       console.log(`🏙️  After fromCity filter (${fromCity}): ${trips.length} trips`);
     } else if (toCity) {
       trips = trips.filter(
-        (trip) =>
-          trip.routeId &&
-          trip.routeId.destination.city.toLowerCase().includes(toCity.toLowerCase())
+        (trip) => {
+          if (!trip.routeId) return false;
+
+          return trip.routeId.destination.province?.toLowerCase().includes(toCity.toLowerCase()) ||
+                 trip.routeId.destination.city?.toLowerCase().includes(toCity.toLowerCase());
+        }
       );
       console.log(`🏙️  After toCity filter (${toCity}): ${trips.length} trips`);
     }
