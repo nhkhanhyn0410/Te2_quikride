@@ -12,6 +12,30 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
   const [editMode, setEditMode] = useState(false);
   const [selectedTool, setSelectedTool] = useState('aisle'); // 'seat', 'aisle', 'empty'
 
+  // Calculate total seats from layout - MUST be defined before useEffect
+  const calculateTotalSeats = useCallback((layout) => {
+    if (!layout || !Array.isArray(layout)) return 0;
+
+    let count = 0;
+    layout.forEach(row => {
+      if (Array.isArray(row)) {
+        row.forEach(seat => {
+          // Count only actual seats (not empty, not aisle, not driver, not floor marker)
+          if (seat &&
+              seat !== '' &&
+              seat !== 'DRIVER' &&
+              seat !== 'FLOOR_2' &&
+              seat !== '🚗' &&
+              seat.toUpperCase() !== 'AISLE' &&
+              !seat.toLowerCase().includes('aisle')) {
+            count++;
+          }
+        });
+      }
+    });
+    return count;
+  }, []);
+
   // Reset states when busType changes
   useEffect(() => {
     if (busType) {
@@ -121,30 +145,6 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
     setEditMode(false);
     onSave(null);
   }, [onSave]);
-
-  // Calculate total seats from layout
-  const calculateTotalSeats = useCallback((layout) => {
-    if (!layout || !Array.isArray(layout)) return 0;
-
-    let count = 0;
-    layout.forEach(row => {
-      if (Array.isArray(row)) {
-        row.forEach(seat => {
-          // Count only actual seats (not empty, not aisle, not driver, not floor marker)
-          if (seat &&
-              seat !== '' &&
-              seat !== 'DRIVER' &&
-              seat !== 'FLOOR_2' &&
-              seat !== '🚗' &&
-              seat.toUpperCase() !== 'AISLE' &&
-              !seat.toLowerCase().includes('aisle')) {
-            count++;
-          }
-        });
-      }
-    });
-    return count;
-  }, []);
 
   // Handle seat click in edit mode
   const handleSeatClick = useCallback((rowIndex, seatIndex) => {
