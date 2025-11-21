@@ -26,7 +26,13 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
   useEffect(() => {
     // Set initial layout if provided
     if (initialLayout) {
-      setCustomLayout(initialLayout);
+      // Recalculate totalSeats from layout to ensure accuracy
+      const correctTotalSeats = calculateTotalSeats(initialLayout.layout);
+
+      setCustomLayout({
+        ...initialLayout,
+        totalSeats: correctTotalSeats, // Use recalculated value
+      });
 
       // Calculate actual rows per floor based on total rows and floors
       // For 1 floor: total rows = actual rows + 1 (driver row)
@@ -44,7 +50,7 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
       setColumns(initialLayout.columns || 4);
       setFloors(initialLayout.floors || 1);
     }
-  }, [initialLayout]);
+  }, [initialLayout, calculateTotalSeats]);
 
   const handleBuildCustom = async () => {
     if (!busType) {
@@ -78,7 +84,14 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
       console.log('Build custom layout response:', response);
 
       if (response.status === 'success' && response.data?.seatLayout) {
-        setCustomLayout(response.data.seatLayout);
+        const receivedLayout = response.data.seatLayout;
+        // Recalculate totalSeats from layout to ensure accuracy
+        const correctTotalSeats = calculateTotalSeats(receivedLayout.layout);
+
+        setCustomLayout({
+          ...receivedLayout,
+          totalSeats: correctTotalSeats, // Use recalculated value
+        });
         message.success('Đã tạo sơ đồ tùy chỉnh');
       } else {
         message.error('Không thể tạo sơ đồ');
@@ -123,6 +136,7 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
               seat !== 'DRIVER' &&
               seat !== 'FLOOR_2' &&
               seat !== '🚗' &&
+              seat.toUpperCase() !== 'AISLE' &&
               !seat.toLowerCase().includes('aisle')) {
             count++;
           }
