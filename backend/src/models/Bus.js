@@ -152,16 +152,24 @@ BusSchema.virtual('isAvailable').get(function () {
 // Pre-save middleware to calculate total seats from layout
 BusSchema.pre('save', function (next) {
   if (this.seatLayout && this.seatLayout.layout) {
-    // Count non-empty seats in the layout
+    // Count only actual seats (excluding driver, aisle, floor markers, empty)
     let totalSeats = 0;
     for (const row of this.seatLayout.layout) {
       for (const seat of row) {
-        if (seat && seat.trim() !== '') {
+        // Count only actual seats (not empty, not aisle, not driver, not floor marker)
+        if (seat &&
+            seat !== '' &&
+            seat !== 'DRIVER' &&
+            seat !== 'FLOOR_2' &&
+            seat !== '🚗' &&
+            seat.toUpperCase() !== 'AISLE' &&
+            !seat.toLowerCase().includes('aisle')) {
           totalSeats++;
         }
       }
     }
     this.seatLayout.totalSeats = totalSeats;
+    console.log('💾 PRE-SAVE MIDDLEWARE - Calculated totalSeats:', totalSeats);
   }
   next();
 });
