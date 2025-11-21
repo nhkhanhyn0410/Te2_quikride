@@ -287,6 +287,7 @@ class TripManagerController {
               busType: trip.busId.busType,
               licensePlate: trip.busId.licensePlate,
               capacity: trip.busId.capacity,
+              seatLayout: trip.busId.seatLayout,
             },
             operator: trip.operatorId,
           },

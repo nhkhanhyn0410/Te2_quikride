@@ -404,7 +404,7 @@ class EmployeeService {
     // Get trips with populated data
     const trips = await Trip.find(query)
       .populate('routeId', 'routeName departureCity arrivalCity')
-      .populate('busId', 'busNumber plateNumber seatCapacity')
+      .populate('busId', 'busNumber plateNumber seatCapacity seatLayout')
       .populate('driverId', 'fullName phone employeeCode')
       .populate('tripManagerId', 'fullName phone employeeCode')
       .populate('operatorId', 'companyName')
