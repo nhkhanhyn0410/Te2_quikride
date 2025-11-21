@@ -42,7 +42,6 @@ import dayjs from 'dayjs';
 import useActiveTripStore from '../../store/activeTripStore';
 import useAuthStore from '../../store/authStore';
 import tripManagerApi from '../../services/tripManagerApi';
-import { getTripPassengers } from '../../services/ticketApi';
 
 const { TextArea } = Input;
 
@@ -83,41 +82,34 @@ const ActiveTripPage = () => {
     }
   }, [hasActiveTrip, navigate]);
 
-  // Fetch trip details to get full bus info including seatLayout
+  // Fetch trip details to get full bus info including seatLayout and passengers
   const fetchTripDetails = async () => {
     if (!activeTrip?._id) return;
 
     try {
       const response = await tripManagerApi.getTripDetails(activeTrip._id);
-      if (response.success && response.data.trip) {
+      if (response.success && response.data) {
         // Update active trip in store with full details
-        updateTrip(response.data.trip);
+        if (response.data.trip) {
+          updateTrip(response.data.trip);
+        }
+
+        // Update passengers from trip details response
+        if (response.data.passengers) {
+          const passengersData = response.data.passengers || [];
+          setPassengers(passengersData);
+
+          // Calculate stats
+          const boardedCount = passengersData.filter((p) => p.isUsed || p.isBoarded).length;
+          setStats({
+            total: passengersData.length,
+            boarded: boardedCount,
+            notBoarded: passengersData.length - boardedCount,
+          });
+        }
       }
     } catch (error) {
       console.error('Fetch trip details error:', error);
-    }
-  };
-
-  // Fetch passengers data
-  const fetchPassengers = async () => {
-    if (!activeTrip?._id) return;
-
-    try {
-      const response = await getTripPassengers(activeTrip._id);
-      if (response.status === 'success') {
-        const passengersData = response.data.passengers || [];
-        setPassengers(passengersData);
-
-        // Calculate stats
-        const boardedCount = passengersData.filter((p) => p.isUsed || p.isBoarded).length;
-        setStats({
-          total: passengersData.length,
-          boarded: boardedCount,
-          notBoarded: passengersData.length - boardedCount,
-        });
-      }
-    } catch (error) {
-      console.error('Fetch passengers error:', error);
     }
   };
 
@@ -143,13 +135,11 @@ const ActiveTripPage = () => {
 
   useEffect(() => {
     fetchTripDetails();
-    fetchPassengers();
     fetchJourneyDetails();
 
     // Auto refresh every 30 seconds
     const interval = setInterval(() => {
       fetchTripDetails();
-      fetchPassengers();
       fetchJourneyDetails();
     }, 30000);
 
@@ -182,6 +172,15 @@ const ActiveTripPage = () => {
   const handleCompleteTrip = async () => {
     try {
       setLoading(true);
+
+      // Check if already completed
+      if (activeTrip.status === 'completed') {
+        message.success('Chuyến xe đã hoàn thành!');
+        completeTrip(); // Clear active trip
+        navigate('/trip-manager/dashboard');
+        return;
+      }
+
       const response = await tripManagerApi.updateTripStatus(activeTrip._id, {
         status: 'completed',
       });
@@ -414,10 +413,10 @@ const ActiveTripPage = () => {
           }
 
           .seat {
-            width: 56px;
-            height: 56px;
-            border-radius: 8px;
-            border: 2px solid transparent;
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            border: 2.5px solid transparent;
             font-size: 11px;
             font-weight: 600;
             display: flex;
@@ -425,7 +424,14 @@ const ActiveTripPage = () => {
             justify-content: center;
             padding: 4px;
             position: relative;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+
+          .seat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
           }
 
           .seat-content {
@@ -433,21 +439,20 @@ const ActiveTripPage = () => {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 2px;
+            gap: 3px;
             width: 100%;
             text-align: center;
           }
 
           .seat-number {
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 13px;
+            font-weight: 800;
             line-height: 1;
           }
 
           .seat-label {
             font-size: 9px;
-            font-weight: 500;
-            opacity: 0.9;
+            font-weight: 600;
             line-height: 1.1;
             max-width: 100%;
             overflow: hidden;
@@ -456,52 +461,78 @@ const ActiveTripPage = () => {
           }
 
           .seat-icon {
-            font-size: 10px;
-            margin-top: 1px;
+            font-size: 12px;
+            margin-top: 2px;
           }
 
+          /* Ghế trống - Xám sáng */
           .seat-empty {
-            background-color: #f3f4f6;
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
             border-color: #d1d5db;
-            color: #9ca3af;
+            color: #6b7280;
           }
 
+          .seat-empty:hover {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+          }
+
+          /* Đã đặt nhưng chưa lên xe - Cam sáng */
           .seat-pending {
-            background-color: #fef3c7;
-            border-color: #fbbf24;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #f59e0b;
             color: #92400e;
+            animation: pulse-pending 2s ease-in-out infinite;
+          }
+
+          @keyframes pulse-pending {
+            0%, 100% {
+              box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+            }
+            50% {
+              box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+            }
           }
 
           .seat-pending:hover {
-            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+            background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
           }
 
+          /* Đã lên xe - Xanh lá đậm */
           .seat-boarded {
-            background-color: #d1fae5;
-            border-color: #10b981;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-color: #059669;
             color: #065f46;
           }
 
           .seat-boarded:hover {
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
           }
 
+          /* Ghế lái - Xanh dương */
           .seat-driver {
-            background-color: #3b82f6;
-            border-color: #2563eb;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-color: #1d4ed8;
             color: white;
-            font-size: 20px;
+            font-size: 24px;
           }
 
+          .seat-driver:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+          }
+
+          /* Dấu phân tách tầng */
           .seat-floor-separator {
             width: 100%;
-            background-color: #fbbf24;
-            border-color: #f59e0b;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-color: #d97706;
             color: #78350f;
             font-size: 11px;
             font-weight: 700;
             text-align: center;
-            padding: 4px 8px;
+            padding: 6px 8px;
           }
 
           .seat-invisible {
@@ -841,24 +872,57 @@ const ActiveTripPage = () => {
             Sơ đồ ghế xe
           </span>
         }>
-          <div className="mb-4 flex flex-wrap gap-3 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 flex items-center justify-center bg-green-100 border-2 border-green-500 rounded text-xs font-semibold text-green-700">
-                ✓
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="text-sm font-semibold text-gray-700 mb-3">Chú thích màu sắc:</div>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-10 h-10 flex items-center justify-center rounded-lg text-xs font-bold shadow-md"
+                  style={{
+                    background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+                    border: '2.5px solid #059669',
+                    color: '#065f46'
+                  }}
+                >
+                  ✓
+                </div>
+                <div>
+                  <div className="font-semibold text-sm text-gray-800">Đã lên xe</div>
+                  <div className="text-xs text-gray-500">({stats.boarded} người)</div>
+                </div>
               </div>
-              <span>Đã lên xe ({stats.boarded})</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 flex items-center justify-center bg-yellow-50 border-2 border-yellow-400 rounded text-xs font-semibold text-yellow-800">
-                A1
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-10 h-10 flex items-center justify-center rounded-lg text-xs font-bold shadow-md"
+                  style={{
+                    background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                    border: '2.5px solid #f59e0b',
+                    color: '#92400e'
+                  }}
+                >
+                  A1
+                </div>
+                <div>
+                  <div className="font-semibold text-sm text-gray-800">Đã đặt chưa lên</div>
+                  <div className="text-xs text-gray-500">({stats.notBoarded} người)</div>
+                </div>
               </div>
-              <span>Chưa lên xe ({stats.notBoarded})</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 flex items-center justify-center bg-gray-50 border-2 border-gray-300 rounded text-xs text-gray-400">
-                B1
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-10 h-10 flex items-center justify-center rounded-lg text-xs shadow-md"
+                  style={{
+                    background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)',
+                    border: '2.5px solid #d1d5db',
+                    color: '#6b7280'
+                  }}
+                >
+                  B1
+                </div>
+                <div>
+                  <div className="font-semibold text-sm text-gray-800">Ghế trống</div>
+                  <div className="text-xs text-gray-500">({(activeTrip?.bus?.seatLayout?.totalSeats || activeTrip?.bus?.seatCapacity || 0) - stats.total} ghế)</div>
+                </div>
               </div>
-              <span>Ghế trống ({(activeTrip?.bus?.seatCapacity || activeTrip?.totalSeats || 0) - stats.total})</span>
             </div>
           </div>
           {renderSeatMap()}
