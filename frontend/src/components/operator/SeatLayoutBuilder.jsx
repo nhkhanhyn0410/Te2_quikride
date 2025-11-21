@@ -27,8 +27,20 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
     // Set initial layout if provided
     if (initialLayout) {
       setCustomLayout(initialLayout);
-      // Also set the input values from initial layout
-      setRows(initialLayout.rows || 10);
+
+      // Calculate actual rows per floor based on total rows and floors
+      // For 1 floor: total rows = actual rows + 1 (driver row)
+      // For 2 floors: total rows = rowsPerFloor * 2 + 2 (driver + floor separator)
+      let actualRows = 10;
+      if (initialLayout.floors === 1) {
+        // Single floor: subtract driver row
+        actualRows = (initialLayout.rows || 11) - 1;
+      } else if (initialLayout.floors === 2) {
+        // Double floor: (total - 2) / 2
+        actualRows = Math.floor(((initialLayout.rows || 14) - 2) / 2);
+      }
+
+      setRows(actualRows);
       setColumns(initialLayout.columns || 4);
       setFloors(initialLayout.floors || 1);
     }
@@ -237,7 +249,10 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
         </div>
         <div className="mt-4 text-sm text-gray-600 space-y-1">
           <p className="font-semibold">Tổng số ghế: {layout.totalSeats}</p>
-          <p>Kích thước: {layout.rows} hàng × {layout.columns} cột</p>
+          <p>
+            Kích thước: {layout.rows} hàng tổng × {layout.columns} cột
+            {layout.floors > 1 && ` (${Math.floor((layout.rows - 2) / 2)} hàng/tầng)`}
+          </p>
           {layout.floors > 1 && <p>Số tầng: {layout.floors}</p>}
         </div>
 
@@ -287,7 +302,8 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block mb-1 text-sm font-medium">
-                Số Hàng: <span className="text-gray-500">(1-20)</span>
+                {floors === 2 ? 'Số Hàng (mỗi tầng)' : 'Số Hàng'}:{' '}
+                <span className="text-gray-500">(1-20)</span>
               </label>
               <InputNumber
                 min={1}
