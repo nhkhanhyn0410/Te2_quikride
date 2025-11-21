@@ -7,6 +7,34 @@ const BusOperator = require('../models/BusOperator');
  */
 class BusService {
   /**
+   * Calculate total seats from layout (excluding driver, aisle, floor markers)
+   * @param {Array} layout - 2D array of seat layout
+   * @returns {Number} Total number of actual seats
+   */
+  static calculateTotalSeats(layout) {
+    if (!layout || !Array.isArray(layout)) return 0;
+
+    let count = 0;
+    layout.forEach(row => {
+      if (Array.isArray(row)) {
+        row.forEach(seat => {
+          // Count only actual seats (not empty, not aisle, not driver, not floor marker)
+          if (seat &&
+              seat !== '' &&
+              seat !== 'DRIVER' &&
+              seat !== 'FLOOR_2' &&
+              seat !== '🚗' &&
+              seat.toUpperCase() !== 'AISLE' &&
+              !seat.toLowerCase().includes('aisle')) {
+            count++;
+          }
+        });
+      }
+    });
+    return count;
+  }
+
+  /**
    * Tạo xe mới
    * @param {String} operatorId - Operator ID
    * @param {Object} busData - Bus data
@@ -36,6 +64,11 @@ class BusService {
     // Validate seat layout
     if (busData.seatLayout) {
       const { floors, rows, columns, layout } = busData.seatLayout;
+
+      // Recalculate totalSeats from layout to ensure accuracy
+      if (layout) {
+        busData.seatLayout.totalSeats = this.calculateTotalSeats(layout);
+      }
 
       // Validate layout dimensions match rows and columns
       if (layout.length !== rows) {
@@ -183,6 +216,9 @@ class BusService {
       const { floors, rows, columns, layout } = updateData.seatLayout;
 
       if (layout) {
+        // Recalculate totalSeats from layout to ensure accuracy
+        updateData.seatLayout.totalSeats = this.calculateTotalSeats(layout);
+
         // Validate layout dimensions match rows and columns
         const rowCount = rows || bus.seatLayout.rows;
         const colCount = columns || bus.seatLayout.columns;
