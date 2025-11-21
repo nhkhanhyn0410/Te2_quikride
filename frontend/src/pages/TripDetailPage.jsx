@@ -271,7 +271,7 @@ const TripDetailPage = () => {
                         <Text strong>{point.name}</Text>
                         <div className="text-sm text-gray-500">{point.address}</div>
                       </div>
-                      <Text>{dayjs(point.time).format('HH:mm')}</Text>
+                      <Text>{dayjs(trip.departureTime).format('HH:mm')}</Text>
                     </div>
                   </Card>
                 ))}
@@ -295,7 +295,7 @@ const TripDetailPage = () => {
                         <Text strong>{point.name}</Text>
                         <div className="text-sm text-gray-500">{point.address}</div>
                       </div>
-                      <Text>{dayjs(point.time).format('HH:mm')}</Text>
+                      <Text>{dayjs(trip.arrivalTime).format('HH:mm')}</Text>
                     </div>
                   </Card>
                 ))}
