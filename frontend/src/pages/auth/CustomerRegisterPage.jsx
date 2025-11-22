@@ -128,12 +128,16 @@ const CustomerRegisterPage = () => {
               rules={[
                 { required: true, message: 'Vui lòng nhập mật khẩu!' },
                 { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' },
+                {
+                  pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                  message: 'Mật khẩu phải chứa ít nhất 1 chữ thường, 1 chữ HOA và 1 số!'
+                },
               ]}
               hasFeedback
             >
               <Input.Password
                 prefix={<LockOutlined className="text-gray-400" />}
-                placeholder="Nhập mật khẩu"
+                placeholder="Ví dụ: Password123"
               />
             </Form.Item>
 
