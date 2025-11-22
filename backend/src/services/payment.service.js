@@ -120,12 +120,49 @@ class PaymentService {
       };
       await payment.save();
 
+      // Get trip and update booked seats
+      const trip = await Trip.findById(booking.tripId);
+      if (!trip) {
+        throw new Error('Không tìm thấy chuyến xe');
+      }
+
+      // Add seats to trip's booked seats
+      const seatNumbers = booking.seats.map((s) => s.seatNumber);
+      for (const seat of booking.seats) {
+        trip.bookedSeats.push({
+          seatNumber: seat.seatNumber,
+          bookingId: booking._id,
+          passengerName: seat.passengerName,
+        });
+      }
+      trip.availableSeats -= seatNumbers.length;
+      await trip.save();
+
+      // Apply voucher if present
+      if (booking.voucherId) {
+        try {
+          const VoucherService = require('./voucher.service');
+          await VoucherService.applyToBooking(booking.voucherId);
+        } catch (error) {
+          console.error('Failed to apply voucher:', error.message);
+        }
+      }
+
       // Confirm booking immediately for cash payment
       booking.paymentStatus = 'pending'; // Will be marked as 'paid' when driver confirms cash received
       booking.paymentMethod = 'cash';
       booking.paymentId = payment._id;
-      booking.confirm(); // Confirm booking
+      booking.confirm(); // Confirm booking (sets status to 'confirmed', unsets hold)
       await booking.save();
+
+      // Release Redis locks if booking was held
+      if (booking.isHeld) {
+        try {
+          await SeatLockService.releaseSeats(booking.tripId, seatNumbers);
+        } catch (error) {
+          console.log('Note: Could not release seat locks (may have already expired):', error.message);
+        }
+      }
 
       // Generate digital ticket in background
       const TicketServiceClass = getTicketService();

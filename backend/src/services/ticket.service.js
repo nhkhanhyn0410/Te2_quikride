@@ -46,8 +46,16 @@ class TicketService {
         throw new Error('Không tìm thấy booking');
       }
 
-      if (booking.status !== 'confirmed' || booking.paymentStatus !== 'paid') {
-        throw new Error('Booking chưa được xác nhận hoặc chưa thanh toán');
+      // Check booking status
+      if (booking.status !== 'confirmed') {
+        throw new Error('Booking chưa được xác nhận');
+      }
+
+      // For cash payments, allow pending payment status (will be paid on boarding)
+      // For online payments, must be paid already
+      const isCashPayment = booking.paymentMethod === 'cash';
+      if (!isCashPayment && booking.paymentStatus !== 'paid') {
+        throw new Error('Booking chưa thanh toán');
       }
 
       // Get full trip details
