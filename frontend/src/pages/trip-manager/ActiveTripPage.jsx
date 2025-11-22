@@ -1042,19 +1042,17 @@ const ActiveTripPage = () => {
         width={700}
       >
         <Alert
-          message="Hướng dẫn cập nhật trạng thái"
+          message="Cập nhật trạng thái hành trình"
           description={
             <div className="text-sm">
-              <p className="mb-2"><strong>Quy trình cập nhật:</strong></p>
-              <ol className="list-decimal ml-4 space-y-1">
-                <li><strong>Chuẩn bị khởi hành</strong> → Xe đang chuẩn bị tại bến</li>
-                <li><strong>Đang soát vé</strong> → Kiểm tra vé hành khách trước khi xuất phát</li>
-                <li><strong>Đang di chuyển</strong> → Xe đã khởi hành và đang di chuyển (tự động chuyển đến điểm dừng 1)</li>
-                <li><strong>Tại điểm dừng</strong> → Chọn điểm dừng đã đến</li>
-                <li><strong>Đang di chuyển</strong> → Rời điểm dừng, tiếp tục hành trình (tự động chuyển đến điểm dừng tiếp theo)</li>
-                <li>Lặp lại bước 4-5 cho các điểm dừng tiếp theo</li>
-                <li>Sau điểm dừng cuối cùng, khi chọn "Đang di chuyển" sẽ <strong>tự động hoàn thành</strong> chuyến đi</li>
-              </ol>
+              <p className="mb-2"><strong>Hướng dẫn:</strong></p>
+              <ul className="list-disc ml-4 space-y-1">
+                <li><strong>Chuẩn bị khởi hành:</strong> Xe đang chuẩn bị tại bến</li>
+                <li><strong>Đang soát vé:</strong> Kiểm tra vé hành khách trước khi xuất phát</li>
+                <li><strong>Đang di chuyển:</strong> Xe đang lưu thông trên đường</li>
+                <li><strong>Tại điểm dừng:</strong> Xe đang dừng tại điểm dừng (chọn điểm dừng)</li>
+                <li><strong>Hoàn thành:</strong> Chuyến xe đã đến đích</li>
+              </ul>
             </div>
           }
           type="info"
