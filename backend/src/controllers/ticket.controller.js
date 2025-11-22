@@ -302,11 +302,11 @@ class TicketController {
       }
 
       const { tripId } = req.params;
-      const { qrCodeData } = req.body;
+      const { qrCodeData, confirmPayment } = req.body;
       // Support both regular users and trip managers
       const verifiedBy = req.tripManager?.id || req.user?.id;
 
-      const result = await TicketService.verifyTicketQR(qrCodeData, tripId, verifiedBy);
+      const result = await TicketService.verifyTicketQR(qrCodeData, tripId, verifiedBy, confirmPayment);
 
       if (result.success) {
         res.json({

@@ -81,9 +81,16 @@ class AuthService {
   static async register(userData) {
     const { email, phone, password, fullName } = userData;
 
+    console.log('=== REGISTRATION ATTEMPT ===');
+    console.log('Email:', email);
+    console.log('Phone:', phone);
+    console.log('Password length:', password ? password.length : 0);
+    console.log('Full name:', fullName);
+
     // Kiểm tra email hoặc phone đã tồn tại
     const existingUser = await User.findByEmailOrPhone(email || phone);
     if (existingUser) {
+      console.log('Existing user found:', existingUser.email, existingUser.phone);
       if (existingUser.email === email.toLowerCase()) {
         throw new Error('Email đã được sử dụng');
       }
@@ -92,6 +99,7 @@ class AuthService {
       }
     }
 
+    console.log('Creating new user...');
     // Tạo user mới
     const user = await User.create({
       email: email.toLowerCase(),
@@ -99,6 +107,9 @@ class AuthService {
       password, // Password sẽ được hash tự động trong pre-save hook
       fullName,
     });
+
+    console.log('User created successfully with ID:', user._id);
+    console.log('Password was hashed:', user.password ? user.password.substring(0, 20) + '...' : 'NONE');
 
     // Tạo email verification token
     const verificationToken = user.createEmailVerificationToken();
@@ -131,25 +142,41 @@ class AuthService {
    * @returns {Object} User và tokens
    */
   static async login(identifier, password, rememberMe = false) {
+    // Debug: Log login attempt
+    console.log('=== LOGIN ATTEMPT ===');
+    console.log('Identifier:', identifier);
+    console.log('Password provided:', password ? '***' : 'NO PASSWORD');
+
     // Tìm user và select password để so sánh
     const user = await User.findByEmailOrPhone(identifier).select('+password');
 
+    console.log('User found:', user ? `Yes (email: ${user.email}, phone: ${user.phone})` : 'NO');
+
     if (!user) {
+      console.log('ERROR: User not found');
       throw new Error('Email/Số điện thoại hoặc mật khẩu không đúng');
     }
 
     // Kiểm tra account status
     if (user.isBlocked) {
+      console.log('ERROR: User is blocked');
       throw new Error(`Tài khoản đã bị khóa. Lý do: ${user.blockedReason || 'Không rõ'}`);
     }
 
     if (!user.isActive) {
+      console.log('ERROR: User is not active');
       throw new Error('Tài khoản không hoạt động');
     }
 
+    console.log('User password hash exists:', !!user.password);
+    console.log('Comparing passwords...');
+
     // So sánh password
     const isPasswordCorrect = await user.comparePassword(password);
+    console.log('Password match:', isPasswordCorrect);
+
     if (!isPasswordCorrect) {
+      console.log('ERROR: Password incorrect');
       throw new Error('Email/Số điện thoại hoặc mật khẩu không đúng');
     }
 

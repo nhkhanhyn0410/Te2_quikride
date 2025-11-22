@@ -52,22 +52,28 @@ api.interceptors.response.use(
       const { status, data } = error.response;
 
       if (status === 401) {
-        // Unauthorized - clear all auth data
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('auth-storage'); // Zustand persist key
-        localStorage.removeItem('guest-token');
+        // Check if this is a login/register request - don't redirect
+        const isAuthRequest = error.config.url?.includes('/auth/login') ||
+                              error.config.url?.includes('/auth/register');
 
-        // Redirect based on current path
-        const currentPath = window.location.pathname;
-        if (currentPath.startsWith('/admin')) {
-          window.location.href = '/admin/login';
-        } else if (currentPath.startsWith('/operator')) {
-          window.location.href = '/operator/login';
-        } else if (currentPath.startsWith('/trip-manager')) {
-          window.location.href = '/trip-manager/login';
-        } else {
-          window.location.href = '/login';
+        if (!isAuthRequest) {
+          // Unauthorized - clear all auth data and redirect
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('auth-storage'); // Zustand persist key
+          localStorage.removeItem('guest-token');
+
+          // Redirect based on current path
+          const currentPath = window.location.pathname;
+          if (currentPath.startsWith('/admin')) {
+            window.location.href = '/admin/login';
+          } else if (currentPath.startsWith('/operator')) {
+            window.location.href = '/operator/login';
+          } else if (currentPath.startsWith('/trip-manager')) {
+            window.location.href = '/trip-manager/login';
+          } else {
+            window.location.href = '/login';
+          }
         }
       }
 

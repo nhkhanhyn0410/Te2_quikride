@@ -205,8 +205,16 @@ userSchema.pre('save', async function (next) {
 // Instance method - So sánh password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
-    return await bcrypt.compare(candidatePassword, this.password);
+    console.log('=== comparePassword ===');
+    console.log('Candidate password length:', candidatePassword ? candidatePassword.length : 0);
+    console.log('Stored hash exists:', !!this.password);
+    console.log('Stored hash preview:', this.password ? this.password.substring(0, 20) + '...' : 'NONE');
+
+    const result = await bcrypt.compare(candidatePassword, this.password);
+    console.log('Comparison result:', result);
+    return result;
   } catch (error) {
+    console.log('ERROR in comparePassword:', error.message);
     throw new Error('Lỗi khi so sánh mật khẩu');
   }
 };
@@ -279,6 +287,13 @@ userSchema.methods.addPoints = function (points, reason, tripId = null) {
 
 // Static method - Tìm user bằng email hoặc phone
 userSchema.statics.findByEmailOrPhone = function (identifier) {
+  console.log('=== findByEmailOrPhone ===');
+  console.log('Original identifier:', identifier);
+  console.log('Lowercase identifier:', identifier.toLowerCase());
+  console.log('Query:', {
+    $or: [{ email: identifier.toLowerCase() }, { phone: identifier }],
+  });
+
   return this.findOne({
     $or: [{ email: identifier.toLowerCase() }, { phone: identifier }],
   });

@@ -559,7 +559,7 @@ class TicketService {
    * @param {string} verifiedBy - Employee ID who verified
    * @returns {Promise<Object>} Verification result
    */
-  static async verifyTicketQR(qrCodeData, tripId, verifiedBy) {
+  static async verifyTicketQR(qrCodeData, tripId, verifiedBy, confirmPayment = false) {
     try {
       // Verify QR code structure and data
       const qrVerification = await QRService.verifyTicketQR(qrCodeData, { tripId });
@@ -617,6 +617,25 @@ class TicketService {
           error: 'Vé không thuộc chuyến xe này',
           ticket,
         };
+      }
+
+      // Check if cash payment needs confirmation
+      const booking = ticket.bookingId;
+      if (booking && booking.paymentMethod === 'cash' && booking.paymentStatus === 'pending') {
+        if (!confirmPayment) {
+          // Return ticket info but don't mark as used yet - frontend will show payment confirmation modal
+          return {
+            success: true,
+            message: 'Vé hợp lệ - chờ xác nhận thanh toán',
+            ticket,
+            passengers: ticket.passengers,
+          };
+        } else {
+          // Confirm payment received
+          booking.paymentStatus = 'paid';
+          booking.paidAt = new Date();
+          await booking.save();
+        }
       }
 
       // Mark ticket as used
