@@ -13,8 +13,6 @@ import {
   Col,
   Progress,
   Select,
-  Modal,
-  Descriptions,
   Spin,
 } from 'antd';
 import {
@@ -47,8 +45,6 @@ const PassengersPage = () => {
     boarded: 0,
     notBoarded: 0,
   });
-  const [statusModalVisible, setStatusModalVisible] = useState(false);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // Fetch trip details and passengers
   const fetchData = async () => {
@@ -113,22 +109,6 @@ const PassengersPage = () => {
 
     setFilteredPassengers(filtered);
   }, [searchText, statusFilter, passengers]);
-
-  // Handle update trip status
-  const handleUpdateTripStatus = async (newStatus) => {
-    setUpdatingStatus(true);
-    try {
-      await tripManagerApi.updateTripStatus(tripId, { status: newStatus });
-      message.success('Cập nhật trạng thái chuyến thành công');
-      setStatusModalVisible(false);
-      fetchData();
-    } catch (error) {
-      console.error('Update status error:', error);
-      message.error(error.message || 'Không thể cập nhật trạng thái');
-    } finally {
-      setUpdatingStatus(false);
-    }
-  };
 
   // Get trip status tag
   const getTripStatusTag = (status) => {
@@ -256,10 +236,6 @@ const PassengersPage = () => {
                 </div>
               )}
             </div>
-
-            <Button type="primary" onClick={() => setStatusModalVisible(true)}>
-              Cập nhật trạng thái chuyến
-            </Button>
           </div>
         </div>
       </div>
@@ -363,68 +339,6 @@ const PassengersPage = () => {
             }
           />
         </Card>
-
-        {/* Update Trip Status Modal */}
-        <Modal
-          title="Cập nhật trạng thái chuyến"
-          open={statusModalVisible}
-          onCancel={() => setStatusModalVisible(false)}
-          footer={null}
-        >
-          <div className="space-y-4">
-            {trip && (
-              <Descriptions bordered column={1} size="small">
-                <Descriptions.Item label="Tuyến">
-                  {trip.route?.routeName}
-                </Descriptions.Item>
-                <Descriptions.Item label="Ngày giờ">
-                  {dayjs(trip.departureTime).format('DD/MM/YYYY HH:mm')}
-                </Descriptions.Item>
-                <Descriptions.Item label="Trạng thái hiện tại">
-                  {getTripStatusTag(trip.status)}
-                </Descriptions.Item>
-              </Descriptions>
-            )}
-
-            <div>
-              <p className="text-gray-700 mb-4">
-                Chọn trạng thái mới cho chuyến:
-              </p>
-
-              <Space direction="vertical" className="w-full">
-                {trip?.status === 'scheduled' && (
-                  <Button
-                    type="primary"
-                    block
-                    size="large"
-                    loading={updatingStatus}
-                    onClick={() => handleUpdateTripStatus('ongoing')}
-                  >
-                    Bắt đầu chuyến
-                  </Button>
-                )}
-
-                {trip?.status === 'ongoing' && (
-                  <Button
-                    type="primary"
-                    block
-                    size="large"
-                    loading={updatingStatus}
-                    onClick={() => handleUpdateTripStatus('completed')}
-                  >
-                    Hoàn thành chuyến
-                  </Button>
-                )}
-
-                {trip?.status === 'completed' && (
-                  <div className="text-center text-gray-500">
-                    Chuyến đã hoàn thành
-                  </div>
-                )}
-              </Space>
-            </div>
-          </div>
-        </Modal>
       </div>
     </div>
   );
