@@ -101,9 +101,9 @@ const PassengersPage = () => {
     // Filter by status
     if (statusFilter !== 'all') {
       if (statusFilter === 'boarded') {
-        filtered = filtered.filter((p) => p.isBoarded);
+        filtered = filtered.filter((p) => p.isUsed || p.isBoarded);
       } else if (statusFilter === 'not-boarded') {
-        filtered = filtered.filter((p) => !p.isBoarded);
+        filtered = filtered.filter((p) => !p.isUsed && !p.isBoarded);
       }
     }
 
@@ -184,8 +184,8 @@ const PassengersPage = () => {
       title: 'Trạng thái',
       dataIndex: 'isBoarded',
       key: 'isBoarded',
-      render: (isBoarded) =>
-        isBoarded ? (
+      render: (isBoarded, record) =>
+        (isBoarded || record.isUsed) ? (
           <Tag icon={<CheckCircleOutlined />} color="success">
             Đã lên xe
           </Tag>
@@ -335,7 +335,7 @@ const PassengersPage = () => {
               showTotal: (total) => `Tổng ${total} hành khách`,
             }}
             rowClassName={(record) =>
-              record.isBoarded ? 'bg-green-50' : ''
+              (record.isBoarded || record.isUsed) ? 'bg-green-50' : ''
             }
           />
         </Card>
