@@ -22,8 +22,7 @@ import {
   CloseCircleOutlined,
 } from '@ant-design/icons';
 import { Html5Qrcode } from 'html5-qrcode';
-import { verifyTicketQR } from '../../services/ticketApi';
-import api from '../../services/api';
+import tripManagerApi from '../../services/tripManagerApi';
 
 const QRScannerPage = () => {
   const { tripId } = useParams();
@@ -39,13 +38,13 @@ const QRScannerPage = () => {
   const fetchTrip = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/trips/${tripId}`);
-      if (response.status === 'success') {
+      const response = await tripManagerApi.getTripDetails(tripId);
+      if (response.success && response.data && response.data.trip) {
         setTrip(response.data.trip);
       }
     } catch (error) {
       console.error('Fetch trip error:', error);
-      message.error(error || 'Không thể tải thông tin chuyến xe');
+      message.error(error.message || 'Không thể tải thông tin chuyến xe');
     } finally {
       setLoading(false);
     }
@@ -113,9 +112,9 @@ const QRScannerPage = () => {
   const verifyTicket = async (qrCodeData) => {
     setLoading(true);
     try {
-      const response = await verifyTicketQR(tripId, qrCodeData);
+      const response = await tripManagerApi.verifyTicketQR(tripId, { qrCodeData });
 
-      if (response.status === 'success') {
+      if (response.success) {
         setVerifiedTicket(response.data.ticket);
         setVerificationResult({
           success: true,
@@ -127,9 +126,9 @@ const QRScannerPage = () => {
       console.error('Verify ticket error:', error);
       setVerificationResult({
         success: false,
-        message: error || 'Vé không hợp lệ',
+        message: error.message || 'Vé không hợp lệ',
       });
-      message.error(error || 'Vé không hợp lệ');
+      message.error(error.message || 'Vé không hợp lệ');
     } finally {
       setLoading(false);
     }

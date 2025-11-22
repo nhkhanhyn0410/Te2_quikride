@@ -28,8 +28,7 @@ import {
   IdcardOutlined,
   QrcodeOutlined,
 } from '@ant-design/icons';
-import { getTripPassengers, updateTripStatus } from '../../services/ticketApi';
-import api from '../../services/api';
+import tripManagerApi from '../../services/tripManagerApi';
 import dayjs from 'dayjs';
 
 const { Option } = Select;
@@ -55,30 +54,30 @@ const PassengersPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch trip details
-      const tripResponse = await api.get(`/trips/${tripId}`);
-      if (tripResponse.status === 'success') {
-        setTrip(tripResponse.data.trip);
-      }
+      // Fetch trip details and passengers using trip manager API
+      const response = await tripManagerApi.getTripDetails(tripId);
+      if (response.success && response.data) {
+        if (response.data.trip) {
+          setTrip(response.data.trip);
+        }
 
-      // Fetch passengers
-      const passengersResponse = await getTripPassengers(tripId);
-      if (passengersResponse.status === 'success') {
-        const passengersData = passengersResponse.data.passengers || [];
-        setPassengers(passengersData);
-        setFilteredPassengers(passengersData);
+        if (response.data.passengers) {
+          const passengersData = response.data.passengers || [];
+          setPassengers(passengersData);
+          setFilteredPassengers(passengersData);
 
-        // Calculate stats
-        const boardedCount = passengersData.filter((p) => p.isBoarded).length;
-        setStats({
-          total: passengersData.length,
-          boarded: boardedCount,
-          notBoarded: passengersData.length - boardedCount,
-        });
+          // Calculate stats
+          const boardedCount = passengersData.filter((p) => p.isUsed || p.isBoarded).length;
+          setStats({
+            total: passengersData.length,
+            boarded: boardedCount,
+            notBoarded: passengersData.length - boardedCount,
+          });
+        }
       }
     } catch (error) {
       console.error('Fetch data error:', error);
-      message.error(error || 'Không thể tải dữ liệu');
+      message.error(error.message || 'Không thể tải dữ liệu');
     } finally {
       setLoading(false);
     }
@@ -119,13 +118,13 @@ const PassengersPage = () => {
   const handleUpdateTripStatus = async (newStatus) => {
     setUpdatingStatus(true);
     try {
-      await updateTripStatus(tripId, newStatus);
+      await tripManagerApi.updateTripStatus(tripId, { status: newStatus });
       message.success('Cập nhật trạng thái chuyến thành công');
       setStatusModalVisible(false);
       fetchData();
     } catch (error) {
       console.error('Update status error:', error);
-      message.error(error || 'Không thể cập nhật trạng thái');
+      message.error(error.message || 'Không thể cập nhật trạng thái');
     } finally {
       setUpdatingStatus(false);
     }
