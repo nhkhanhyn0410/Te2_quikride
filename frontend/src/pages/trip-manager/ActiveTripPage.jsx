@@ -303,6 +303,8 @@ const ActiveTripPage = () => {
       if (!seatNumber || seatNumber === '') return 'aisle';
       if (seatNumber === 'DRIVER' || seatNumber === '🚗' || seatNumber.includes('Driver')) return 'driver';
       if (seatNumber === 'FLOOR_2') return 'floor_separator';
+      // Check for AISLE markers
+      if (seatNumber.toUpperCase() === 'AISLE' || seatNumber.toLowerCase().includes('aisle')) return 'aisle';
       return 'seat';
     };
 
