@@ -57,7 +57,26 @@ const validateLogin = [
   body('identifier')
     .trim()
     .notEmpty()
-    .withMessage('Email hoặc số điện thoại là bắt buộc'),
+    .withMessage('Email hoặc số điện thoại là bắt buộc')
+    .customSanitizer((value) => {
+      // If it looks like an email, normalize it the same way as registration
+      if (value.includes('@')) {
+        const parts = value.toLowerCase().split('@');
+        if (parts.length === 2) {
+          const localPart = parts[0];
+          const domain = parts[1];
+
+          // For Gmail and Googlemail, remove dots from local part
+          if (domain === 'gmail.com' || domain === 'googlemail.com') {
+            return localPart.replace(/\./g, '') + '@' + domain;
+          }
+
+          // For other domains, just lowercase
+          return value.toLowerCase();
+        }
+      }
+      return value;
+    }),
   body('password').notEmpty().withMessage('Mật khẩu là bắt buộc'),
   handleValidationErrors,
 ];
