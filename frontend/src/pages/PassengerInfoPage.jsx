@@ -38,6 +38,7 @@ import {
   createPayment,
 } from '../services/bookingApi';
 import useBookingStore from '../store/bookingStore';
+import useAuthStore from '../store/authStore';
 import GuestOTPModal from '../components/GuestOTPModal';
 
 const { Title, Text } = Typography;
@@ -117,6 +118,9 @@ const PassengerInfoPage = () => {
     setAppliedVoucher,
     appliedVoucher,
   } = useBookingStore();
+
+  // Get current user for logged-in bookings
+  const { user } = useAuthStore();
 
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -245,9 +249,12 @@ const PassengerInfoPage = () => {
         pickupPoint: pickupPoint,
         dropoffPoint: dropoffPoint,
         voucherCode: appliedVoucher ? voucherCode : undefined,
+        // Include customerId if user is logged in
+        customerId: user?._id || user?.id || undefined,
       };
 
       console.log('Hold seats request:', holdData);
+      console.log('User logged in:', !!user, 'User ID:', user?._id || user?.id);
 
       const holdResponse = await holdSeats(holdData);
 
@@ -335,9 +342,12 @@ const PassengerInfoPage = () => {
         paymentMethod: selectedPaymentMethod,
         amount: currentBooking.finalPrice,
         locale: 'vn',
+        // Include customerId if user is logged in
+        customerId: user?._id || user?.id || undefined,
       };
 
       console.log('Creating payment with data:', paymentData);
+      console.log('User logged in:', !!user, 'User ID:', user?._id || user?.id);
 
       const paymentResponse = await createPayment(paymentData);
 
