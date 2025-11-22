@@ -32,6 +32,8 @@ const QRScannerPage = () => {
   const [scanning, setScanning] = useState(false);
   const [verifiedTicket, setVerifiedTicket] = useState(null);
   const [verificationResult, setVerificationResult] = useState(null);
+  const [paymentConfirmModalVisible, setPaymentConfirmModalVisible] = useState(false);
+  const [pendingQrData, setPendingQrData] = useState(null);
   const html5QrCodeRef = useRef(null);
 
   // Fetch trip details
@@ -109,13 +111,29 @@ const QRScannerPage = () => {
   };
 
   // Verify ticket with QR data
-  const verifyTicket = async (qrCodeData) => {
+  const verifyTicket = async (qrCodeData, confirmPayment = false) => {
     setLoading(true);
     try {
-      const response = await tripManagerApi.verifyTicketQR(tripId, { qrCodeData });
+      const response = await tripManagerApi.verifyTicketQR(tripId, {
+        qrCodeData,
+        confirmPayment // Thêm flag để confirm payment nếu là vé cash
+      });
 
       if (response.success) {
-        setVerifiedTicket(response.data.ticket);
+        const ticket = response.data.ticket;
+
+        // Check if ticket requires cash payment confirmation
+        if (ticket.bookingId?.paymentMethod === 'cash' &&
+            ticket.bookingId?.paymentStatus === 'pending' &&
+            !confirmPayment) {
+          // Show payment confirmation modal
+          setPendingQrData(qrCodeData);
+          setPaymentConfirmModalVisible(true);
+          setLoading(false);
+          return;
+        }
+
+        setVerifiedTicket(ticket);
         setVerificationResult({
           success: true,
           message: 'Vé hợp lệ! Hành khách đã được xác nhận lên xe.',
@@ -132,6 +150,23 @@ const QRScannerPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle confirm cash payment
+  const handleConfirmPayment = async () => {
+    if (!pendingQrData) return;
+
+    setPaymentConfirmModalVisible(false);
+    // Re-verify with confirmPayment flag
+    await verifyTicket(pendingQrData, true);
+    setPendingQrData(null);
+  };
+
+  // Handle cancel payment confirmation
+  const handleCancelPaymentConfirm = () => {
+    setPaymentConfirmModalVisible(false);
+    setPendingQrData(null);
+    message.info('Đã hủy xác thực vé');
   };
 
   // Handle upload QR image
@@ -346,6 +381,41 @@ const QRScannerPage = () => {
           </Card>
         )}
       </div>
+
+      {/* Payment Confirmation Modal */}
+      <Modal
+        title="Xác nhận thanh toán tiền mặt"
+        open={paymentConfirmModalVisible}
+        onOk={handleConfirmPayment}
+        onCancel={handleCancelPaymentConfirm}
+        okText="Đã nhận tiền"
+        cancelText="Hủy"
+        okButtonProps={{ type: 'primary', danger: false }}
+        width={500}
+      >
+        <Alert
+          message="Vé thanh toán tiền mặt"
+          description={
+            <div className="mt-3">
+              <p className="text-base mb-3">
+                Đây là vé <strong>trả tiền mặt khi lên xe</strong> và chưa thanh toán.
+              </p>
+              <p className="text-base mb-3">
+                Vui lòng <strong className="text-red-600">thu tiền từ hành khách</strong> trước khi xác nhận.
+              </p>
+              <p className="text-sm text-gray-600">
+                Sau khi nhấn "Đã nhận tiền", hệ thống sẽ:
+              </p>
+              <ul className="list-disc ml-5 text-sm text-gray-600 mt-2">
+                <li>Cập nhật trạng thái thanh toán thành "Đã thanh toán"</li>
+                <li>Xác nhận hành khách đã lên xe</li>
+              </ul>
+            </div>
+          }
+          type="warning"
+          showIcon
+        />
+      </Modal>
     </div>
   );
 };
