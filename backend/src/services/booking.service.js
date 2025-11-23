@@ -26,6 +26,12 @@ class BookingService {
   static async holdSeats(holdData) {
     const { tripId, seats, contactInfo, customerId, pickupPoint, dropoffPoint, voucherCode } = holdData;
 
+    console.log('=== HOLD SEATS ===');
+    console.log('Customer ID:', customerId);
+    console.log('Is Guest Booking:', !customerId);
+    console.log('Trip ID:', tripId);
+    console.log('Seats:', seats?.length);
+
     // Validate trip exists and is bookable
     const trip = await Trip.findById(tripId)
       .populate('routeId')
