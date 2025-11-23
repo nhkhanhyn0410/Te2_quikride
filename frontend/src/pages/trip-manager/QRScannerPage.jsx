@@ -174,16 +174,28 @@ const QRScannerPage = () => {
     try {
       setLoading(true);
 
+      // Create a temporary Html5Qrcode instance just for file scanning
       const html5QrCode = new Html5Qrcode('qr-reader-upload');
 
-      // Scan from file
-      const decodedText = await html5QrCode.scanFile(file, false);
+      // Scan from file using Promise wrapper
+      const decodedText = await new Promise((resolve, reject) => {
+        html5QrCode
+          .scanFile(file, true) // true = show image
+          .then((decodedText) => {
+            resolve(decodedText);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+
+      console.log('Decoded QR from file:', decodedText);
 
       // Verify ticket
       await verifyTicket(decodedText);
     } catch (error) {
       console.error('Upload QR error:', error);
-      message.error('Không thể đọc mã QR từ ảnh. Vui lòng thử lại.');
+      message.error('Không thể đọc mã QR từ ảnh. Vui lòng chụp ảnh rõ hơn hoặc sử dụng camera.');
     } finally {
       setLoading(false);
     }

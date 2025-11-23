@@ -638,35 +638,79 @@ const ActiveTripPage = () => {
     // Stops
     stops.forEach((stop, index) => {
       const stopNumber = index + 1;
-      // Stop status logic:
-      // - Passed: if currentStopIndex > index (we've been to this stop and left)
-      // - Current: if currentStopIndex === index AND status === 'at_stop' (currently at this stop)
-      //            OR if currentStopIndex === index - 1 AND status === 'in_transit' (heading to this stop)
-      const isPassed = currentStopIndex > index;
-      const isAtThisStop = currentStopIndex === index && currentStatus === 'at_stop';
-      const isHeadingToThisStop = currentStopIndex === index - 1 && currentStatus === 'in_transit';
-      const isCurrent = isAtThisStop || isHeadingToThisStop;
+
+      // Improved stop status logic based on journey state
+      let stopStatus = 'upcoming'; // upcoming | arrived | completed
+      let statusText = '';
+      let dotIcon = <EnvironmentOutlined />;
+      let color = 'gray';
+
+      // Determine stop status:
+      // 1. COMPLETED: We've been to this stop and left (in_transit with currentStopIndex >= index)
+      // 2. ARRIVED: Currently at this stop (at_stop with currentStopIndex === index)
+      // 3. HEADING: Heading to this stop (in_transit with currentStopIndex === index - 1)
+      // 4. UPCOMING: Not reached yet
+
+      if (currentStatus === 'completed' && index <= stops.length - 1) {
+        // Trip completed - all stops are completed
+        stopStatus = 'completed';
+        statusText = 'Hoàn thành';
+        dotIcon = <CheckOutlined />;
+        color = 'green';
+      } else if (currentStatus === 'at_stop' && currentStopIndex === index) {
+        // Currently at this stop - show as "arrived"
+        stopStatus = 'arrived';
+        statusText = 'Đã đến';
+        dotIcon = <CheckOutlined />;
+        color = 'blue';
+      } else if (currentStatus === 'in_transit') {
+        if (currentStopIndex > index) {
+          // We've passed this stop (left it) - completed
+          stopStatus = 'completed';
+          statusText = 'Hoàn thành';
+          dotIcon = <CheckOutlined />;
+          color = 'green';
+        } else if (currentStopIndex === index) {
+          // We left this stop, now in transit - mark as completed
+          stopStatus = 'completed';
+          statusText = 'Hoàn thành';
+          dotIcon = <CheckOutlined />;
+          color = 'green';
+        } else if (currentStopIndex === index - 1) {
+          // Heading to this stop (from previous stop)
+          stopStatus = 'heading';
+          statusText = 'Đang đến';
+          dotIcon = <LoadingOutlined spin />;
+          color = 'blue';
+        }
+      } else if (currentStopIndex > index) {
+        // Past this stop (regardless of current status)
+        stopStatus = 'completed';
+        statusText = 'Hoàn thành';
+        dotIcon = <CheckOutlined />;
+        color = 'green';
+      }
 
       const estimatedTime = dayjs(activeTrip.departureTime).add(
         stop.estimatedArrivalMinutes,
         'minute'
       );
 
-      let statusText = '';
-      if (isPassed) statusText = 'Đã qua';
-      else if (isAtThisStop) statusText = 'Đang tại đây';
-      else if (isHeadingToThisStop) statusText = 'Đang đến';
-
       timelineItems.push({
         key: `stop-${stopNumber}`,
-        dot: isPassed ? <CheckOutlined /> : isCurrent ? <LoadingOutlined spin /> : <EnvironmentOutlined />,
-        color: isPassed ? 'green' : isCurrent ? 'blue' : 'gray',
+        dot: dotIcon,
+        color: color,
         children: (
           <div>
             <div className="font-semibold">
               Điểm dừng {stopNumber}: {stop.name}
-              {isCurrent && <Badge status="processing" text={statusText} className="ml-2" />}
-              {isPassed && <Badge status="success" text={statusText} className="ml-2" />}
+              {statusText && (
+                <Badge
+                  status={stopStatus === 'completed' ? 'success' : stopStatus === 'arrived' ? 'default' : 'processing'}
+                  text={statusText}
+                  className="ml-2"
+                />
+              )}
             </div>
             <div className="text-sm text-gray-600">{stop.address}</div>
             <div className="text-xs text-gray-500">
