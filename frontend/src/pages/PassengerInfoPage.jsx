@@ -122,6 +122,15 @@ const PassengerInfoPage = () => {
   // Get current user for logged-in bookings
   const { user } = useAuthStore();
 
+  // Debug: Log user on mount
+  useEffect(() => {
+    console.log('=== PassengerInfoPage User Debug ===');
+    console.log('User object:', user);
+    console.log('User ID (_id):', user?._id);
+    console.log('User ID (id):', user?.id);
+    console.log('Is authenticated:', !!user);
+  }, [user]);
+
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('cash');
