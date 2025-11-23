@@ -92,10 +92,29 @@ class TicketService {
       });
 
       // Create ticket document
+      console.log('=== CREATING TICKET ===');
+      console.log('Booking ID:', booking._id);
+      console.log('Booking customerId (raw):', booking.customerId);
+      console.log('Booking customerId type:', typeof booking.customerId);
+
+      // Handle both populated (object) and non-populated (ObjectId) customerId
+      let ticketCustomerId = null;
+      if (booking.customerId) {
+        if (typeof booking.customerId === 'object' && booking.customerId._id) {
+          // Populated object
+          ticketCustomerId = booking.customerId._id;
+        } else {
+          // Already an ObjectId/string
+          ticketCustomerId = booking.customerId;
+        }
+      }
+      console.log('Ticket customerId:', ticketCustomerId);
+      console.log('Is Guest Booking:', !ticketCustomerId);
+
       const ticket = await Ticket.create({
         ticketCode,
         bookingId: booking._id,
-        customerId: booking.customerId?._id || null,
+        customerId: ticketCustomerId,
         tripId: trip._id,
         operatorId: booking.operatorId._id,
         qrCode: qrData.qrCode, // Base64 image
@@ -444,6 +463,11 @@ class TicketService {
    * @returns {Promise<Object>} Tickets with metadata
    */
   static async getCustomerTickets(customerId, filters = {}) {
+    console.log('=== GET CUSTOMER TICKETS ===');
+    console.log('Customer ID:', customerId);
+    console.log('Customer ID type:', typeof customerId);
+    console.log('Filters:', filters);
+
     const query = { customerId };
     const now = new Date();
 
@@ -506,6 +530,7 @@ class TicketService {
     const skip = (page - 1) * limit;
 
     // Get tickets
+    console.log('Final query:', JSON.stringify(query, null, 2));
     const tickets = await Ticket.find(query)
       .populate('tripId')
       .populate('operatorId', 'companyName phone email logo')
@@ -514,8 +539,15 @@ class TicketService {
       .skip(skip)
       .limit(limit);
 
+    console.log('Found tickets:', tickets.length);
+    if (tickets.length > 0) {
+      console.log('First ticket customerId:', tickets[0].customerId);
+      console.log('First ticket code:', tickets[0].ticketCode);
+    }
+
     // Get total count
     const total = await Ticket.countDocuments(query);
+    console.log('Total matching tickets:', total);
 
     // Calculate stats
     const stats = {

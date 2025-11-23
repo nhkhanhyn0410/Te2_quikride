@@ -513,9 +513,10 @@ TripSchema.methods.updateStatus = async function (newStatus, options = {}) {
 
 /**
  * Update journey status - for Trip Manager to update current location and status
+ * Improved logic to prevent skipping stops and ensure proper progression
  * @param {Object} data - Update data
  * @param {string} data.status - New journey status
- * @param {number} data.stopIndex - Current stop index
+ * @param {number} data.stopIndex - Current stop index (1-based, required for 'at_stop')
  * @param {Object} data.location - Current location {lat, lng}
  * @param {string} data.notes - Notes for this update
  * @param {ObjectId} data.updatedBy - Employee ID who made the update
@@ -533,22 +534,93 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
   // Initialize journey if not exists
   if (!this.journey) {
     this.journey = {
-      currentStopIndex: -1,
+      currentStopIndex: -1, // -1 means at origin (before any stops)
       currentStatus: 'preparing',
       statusHistory: [],
+      stoppedAt: [], // Track which stops have been visited
     };
   }
 
   const oldStatus = this.journey.currentStatus;
+  const oldStopIndex = this.journey.currentStopIndex;
 
-  // Simple logic: Just update what user provides
-  // No automatic progression, user controls the journey manually
+  // Initialize stoppedAt array if not exists (for backward compatibility)
+  if (!this.journey.stoppedAt) {
+    this.journey.stoppedAt = [];
+  }
+
+  // Calculate new stop index based on status and current state
   let newStopIndex = this.journey.currentStopIndex;
 
-  // If user specifies stopIndex (when at_stop), use it
-  if (status === 'at_stop' && stopIndex !== undefined) {
-    // stopIndex from UI is 1-based, convert to 0-based
-    newStopIndex = stopIndex - 1;
+  // Status-specific logic
+  switch (status) {
+    case 'at_stop':
+      // REQUIRED: stopIndex must be provided when at_stop
+      if (stopIndex === undefined || stopIndex === null) {
+        throw new Error('Vui lòng chọn điểm dừng khi cập nhật trạng thái "Tại điểm dừng"');
+      }
+
+      // Convert from 1-based (UI) to 0-based (internal)
+      const requestedStopIndex = stopIndex - 1;
+
+      // Validate: cannot go backward (unless correcting a mistake)
+      if (requestedStopIndex < oldStopIndex) {
+        // Allow if correcting: was in_transit but marking previous stop
+        console.warn(`Warning: Moving backward from stop ${oldStopIndex} to ${requestedStopIndex}`);
+      }
+
+      // Validate: cannot skip stops (must stop at each stop sequentially)
+      const expectedNextStop = oldStopIndex + 1;
+      if (requestedStopIndex > expectedNextStop && oldStatus !== 'at_stop') {
+        throw new Error(
+          `Không thể bỏ qua điểm dừng! ` +
+          `Vui lòng dừng tại điểm dừng ${expectedNextStop + 1} trước khi đến điểm dừng ${requestedStopIndex + 1}`
+        );
+      }
+
+      newStopIndex = requestedStopIndex;
+
+      // Mark this stop as visited
+      if (!this.journey.stoppedAt.includes(newStopIndex)) {
+        this.journey.stoppedAt.push(newStopIndex);
+        this.journey.stoppedAt.sort((a, b) => a - b); // Keep sorted
+      }
+      break;
+
+    case 'in_transit':
+      // When leaving a stop and going in transit:
+      // - If coming from 'at_stop', keep current stop index (heading to next)
+      // - If already in_transit, keep current index
+      if (oldStatus === 'at_stop') {
+        // We're leaving the current stop, heading to next stop
+        // Keep stopIndex as is (it represents "heading towards stop X+1")
+        newStopIndex = oldStopIndex;
+      } else {
+        // Already in transit or coming from preparing/checking_tickets
+        newStopIndex = oldStopIndex;
+      }
+      break;
+
+    case 'completed':
+      // When completing trip, set to last stop or beyond
+      const route = await this.populate('routeId');
+      const totalStops = route?.routeId?.stops?.length || 0;
+      newStopIndex = totalStops - 1; // Last stop index
+      break;
+
+    case 'preparing':
+    case 'checking_tickets':
+      // At origin, before any stops
+      newStopIndex = -1;
+      break;
+
+    case 'cancelled':
+      // Keep current stop
+      newStopIndex = oldStopIndex;
+      break;
+
+    default:
+      newStopIndex = oldStopIndex;
   }
 
   // Create status history entry
@@ -590,7 +662,9 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
     success: true,
     oldStatus,
     newStatus: this.journey.currentStatus,
-    currentStop: this.journey.currentStopIndex,
+    oldStopIndex,
+    currentStopIndex: this.journey.currentStopIndex,
+    stoppedAt: this.journey.stoppedAt,
   };
 };
 
