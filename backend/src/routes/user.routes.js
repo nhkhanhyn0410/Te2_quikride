@@ -37,6 +37,9 @@ router.delete('/saved-passengers/:passengerId', userController.removeSavedPassen
 
 // Loyalty points routes
 router.get('/points-history', userController.getPointsHistory);
+router.get('/loyalty/history', userController.getLoyaltyHistory);
+router.get('/loyalty/overview', userController.getLoyaltyOverview);
+router.post('/loyalty/redeem', userController.redeemPoints);
 
 // ============================================================================
 // UC-8: Ticket Management Routes
