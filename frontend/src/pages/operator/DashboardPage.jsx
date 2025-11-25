@@ -57,8 +57,22 @@ const DashboardPage = () => {
     try {
       const response = await api.get(`/operators/dashboard/stats?period=${period}`);
 
-      if (response.status === 'success') {
-        setStats(response.data.stats);
+      console.log('📊 Dashboard response:', {
+        success: response.success,
+        hasData: !!response.data,
+        dataKeys: response.data ? Object.keys(response.data) : []
+      });
+
+      if (response.success) {
+        setStats(response.data);
+        console.log('✅ Stats loaded:', {
+          revenue: response.data.revenue,
+          bookings: response.data.bookings,
+          trips: response.data.trips,
+          hasTrends: !!response.data.trends
+        });
+      } else {
+        console.error('❌ Response not successful:', response);
       }
     } catch (error) {
       message.error(error || 'Không thể tải thống kê dashboard');
