@@ -541,12 +541,26 @@ class TicketService {
 
     console.log('Found tickets:', tickets.length);
     if (tickets.length > 0) {
-      console.log('First ticket customerId:', tickets[0].customerId);
-      console.log('First ticket code:', tickets[0].ticketCode);
-      console.log('First ticket tripId:', tickets[0].tripId ? 'populated' : 'NULL');
-      console.log('First ticket operatorId:', tickets[0].operatorId ? 'populated' : 'NULL');
-      console.log('First ticket bookingId:', tickets[0].bookingId ? 'populated' : 'NULL');
-      console.log('First ticket full data:', JSON.stringify(tickets[0], null, 2));
+      const firstTicket = tickets[0];
+      console.log('First ticket customerId:', firstTicket.customerId);
+      console.log('First ticket code:', firstTicket.ticketCode);
+      console.log('First ticket tripId:', firstTicket.tripId ? 'populated' : 'NULL');
+      console.log('First ticket operatorId:', firstTicket.operatorId ? 'populated' : 'NULL');
+      console.log('First ticket bookingId:', firstTicket.bookingId ? 'populated' : 'NULL');
+      console.log('First ticket structure (no QR):', JSON.stringify({
+        _id: firstTicket._id,
+        ticketCode: firstTicket.ticketCode,
+        customerId: firstTicket.customerId,
+        status: firstTicket.status,
+        hasQRCode: !!firstTicket.qrCode,
+        qrCodeLength: firstTicket.qrCode?.length || 0,
+        tripId: firstTicket.tripId?._id || 'null',
+        operatorId: firstTicket.operatorId?._id || 'null',
+        bookingId: firstTicket.bookingId?._id || 'null',
+        passengers: firstTicket.passengers?.length || 0,
+        seatNumbers: firstTicket.seatNumbers,
+        tripInfo: firstTicket.tripInfo ? 'exists' : 'missing'
+      }, null, 2));
     }
 
     // Get total count
