@@ -14,6 +14,7 @@ dotenv.config();
 const connectDB = require('./config/database');
 const connectRedis = require('./config/redis');
 const websocketService = require('./services/websocket.service');
+const schedulerService = require('./services/scheduler.service');
 
 // Import routes
 const authRoutes = require('./routes/auth.routes');
@@ -31,6 +32,7 @@ const ticketRoutes = require('./routes/ticket.routes');
 const tripManagerRoutes = require('./routes/tripManager.routes');
 const complaintRoutes = require('./routes/complaint.routes');
 const contentRoutes = require('./routes/content.routes');
+const reviewRoutes = require('./routes/review.routes');
 
 // Import middleware
 const errorHandler = require('./middleware/error.middleware');
@@ -164,6 +166,7 @@ app.use(`/api/${API_VERSION}/tickets`, ticketRoutes);
 app.use(`/api/${API_VERSION}/trip-manager`, tripManagerRoutes);
 app.use(`/api/${API_VERSION}/complaints`, complaintRoutes);
 app.use(`/api/${API_VERSION}/content`, contentRoutes);
+app.use(`/api/${API_VERSION}`, reviewRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -184,12 +187,16 @@ const server = http.createServer(app);
 // Initialize WebSocket
 websocketService.initialize(server);
 
+// Initialize Scheduler (cron jobs)
+schedulerService.initialize();
+
 // Start server
 server.listen(PORT, () => {
   console.log(`🚀 Server đang chạy ở chế độ ${process.env.NODE_ENV} trên port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
   console.log(`📍 API endpoint: http://localhost:${PORT}/api/${API_VERSION}`);
   console.log(`🔌 WebSocket server ready for real-time updates`);
+  console.log(`⏰ Scheduler service active`);
 });
 
 // Handle unhandled promise rejections

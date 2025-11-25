@@ -1,4 +1,5 @@
 const UserService = require('../services/user.service');
+const loyaltyService = require('../services/loyalty.service');
 
 /**
  * User Controller
@@ -266,6 +267,82 @@ exports.getPointsHistory = async (req, res, next) => {
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy lịch sử điểm thất bại',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/users/loyalty/history
+ * @desc    Get loyalty program history
+ * @access  Private
+ */
+exports.getLoyaltyHistory = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const { page, limit, type } = req.query;
+
+    const result = await loyaltyService.getLoyaltyHistory(userId, {
+      page: parseInt(page, 10) || 1,
+      limit: parseInt(limit, 10) || 20,
+      type,
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Get loyalty history error:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Lấy lịch sử loyalty thất bại',
+    });
+  }
+};
+
+/**
+ * @route   GET /api/v1/users/loyalty/overview
+ * @desc    Get loyalty program overview
+ * @access  Private
+ */
+exports.getLoyaltyOverview = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+
+    const result = await loyaltyService.getLoyaltyOverview(userId);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Get loyalty overview error:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Lấy thông tin loyalty thất bại',
+    });
+  }
+};
+
+/**
+ * @route   POST /api/v1/users/loyalty/redeem
+ * @desc    Redeem loyalty points
+ * @access  Private
+ */
+exports.redeemPoints = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const { points } = req.body;
+
+    if (!points || points < 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'Số điểm đổi tối thiểu là 100',
+      });
+    }
+
+    const result = await loyaltyService.redeemPoints(userId, points);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Redeem points error:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Đổi điểm thất bại',
     });
   }
 };

@@ -137,9 +137,28 @@ const userSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        type: {
+          type: String,
+          enum: ['earn', 'redeem', 'expire'],
+          default: 'earn',
+        },
         tripId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Trip',
+        },
+        expiresAt: {
+          type: Date,
+          // Points expire after 1 year
+          default: function () {
+            if (this.type === 'earn') {
+              return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+            }
+            return null;
+          },
+        },
+        isExpired: {
+          type: Boolean,
+          default: false,
         },
         createdAt: {
           type: Date,
@@ -270,10 +289,72 @@ userSchema.methods.addPoints = function (points, reason, tripId = null) {
   this.pointsHistory.push({
     points,
     reason,
+    type: 'earn',
     tripId,
+    expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
   });
 
   // Update loyalty tier based on total points
+  this.updateLoyaltyTier();
+};
+
+// Instance method - Redeem points
+userSchema.methods.redeemPoints = function (points, reason) {
+  if (this.totalPoints < points) {
+    throw new Error('Không đủ điểm để đổi');
+  }
+
+  this.totalPoints -= points;
+
+  this.pointsHistory.push({
+    points: -points, // Negative for redemption
+    reason,
+    type: 'redeem',
+  });
+
+  // Update loyalty tier
+  this.updateLoyaltyTier();
+};
+
+// Instance method - Remove expired points
+userSchema.methods.removeExpiredPoints = async function () {
+  const now = new Date();
+  let expiredPoints = 0;
+
+  // Find all expired points that haven't been marked as expired
+  this.pointsHistory.forEach((entry) => {
+    if (
+      entry.type === 'earn' &&
+      !entry.isExpired &&
+      entry.expiresAt &&
+      entry.expiresAt < now
+    ) {
+      entry.isExpired = true;
+      expiredPoints += entry.points;
+    }
+  });
+
+  if (expiredPoints > 0) {
+    this.totalPoints -= expiredPoints;
+
+    // Add expiry record
+    this.pointsHistory.push({
+      points: -expiredPoints,
+      reason: 'Điểm hết hạn',
+      type: 'expire',
+    });
+
+    // Update loyalty tier
+    this.updateLoyaltyTier();
+
+    console.log(`✅ Removed ${expiredPoints} expired points for user ${this._id}`);
+  }
+
+  return expiredPoints;
+};
+
+// Instance method - Update loyalty tier
+userSchema.methods.updateLoyaltyTier = function () {
   if (this.totalPoints >= 10000) {
     this.loyaltyTier = 'platinum';
   } else if (this.totalPoints >= 5000) {
@@ -283,6 +364,52 @@ userSchema.methods.addPoints = function (points, reason, tripId = null) {
   } else {
     this.loyaltyTier = 'bronze';
   }
+};
+
+// Instance method - Get tier benefits
+userSchema.methods.getTierBenefits = function () {
+  const benefits = {
+    bronze: {
+      pointsMultiplier: 1,
+      discountPercentage: 0,
+      prioritySupport: false,
+      features: ['Tích điểm cơ bản'],
+    },
+    silver: {
+      pointsMultiplier: 1.2,
+      discountPercentage: 5,
+      prioritySupport: false,
+      features: ['Tích điểm x1.2', 'Giảm 5% cho mỗi booking', 'Hủy vé miễn phí'],
+    },
+    gold: {
+      pointsMultiplier: 1.5,
+      discountPercentage: 10,
+      prioritySupport: true,
+      features: [
+        'Tích điểm x1.5',
+        'Giảm 10% cho mỗi booking',
+        'Hủy vé miễn phí',
+        'Hỗ trợ ưu tiên',
+        'Đổi lịch miễn phí',
+      ],
+    },
+    platinum: {
+      pointsMultiplier: 2,
+      discountPercentage: 15,
+      prioritySupport: true,
+      features: [
+        'Tích điểm x2',
+        'Giảm 15% cho mỗi booking',
+        'Hủy vé miễn phí',
+        'Hỗ trợ ưu tiên 24/7',
+        'Đổi lịch miễn phí',
+        'Phòng chờ VIP',
+        'Quà tặng sinh nhật',
+      ],
+    },
+  };
+
+  return benefits[this.loyaltyTier] || benefits.bronze;
 };
 
 // Static method - Tìm user bằng email hoặc phone
