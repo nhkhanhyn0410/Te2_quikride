@@ -23,7 +23,7 @@ exports.getRevenueReport = async (req, res, next) => {
 
       if (start > end) {
         return res.status(400).json({
-          status: 'error',
+          success: false,
           message: 'Ngày bắt đầu phải trước ngày kết thúc',
         });
       }
@@ -61,15 +61,13 @@ exports.getRevenueReport = async (req, res, next) => {
 
     // Default: JSON response
     res.status(200).json({
-      status: 'success',
-      data: {
-        report: reportData,
-      },
+      success: true,
+      data: reportData,
     });
   } catch (error) {
     console.error('Get revenue report error:', error);
     res.status(500).json({
-      status: 'error',
+      success: false,
       message: error.message || 'Không thể tạo báo cáo doanh thu',
     });
   }
@@ -93,7 +91,7 @@ exports.getRevenueSummary = async (req, res, next) => {
 
     // Return only summary and top routes
     res.status(200).json({
-      status: 'success',
+      success: true,
       data: {
         summary: reportData.summary,
         topRoutes: reportData.topRoutes.slice(0, 5),
@@ -104,7 +102,7 @@ exports.getRevenueSummary = async (req, res, next) => {
   } catch (error) {
     console.error('Get revenue summary error:', error);
     res.status(500).json({
-      status: 'error',
+      success: false,
       message: error.message || 'Không thể tải tóm tắt doanh thu',
     });
   }
@@ -127,7 +125,7 @@ exports.getRevenueByRoute = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      success: true,
       data: {
         revenueByRoute: reportData.revenueByRoute,
         topRoutes: reportData.topRoutes,
@@ -136,7 +134,7 @@ exports.getRevenueByRoute = async (req, res, next) => {
   } catch (error) {
     console.error('Get revenue by route error:', error);
     res.status(500).json({
-      status: 'error',
+      success: false,
       message: error.message || 'Không thể tải doanh thu theo tuyến',
     });
   }
@@ -159,7 +157,7 @@ exports.getRevenueTrend = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      success: true,
       data: {
         revenueTrend: reportData.revenueTrend,
         summary: {
@@ -174,7 +172,7 @@ exports.getRevenueTrend = async (req, res, next) => {
   } catch (error) {
     console.error('Get revenue trend error:', error);
     res.status(500).json({
-      status: 'error',
+      success: false,
       message: error.message || 'Không thể tải xu hướng doanh thu',
     });
   }
@@ -197,7 +195,7 @@ exports.getCancellationReport = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      success: true,
       data: {
         cancellationReport: reportData.cancellationReport,
       },
@@ -205,7 +203,7 @@ exports.getCancellationReport = async (req, res, next) => {
   } catch (error) {
     console.error('Get cancellation report error:', error);
     res.status(500).json({
-      status: 'error',
+      success: false,
       message: error.message || 'Không thể tải báo cáo hủy vé',
     });
   }
@@ -228,7 +226,7 @@ exports.getGrowthMetrics = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
+      success: true,
       data: {
         growthMetrics: reportData.growthMetrics,
       },
@@ -236,7 +234,7 @@ exports.getGrowthMetrics = async (req, res, next) => {
   } catch (error) {
     console.error('Get growth metrics error:', error);
     res.status(500).json({
-      status: 'error',
+      success: false,
       message: error.message || 'Không thể tải chỉ số tăng trưởng',
     });
   }

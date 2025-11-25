@@ -23,15 +23,13 @@ exports.getDashboardStats = async (req, res, next) => {
     });
 
     res.status(200).json({
-      status: 'success',
-      data: {
-        stats,
-      },
+      success: true,
+      data: stats,
     });
   } catch (error) {
     console.error('Get dashboard stats error:', error);
     res.status(500).json({
-      status: 'error',
+      success: false,
       message: error.message || 'Không thể tải thống kê dashboard',
     });
   }
