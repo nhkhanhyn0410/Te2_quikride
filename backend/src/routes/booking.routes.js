@@ -1,17 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const bookingController = require('../controllers/booking.controller');
-const { authenticate, authorize } = require('../middleware/auth.middleware');
+const { authenticate, authorize, optionalAuth } = require('../middleware/auth.middleware');
 
 /**
- * Public booking routes
+ * Public booking routes (with optional auth to associate with logged-in users)
  */
 
-// Hold seats temporarily
-router.post('/hold-seats', bookingController.holdSeats);
+// Hold seats temporarily (optionally authenticated to link with user account)
+router.post('/hold-seats', optionalAuth, bookingController.holdSeats);
 
-// Confirm booking
-router.post('/:bookingId/confirm', bookingController.confirmBooking);
+// Confirm booking (optionally authenticated to link with user account)
+router.post('/:bookingId/confirm', optionalAuth, bookingController.confirmBooking);
 
 // Extend hold duration
 router.post('/:bookingId/extend', bookingController.extendHold);
