@@ -220,32 +220,35 @@ const ReportsPage = () => {
       dataIndex: 'ticketCount',
       key: 'ticketCount',
       align: 'right',
-      render: (count) => count.toLocaleString('vi-VN'),
+      render: (count) => (count || 0).toLocaleString('vi-VN'),
     },
     {
       title: 'Doanh Thu',
       dataIndex: 'totalRevenue',
       key: 'totalRevenue',
       align: 'right',
-      render: (revenue) => formatCurrency(revenue),
+      render: (revenue) => formatCurrency(revenue || 0),
     },
     {
       title: 'Giá TB/Vé',
       dataIndex: 'averagePrice',
       key: 'averagePrice',
       align: 'right',
-      render: (price) => formatCurrency(price),
+      render: (price) => formatCurrency(price || 0),
     },
     {
       title: 'Tỷ Lệ Hủy',
       dataIndex: 'cancellationRate',
       key: 'cancellationRate',
       align: 'right',
-      render: (rate) => (
-        <Tag color={rate > 15 ? 'red' : rate > 10 ? 'orange' : 'green'}>
-          {rate.toFixed(1)}%
-        </Tag>
-      ),
+      render: (rate) => {
+        const safeRate = rate || 0;
+        return (
+          <Tag color={safeRate > 15 ? 'red' : safeRate > 10 ? 'orange' : 'green'}>
+            {safeRate.toFixed(1)}%
+          </Tag>
+        );
+      },
     },
   ];
 
