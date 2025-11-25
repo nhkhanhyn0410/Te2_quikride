@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const SMSService = require('./sms.service');
+const smsService = require('./sms.service');
 
 /**
  * Notification Service
@@ -9,7 +9,7 @@ class NotificationService {
   constructor() {
     // Email transporter setup with error handling
     try {
-      this.emailTransporter = nodemailer.createTransporter({
+      this.emailTransporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
         port: process.env.SMTP_PORT || 587,
         secure: false, // true for 465, false for other ports
@@ -23,8 +23,8 @@ class NotificationService {
       this.emailTransporter = null;
     }
 
-    // SMS service
-    this.smsService = new SMSService();
+    // SMS service (singleton instance)
+    this.smsService = smsService;
 
     this.fromEmail = process.env.FROM_EMAIL || 'noreply@quikride.com';
     this.fromName = process.env.FROM_NAME || 'QuikRide';
