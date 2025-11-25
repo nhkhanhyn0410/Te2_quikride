@@ -66,8 +66,8 @@ class BookingService {
       throw new Error(`Ghế ${alreadyBooked.join(', ')} đã được đặt`);
     }
 
-    // Generate session ID for lock
-    const sessionId = customerId || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Generate session ID for lock (convert ObjectId to string if needed)
+    const sessionId = customerId ? customerId.toString() : `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Try to lock seats in Redis
     const lockResult = await SeatLockService.lockSeats(
