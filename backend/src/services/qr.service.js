@@ -56,9 +56,26 @@ class QRService {
    */
   decrypt(encryptedText) {
     try {
-      const parts = encryptedText.split(':');
+      console.log('🔓 Attempting to decrypt QR data:', {
+        length: encryptedText.length,
+        preview: encryptedText.substring(0, 50) + '...',
+      });
+
+      // Trim whitespace that might come from scanning
+      const cleanText = encryptedText.trim();
+
+      const parts = cleanText.split(':');
+      if (parts.length < 2) {
+        throw new Error('QR code format không đúng (thiếu IV)');
+      }
+
       const iv = Buffer.from(parts.shift(), 'hex');
       const encryptedData = Buffer.from(parts.join(':'), 'hex');
+
+      console.log('🔑 Decryption parameters:', {
+        ivLength: iv.length,
+        dataLength: encryptedData.length,
+      });
 
       const decipher = crypto.createDecipheriv(
         this.algorithm,
@@ -69,10 +86,19 @@ class QRService {
       let decrypted = decipher.update(encryptedData);
       decrypted = Buffer.concat([decrypted, decipher.final()]);
 
-      return JSON.parse(decrypted.toString());
+      const result = JSON.parse(decrypted.toString());
+
+      console.log('✅ QR decrypted successfully:', {
+        ticketCode: result.ticketCode,
+        bookingId: result.bookingId,
+        version: result.version,
+      });
+
+      return result;
     } catch (error) {
       console.error('❌ Decryption error:', error);
-      throw new Error('Invalid or corrupted QR code');
+      console.error('QR text that failed:', encryptedText);
+      throw new Error('QR code không hợp lệ hoặc bị hỏng: ' + error.message);
     }
   }
 
@@ -108,16 +134,18 @@ class QRService {
       const encryptedData = this.encrypt(qrData);
 
       // Generate QR code image (Base64)
+      // Using higher error correction and larger size for better scanning
       const qrCodeImage = await QRCode.toDataURL(encryptedData, {
-        errorCorrectionLevel: 'H',
+        errorCorrectionLevel: 'H', // High error correction (can recover from ~30% damage)
         type: 'image/png',
-        quality: 0.95,
-        margin: 1,
-        width: 300,
+        quality: 1.0, // Maximum quality
+        margin: 2, // Increased margin for better scanning
+        width: 400, // Larger size for better scan reliability
         color: {
           dark: '#000000',
           light: '#FFFFFF',
         },
+        scale: 4, // Higher scale for sharper image
       });
 
       return {
