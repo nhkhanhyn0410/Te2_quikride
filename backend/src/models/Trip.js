@@ -272,6 +272,11 @@ const TripSchema = new mongoose.Schema(
         enum: ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'],
         default: 'preparing',
       },
+      stoppedAt: {
+        type: [Number],
+        default: [],
+        // Array of stop indices that have been visited (0-based internal indices)
+      },
       statusHistory: {
         type: [JourneyStatusSchema],
         default: [],
