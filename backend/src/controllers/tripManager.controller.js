@@ -536,20 +536,40 @@ class TripManagerController {
 
       // Calculate journey progress
       const totalStops = stops.length;
-      const currentStopIndex = trip.journey?.currentStopIndex || -1;
-      const progressPercentage = totalStops > 0
-        ? Math.min(100, Math.max(0, ((currentStopIndex + 1) / (totalStops + 1)) * 100))
-        : 0;
+      const internalStopIndex = trip.journey?.currentStopIndex ?? -1;
+      const currentStatus = trip.journey?.currentStatus || 'preparing';
+
+      let progressPercentage;
+      if (currentStatus === 'completed') {
+        // Journey completed - arrived at destination
+        progressPercentage = 100;
+      } else if (currentStatus === 'preparing' || currentStatus === 'checking_tickets') {
+        // At origin, not yet departed
+        progressPercentage = 0;
+      } else if (totalStops > 0) {
+        // Calculate based on stops: origin -> stop1 -> stop2 -> ... -> destination
+        // Total segments = totalStops + 1 (including segment to destination)
+        // Progress = (current segment / total segments) * 100
+        progressPercentage = Math.min(100, Math.max(0, ((internalStopIndex + 1) / (totalStops + 1)) * 100));
+      } else {
+        // No intermediate stops: origin -> destination
+        // Show 50% when in transit, 100% when completed
+        progressPercentage = currentStatus === 'in_transit' ? 50 : 0;
+      }
+
+      // Convert internal stop index (0-based) to UI stop index (1-based)
+      const currentUIStopIndex = internalStopIndex >= 0 ? internalStopIndex + 1 : -1;
 
       res.json({
         success: true,
         data: {
           journey: {
-            currentStopIndex: trip.journey?.currentStopIndex || -1,
+            currentStopIndex: currentUIStopIndex, // UI index (1-based)
             currentStatus: trip.journey?.currentStatus || 'preparing',
             actualDepartureTime: trip.journey?.actualDepartureTime,
             actualArrivalTime: trip.journey?.actualArrivalTime,
             progressPercentage: progressPercentage.toFixed(1),
+            stoppedAt: (trip.journey?.stoppedAt || []).map(idx => idx + 1), // Convert to UI indices
           },
           stops: stops.sort((a, b) => a.order - b.order),
           statusHistory: trip.journey?.statusHistory || [],
@@ -675,15 +695,40 @@ class TripManagerController {
         stoppedAt: result.stoppedAt,
       });
 
+      // Convert internal stop index (0-based) to UI stop index (1-based) for frontend
+      const currentUIStopIndex = trip.journey.currentStopIndex >= 0
+        ? trip.journey.currentStopIndex + 1
+        : -1;
+
+      // Calculate progress percentage
+      const stops = trip.routeId?.stops || [];
+      const totalStops = stops.length;
+      const internalStopIndex = trip.journey.currentStopIndex;
+      const currentStatus = trip.journey.currentStatus;
+
+      let progressPercentage;
+      if (currentStatus === 'completed') {
+        progressPercentage = 100;
+      } else if (currentStatus === 'preparing' || currentStatus === 'checking_tickets') {
+        progressPercentage = 0;
+      } else if (totalStops > 0) {
+        progressPercentage = Math.min(100, Math.max(0, ((internalStopIndex + 1) / (totalStops + 1)) * 100));
+      } else {
+        progressPercentage = currentStatus === 'in_transit' ? 50 : 0;
+      }
+
       res.json({
         success: true,
         message,
         data: {
           journey: {
             currentStatus: trip.journey.currentStatus,
-            currentStopIndex: trip.journey.currentStopIndex,
+            currentStopIndex: currentUIStopIndex, // UI index (1-based)
+            internalStopIndex: trip.journey.currentStopIndex, // Internal index (0-based) for debugging
             oldStatus: result.oldStatus,
             newStatus: result.newStatus,
+            stoppedAt: result.stoppedAt.map(idx => idx + 1), // Convert to UI indices
+            progressPercentage: progressPercentage.toFixed(1), // Progress bar percentage
             updatedAt: new Date(),
           },
         },

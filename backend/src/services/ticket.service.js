@@ -543,6 +543,10 @@ class TicketService {
     if (tickets.length > 0) {
       console.log('First ticket customerId:', tickets[0].customerId);
       console.log('First ticket code:', tickets[0].ticketCode);
+      console.log('First ticket tripId:', tickets[0].tripId ? 'populated' : 'NULL');
+      console.log('First ticket operatorId:', tickets[0].operatorId ? 'populated' : 'NULL');
+      console.log('First ticket bookingId:', tickets[0].bookingId ? 'populated' : 'NULL');
+      console.log('First ticket full data:', JSON.stringify(tickets[0], null, 2));
     }
 
     // Get total count
@@ -570,7 +574,7 @@ class TicketService {
       total: await Ticket.countDocuments({ customerId }),
     };
 
-    return {
+    const result = {
       tickets,
       pagination: {
         page,
@@ -580,6 +584,14 @@ class TicketService {
       },
       stats,
     };
+
+    console.log('Returning result:', {
+      ticketCount: tickets.length,
+      pagination: result.pagination,
+      stats: result.stats
+    });
+
+    return result;
   }
 
   /**

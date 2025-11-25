@@ -24,25 +24,35 @@ class QRService {
     if (this.secretKey.length !== 32) {
       throw new Error(`QR_ENCRYPTION_KEY must be 32 bytes (64 hex characters), got ${this.secretKey.length} bytes`);
     }
-
-    this.iv = crypto.randomBytes(16);
   }
 
   /**
    * Encrypt QR code data
+   * IMPORTANT: Generate a fresh IV for each encryption (security best practice)
    * @param {Object} data - Data to encrypt
    * @returns {string} Encrypted string
    */
   encrypt(data) {
     try {
       const text = JSON.stringify(data);
-      const cipher = crypto.createCipheriv(this.algorithm, Buffer.from(this.secretKey), this.iv);
+
+      // Generate fresh IV for each encryption (CRITICAL for security and reliability)
+      const iv = crypto.randomBytes(16);
+      const cipher = crypto.createCipheriv(this.algorithm, Buffer.from(this.secretKey), iv);
 
       let encrypted = cipher.update(text);
       encrypted = Buffer.concat([encrypted, cipher.final()]);
 
       // Return encrypted data with IV (needed for decryption)
-      return `${this.iv.toString('hex')}:${encrypted.toString('hex')}`;
+      const result = `${iv.toString('hex')}:${encrypted.toString('hex')}`;
+
+      console.log('🔐 QR encryption:', {
+        dataLength: text.length,
+        encryptedLength: result.length,
+        ivLength: iv.length
+      });
+
+      return result;
     } catch (error) {
       console.error('❌ Encryption error:', error);
       throw new Error('Failed to encrypt QR data');
@@ -134,18 +144,23 @@ class QRService {
       const encryptedData = this.encrypt(qrData);
 
       // Generate QR code image (Base64)
-      // Using higher error correction and larger size for better scanning
+      // Using balanced settings for optimal scanning reliability
       const qrCodeImage = await QRCode.toDataURL(encryptedData, {
-        errorCorrectionLevel: 'H', // High error correction (can recover from ~30% damage)
+        errorCorrectionLevel: 'M', // Medium error correction (balanced, can recover from ~15% damage)
         type: 'image/png',
-        quality: 1.0, // Maximum quality
-        margin: 2, // Increased margin for better scanning
-        width: 400, // Larger size for better scan reliability
+        quality: 0.95,
+        margin: 4, // Good margin for scanner detection
+        width: 300, // Standard size - proven to work well
         color: {
           dark: '#000000',
           light: '#FFFFFF',
         },
-        scale: 4, // Higher scale for sharper image
+      });
+
+      console.log('📱 QR code generated:', {
+        dataLength: encryptedData.length,
+        imageSize: '300x300',
+        errorCorrection: 'M'
       });
 
       return {
