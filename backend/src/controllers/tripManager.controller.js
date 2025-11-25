@@ -586,8 +586,19 @@ class TripManagerController {
       const { tripId } = req.params;
       const { status, stopIndex, location, notes } = req.body;
 
+      console.log('🚌 Journey Status Update Request:', {
+        tripId,
+        status,
+        stopIndex,
+        location,
+        notes,
+        userId: req.userId || req.tripManager?.id,
+        timestamp: new Date().toISOString(),
+      });
+
       // Validate input
       if (!status) {
+        console.error('❌ Missing status in journey update');
         return res.status(400).json({
           success: false,
           message: 'Trạng thái hành trình là bắt buộc',
@@ -596,6 +607,7 @@ class TripManagerController {
 
       const validJourneyStatuses = ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'];
       if (!validJourneyStatuses.includes(status)) {
+        console.error('❌ Invalid journey status:', status);
         return res.status(400).json({
           success: false,
           message: `Trạng thái không hợp lệ. Chỉ chấp nhận: ${validJourneyStatuses.join(', ')}`,
@@ -608,11 +620,18 @@ class TripManagerController {
       const trip = await Trip.findById(tripId);
 
       if (!trip) {
+        console.error('❌ Trip not found:', tripId);
         return res.status(404).json({
           success: false,
           message: 'Không tìm thấy chuyến xe',
         });
       }
+
+      console.log('📋 Current trip journey state:', {
+        currentStatus: trip.journey?.currentStatus || 'none',
+        currentStopIndex: trip.journey?.currentStopIndex ?? -1,
+        stoppedAt: trip.journey?.stoppedAt || [],
+      });
 
       // Update journey status using the model method
       const result = await trip.updateJourneyStatus({
@@ -648,6 +667,14 @@ class TripManagerController {
           message = 'Trạng thái hành trình đã được cập nhật';
       }
 
+      console.log('✅ Journey status updated successfully:', {
+        oldStatus: result.oldStatus,
+        newStatus: result.newStatus,
+        oldStopIndex: result.oldStopIndex,
+        currentStopIndex: result.currentStopIndex,
+        stoppedAt: result.stoppedAt,
+      });
+
       res.json({
         success: true,
         message,
@@ -662,10 +689,18 @@ class TripManagerController {
         },
       });
     } catch (error) {
-      console.error('Update journey status error:', error);
+      console.error('❌ Update journey status error:', error);
+      console.error('Error stack:', error.stack);
 
       // Handle specific error messages
       if (error.message.includes('Trạng thái hành trình không hợp lệ')) {
+        return res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      if (error.message.includes('Không thể bỏ qua điểm dừng')) {
         return res.status(400).json({
           success: false,
           message: error.message,

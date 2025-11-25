@@ -525,14 +525,27 @@ TripSchema.methods.updateStatus = async function (newStatus, options = {}) {
 TripSchema.methods.updateJourneyStatus = async function (data) {
   const { status, stopIndex, location, notes, updatedBy } = data;
 
+  // Log journey update for debugging
+  console.log('📍 Journey Update Request:', {
+    tripId: this._id,
+    requestedStatus: status,
+    requestedStopIndex: stopIndex,
+    currentStatus: this.journey?.currentStatus || 'none',
+    currentStopIndex: this.journey?.currentStopIndex ?? -1,
+    location,
+    notes,
+  });
+
   // Validate status
   const validJourneyStatuses = ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'];
   if (!validJourneyStatuses.includes(status)) {
+    console.error('❌ Invalid journey status:', status);
     throw new Error(`Trạng thái hành trình không hợp lệ: ${status}`);
   }
 
   // Initialize journey if not exists
   if (!this.journey) {
+    console.log('🆕 Initializing journey for trip:', this._id);
     this.journey = {
       currentStopIndex: -1, // -1 means at origin (before any stops)
       currentStatus: 'preparing',
@@ -557,21 +570,41 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
     case 'at_stop':
       // REQUIRED: stopIndex must be provided when at_stop
       if (stopIndex === undefined || stopIndex === null) {
+        console.error('❌ Missing stopIndex for at_stop status');
         throw new Error('Vui lòng chọn điểm dừng khi cập nhật trạng thái "Tại điểm dừng"');
       }
 
       // Convert from 1-based (UI) to 0-based (internal)
       const requestedStopIndex = stopIndex - 1;
 
+      console.log('🚏 Processing at_stop:', {
+        uiStopIndex: stopIndex,
+        internalStopIndex: requestedStopIndex,
+        oldStopIndex,
+        oldStatus,
+      });
+
       // Validate: cannot go backward (unless correcting a mistake)
       if (requestedStopIndex < oldStopIndex) {
         // Allow if correcting: was in_transit but marking previous stop
-        console.warn(`Warning: Moving backward from stop ${oldStopIndex} to ${requestedStopIndex}`);
+        console.warn(`⚠️ Moving backward from stop ${oldStopIndex} to ${requestedStopIndex}`);
       }
 
       // Validate: cannot skip stops (must stop at each stop sequentially)
       const expectedNextStop = oldStopIndex + 1;
-      if (requestedStopIndex > expectedNextStop && oldStatus !== 'at_stop') {
+
+      // FIX: Allow moving from origin (-1) to first stop (0)
+      // Only validate if not moving from origin and not correcting from at_stop
+      const isMovingFromOrigin = oldStopIndex === -1 && requestedStopIndex === 0;
+      const isCorrectingAtStop = oldStatus === 'at_stop';
+
+      if (requestedStopIndex > expectedNextStop && !isMovingFromOrigin && !isCorrectingAtStop) {
+        console.error('❌ Cannot skip stops:', {
+          requestedStopIndex,
+          expectedNextStop,
+          oldStopIndex,
+          oldStatus,
+        });
         throw new Error(
           `Không thể bỏ qua điểm dừng! ` +
           `Vui lòng dừng tại điểm dừng ${expectedNextStop + 1} trước khi đến điểm dừng ${requestedStopIndex + 1}`
@@ -584,6 +617,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       if (!this.journey.stoppedAt.includes(newStopIndex)) {
         this.journey.stoppedAt.push(newStopIndex);
         this.journey.stoppedAt.sort((a, b) => a - b); // Keep sorted
+        console.log('✅ Marked stop as visited:', newStopIndex, 'Total visited:', this.journey.stoppedAt);
       }
       break;
 
@@ -657,6 +691,15 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
   this.markModified('journey');
 
   await this.save();
+
+  console.log('✅ Journey updated successfully:', {
+    tripId: this._id,
+    oldStatus,
+    newStatus: this.journey.currentStatus,
+    oldStopIndex,
+    newStopIndex: this.journey.currentStopIndex,
+    stoppedAt: this.journey.stoppedAt,
+  });
 
   return {
     success: true,
