@@ -174,6 +174,12 @@ const QRScannerPage = () => {
     try {
       setLoading(true);
 
+      console.log('📸 Processing QR image upload:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      });
+
       // Create a temporary Html5Qrcode instance just for file scanning
       const html5QrCode = new Html5Qrcode('qr-reader-upload');
 
@@ -182,20 +188,42 @@ const QRScannerPage = () => {
         html5QrCode
           .scanFile(file, true) // true = show image
           .then((decodedText) => {
+            console.log('✅ QR code decoded successfully:', decodedText);
             resolve(decodedText);
           })
           .catch((err) => {
+            console.error('❌ QR decode failed:', err);
             reject(err);
           });
       });
 
-      console.log('Decoded QR from file:', decodedText);
+      console.log('🎫 Decoded QR from file:', decodedText);
 
       // Verify ticket
       await verifyTicket(decodedText);
     } catch (error) {
-      console.error('Upload QR error:', error);
-      message.error('Không thể đọc mã QR từ ảnh. Vui lòng chụp ảnh rõ hơn hoặc sử dụng camera.');
+      console.error('❌ Upload QR error:', error);
+
+      // Provide more specific error messages
+      let errorMessage = 'Không thể đọc mã QR từ ảnh.';
+
+      if (error.message && error.message.includes('No MultiFormat Readers')) {
+        errorMessage = 'Không tìm thấy mã QR trong ảnh. Vui lòng chụp ảnh rõ hơn và đảm bảo mã QR nằm trong khung hình.';
+      } else if (error.message && error.message.includes('NotFoundException')) {
+        errorMessage = 'Không nhận diện được mã QR. Hãy thử:\n- Chụp ảnh rõ nét hơn\n- Tăng độ sáng\n- Giữ camera ổn định\n- Hoặc sử dụng chức năng quét bằng camera';
+      } else if (error.message) {
+        errorMessage = `Lỗi đọc QR: ${error.message}`;
+      }
+
+      message.error({
+        content: errorMessage,
+        duration: 5,
+      });
+
+      setVerificationResult({
+        success: false,
+        message: errorMessage,
+      });
     } finally {
       setLoading(false);
     }
