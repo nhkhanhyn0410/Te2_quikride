@@ -73,13 +73,26 @@ const MyTicketsPage = () => {
 
       const response = await getCustomerTickets(params);
 
-      if (response.status === 'success') {
-        setTickets(response.data.tickets || []);
+      console.log('📋 Tickets response:', {
+        success: response.success,
+        ticketCount: response.data?.tickets?.length || 0,
+        pagination: response.data?.pagination
+      });
+
+      if (response.success) {
+        const tickets = response.data?.tickets || [];
+        const pagination = response.data?.pagination || {};
+
+        setTickets(tickets);
         setPagination({
-          ...pagination,
-          current: response.data.pagination?.currentPage || 1,
-          total: response.data.pagination?.total || 0,
+          current: pagination.page || 1,
+          pageSize: pagination.limit || 10,
+          total: pagination.total || 0,
         });
+
+        console.log('✅ Tickets set:', tickets.length);
+      } else {
+        console.error('❌ Response not successful:', response);
       }
     } catch (error) {
       console.error('Fetch tickets error:', error);
