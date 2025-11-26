@@ -21,6 +21,7 @@ import OperatorTripsPage from './pages/operator/TripsPage';
 import EmployeesPage from './pages/operator/EmployeesPage';
 import ReportsPage from './pages/operator/ReportsPage';
 import VouchersPage from './pages/operator/VouchersPage';
+import OperatorReviewsPage from './pages/OperatorReviewsPage';
 
 // Customer Pages
 import HomePage from './pages/HomePage';
@@ -30,6 +31,7 @@ import TripDetailPage from './pages/TripDetailPage';
 import PassengerInfoPage from './pages/PassengerInfoPage';
 import BookingConfirmationPage from './pages/BookingConfirmationPage';
 import MyTicketsPage from './pages/customer/MyTicketsPage';
+import MyReviewsPage from './pages/MyReviewsPage';
 import GuestTicketLookupPage from './pages/GuestTicketLookupPage';
 import CancelTicketPage from './pages/CancelTicketPage';
 
@@ -97,6 +99,16 @@ function App() {
         <Route path="/tickets/lookup" element={<GuestTicketLookupPage />} />
         <Route path="/tickets/cancel" element={<CancelTicketPage />} />
 
+        {/* Customer Reviews */}
+        <Route
+          path="/my-reviews"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <MyReviewsPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Payment Routes */}
         <Route path="/payment/vnpay-return" element={<VNPayReturn />} />
         <Route path="/booking/success" element={<BookingSuccess />} />
@@ -125,6 +137,7 @@ function App() {
           <Route path="employees" element={<EmployeesPage />} />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="vouchers" element={<VouchersPage />} />
+          <Route path="reviews" element={<OperatorReviewsPage />} />
         </Route>
 
         {/* Trip Manager Auth Routes */}

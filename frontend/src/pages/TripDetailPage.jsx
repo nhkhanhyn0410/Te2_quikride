@@ -27,6 +27,7 @@ import toast from 'react-hot-toast';
 import { getTripDetails, getAvailableSeats } from '../services/bookingApi';
 import useBookingStore from '../store/bookingStore';
 import SeatMapComponent from '../components/SeatMapComponent';
+import ReviewsSection from '../components/ReviewsSection';
 import { getAmenityIcon } from '../utils/constants';
 
 const { Title, Text } = Typography;
@@ -301,6 +302,9 @@ const TripDetailPage = () => {
                 ))}
               </Space>
             </Card>
+
+            {/* Reviews Section */}
+            <ReviewsSection tripId={tripId} />
 
             {/* Policies */}
             {trip.policies && (
