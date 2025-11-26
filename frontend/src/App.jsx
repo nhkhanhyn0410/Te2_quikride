@@ -31,6 +31,8 @@ import PassengerInfoPage from './pages/PassengerInfoPage';
 import BookingConfirmationPage from './pages/BookingConfirmationPage';
 import MyTicketsPage from './pages/customer/MyTicketsPage';
 import MyReviewsPage from './pages/MyReviewsPage';
+import MyComplaintsPage from './pages/MyComplaintsPage';
+import ComplaintDetailPage from './pages/ComplaintDetailPage';
 import GuestTicketLookupPage from './pages/GuestTicketLookupPage';
 import CancelTicketPage from './pages/CancelTicketPage';
 
@@ -104,6 +106,24 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['customer']}>
               <MyReviewsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Customer Complaints */}
+        <Route
+          path="/complaints"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <MyComplaintsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/complaints/:id"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <ComplaintDetailPage />
             </ProtectedRoute>
           }
         />
