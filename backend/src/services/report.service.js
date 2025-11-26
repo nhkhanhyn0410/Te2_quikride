@@ -153,7 +153,18 @@ class ReportService {
       routeData.tickets += booking.seats.length;
     });
 
-    return Array.from(routeMap.values());
+    // Transform to match frontend expectations with correct field names
+    return Array.from(routeMap.values()).map(route => ({
+      routeId: route.routeId,
+      routeName: route.routeName,
+      origin: route.origin,
+      destination: route.destination,
+      totalRevenue: route.revenue, // Frontend expects totalRevenue
+      ticketCount: route.tickets, // Frontend expects ticketCount
+      bookings: route.bookings,
+      averagePrice: route.tickets > 0 ? Math.round(route.revenue / route.tickets) : 0, // Calculate average price per ticket
+      cancellationRate: 0, // TODO: Calculate from separate cancelled bookings query
+    }));
   }
 
   /**
