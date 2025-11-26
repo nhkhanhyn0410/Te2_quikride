@@ -114,32 +114,24 @@ const TripsPage = () => {
       }
       setShowSearchForm(false); // Never show main search form on results page
     } else {
-      // Trips page: show search form with pre-filled or empty values
-      if (searchCriteria.fromCity && searchCriteria.toCity && searchCriteria.date) {
-        // If there are existing search criteria, use them and fetch those trips
-        console.log('Pre-filling trips page form with criteria:', searchCriteria);
-        searchForm.setFieldsValue({
-          fromCity: searchCriteria.fromCity,
-          toCity: searchCriteria.toCity,
-          date: dayjs(searchCriteria.date),
-          passengers: searchCriteria.passengers || 1
-        });
-        fetchTrips(); // Fetch trips with existing criteria
-      } else {
-        // Otherwise, show empty form with today's date and fetch ALL trips
-        console.log('Showing empty search form on trips page and fetching all trips');
-        searchForm.setFieldsValue({
-          fromCity: '',
-          toCity: '',
-          date: dayjs(),
-          passengers: 1
-        });
-        // Fetch all available trips (no city/date filters)
-        fetchAllTrips();
-      }
+      // Trips page: ALWAYS fetch all trips and show empty search form
+      // This allows users to browse all trips and then filter if needed
+      console.log('On trips page - fetching all trips and showing empty search form');
+
+      // Always show empty form to encourage fresh search
+      searchForm.setFieldsValue({
+        fromCity: '',
+        toCity: '',
+        date: dayjs(),
+        passengers: 1
+      });
+
+      // Always fetch ALL available trips (no filters)
+      fetchAllTrips();
+
       setShowSearchForm(true); // Always show search form on trips page
     }
-  }, [location.pathname, searchCriteria]);
+  }, [location.pathname]); // Only depend on pathname, not searchCriteria
 
   useEffect(() => {
     applyFilters();
