@@ -344,6 +344,12 @@ class DashboardService {
    * Get trend data for charts (revenue and bookings)
    */
   static async getTrendData(operatorId, period) {
+    console.log('📊 Getting trend data for:', {
+      operatorId,
+      operatorIdType: typeof operatorId,
+      period
+    });
+
     let groupBy, dateFormat;
 
     switch (period) {
@@ -387,6 +393,11 @@ class DashboardService {
         $limit: period === 'day' ? 24 : period === 'week' ? 7 : period === 'month' ? 31 : 12,
       },
     ]);
+
+    console.log('📈 Trend data results:', {
+      bookingTrendsCount: bookingTrends.length,
+      sample: bookingTrends[0]
+    });
 
     return {
       bookings: bookingTrends.map((item) => ({
