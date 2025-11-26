@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from './theme';
 
 // Layouts
 import DashboardLayout from './components/operator/DashboardLayout';
@@ -59,7 +60,7 @@ import ContentManagementPage from './pages/admin/ContentManagementPage';
 
 function App() {
   return (
-    <>
+    <ThemeProvider>
       <Toaster
         position="top-right"
         toastOptions={{
@@ -253,7 +254,7 @@ function App() {
           }
         />
       </Routes>
-    </>
+    </ThemeProvider>
   );
 }
 
