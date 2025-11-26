@@ -23,6 +23,7 @@ import ReportsPage from './pages/operator/ReportsPage';
 import VouchersPage from './pages/operator/VouchersPage';
 
 // Customer Pages
+import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import TripsPage from './pages/TripsPage';
 import TripDetailPage from './pages/TripDetailPage';
@@ -85,7 +86,7 @@ function App() {
         <Route path="/register" element={<CustomerRegisterPage />} />
 
         {/* Customer Booking Flow */}
-        <Route path="/" element={<SearchPage />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/trips" element={<TripsPage />} />
         <Route path="/trips/:tripId" element={<TripDetailPage />} />
         <Route path="/booking/passenger-info" element={<PassengerInfoPage />} />
