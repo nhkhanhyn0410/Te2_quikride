@@ -10,24 +10,20 @@ import {
   Tag,
   Divider,
   Spin,
-  Descriptions,
   message,
+  Badge,
 } from 'antd';
 import {
-  ClockCircleOutlined,
-  EnvironmentOutlined,
   ArrowLeftOutlined,
-  CarOutlined,
-  PhoneOutlined,
-  MailOutlined,
-  StarOutlined,
+  EnvironmentOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import { getTripDetails, getAvailableSeats } from '../services/bookingApi';
 import useBookingStore from '../store/bookingStore';
 import SeatMapComponent from '../components/SeatMapComponent';
-import { getAmenityIcon } from '../utils/constants';
+import Header from '../components/layout/Header';
+import Footer from '../components/layout/Footer';
 
 const { Title, Text } = Typography;
 
@@ -49,7 +45,6 @@ const TripDetailPage = () => {
   const [selectedPickup, setSelectedPickup] = useState(null);
   const [selectedDropoff, setSelectedDropoff] = useState(null);
 
-  // Clear selected seats when entering a new trip page
   useEffect(() => {
     clearSeats();
     fetchTripDetails();
@@ -61,24 +56,23 @@ const TripDetailPage = () => {
       setLoading(true);
       const response = await getTripDetails(tripId);
 
-      console.log('Trip detail response:', response);
-
       if (response.status === 'success' && response.data?.trip) {
         const tripData = response.data.trip;
         setTrip(tripData);
         setSelectedTrip(tripData);
 
-        console.log('TripDetailPage - Set selected trip:', {
-          tripId: tripData._id,
-          hasId: !!tripData._id,
-          trip: tripData,
-        });
+        // Auto-select first pickup and dropoff points
+        if (tripData.route?.pickupPoints?.length > 0) {
+          setSelectedPickup(tripData.route.pickupPoints[0]);
+        }
+        if (tripData.route?.dropoffPoints?.length > 0) {
+          setSelectedDropoff(tripData.route.dropoffPoints[0]);
+        }
       } else {
         toast.error('Không tìm thấy thông tin chuyến xe');
         navigate('/');
       }
     } catch (error) {
-      console.error('Fetch trip details error:', error);
       toast.error(error || 'Có lỗi xảy ra');
       navigate('/');
     } finally {
@@ -89,8 +83,6 @@ const TripDetailPage = () => {
   const fetchAvailableSeats = async () => {
     try {
       const response = await getAvailableSeats(tripId);
-      console.log('Available seats response:', response);
-
       if (response.status === 'success' && response.data) {
         setAvailableSeats(response.data.availableSeats || response.data.available || []);
       }
@@ -115,26 +107,17 @@ const TripDetailPage = () => {
       return;
     }
 
-    // Store pickup/dropoff points
     setPickupPoint(selectedPickup);
     setDropoffPoint(selectedDropoff);
-
-    // Debug logging
-    console.log('TripDetailPage - Before navigate to passenger info:', {
-      selectedTrip,
-      selectedSeats,
-      selectedPickup,
-      selectedDropoff,
-      hasTripId: !!selectedTrip?._id,
-      seatsCount: selectedSeats?.length || 0,
-    });
-
-    // Navigate to passenger info
     navigate('/booking/passenger-info');
   };
 
   const formatTime = (dateString) => {
-    return dayjs(dateString).format('HH:mm, DD/MM/YYYY');
+    return dayjs(dateString).format('HH:mm');
+  };
+
+  const formatDate = (dateString) => {
+    return dayjs(dateString).format('DD/MM/YYYY');
   };
 
   const formatPrice = (price) => {
@@ -143,7 +126,6 @@ const TripDetailPage = () => {
   };
 
   const getSeatPrice = () => {
-    // Try multiple price fields in order of preference
     return trip?.pricing?.finalPrice || trip?.finalPrice || trip?.pricing?.basePrice || 0;
   };
 
@@ -163,216 +145,257 @@ const TripDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <Header />
+
+      {/* Page Header */}
+      <div className="bg-gradient-to-r from-gray-700 to-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/trips')}
+            className="mb-4 text-white border-white hover:bg-white/20"
           >
             Quay lại
           </Button>
+          <Title level={1} className="!text-white !mb-2">
+            Chi Tiết Xe
+          </Title>
+          <Text className="text-gray-300">
+            Nhấp vào ghế trống để đặt chỗ
+          </Text>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Row gutter={[24, 24]}>
-          {/* Trip Information */}
-          <Col xs={24} lg={16}>
-            {/* Operator Info */}
-            <Card className="mb-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <Title level={3}>{trip.operator?.companyName}</Title>
-                  {trip.operator?.rating && (
-                    <div>
-                      <Tag color="gold">
-                        <StarOutlined /> {trip.operator.rating.average?.toFixed(1)}
-                      </Tag>
-                      <Text className="text-gray-500">
-                        ({trip.operator.rating.total} đánh giá)
-                      </Text>
-                    </div>
-                  )}
-                </div>
-                <Space direction="vertical" className="text-right">
-                  <Text>
-                    <PhoneOutlined /> {trip.operator?.phone}
-                  </Text>
-                  <Text>
-                    <MailOutlined /> {trip.operator?.email}
-                  </Text>
-                </Space>
-              </div>
-            </Card>
-
-            {/* Route & Schedule Info */}
-            <Card title="Thông tin lộ trình" className="mb-6">
-              <Descriptions column={1} bordered>
-                <Descriptions.Item label="Tuyến đường">
-                  <strong>{trip.route?.name}</strong> ({trip.route?.code})
-                </Descriptions.Item>
-                <Descriptions.Item label="Điểm đi">
-                  <EnvironmentOutlined /> {trip.route?.origin?.city} - {trip.route?.origin?.address}
-                </Descriptions.Item>
-                <Descriptions.Item label="Điểm đến">
-                  <EnvironmentOutlined /> {trip.route?.destination?.city} -{' '}
-                  {trip.route?.destination?.address}
-                </Descriptions.Item>
-                <Descriptions.Item label="Thời gian khởi hành">
-                  <ClockCircleOutlined /> {formatTime(trip.departureTime)}
-                </Descriptions.Item>
-                <Descriptions.Item label="Thời gian đến">
-                  <ClockCircleOutlined /> {formatTime(trip.arrivalTime)}
-                </Descriptions.Item>
-                <Descriptions.Item label="Thời gian di chuyển">
-                  {trip.duration?.formatted || 'N/A'}
-                </Descriptions.Item>
-                <Descriptions.Item label="Khoảng cách">
-                  {trip.route?.distance} km
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-
-            {/* Bus Info */}
-            <Card title={<><CarOutlined /> Thông tin xe</>} className="mb-6">
-              <Descriptions column={2} bordered>
-                <Descriptions.Item label="Biển số xe">{trip.bus?.busNumber}</Descriptions.Item>
-                <Descriptions.Item label="Loại xe">{trip.bus?.busType}</Descriptions.Item>
-                <Descriptions.Item label="Tổng số ghế" span={2}>
-                  {trip.seats?.total} ghế ({trip.seats?.available} ghế trống)
-                </Descriptions.Item>
-                <Descriptions.Item label="Tiện nghi" span={2}>
-                  <Space wrap>
-                    {trip.bus?.amenities?.map(amenity => (
-                      <Tag key={amenity} color="blue">
-                        {getAmenityIcon(amenity)} {amenity}
-                      </Tag>
-                    ))}
-                  </Space>
-                </Descriptions.Item>
-              </Descriptions>
-            </Card>
-
-            {/* Pickup Points */}
-            <Card title="Điểm đón" className="mb-6">
-              <Space direction="vertical" className="w-full">
-                {trip.route?.pickupPoints?.map((point, index) => (
-                  <Card
-                    key={index}
-                    size="small"
-                    className={`cursor-pointer ${
-                      selectedPickup?.name === point.name ? 'border-blue-500 border-2' : ''
-                    }`}
-                    onClick={() => setSelectedPickup(point)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Text strong>{point.name}</Text>
-                        <div className="text-sm text-gray-500">{point.address}</div>
-                      </div>
-                      <Text>{dayjs(trip.departureTime).format('HH:mm')}</Text>
-                    </div>
-                  </Card>
-                ))}
-              </Space>
-            </Card>
-
-            {/* Dropoff Points */}
-            <Card title="Điểm trả" className="mb-6">
-              <Space direction="vertical" className="w-full">
-                {trip.route?.dropoffPoints?.map((point, index) => (
-                  <Card
-                    key={index}
-                    size="small"
-                    className={`cursor-pointer ${
-                      selectedDropoff?.name === point.name ? 'border-blue-500 border-2' : ''
-                    }`}
-                    onClick={() => setSelectedDropoff(point)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <Text strong>{point.name}</Text>
-                        <div className="text-sm text-gray-500">{point.address}</div>
-                      </div>
-                      <Text>{dayjs(trip.arrivalTime).format('HH:mm')}</Text>
-                    </div>
-                  </Card>
-                ))}
-              </Space>
-            </Card>
-
-            {/* Policies */}
-            {trip.policies && (
-              <Card title="Chính sách" className="mb-6">
-                <div className="whitespace-pre-line">{trip.policies}</div>
-              </Card>
-            )}
-          </Col>
-
-          {/* Seat Selection & Booking Summary */}
-          <Col xs={24} lg={8}>
-            {/* Seat Map */}
-            <Card title="Chọn ghế" className="mb-6 sticky top-4">
+          {/* Left Section - Seat Map */}
+          <Col xs={24} lg={14}>
+            <Card title="Sơ Đồ Chỗ Ngồi" className="shadow-lg">
               <SeatMapComponent
                 seatLayout={trip.bus?.seatLayout}
                 bookedSeats={trip.seats?.bookedSeatNumbers || []}
                 heldSeats={trip.seats?.heldSeatNumbers || []}
                 availableSeats={availableSeats}
               />
+            </Card>
+
+            {/* Pickup Points */}
+            {trip.route?.pickupPoints && trip.route.pickupPoints.length > 0 && (
+              <Card title="Điểm Đón" className="mt-6 shadow-lg">
+                <Space direction="vertical" className="w-full">
+                  {trip.route.pickupPoints.map((point, index) => (
+                    <Card
+                      key={index}
+                      size="small"
+                      className={`cursor-pointer transition-all ${
+                        selectedPickup?.name === point.name
+                          ? 'border-red-600 border-2 bg-red-50'
+                          : 'hover:border-red-400'
+                      }`}
+                      onClick={() => setSelectedPickup(point)}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <Text strong>{point.name}</Text>
+                          <div className="text-sm text-gray-500">
+                            <EnvironmentOutlined /> {point.address}
+                          </div>
+                        </div>
+                        <Text strong className="text-red-600">
+                          {formatTime(trip.departureTime)}
+                        </Text>
+                      </div>
+                    </Card>
+                  ))}
+                </Space>
+              </Card>
+            )}
+
+            {/* Dropoff Points */}
+            {trip.route?.dropoffPoints && trip.route.dropoffPoints.length > 0 && (
+              <Card title="Điểm Trả" className="mt-6 shadow-lg">
+                <Space direction="vertical" className="w-full">
+                  {trip.route.dropoffPoints.map((point, index) => (
+                    <Card
+                      key={index}
+                      size="small"
+                      className={`cursor-pointer transition-all ${
+                        selectedDropoff?.name === point.name
+                          ? 'border-red-600 border-2 bg-red-50'
+                          : 'hover:border-red-400'
+                      }`}
+                      onClick={() => setSelectedDropoff(point)}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <Text strong>{point.name}</Text>
+                          <div className="text-sm text-gray-500">
+                            <EnvironmentOutlined /> {point.address}
+                          </div>
+                        </div>
+                        <Text strong className="text-red-600">
+                          {formatTime(trip.arrivalTime)}
+                        </Text>
+                      </div>
+                    </Card>
+                  ))}
+                </Space>
+              </Card>
+            )}
+          </Col>
+
+          {/* Right Section - Booking Summary */}
+          <Col xs={24} lg={10}>
+            <Card className="shadow-lg sticky top-4">
+              {/* Your Destination */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <Title level={5} className="!mb-0">
+                    Điểm Đến Của Bạn
+                  </Title>
+                  <Button
+                    type="link"
+                    size="small"
+                    className="text-red-600"
+                    onClick={() => navigate('/trips')}
+                  >
+                    Thay đổi tuyến
+                  </Button>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <Text className="text-xs text-gray-500 block">Từ (Điểm Đón)</Text>
+                      <Text strong className="block">
+                        {selectedPickup?.name || trip.route?.origin?.city || 'Chưa chọn'}
+                      </Text>
+                      <Text className="text-xs text-gray-600">
+                        {trip.route?.origin?.city} ({formatTime(trip.departureTime)})
+                      </Text>
+                    </div>
+                    <Badge
+                      count={`${selectedSeats.length}`}
+                      showZero
+                      className="bg-red-600"
+                      style={{ backgroundColor: '#DC2626' }}
+                    />
+                  </div>
+
+                  <Divider className="my-3" />
+
+                  <div>
+                    <Text className="text-xs text-gray-500 block">Đến</Text>
+                    <Text strong className="block">
+                      {selectedDropoff?.name || trip.route?.destination?.city || 'Chưa chọn'}
+                    </Text>
+                    <Text className="text-xs text-gray-600">
+                      {trip.route?.destination?.city} ({formatTime(trip.arrivalTime)})
+                    </Text>
+                  </div>
+                </div>
+              </div>
 
               <Divider />
 
               {/* Selected Seats */}
-              <div className="mb-4">
-                <Text strong>Ghế đã chọn:</Text>
-                <div className="mt-2">
-                  {selectedSeats.length === 0 ? (
-                    <Text className="text-gray-400">Chưa chọn ghế</Text>
-                  ) : (
-                    <Space wrap>
+              <div className="mb-6">
+                <Title level={5} className="!mb-3">
+                  Ghế Đã Chọn
+                </Title>
+                {selectedSeats.length === 0 ? (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                    <Text className="text-yellow-700">Chưa chọn ghế nào</Text>
+                  </div>
+                ) : (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <Space wrap size={[8, 8]}>
                       {selectedSeats.map(seat => (
-                        <Tag key={seat.seatNumber} color="blue" className="text-base px-3 py-1">
+                        <Tag
+                          key={seat.seatNumber}
+                          color="red"
+                          className="text-base px-4 py-2 font-semibold"
+                        >
                           {seat.seatNumber}
                         </Tag>
                       ))}
                     </Space>
-                  )}
-                </div>
+                    <Divider className="my-3" />
+                    <div className="flex justify-between items-center">
+                      <Text className="text-sm text-gray-600">Tổng ghế:</Text>
+                      <Text strong className="text-lg">
+                        {selectedSeats.length} ghế
+                      </Text>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <Divider />
+              {selectedSeats.length > 0 && (
+                <>
+                  <Divider />
 
-              {/* Price Summary */}
-              <div className="mb-4">
-                <div className="flex justify-between mb-2">
-                  <Text>Giá vé ({selectedSeats.length} ghế)</Text>
-                  <Text strong className="text-blue-600">
-                    {selectedSeats.length > 0 ? formatPrice(getSeatPrice()) : '0đ'} x {selectedSeats.length}
-                  </Text>
-                </div>
-                <Divider className="my-2" />
-                <div className="flex justify-between">
-                  <Text strong className="text-lg">Tổng cộng</Text>
-                  <Text strong className="text-lg text-blue-600">
-                    {formatPrice(calculateTotalPrice())}
-                  </Text>
-                </div>
-              </div>
+                  {/* Fare Details */}
+                  <div className="mb-6">
+                    <Title level={5} className="!mb-3">
+                      Chi Tiết Giá
+                    </Title>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <Text className="text-gray-600">Giá cơ bản:</Text>
+                        <Text>{formatPrice(getSeatPrice())}</Text>
+                      </div>
+                      <div className="flex justify-between">
+                        <Text className="text-gray-600">Số lượng ghế:</Text>
+                        <Text>{selectedSeats.length} x {formatPrice(getSeatPrice())}</Text>
+                      </div>
+                      {trip.discount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <Text className="text-green-600">Giảm giá ({trip.discount}%):</Text>
+                          <Text className="text-green-600">
+                            -{formatPrice(getSeatPrice() * selectedSeats.length * trip.discount / 100)}
+                          </Text>
+                        </div>
+                      )}
+                      <Divider className="my-2" />
+                      <div className="flex justify-between items-center">
+                        <Text strong className="text-lg">Tổng Giá:</Text>
+                        <Text strong className="text-2xl text-red-600">
+                          NPR {calculateTotalPrice()}
+                        </Text>
+                      </div>
+                      <Text className="text-xs text-gray-500 block text-center">
+                        (Đã bao gồm thuế)
+                      </Text>
+                    </div>
+                  </div>
+                </>
+              )}
 
+              {/* Checkout Button */}
               <Button
                 type="primary"
                 size="large"
                 block
                 onClick={handleContinue}
                 disabled={selectedSeats.length === 0 || !selectedPickup || !selectedDropoff}
+                className="!h-14 text-lg font-bold bg-red-600 hover:bg-red-700 border-red-600 disabled:bg-gray-400"
               >
-                Tiếp tục
+                TIẾN HÀNH THANH TOÁN
               </Button>
+
+              {/* Refund Notice */}
+              <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <Text className="text-xs text-orange-700 block text-center">
+                  <Badge status="warning" /> Không hoàn tiền
+                </Text>
+              </div>
             </Card>
           </Col>
         </Row>
       </div>
+
+      <Footer />
     </div>
   );
 };

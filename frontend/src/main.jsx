@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         locale={viVN}
         theme={{
           token: {
-            colorPrimary: '#0ea5e9',
+            colorPrimary: '#DC2626',
             borderRadius: 8,
             fontFamily: 'Inter, system-ui, sans-serif',
           },

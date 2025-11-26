@@ -10,65 +10,42 @@ import {
   Col,
   Typography,
   Space,
-  Dropdown,
 } from 'antd';
 import {
   SearchOutlined,
   SwapOutlined,
   CalendarOutlined,
-  LoginOutlined,
-  LogoutOutlined,
-  DownOutlined,
-  UserOutlined,
+  SafetyOutlined,
+  SyncOutlined,
+  CustomerServiceOutlined,
+  EnvironmentOutlined,
 } from '@ant-design/icons';
+import { FiLock, FiRefreshCw, FiHeadphones } from 'react-icons/fi';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import useBookingStore from '../store/bookingStore';
-import useAuthStore from '../store/authStore';
+import Header from '../components/layout/Header';
+import Footer from '../components/layout/Footer';
 
 const { Title, Text } = Typography;
 
 const SearchPage = () => {
   const navigate = useNavigate();
   const { searchCriteria, setSearchCriteria } = useBookingStore();
-  const { user, isAuthenticated, logout } = useAuthStore();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-
-  const handleLogout = () => {
-    logout();
-    toast.success('Đã đăng xuất');
-  };
-
-  // User menu items
-  const userMenuItems = [
-    {
-      key: 'my-tickets',
-      label: 'Vé của tôi',
-      icon: <UserOutlined />,
-      onClick: () => navigate('/my-tickets'),
-    },
-    {
-      key: 'logout',
-      label: 'Đăng xuất',
-      icon: <LogoutOutlined />,
-      onClick: handleLogout,
-    },
-  ];
 
   const handleSearch = async (values) => {
     try {
       setLoading(true);
 
-      // Format date to YYYY-MM-DD
       const searchData = {
         fromCity: values.fromCity,
         toCity: values.toCity,
         date: values.date ? dayjs(values.date).format('YYYY-MM-DD') : null,
-        passengers: 1, // Default to 1, users can select seats freely in trip detail page
+        passengers: 1,
       };
 
-      // Validate
       if (!searchData.fromCity || !searchData.toCity) {
         toast.error('Vui lòng nhập điểm đi và điểm đến');
         return;
@@ -79,10 +56,7 @@ const SearchPage = () => {
         return;
       }
 
-      // Store search criteria
       setSearchCriteria(searchData);
-
-      // Navigate to results page
       navigate('/trips');
     } catch (error) {
       toast.error(error.message || 'Có lỗi xảy ra khi tìm kiếm');
@@ -100,183 +74,349 @@ const SearchPage = () => {
     });
   };
 
-  // Disable past dates
   const disabledDate = (current) => {
     return current && current < dayjs().startOf('day');
   };
 
+  const handleRouteClick = (from, to) => {
+    form.setFieldsValue({
+      fromCity: from,
+      toCity: to,
+      date: dayjs(),
+    });
+  };
+
+  // Popular routes data
+  const popularRoutes = [
+    {
+      from: 'Kathmandu',
+      fromDetails: 'New Buspark',
+      to: 'Pyuthan',
+      toDetails: 'Hrs',
+      duration: '12 Hrs',
+      price: 'Rs. 1600',
+      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
+    },
+    {
+      from: 'Pokhara',
+      fromDetails: '',
+      to: 'Pokhara',
+      toDetails: '8 Hrs',
+      duration: '8 Hrs',
+      price: 'Rs. 1300',
+      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
+    },
+    {
+      from: 'Kathmandu',
+      fromDetails: '',
+      to: 'Lumbini',
+      toDetails: '12 Hrs',
+      duration: '12 Hrs',
+      price: 'Rs. 2200',
+      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
+    },
+    {
+      from: 'Kathmandu',
+      fromDetails: '',
+      to: 'Chitwan',
+      toDetails: '6 Hrs',
+      duration: '6 Hrs',
+      price: 'Rs. 1000',
+      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
+    },
+    {
+      from: 'Pokhara',
+      fromDetails: '',
+      to: 'Mustang',
+      toDetails: '16 Hrs',
+      duration: '16 Hrs',
+      price: 'Rs. 2000',
+      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
+    },
+    {
+      from: 'Pokhara',
+      fromDetails: '',
+      to: 'Pyuthan',
+      toDetails: '8 Hrs',
+      duration: '8 Hrs',
+      price: 'Rs. 1400',
+      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Title level={3} className="!mb-0 text-blue-600 cursor-pointer" onClick={() => navigate('/')}>
-              🚌 QuikRide
-            </Title>
-            <Space size="middle">
-              {isAuthenticated && user?.role === 'customer' ? (
-                <>
-                  <Button type="link" onClick={() => navigate('/my-tickets')}>
-                    Vé của tôi
-                  </Button>
-                  <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
-                    <Button type="text">
-                      <Space>
-                        <UserOutlined />
-                        {user?.name || 'Tài khoản'}
-                        <DownOutlined />
-                      </Space>
-                    </Button>
-                  </Dropdown>
-                </>
-              ) : (
-                <>
-                  <Button type="link" onClick={() => navigate('/tickets/lookup')}>
-                    Tra cứu vé
-                  </Button>
-                  <Button type="link" onClick={() => navigate('/login')} icon={<LoginOutlined />}>
-                    Đăng nhập
-                  </Button>
-                  <Button type="primary" onClick={() => navigate('/register')}>
-                    Đăng ký
-                  </Button>
-                </>
-              )}
-              <Button type="link" onClick={() => navigate('/operator/login')} className="text-gray-500">
-                Nhà xe
-              </Button>
-            </Space>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+
+      {/* Hero Section with Bus Showcase */}
+      <div className="relative bg-gradient-to-br from-gray-100 to-gray-200">
+        {/* Background placeholder for bus image */}
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-300/50 to-gray-400/50">
+          <div className="max-w-7xl mx-auto h-full flex items-center justify-center">
+            <div className="text-center text-gray-500 opacity-30">
+              <div className="text-9xl mb-4">🚌</div>
+              <Text className="text-2xl">Bus Showcase Image</Text>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-8">
-          <Title level={1} className="!text-4xl md:!text-5xl !mb-4">
-            Đặt vé xe khách trực tuyến
-          </Title>
-          <Text className="text-lg text-gray-600">
-            Tìm và đặt vé xe khách nhanh chóng, tiện lợi
-          </Text>
-        </div>
-
-        {/* Search Card */}
-        <Card className="shadow-2xl rounded-2xl max-w-4xl mx-auto">
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSearch}
-            initialValues={{
-              fromCity: searchCriteria.fromCity,
-              toCity: searchCriteria.toCity,
-              date: searchCriteria.date ? dayjs(searchCriteria.date) : null,
-            }}
-          >
-            <Row gutter={[16, 16]}>
-              {/* From City */}
-              <Col xs={24} md={11}>
-                <Form.Item
-                  name="fromCity"
-                  label="Điểm đi"
-                  rules={[{ required: true, message: 'Vui lòng nhập điểm đi' }]}
-                >
-                  <Input
-                    size="large"
-                    placeholder="VD: Hà Nội, TP HCM..."
-                    prefix={<SearchOutlined className="text-gray-400" />}
-                  />
-                </Form.Item>
-              </Col>
-
-              {/* Swap Button */}
-              <Col xs={24} md={2} className="flex items-center justify-center">
-                <Button
-                  type="text"
-                  icon={<SwapOutlined />}
-                  onClick={handleSwapCities}
-                  className="mt-6"
-                />
-              </Col>
-
-              {/* To City */}
-              <Col xs={24} md={11}>
-                <Form.Item
-                  name="toCity"
-                  label="Điểm đến"
-                  rules={[{ required: true, message: 'Vui lòng nhập điểm đến' }]}
-                >
-                  <Input
-                    size="large"
-                    placeholder="VD: Đà Nẵng, Nha Trang..."
-                    prefix={<SearchOutlined className="text-gray-400" />}
-                  />
-                </Form.Item>
-              </Col>
-
-              {/* Date */}
-              <Col xs={24}>
-                <Form.Item
-                  name="date"
-                  label="Ngày đi"
-                  rules={[{ required: true, message: 'Vui lòng chọn ngày đi' }]}
-                >
-                  <DatePicker
-                    size="large"
-                    className="w-full"
-                    format="DD/MM/YYYY"
-                    placeholder="Chọn ngày đi"
-                    disabledDate={disabledDate}
-                    suffixIcon={<CalendarOutlined />}
-                  />
-                </Form.Item>
-              </Col>
-
-              {/* Submit Button */}
-              <Col xs={24}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  size="large"
-                  loading={loading}
-                  icon={<SearchOutlined />}
-                  className="w-full h-12 text-lg font-semibold"
-                >
-                  Tìm chuyến xe
-                </Button>
-              </Col>
-            </Row>
-          </Form>
-        </Card>
-
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <Card className="text-center hover:shadow-lg transition-shadow">
-            <div className="text-4xl mb-4">🎫</div>
-            <Title level={4}>Đặt vé dễ dàng</Title>
-            <Text className="text-gray-600">
-              Tìm kiếm và đặt vé xe khách chỉ với vài bước đơn giản
+        {/* Hero Content */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+          <div className="text-center mb-8">
+            <Text className="text-gray-700 text-lg mb-2 block">
+              Đặt vé xe khách của bạn
             </Text>
-          </Card>
+            <Title level={1} className="!text-4xl md:!text-5xl !mb-6 !font-bold">
+              Tìm Chuyến Xe Tốt Nhất Cho Bạn!
+            </Title>
+          </div>
 
-          <Card className="text-center hover:shadow-lg transition-shadow">
-            <div className="text-4xl mb-4">💳</div>
-            <Title level={4}>Thanh toán an toàn</Title>
-            <Text className="text-gray-600">
-              Nhiều phương thức thanh toán tiện lợi và bảo mật
-            </Text>
-          </Card>
+          {/* Search Form */}
+          <Card className="max-w-5xl mx-auto shadow-2xl">
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSearch}
+              initialValues={{
+                fromCity: searchCriteria.fromCity,
+                toCity: searchCriteria.toCity,
+                date: searchCriteria.date ? dayjs(searchCriteria.date) : null,
+              }}
+            >
+              <Row gutter={[16, 16]} align="middle">
+                {/* From City */}
+                <Col xs={24} md={10}>
+                  <Form.Item
+                    name="fromCity"
+                    className="!mb-0"
+                    rules={[{ required: true, message: 'Bắt buộc' }]}
+                  >
+                    <Input
+                      size="large"
+                      placeholder="Từ..."
+                      prefix={<EnvironmentOutlined className="text-gray-400" />}
+                      className="!py-3"
+                    />
+                  </Form.Item>
+                </Col>
 
-          <Card className="text-center hover:shadow-lg transition-shadow">
-            <div className="text-4xl mb-4">⚡</div>
-            <Title level={4}>Xác nhận nhanh chóng</Title>
-            <Text className="text-gray-600">
-              Nhận vé điện tử ngay sau khi thanh toán thành công
-            </Text>
+                {/* Swap Button */}
+                <Col xs={24} md={2} className="flex justify-center">
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<SwapOutlined className="text-white" />}
+                    onClick={handleSwapCities}
+                    size="large"
+                    className="bg-red-600 hover:bg-red-700 border-red-600"
+                  />
+                </Col>
+
+                {/* To City */}
+                <Col xs={24} md={10}>
+                  <Form.Item
+                    name="toCity"
+                    className="!mb-0"
+                    rules={[{ required: true, message: 'Bắt buộc' }]}
+                  >
+                    <Input
+                      size="large"
+                      placeholder="Đến..."
+                      prefix={<EnvironmentOutlined className="text-gray-400" />}
+                      className="!py-3"
+                    />
+                  </Form.Item>
+                </Col>
+
+                {/* Date */}
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    name="date"
+                    className="!mb-0"
+                    rules={[{ required: true, message: 'Bắt buộc' }]}
+                  >
+                    <DatePicker
+                      size="large"
+                      className="w-full !py-3"
+                      format="DD/MM/YYYY"
+                      placeholder="dd/mm/yyyy"
+                      disabledDate={disabledDate}
+                      suffixIcon={<CalendarOutlined />}
+                    />
+                  </Form.Item>
+                </Col>
+
+                {/* Search Button */}
+                <Col xs={24} md={12}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    size="large"
+                    loading={loading}
+                    icon={<SearchOutlined />}
+                    className="w-full !py-6 !h-auto text-lg font-semibold bg-red-600 hover:bg-red-700 border-red-600"
+                  >
+                    Tìm kiếm
+                  </Button>
+                </Col>
+              </Row>
+            </Form>
           </Card>
         </div>
       </div>
+
+      {/* Services Section */}
+      <div id="services" className="bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <Title level={2} className="!mb-2">
+              Dịch Vụ <span className="text-red-600">Của Chúng Tôi</span>
+            </Title>
+          </div>
+
+          <Row gutter={[32, 32]}>
+            {/* Secure Payment */}
+            <Col xs={24} md={8}>
+              <Card className="text-center h-full hover:shadow-xl transition-shadow border-gray-200">
+                <div className="mb-4 flex justify-center">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+                    <FiLock className="text-4xl text-gray-700" />
+                  </div>
+                </div>
+                <Title level={4} className="!mb-3">
+                  Thanh Toán An Toàn
+                </Title>
+                <Text className="text-gray-600">
+                  Tích hợp cổng thanh toán an toàn để người dùng thanh toán vé của họ
+                </Text>
+              </Card>
+            </Col>
+
+            {/* Refund Policy */}
+            <Col xs={24} md={8}>
+              <Card className="text-center h-full hover:shadow-xl transition-shadow border-gray-200">
+                <div className="mb-4 flex justify-center">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+                    <FiRefreshCw className="text-4xl text-gray-700" />
+                  </div>
+                </div>
+                <Title level={4} className="!mb-3">
+                  Chính Sách Hoàn Tiền
+                </Title>
+                <Text className="text-gray-600">
+                  Cung cấp các tùy chọn cho người dùng mua vé có thể hoàn lại với điều khoản rõ ràng
+                </Text>
+              </Card>
+            </Col>
+
+            {/* 24/7 Support */}
+            <Col xs={24} md={8}>
+              <Card className="text-center h-full hover:shadow-xl transition-shadow border-gray-200">
+                <div className="mb-4 flex justify-center">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+                    <FiHeadphones className="text-4xl text-gray-700" />
+                  </div>
+                </div>
+                <Title level={4} className="!mb-3">
+                  Hỗ Trợ 24/7
+                </Title>
+                <Text className="text-gray-600">
+                  Nhận hỗ trợ bất cứ lúc nào qua chat, email hoặc điện thoại
+                </Text>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </div>
+
+      {/* Top Search Routes Section */}
+      <div className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <Title level={2} className="!mb-2">
+              Tuyến Đường <span className="text-red-600">Phổ Biến</span>
+            </Title>
+          </div>
+
+          <Row gutter={[24, 24]}>
+            {popularRoutes.map((route, index) => (
+              <Col xs={24} sm={12} lg={8} key={index}>
+                <Card
+                  className="hover:shadow-xl transition-all cursor-pointer border-gray-200"
+                  onClick={() => handleRouteClick(route.from, route.to)}
+                >
+                  {/* Route Header */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <Text strong className="block text-base">
+                          From
+                        </Text>
+                        <Title level={5} className="!mb-0">
+                          {route.from}
+                        </Title>
+                        {route.fromDetails && (
+                          <Text className="text-xs text-gray-500">
+                            {route.fromDetails}
+                          </Text>
+                        )}
+                      </div>
+                      <div className="text-center px-2">
+                        <div className="text-gray-400">........</div>
+                      </div>
+                      <div className="text-right">
+                        <Text strong className="block text-base">
+                          To Hrs
+                        </Text>
+                        <Title level={5} className="!mb-0">
+                          {route.to}
+                        </Title>
+                        {route.toDetails && (
+                          <Text className="text-xs text-gray-500">
+                            {route.toDetails}
+                          </Text>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Amenities */}
+                    <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                      {route.amenities.map((amenity, i) => (
+                        <span key={i} className="flex items-center gap-1">
+                          <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                          {amenity}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Price and Button */}
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div>
+                      <Text className="text-2xl font-bold text-red-600">
+                        {route.price}
+                      </Text>
+                    </div>
+                    <Button
+                      type="primary"
+                      size="large"
+                      className="bg-red-600 hover:bg-red-700 border-red-600"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRouteClick(route.from, route.to);
+                      }}
+                    >
+                      Đặt Chỗ
+                    </Button>
+                  </div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </div>
+      </div>
+
+      <Footer />
     </div>
   );
 };
