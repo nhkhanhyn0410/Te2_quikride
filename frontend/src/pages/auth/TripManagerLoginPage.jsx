@@ -6,14 +6,14 @@ import {
   LockOutlined,
   CarOutlined,
 } from '@ant-design/icons';
-import useAuthStore from '../../store/authStore';
+import useTripManagerAuthStore from '../../store/tripManagerAuthStore';
 import api from '../../services/api';
 
 const TripManagerLoginPage = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const { login } = useAuthStore();
+  const { login } = useTripManagerAuthStore();
 
   const handleLogin = async (values) => {
     setLoading(true);

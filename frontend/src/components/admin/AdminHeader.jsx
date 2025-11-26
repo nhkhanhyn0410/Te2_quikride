@@ -9,14 +9,14 @@ import {
   DashboardOutlined,
   HomeOutlined,
 } from '@ant-design/icons';
-import useAuthStore from '../../store/authStore';
+import useAdminAuthStore from '../../store/adminAuthStore';
 
 const { Text } = Typography;
 
 const AdminHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuthStore();
+  const { admin: user, logout } = useAdminAuthStore();
 
   const handleLogout = () => {
     logout();

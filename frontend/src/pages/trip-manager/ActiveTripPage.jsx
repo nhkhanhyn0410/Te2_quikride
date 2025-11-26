@@ -40,7 +40,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import useActiveTripStore from '../../store/activeTripStore';
-import useAuthStore from '../../store/authStore';
+import useTripManagerAuthStore from '../../store/tripManagerAuthStore';
 import tripManagerApi from '../../services/tripManagerApi';
 
 const { TextArea } = Input;
@@ -48,7 +48,7 @@ const { TextArea } = Input;
 const ActiveTripPage = () => {
   const navigate = useNavigate();
   const { activeTrip, updateTrip, completeTrip, cancelTrip, hasActiveTrip } = useActiveTripStore();
-  const { user, logout } = useAuthStore();
+  const { tripManager: user, logout } = useTripManagerAuthStore();
 
   // Passengers & Stats
   const [passengers, setPassengers] = useState([]);

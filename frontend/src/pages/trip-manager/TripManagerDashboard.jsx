@@ -31,14 +31,14 @@ import {
   WarningOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import useAuthStore from '../../store/authStore';
+import useTripManagerAuthStore from '../../store/tripManagerAuthStore';
 import useActiveTripStore from '../../store/activeTripStore';
 import api from '../../services/api';
 import tripManagerApi from '../../services/tripManagerApi';
 
 const TripManagerDashboard = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { tripManager: user, logout } = useTripManagerAuthStore();
   const { startTrip, hasActiveTrip, getActiveTripId } = useActiveTripStore();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(false);
