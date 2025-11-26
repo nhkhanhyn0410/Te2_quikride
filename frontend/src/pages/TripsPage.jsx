@@ -90,9 +90,16 @@ const TripsPage = () => {
   const isSearchResults = location.pathname === '/search-results';
 
   useEffect(() => {
+    console.log('TripsPage mounted/updated', {
+      pathname: location.pathname,
+      isSearchResults,
+      searchCriteria
+    });
+
     if (isSearchResults) {
       // Search results page: always show results if criteria exist
       if (searchCriteria.fromCity && searchCriteria.toCity && searchCriteria.date) {
+        console.log('Loading search results with criteria:', searchCriteria);
         searchForm.setFieldsValue({
           fromCity: searchCriteria.fromCity,
           toCity: searchCriteria.toCity,
@@ -100,21 +107,37 @@ const TripsPage = () => {
           passengers: searchCriteria.passengers || 1
         });
         fetchTrips();
+      } else {
+        console.warn('No search criteria found on search-results page, redirecting to /trips');
+        // If no search criteria on search-results page, redirect to trips page
+        navigate('/trips', { replace: true });
       }
       setShowSearchForm(false); // Never show main search form on results page
     } else {
-      // Trips page: always show search form, clear results
-      searchForm.setFieldsValue({
-        fromCity: '',
-        toCity: '',
-        date: dayjs(),
-        passengers: 1
-      });
-      setTrips([]);
-      setFilteredTrips([]);
+      // Trips page: show search form with pre-filled or empty values
+      if (searchCriteria.fromCity && searchCriteria.toCity && searchCriteria.date) {
+        // If there are existing search criteria, use them
+        console.log('Pre-filling trips page form with criteria:', searchCriteria);
+        searchForm.setFieldsValue({
+          fromCity: searchCriteria.fromCity,
+          toCity: searchCriteria.toCity,
+          date: dayjs(searchCriteria.date),
+          passengers: searchCriteria.passengers || 1
+        });
+      } else {
+        // Otherwise, show empty form with today's date
+        console.log('Showing empty search form on trips page');
+        searchForm.setFieldsValue({
+          fromCity: '',
+          toCity: '',
+          date: dayjs(),
+          passengers: 1
+        });
+      }
+      // Don't clear trips immediately - let user keep previous results or show empty state
       setShowSearchForm(true); // Always show search form on trips page
     }
-  }, [location.pathname]);
+  }, [location.pathname, searchCriteria]);
 
   useEffect(() => {
     applyFilters();
