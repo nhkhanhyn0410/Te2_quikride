@@ -25,6 +25,7 @@ import OperatorReviewsPage from './pages/OperatorReviewsPage';
 
 // Customer Pages
 import SearchPage from './pages/SearchPage';
+import NewHomePage from './pages/NewHomePage';
 import TripsPage from './pages/TripsPage';
 import TripDetailPage from './pages/TripDetailPage';
 import PassengerInfoPage from './pages/PassengerInfoPage';
@@ -91,7 +92,8 @@ function App() {
         <Route path="/register" element={<CustomerRegisterPage />} />
 
         {/* Customer Booking Flow */}
-        <Route path="/" element={<SearchPage />} />
+        <Route path="/" element={<NewHomePage />} />
+        <Route path="/search" element={<SearchPage />} />
         <Route path="/trips" element={<TripsPage />} />
         <Route path="/trips/:tripId" element={<TripDetailPage />} />
         <Route path="/booking/passenger-info" element={<PassengerInfoPage />} />
