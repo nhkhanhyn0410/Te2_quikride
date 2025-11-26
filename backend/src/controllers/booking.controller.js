@@ -142,6 +142,62 @@ exports.cancelBooking = async (req, res) => {
 };
 
 /**
+ * @route   POST /api/v1/bookings/guest/cancel
+ * @desc    Cancel booking for guest users (no auth required)
+ * @access  Public
+ */
+exports.cancelBookingGuest = async (req, res) => {
+  try {
+    const { bookingId, email, phone, reason } = req.body;
+
+    // Validate required fields
+    if (!bookingId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Mã đặt vé là bắt buộc',
+      });
+    }
+
+    if (!email && !phone) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Email hoặc số điện thoại là bắt buộc để xác thực',
+      });
+    }
+
+    // Get IP address
+    const ipAddress =
+      req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      '127.0.0.1';
+
+    const result = await BookingService.cancelBookingGuest(
+      bookingId,
+      email,
+      phone,
+      reason || 'Khách hủy vé',
+      ipAddress
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        booking: result.booking,
+        refundResult: result.refundResult,
+      },
+      message: 'Hủy vé thành công. Tiền sẽ được hoàn lại trong 3-7 ngày làm việc.',
+    });
+  } catch (error) {
+    console.error('Cancel booking guest error:', error);
+    res.status(400).json({
+      status: 'error',
+      message: error.message || 'Không thể hủy vé',
+    });
+  }
+};
+
+/**
  * @route   POST /api/v1/bookings/:bookingId/extend
  * @desc    Extend seat hold duration
  * @access  Public

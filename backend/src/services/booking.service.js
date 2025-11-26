@@ -221,6 +221,38 @@ class BookingService {
   }
 
   /**
+   * Cancel booking for guest users (no authentication required)
+   * Verifies booking ownership using email or phone
+   * @param {string} bookingId - Booking ID
+   * @param {string} email - Customer email
+   * @param {string} phone - Customer phone
+   * @param {string} reason - Cancellation reason
+   * @param {string} ipAddress - IP address
+   * @returns {Promise<Object>} Cancelled booking with refund result
+   */
+  static async cancelBookingGuest(bookingId, email, phone, reason, ipAddress) {
+    const booking = await Booking.findById(bookingId).populate('customerId', 'email phone');
+
+    if (!booking) {
+      throw new Error('Không tìm thấy mã đặt vé');
+    }
+
+    // Verify booking ownership using email or phone
+    const customerEmail = booking.customerId?.email || booking.guestInfo?.email;
+    const customerPhone = booking.customerId?.phone || booking.guestInfo?.phone;
+
+    const emailMatch = email && customerEmail && email.toLowerCase() === customerEmail.toLowerCase();
+    const phoneMatch = phone && customerPhone && phone === customerPhone;
+
+    if (!emailMatch && !phoneMatch) {
+      throw new Error('Thông tin xác thực không chính xác. Vui lòng kiểm tra lại email hoặc số điện thoại.');
+    }
+
+    // Use the existing cancelBooking method
+    return await this.cancelBooking(bookingId, reason, 'customer', ipAddress);
+  }
+
+  /**
    * Cancel booking
    * @param {string} bookingId - Booking ID
    * @param {string} reason - Cancellation reason

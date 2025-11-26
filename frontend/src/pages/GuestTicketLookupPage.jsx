@@ -6,10 +6,12 @@ import {
   Button,
   Steps,
   message,
-  Descriptions,
   Tag,
   Space,
   Modal,
+  List,
+  Empty,
+  Alert,
 } from 'antd';
 import {
   SearchOutlined,
@@ -19,8 +21,10 @@ import {
   CalendarOutlined,
   EnvironmentOutlined,
   UserOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 import {
   requestTicketLookupOTP,
   verifyTicketLookupOTP,
@@ -31,72 +35,88 @@ const { Step } = Steps;
 const GuestTicketLookupPage = () => {
   const [form] = Form.useForm();
   const [otpForm] = Form.useForm();
+  const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [lookupData, setLookupData] = useState({
-    ticketCode: '',
-    phone: '',
-  });
-  const [ticket, setTicket] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [tickets, setTickets] = useState([]);
+  const [selectedTicket, setSelectedTicket] = useState(null);
   const [qrModalVisible, setQrModalVisible] = useState(false);
 
-  // Step 1: Request OTP
+  // Step 1: Request OTP (Phone only)
   const handleRequestOTP = async (values) => {
     setLoading(true);
     try {
       const response = await requestTicketLookupOTP({
-        ticketCode: values.ticketCode,
         phone: values.phone,
       });
 
-      if (response.status === 'success') {
-        setLookupData({
-          ticketCode: values.ticketCode,
-          phone: values.phone,
-        });
+      if (response.status === 'success' || response.success) {
+        setPhoneNumber(values.phone);
         setCurrentStep(1);
-        message.success('Mã OTP đã được gửi đến số điện thoại của bạn');
+        message.success('Mã OTP đã được gửi đến số điện thoại của bạn (Demo: 123456)');
       }
     } catch (error) {
       console.error('Request OTP error:', error);
-      message.error(error || 'Không thể gửi mã OTP. Vui lòng kiểm tra lại thông tin.');
+      message.error(error.response?.data?.message || 'Không thể gửi mã OTP. Vui lòng kiểm tra lại số điện thoại.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 2: Verify OTP and get ticket
+  // Step 2: Verify OTP and get tickets
   const handleVerifyOTP = async (values) => {
     setLoading(true);
     try {
+      // Demo mode: Accept "123456" as valid OTP
+      const isDemo = values.otp === '123456';
+
       const response = await verifyTicketLookupOTP({
-        ticketCode: lookupData.ticketCode,
-        phone: lookupData.phone,
+        phone: phoneNumber,
         otp: values.otp,
       });
 
-      if (response.status === 'success') {
-        setTicket(response.data.ticket);
+      if (response.status === 'success' || response.success) {
+        const ticketList = response.data.tickets || [];
+        setTickets(ticketList);
         setCurrentStep(2);
-        message.success('Tra cứu vé thành công');
+
+        if (ticketList.length === 0) {
+          message.info('Không tìm thấy vé nào với số điện thoại này');
+        } else {
+          message.success(`Tìm thấy ${ticketList.length} vé`);
+        }
       }
     } catch (error) {
       console.error('Verify OTP error:', error);
-      message.error(error || 'Mã OTP không đúng. Vui lòng thử lại.');
+
+      // Demo mode fallback: If OTP is 123456, proceed anyway
+      if (values.otp === '123456') {
+        message.warning('Demo mode: OTP được chấp nhận nhưng không tìm thấy vé');
+        setTickets([]);
+        setCurrentStep(2);
+      } else {
+        message.error(error.response?.data?.message || 'Mã OTP không đúng. Vui lòng thử lại hoặc dùng mã demo: 123456');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // View ticket details
+  const handleViewTicket = (ticket) => {
+    setSelectedTicket(ticket);
+  };
 
   // Reset form
   const handleReset = () => {
     form.resetFields();
     otpForm.resetFields();
     setCurrentStep(0);
-    setLookupData({ ticketCode: '', phone: '' });
-    setTicket(null);
+    setPhoneNumber('');
+    setTickets([]);
+    setSelectedTicket(null);
   };
 
   // Get status tag
@@ -112,6 +132,21 @@ const GuestTicketLookupPage = () => {
     return <Tag color={config.color}>{config.text}</Tag>;
   };
 
+  // Check if ticket can be cancelled
+  const canCancelTicket = (ticket) => {
+    if (ticket.status !== 'valid') return false;
+
+    const departureTime = dayjs(ticket.tripInfo?.departureTime);
+    const now = dayjs();
+
+    // Cannot cancel if already departed
+    if (now.isAfter(departureTime)) return false;
+
+    // Can cancel if more than 2 hours before departure
+    const hoursDiff = departureTime.diff(now, 'hour', true);
+    return hoursDiff > 2;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -122,20 +157,20 @@ const GuestTicketLookupPage = () => {
             Tra cứu vé
           </h1>
           <p className="text-gray-600">
-            Tra cứu thông tin vé đã đặt bằng mã vé và số điện thoại
+            Nhập số điện thoại để tra cứu thông tin vé đã đặt
           </p>
         </div>
 
         {/* Steps */}
         <Card className="mb-6">
           <Steps current={currentStep}>
-            <Step title="Nhập thông tin" icon={<SearchOutlined />} />
+            <Step title="Nhập SĐT" icon={<PhoneOutlined />} />
             <Step title="Xác thực OTP" icon={<SafetyOutlined />} />
-            <Step title="Thông tin vé" icon={<QrcodeOutlined />} />
+            <Step title="Danh sách vé" icon={<QrcodeOutlined />} />
           </Steps>
         </Card>
 
-        {/* Step 1: Enter ticket code and phone */}
+        {/* Step 1: Enter phone number */}
         {currentStep === 0 && (
           <Card>
             <Form
@@ -145,29 +180,13 @@ const GuestTicketLookupPage = () => {
               autoComplete="off"
             >
               <Form.Item
-                label="Mã vé"
-                name="ticketCode"
-                rules={[
-                  { required: true, message: 'Vui lòng nhập mã vé' },
-                  { min: 10, message: 'Mã vé không hợp lệ' },
-                ]}
-              >
-                <Input
-                  prefix={<QrcodeOutlined />}
-                  placeholder="Ví dụ: TKT-20240115-ABCDEFGH"
-                  size="large"
-                  style={{ textTransform: 'uppercase' }}
-                />
-              </Form.Item>
-
-              <Form.Item
                 label="Số điện thoại"
                 name="phone"
                 rules={[
                   { required: true, message: 'Vui lòng nhập số điện thoại' },
                   {
-                    pattern: /^(0|\+84)[0-9]{9,10}$/,
-                    message: 'Số điện thoại không hợp lệ',
+                    pattern: /^[0-9]{10}$/,
+                    message: 'Số điện thoại phải có 10 chữ số',
                   },
                 ]}
               >
@@ -175,6 +194,7 @@ const GuestTicketLookupPage = () => {
                   prefix={<PhoneOutlined />}
                   placeholder="Nhập số điện thoại đã đặt vé"
                   size="large"
+                  maxLength={10}
                 />
               </Form.Item>
 
@@ -192,8 +212,7 @@ const GuestTicketLookupPage = () => {
 
               <div className="bg-blue-50 border border-blue-200 p-4 rounded mt-4">
                 <p className="text-sm text-blue-800">
-                  <strong>Lưu ý:</strong> Mã vé được gửi qua email hoặc SMS sau khi
-                  đặt vé thành công. Vui lòng kiểm tra hộp thư hoặc tin nhắn của bạn.
+                  <strong>Lưu ý:</strong> Hệ thống sẽ gửi mã OTP đến số điện thoại bạn đã sử dụng khi đặt vé để xác thực.
                 </p>
               </div>
             </Form>
@@ -208,9 +227,17 @@ const GuestTicketLookupPage = () => {
               <h2 className="text-xl font-semibold mb-2">Xác thực OTP</h2>
               <p className="text-gray-600">
                 Mã OTP đã được gửi đến số điện thoại{' '}
-                <strong>{lookupData.phone}</strong>
+                <strong>{phoneNumber}</strong>
               </p>
             </div>
+
+            <Alert
+              message="Demo Mode"
+              description="Nhập mã OTP: 123456 để tiếp tục"
+              type="info"
+              showIcon
+              className="mb-4"
+            />
 
             <Form
               form={otpForm}
@@ -231,7 +258,7 @@ const GuestTicketLookupPage = () => {
               >
                 <Input
                   prefix={<SafetyOutlined />}
-                  placeholder="Nhập mã OTP"
+                  placeholder="Nhập mã OTP (Demo: 123456)"
                   size="large"
                   maxLength={6}
                   style={{ letterSpacing: '0.5em', textAlign: 'center' }}
@@ -257,7 +284,10 @@ const GuestTicketLookupPage = () => {
               </Form.Item>
 
               <div className="text-center">
-                <Button type="link" onClick={() => handleRequestOTP(lookupData)}>
+                <Button
+                  type="link"
+                  onClick={() => handleRequestOTP({ phone: phoneNumber })}
+                >
                   Gửi lại mã OTP
                 </Button>
               </div>
@@ -265,98 +295,99 @@ const GuestTicketLookupPage = () => {
           </Card>
         )}
 
-        {/* Step 3: Show ticket details */}
-        {currentStep === 2 && ticket && (
+        {/* Step 3: Show tickets list */}
+        {currentStep === 2 && (
           <Card>
             <div className="text-center mb-6">
               <QrcodeOutlined className="text-5xl text-green-500 mb-4" />
-              <h2 className="text-2xl font-semibold mb-2">Thông tin vé</h2>
+              <h2 className="text-2xl font-semibold mb-2">Danh sách vé của bạn</h2>
+              <p className="text-gray-600">
+                Số điện thoại: <strong>{phoneNumber}</strong>
+              </p>
             </div>
 
-            <Descriptions bordered column={1}>
-              <Descriptions.Item label="Mã vé">
-                <span className="font-mono font-semibold text-blue-600">
-                  {ticket.ticketCode}
-                </span>
-              </Descriptions.Item>
+            {tickets.length === 0 ? (
+              <Empty description="Không tìm thấy vé nào" />
+            ) : (
+              <List
+                dataSource={tickets}
+                renderItem={(ticket) => (
+                  <List.Item>
+                    <Card
+                      className="w-full hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => handleViewTicket(ticket)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-mono font-semibold text-blue-600">
+                              {ticket.ticketCode}
+                            </span>
+                            {getStatusTag(ticket.status)}
+                          </div>
 
-              <Descriptions.Item label="Trạng thái">
-                {getStatusTag(ticket.status)}
-              </Descriptions.Item>
+                          <div className="space-y-1 text-sm">
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <EnvironmentOutlined />
+                              <span className="font-medium">{ticket.tripInfo?.route}</span>
+                            </div>
 
-              <Descriptions.Item
-                label={
-                  <>
-                    <EnvironmentOutlined className="mr-1" />
-                    Tuyến đường
-                  </>
-                }
-              >
-                {ticket.tripInfo?.route}
-              </Descriptions.Item>
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <CalendarOutlined />
+                              <span>
+                                {dayjs(ticket.tripInfo?.departureTime).format('DD/MM/YYYY HH:mm')}
+                              </span>
+                            </div>
 
-              <Descriptions.Item
-                label={
-                  <>
-                    <CalendarOutlined className="mr-1" />
-                    Ngày giờ đi
-                  </>
-                }
-              >
-                {dayjs(ticket.tripInfo?.departureTime).format('DD/MM/YYYY HH:mm')}
-              </Descriptions.Item>
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <UserOutlined />
+                              <span>
+                                {ticket.passengers?.length || 0} hành khách
+                                {ticket.passengers?.length > 0 &&
+                                  ` - Ghế: ${ticket.passengers.map(p => p.seatNumber).join(', ')}`
+                                }
+                              </span>
+                            </div>
+                          </div>
+                        </div>
 
-              <Descriptions.Item
-                label={
-                  <>
-                    <CalendarOutlined className="mr-1" />
-                    Ngày giờ đến
-                  </>
-                }
-              >
-                {dayjs(ticket.tripInfo?.arrivalTime).format('DD/MM/YYYY HH:mm')}
-              </Descriptions.Item>
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            type="primary"
+                            size="small"
+                            icon={<QrcodeOutlined />}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedTicket(ticket);
+                              setQrModalVisible(true);
+                            }}
+                          >
+                            QR Code
+                          </Button>
 
-              <Descriptions.Item label="Điểm đón">
-                {ticket.tripInfo?.pickupPoint}
-              </Descriptions.Item>
+                          {canCancelTicket(ticket) && (
+                            <Button
+                              danger
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate('/tickets/cancel');
+                              }}
+                            >
+                              Hủy vé
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </List.Item>
+                )}
+              />
+            )}
 
-              <Descriptions.Item label="Điểm trả">
-                {ticket.tripInfo?.dropoffPoint}
-              </Descriptions.Item>
-
-              <Descriptions.Item
-                label={
-                  <>
-                    <UserOutlined className="mr-1" />
-                    Hành khách
-                  </>
-                }
-              >
-                <div className="space-y-2">
-                  {ticket.passengers?.map((passenger, index) => (
-                    <div key={index} className="flex items-center gap-4">
-                      <Tag color="blue">Ghế {passenger.seatNumber}</Tag>
-                      <span>{passenger.fullName}</span>
-                      <span className="text-gray-500">{passenger.phone}</span>
-                    </div>
-                  ))}
-                </div>
-              </Descriptions.Item>
-            </Descriptions>
-
-            <div className="mt-6 flex gap-4 justify-center">
-              <Button
-                type="primary"
-                size="large"
-                icon={<QrcodeOutlined />}
-                onClick={() => setQrModalVisible(true)}
-              >
-                Xem mã QR
-              </Button>
-
+            <div className="mt-6 text-center">
               <Button size="large" onClick={handleReset}>
-                Tra cứu vé khác
+                Tra cứu SĐT khác
               </Button>
             </div>
           </Card>
@@ -370,10 +401,10 @@ const GuestTicketLookupPage = () => {
           footer={null}
           centered
         >
-          {ticket && (
+          {selectedTicket && (
             <div className="text-center">
               <img
-                src={ticket.qrCode}
+                src={selectedTicket.qrCode}
                 alt="QR Code"
                 className="mx-auto mb-4"
                 style={{ maxWidth: 300 }}
@@ -382,8 +413,16 @@ const GuestTicketLookupPage = () => {
                 Vui lòng xuất trình mã QR này khi lên xe
               </p>
               <p className="text-sm text-gray-500 mt-2">
-                Mã vé: <strong>{ticket.ticketCode}</strong>
+                Mã vé: <strong>{selectedTicket.ticketCode}</strong>
               </p>
+              <div className="mt-4">
+                <Tag color="blue" className="text-sm">
+                  {selectedTicket.tripInfo?.route}
+                </Tag>
+                <div className="text-gray-600 text-sm mt-2">
+                  {dayjs(selectedTicket.tripInfo?.departureTime).format('DD/MM/YYYY HH:mm')}
+                </div>
+              </div>
             </div>
           )}
         </Modal>
