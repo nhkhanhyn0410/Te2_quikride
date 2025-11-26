@@ -23,7 +23,7 @@ import {
   TrophyOutlined,
   GiftOutlined,
   ExclamationCircleOutlined,
-  TicketOutlined,
+  FileTextOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -223,7 +223,7 @@ const NewHomePage = () => {
               <Space wrap className="w-full justify-center">
                 <Button
                   type="link"
-                  icon={<TicketOutlined />}
+                  icon={<FileTextOutlined />}
                   onClick={() => navigate('/tickets/lookup')}
                 >
                   Tra cứu vé

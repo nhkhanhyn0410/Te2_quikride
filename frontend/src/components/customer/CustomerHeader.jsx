@@ -13,7 +13,7 @@ import {
 import {
   HomeOutlined,
   SearchOutlined,
-  TicketOutlined,
+  FileTextOutlined,
   StarOutlined,
   ExclamationCircleOutlined,
   TrophyOutlined,
@@ -54,7 +54,7 @@ const CustomerHeader = () => {
     },
     {
       key: '/tickets/lookup',
-      icon: <TicketOutlined />,
+      icon: <FileTextOutlined />,
       label: 'Tra cứu vé',
     },
   ];
@@ -64,7 +64,7 @@ const CustomerHeader = () => {
     ? [
         {
           key: 'my-tickets',
-          icon: <TicketOutlined />,
+          icon: <FileTextOutlined />,
           label: 'Vé của tôi',
           onClick: () => navigate('/my-tickets'),
         },
