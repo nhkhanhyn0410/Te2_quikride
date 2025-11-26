@@ -10,6 +10,7 @@ import {
   Col,
   Typography,
   Statistic,
+  AutoComplete,
 } from 'antd';
 import {
   SearchOutlined,
@@ -40,6 +41,13 @@ const NewHomePage = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
+  // City suggestions (same as TripsPage for consistency)
+  const cityOptions = [
+    'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ',
+    'Nha Trang', 'Huế', 'Vũng Tàu', 'Đà Lạt', 'Quy Nhơn',
+    'Phan Thiết', 'Hạ Long', 'Sapa', 'Phú Quốc', 'Buôn Ma Thuột'
+  ];
+
   const handleSearch = async (values) => {
     try {
       setLoading(true);
@@ -51,6 +59,8 @@ const NewHomePage = () => {
         passengers: 1,
       };
 
+      console.log('NewHomePage - Search submitted:', { values, searchData });
+
       if (!searchData.fromCity || !searchData.toCity) {
         toast.error('Vui lòng nhập điểm đi và điểm đến');
         return;
@@ -61,9 +71,12 @@ const NewHomePage = () => {
         return;
       }
 
+      console.log('NewHomePage - Setting search criteria and navigating:', searchData);
       setSearchCriteria(searchData);
+      console.log('NewHomePage - Navigating to search-results');
       navigate('/search-results');
     } catch (error) {
+      console.error('NewHomePage - Search error:', error);
       toast.error(error.message || 'Có lỗi xảy ra khi tìm kiếm');
     } finally {
       setLoading(false);
@@ -231,10 +244,13 @@ const NewHomePage = () => {
                           name="fromCity"
                           rules={[{ required: true, message: 'Vui lòng nhập điểm đi!' }]}
                         >
-                          <Input
+                          <AutoComplete
                             size="large"
-                            placeholder="Nhập thành phố đi (VD: Hà Nội)"
-                            prefix={<EnvironmentOutlined className="text-red-500 mr-2" />}
+                            placeholder="Chọn hoặc nhập thành phố đi (VD: Hà Nội)"
+                            options={cityOptions.map(city => ({ value: city }))}
+                            filterOption={(inputValue, option) =>
+                              option.value.toLowerCase().includes(inputValue.toLowerCase())
+                            }
                             className="h-14 rounded-lg border-2 border-neutral-200 hover:border-red-400 focus:border-red-500 transition-all duration-300"
                           />
                         </Form.Item>
@@ -262,10 +278,13 @@ const NewHomePage = () => {
                           name="toCity"
                           rules={[{ required: true, message: 'Vui lòng nhập điểm đến!' }]}
                         >
-                          <Input
+                          <AutoComplete
                             size="large"
-                            placeholder="Nhập thành phố đến (VD: TP. HCM)"
-                            prefix={<EnvironmentOutlined className="text-red-500 mr-2" />}
+                            placeholder="Chọn hoặc nhập thành phố đến (VD: TP. HCM)"
+                            options={cityOptions.map(city => ({ value: city }))}
+                            filterOption={(inputValue, option) =>
+                              option.value.toLowerCase().includes(inputValue.toLowerCase())
+                            }
                             className="h-14 rounded-lg border-2 border-neutral-200 hover:border-red-400 focus:border-red-500 transition-all duration-300"
                           />
                         </Form.Item>
