@@ -222,6 +222,16 @@ export const iconColors = {
   muted: '#9ca3af',
 };
 
+// Complete icon mapping export
+export const iconMapping = {
+  antdIcons,
+  reactIcons,
+  iconContexts,
+  fallbackIcons,
+  iconSizes,
+  iconColors,
+};
+
 export default {
   antdIcons,
   reactIcons,

@@ -1,0 +1,238 @@
+/* StandardSkeleton Component Styles */
+
+.standard-skeleton {
+  @apply w-full;
+}
+
+/* Size variants */
+.standard-skeleton--small {
+  @apply text-sm;
+}
+
+.standard-skeleton--default {
+  @apply text-base;
+}
+
+.standard-skeleton--large {
+  @apply text-lg;
+}
+
+/* Card skeleton */
+.standard-skeleton--card {
+  @apply border border-gray-200 rounded-lg overflow-hidden bg-white;
+}
+
+.standard-skeleton-card-image {
+  @apply w-full h-32 bg-gray-100;
+}
+
+.standard-skeleton-card-content {
+  @apply p-4 space-y-2;
+}
+
+.standard-skeleton-card-actions {
+  @apply p-4 pt-0 flex space-x-2;
+}
+
+/* Table skeleton */
+.standard-skeleton--table {
+  @apply space-y-3;
+}
+
+.standard-skeleton-table-header {
+  @apply flex space-x-4 pb-2 border-b border-gray-200;
+}
+
+.standard-skeleton-table-header > * {
+  @apply flex-1;
+}
+
+.standard-skeleton-table-body {
+  @apply space-y-2;
+}
+
+.standard-skeleton-table-row {
+  @apply flex space-x-4;
+}
+
+.standard-skeleton-table-row > * {
+  @apply flex-1;
+}
+
+/* Form skeleton */
+.standard-skeleton--form {
+  @apply space-y-4;
+}
+
+.standard-skeleton-form-field {
+  @apply space-y-2;
+}
+
+.standard-skeleton-form-label {
+  @apply w-1/4;
+}
+
+.standard-skeleton-form-input {
+  @apply w-full;
+}
+
+.standard-skeleton-form-actions {
+  @apply flex space-x-2 pt-4;
+}
+
+/* Chart skeleton */
+.standard-skeleton--chart {
+  @apply space-y-4;
+}
+
+.standard-skeleton-chart-title {
+  @apply w-1/3;
+}
+
+.standard-skeleton-chart-area {
+  @apply h-64 bg-gray-50 rounded-lg flex items-end justify-center p-4;
+}
+
+.standard-skeleton-chart-placeholder {
+  @apply w-full h-full flex items-end justify-center;
+}
+
+.standard-skeleton-chart-bars {
+  @apply flex items-end space-x-2 h-full w-3/4;
+}
+
+.standard-skeleton-chart-bar {
+  @apply flex-1 bg-gray-200 rounded-t-sm;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.standard-skeleton-chart-legend {
+  @apply flex space-x-4 justify-center;
+}
+
+.standard-skeleton-chart-legend-item {
+  @apply flex items-center space-x-2;
+}
+
+.standard-skeleton-chart-legend-color {
+  @apply w-3 h-3 bg-gray-200 rounded;
+}
+
+/* List skeleton */
+.standard-skeleton--list {
+  @apply space-y-3;
+}
+
+.standard-skeleton-list-item {
+  @apply flex items-start space-x-3 p-3 border border-gray-100 rounded-lg;
+}
+
+.standard-skeleton-list-content {
+  @apply flex-1;
+}
+
+/* Animation customization */
+.standard-skeleton .ant-skeleton-element {
+  @apply inline-block;
+}
+
+.standard-skeleton .ant-skeleton-avatar {
+  @apply bg-gray-200;
+}
+
+.standard-skeleton .ant-skeleton-button {
+  @apply bg-gray-200;
+}
+
+.standard-skeleton .ant-skeleton-input {
+  @apply bg-gray-200;
+}
+
+.standard-skeleton .ant-skeleton-image {
+  @apply bg-gray-100;
+}
+
+.standard-skeleton .ant-skeleton-content .ant-skeleton-title {
+  @apply bg-gray-200;
+}
+
+.standard-skeleton .ant-skeleton-content .ant-skeleton-paragraph > li {
+  @apply bg-gray-200;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .standard-skeleton-card-image {
+    @apply h-24;
+  }
+  
+  .standard-skeleton-card-content {
+    @apply p-3;
+  }
+  
+  .standard-skeleton-card-actions {
+    @apply p-3 pt-0 flex-col space-y-2 space-x-0;
+  }
+  
+  .standard-skeleton-table-header,
+  .standard-skeleton-table-row {
+    @apply space-x-2;
+  }
+  
+  .standard-skeleton-chart-area {
+    @apply h-48;
+  }
+  
+  .standard-skeleton-chart-legend {
+    @apply flex-col space-y-2 space-x-0 items-center;
+  }
+  
+  .standard-skeleton-form-actions {
+    @apply flex-col space-y-2 space-x-0;
+  }
+}
+
+@media (max-width: 480px) {
+  .standard-skeleton-card-image {
+    @apply h-20;
+  }
+  
+  .standard-skeleton-card-content {
+    @apply p-2;
+  }
+  
+  .standard-skeleton-card-actions {
+    @apply p-2 pt-0;
+  }
+  
+  .standard-skeleton-chart-area {
+    @apply h-32;
+  }
+  
+  .standard-skeleton-list-item {
+    @apply p-2;
+  }
+}
+
+/* Custom pulse animation for chart bars */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Theme integration */
+.standard-skeleton .ant-skeleton-avatar.ant-skeleton-avatar-active::before,
+.standard-skeleton .ant-skeleton-button.ant-skeleton-button-active::before,
+.standard-skeleton .ant-skeleton-input.ant-skeleton-input-active::before,
+.standard-skeleton .ant-skeleton-image.ant-skeleton-image-active::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.04), transparent);
+}
+
+.standard-skeleton .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-title::before,
+.standard-skeleton .ant-skeleton.ant-skeleton-active .ant-skeleton-content .ant-skeleton-paragraph > li::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.04), transparent);
+}

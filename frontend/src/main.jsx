@@ -6,6 +6,7 @@ import viVN from 'antd/locale/vi_VN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import App from './App';
+import IconProvider from './icons/IconProvider';
 import './index.css';
 
 // Set dayjs locale to Vietnamese
@@ -24,7 +25,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           },
         }}
       >
-        <App />
+        <IconProvider>
+          <App />
+        </IconProvider>
       </ConfigProvider>
     </BrowserRouter>
   </React.StrictMode>

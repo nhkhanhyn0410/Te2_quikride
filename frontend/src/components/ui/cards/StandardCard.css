@@ -1,0 +1,138 @@
+/**
+ * StandardCard Component Styles
+ * Consistent styling for all card variants
+ */
+
+.standard-card {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Variant Styles */
+.standard-card--elevated {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.standard-card--elevated:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.standard-card--outlined {
+  border: 2px solid #d9d9d9;
+  box-shadow: none;
+}
+
+.standard-card--outlined:hover {
+  border-color: #1890ff;
+}
+
+.standard-card--ghost {
+  background: transparent;
+  border: 1px dashed #d9d9d9;
+  box-shadow: none;
+}
+
+.standard-card--ghost:hover {
+  border-color: #1890ff;
+  background: rgba(24, 144, 255, 0.02);
+}
+
+.standard-card--filled {
+  background: #fafafa;
+  border: none;
+  box-shadow: none;
+}
+
+/* Size Styles */
+.standard-card--small .ant-card-body {
+  padding: 12px;
+}
+
+.standard-card--large .ant-card-body {
+  padding: 32px;
+}
+
+/* Padding Styles */
+.standard-card--compact .ant-card-body {
+  padding: 8px;
+}
+
+.standard-card--comfortable .ant-card-body {
+  padding: 20px;
+}
+
+.standard-card--spacious .ant-card-body {
+  padding: 40px;
+}
+
+/* Shadow Styles */
+.standard-card--shadow-none {
+  box-shadow: none;
+}
+
+.standard-card--shadow-small {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.standard-card--shadow-medium {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.standard-card--shadow-large {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Interactive Styles */
+.standard-card--hoverable:hover {
+  transform: translateY(-2px);
+}
+
+/* Header Styles */
+.standard-card__head .ant-card-head-title {
+  padding: 0;
+}
+
+/* Body Styles */
+.standard-card__body {
+  position: relative;
+}
+
+/* Action Styles */
+.standard-card .ant-card-actions {
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+}
+
+.standard-card .ant-card-actions > li {
+  margin: 8px 0;
+}
+
+.standard-card .ant-card-actions > li:not(:last-child) {
+  border-right: 1px solid #f0f0f0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .standard-card--large .ant-card-body {
+    padding: 20px;
+  }
+  
+  .standard-card--spacious .ant-card-body {
+    padding: 24px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .standard-card--filled {
+    background: #141414;
+  }
+  
+  .standard-card .ant-card-actions {
+    background: #141414;
+    border-top-color: #303030;
+  }
+  
+  .standard-card .ant-card-actions > li:not(:last-child) {
+    border-right-color: #303030;
+  }
+}

@@ -1,4 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* Import grid utilities */
+@import './styles/grid-utilities.css';
+/* Import responsive utilities */
+@import './styles/responsive-utilities.css';
 
 @tailwind base;
 @tailwind components;

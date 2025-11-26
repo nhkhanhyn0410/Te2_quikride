@@ -1,0 +1,118 @@
+/* ErrorState Component Styles */
+
+.error-state {
+  @apply w-full min-h-64 flex items-center justify-center;
+}
+
+.error-state .ant-result {
+  @apply py-8;
+}
+
+.error-state .ant-result-title {
+  @apply text-gray-800 font-semibold;
+}
+
+.error-state .ant-result-subtitle {
+  @apply text-gray-600;
+}
+
+.error-state-description {
+  @apply text-gray-500 text-sm max-w-md mx-auto mt-4 leading-relaxed;
+}
+
+/* Error type specific styling */
+.error-state .ant-result-error .ant-result-icon {
+  @apply text-red-500;
+}
+
+.error-state .ant-result-warning .ant-result-icon {
+  @apply text-orange-500;
+}
+
+.error-state .ant-result-404 .ant-result-icon,
+.error-state .ant-result-403 .ant-result-icon,
+.error-state .ant-result-500 .ant-result-icon {
+  @apply text-gray-400;
+}
+
+/* Action buttons styling */
+.error-state-retry-btn {
+  @apply bg-blue-600 border-blue-600 hover:bg-blue-700 hover:border-blue-700;
+}
+
+.error-state-home-btn {
+  @apply border-gray-300 text-gray-600 hover:border-blue-400 hover:text-blue-600;
+}
+
+.error-state .ant-result-extra {
+  @apply mt-6;
+}
+
+.error-state .ant-result-extra .ant-btn {
+  @apply mx-2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .error-state .ant-result {
+    @apply py-6;
+  }
+  
+  .error-state .ant-result-title {
+    @apply text-lg;
+  }
+  
+  .error-state .ant-result-subtitle {
+    @apply text-sm;
+  }
+  
+  .error-state-description {
+    @apply text-xs px-4;
+  }
+  
+  .error-state .ant-result-extra .ant-btn {
+    @apply mx-1 mb-2;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-state {
+    @apply min-h-48;
+  }
+  
+  .error-state .ant-result {
+    @apply py-4;
+  }
+  
+  .error-state .ant-result-title {
+    @apply text-base;
+  }
+  
+  .error-state .ant-result-subtitle {
+    @apply text-xs;
+  }
+  
+  .error-state .ant-result-extra {
+    @apply flex flex-col space-y-2;
+  }
+  
+  .error-state .ant-result-extra .ant-btn {
+    @apply w-full mx-0;
+  }
+}
+
+/* Animation for error state appearance */
+.error-state {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

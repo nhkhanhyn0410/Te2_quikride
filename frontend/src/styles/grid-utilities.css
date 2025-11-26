@@ -1,0 +1,203 @@
+/**
+ * Grid Utility Classes
+ * Additional CSS utilities for the responsive grid system
+ */
+
+/* Grid Gap Utilities */
+.grid-gap-responsive {
+  @apply gap-3 md:gap-4 lg:gap-6;
+}
+
+.grid-gap-tight {
+  @apply gap-2 md:gap-3 lg:gap-4;
+}
+
+.grid-gap-loose {
+  @apply gap-4 md:gap-6 lg:gap-8;
+}
+
+/* Panel Grid Layouts */
+.panel-grid-auto {
+  @apply grid grid-cols-1 md:grid-cols-8 lg:grid-cols-12 gap-3 md:gap-4 lg:gap-6;
+}
+
+.panel-grid-sidebar {
+  @apply grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6;
+}
+
+.panel-grid-cards {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6;
+}
+
+.panel-grid-dashboard {
+  @apply grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4 lg:gap-6;
+}
+
+/* Container Utilities */
+.container-responsive {
+  @apply w-full px-4 sm:px-6 lg:px-8 mx-auto;
+}
+
+.container-small {
+  @apply container-responsive max-w-4xl;
+}
+
+.container-default {
+  @apply container-responsive max-w-6xl;
+}
+
+.container-large {
+  @apply container-responsive max-w-7xl;
+}
+
+.container-full {
+  @apply container-responsive max-w-full;
+}
+
+/* Grid Item Utilities */
+.grid-item-full {
+  @apply col-span-full;
+}
+
+.grid-item-half {
+  @apply col-span-1 md:col-span-4 lg:col-span-6;
+}
+
+.grid-item-third {
+  @apply col-span-1 md:col-span-3 lg:col-span-4;
+}
+
+.grid-item-quarter {
+  @apply col-span-1 md:col-span-2 lg:col-span-3;
+}
+
+.grid-item-two-thirds {
+  @apply col-span-1 md:col-span-5 lg:col-span-8;
+}
+
+.grid-item-three-quarters {
+  @apply col-span-1 md:col-span-6 lg:col-span-9;
+}
+
+/* Responsive Visibility */
+.show-mobile {
+  @apply block md:hidden;
+}
+
+.show-tablet {
+  @apply hidden md:block lg:hidden;
+}
+
+.show-desktop {
+  @apply hidden lg:block;
+}
+
+.hide-mobile {
+  @apply hidden md:block;
+}
+
+.hide-tablet {
+  @apply block md:hidden lg:block;
+}
+
+.hide-desktop {
+  @apply block lg:hidden;
+}
+
+/* Responsive Text Alignment */
+.text-responsive-center {
+  @apply text-center md:text-left;
+}
+
+.text-responsive-left {
+  @apply text-center md:text-left;
+}
+
+.text-responsive-right {
+  @apply text-center md:text-right;
+}
+
+/* Responsive Spacing */
+.space-responsive {
+  @apply space-y-4 md:space-y-6 lg:space-y-8;
+}
+
+.space-responsive-x {
+  @apply space-x-4 md:space-x-6 lg:space-x-8;
+}
+
+.p-responsive {
+  @apply p-4 md:p-6 lg:p-8;
+}
+
+.px-responsive {
+  @apply px-4 md:px-6 lg:px-8;
+}
+
+.py-responsive {
+  @apply py-4 md:py-6 lg:py-8;
+}
+
+/* Grid Auto-fit Utilities */
+.grid-auto-fit-sm {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.grid-auto-fit-md {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-auto-fit-lg {
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+}
+
+/* Aspect Ratio Utilities for Grid Items */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-photo {
+  aspect-ratio: 4 / 3;
+}
+
+/* Grid Item Alignment */
+.grid-item-center {
+  @apply flex items-center justify-center;
+}
+
+.grid-item-start {
+  @apply flex items-start justify-start;
+}
+
+.grid-item-end {
+  @apply flex items-end justify-end;
+}
+
+/* Responsive Grid Order */
+.order-mobile-first {
+  @apply order-first md:order-none;
+}
+
+.order-mobile-last {
+  @apply order-last md:order-none;
+}
+
+.order-tablet-first {
+  @apply order-none md:order-first lg:order-none;
+}
+
+.order-tablet-last {
+  @apply order-none md:order-last lg:order-none;
+}
+
+.order-desktop-first {
+  @apply order-none lg:order-first;
+}
+
+.order-desktop-last {
+  @apply order-none lg:order-last;
+}

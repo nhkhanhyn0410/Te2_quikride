@@ -1,0 +1,213 @@
+/* StandardTable Component Styles */
+
+.standard-table {
+  @apply w-full;
+}
+
+/* Table variants */
+.standard-table--default .ant-table {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200;
+}
+
+.standard-table--bordered .ant-table {
+  @apply border border-gray-300 rounded-lg;
+}
+
+.standard-table--bordered .ant-table-thead > tr > th,
+.standard-table--bordered .ant-table-tbody > tr > td {
+  @apply border-r border-gray-200;
+}
+
+.standard-table--striped .ant-table-tbody > tr:nth-child(even) {
+  @apply bg-gray-50;
+}
+
+/* Table header styling */
+.standard-table .ant-table-thead > tr > th {
+  @apply bg-gray-50 font-semibold text-gray-700 border-b-2 border-gray-200;
+  font-size: 14px;
+  padding: 16px 12px;
+}
+
+.standard-table .ant-table-thead > tr > th::before {
+  display: none; /* Remove default Ant Design column separator */
+}
+
+/* Table body styling */
+.standard-table .ant-table-tbody > tr > td {
+  @apply text-gray-900 border-b border-gray-100;
+  padding: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Row hover effects */
+.standard-table .ant-table-tbody > tr:hover > td {
+  @apply bg-blue-50;
+  transition: background-color 0.2s ease;
+}
+
+/* Row selection styling */
+.standard-table .ant-table-tbody > tr.ant-table-row-selected > td {
+  @apply bg-blue-100;
+}
+
+.standard-table .ant-table-tbody > tr.ant-table-row-selected:hover > td {
+  @apply bg-blue-150;
+}
+
+/* Column styling */
+.standard-table-column {
+  @apply text-left;
+}
+
+/* Action buttons styling */
+.standard-table-action-btn {
+  @apply text-gray-600 hover:text-blue-600;
+  transition: color 0.2s ease;
+}
+
+.standard-table-action-btn:hover {
+  @apply bg-gray-100;
+}
+
+.standard-table-action-edit:hover {
+  @apply text-blue-600 bg-blue-50;
+}
+
+.standard-table-action-delete:hover {
+  @apply text-red-600 bg-red-50;
+}
+
+/* Size variants */
+.standard-table--small .ant-table-thead > tr > th,
+.standard-table--small .ant-table-tbody > tr > td {
+  padding: 8px;
+  font-size: 12px;
+}
+
+.standard-table--large .ant-table-thead > tr > th,
+.standard-table--large .ant-table-tbody > tr > td {
+  padding: 16px;
+  font-size: 16px;
+}
+
+/* Pagination styling */
+.standard-table .ant-pagination {
+  @apply mt-4 text-right;
+}
+
+.standard-table .ant-pagination-options {
+  @apply ml-4;
+}
+
+.standard-table .ant-pagination-total-text {
+  @apply text-gray-600 text-sm;
+}
+
+/* Responsive behavior */
+.standard-table--responsive {
+  @apply overflow-x-auto;
+}
+
+.standard-table--responsive .ant-table {
+  min-width: 800px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .standard-table--responsive .ant-table-thead > tr > th,
+  .standard-table--responsive .ant-table-tbody > tr > td {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+  
+  .standard-table--responsive .ant-table-thead > tr > th[data-priority="2"],
+  .standard-table--responsive .ant-table-tbody > tr > td[data-priority="2"] {
+    display: none;
+  }
+  
+  .standard-table .ant-pagination {
+    @apply text-center;
+  }
+  
+  .standard-table .ant-pagination-options {
+    @apply ml-0 mt-2;
+  }
+}
+
+@media (max-width: 480px) {
+  .standard-table--responsive .ant-table-thead > tr > th[data-priority="1"],
+  .standard-table--responsive .ant-table-tbody > tr > td[data-priority="1"] {
+    padding: 6px 2px;
+    font-size: 11px;
+  }
+}
+
+/* Sticky header */
+.standard-table--sticky .ant-table-header {
+  @apply sticky top-0 z-10;
+}
+
+/* Loading state */
+.standard-table .ant-spin-container {
+  min-height: 200px;
+}
+
+/* Empty state */
+.standard-table .ant-empty {
+  @apply py-8;
+}
+
+.standard-table .ant-empty-description {
+  @apply text-gray-500;
+}
+
+/* Sorting indicators */
+.standard-table .ant-table-column-sorter {
+  @apply text-gray-400;
+}
+
+.standard-table .ant-table-column-sorter-up.active,
+.standard-table .ant-table-column-sorter-down.active {
+  @apply text-blue-600;
+}
+
+/* Filter dropdown */
+.standard-table .ant-table-filter-trigger {
+  @apply text-gray-400 hover:text-blue-600;
+}
+
+.standard-table .ant-table-filter-trigger.active {
+  @apply text-blue-600;
+}
+
+/* Selection column */
+.standard-table .ant-table-selection-column {
+  width: 48px;
+  min-width: 48px;
+}
+
+.standard-table .ant-checkbox-wrapper {
+  @apply flex items-center justify-center;
+}
+
+/* Expandable row */
+.standard-table .ant-table-expand-icon-col {
+  width: 48px;
+  min-width: 48px;
+}
+
+.standard-table .ant-table-row-expand-icon {
+  @apply text-gray-600 hover:text-blue-600;
+  transition: color 0.2s ease;
+}
+
+/* Fixed columns shadow */
+.standard-table .ant-table-ping-left:not(.ant-table-has-fix-left) .ant-table-container::before {
+  box-shadow: inset 10px 0 8px -8px rgba(0, 0, 0, 0.15);
+}
+
+.standard-table .ant-table-ping-right:not(.ant-table-has-fix-right) .ant-table-container::after {
+  box-shadow: inset -10px 0 8px -8px rgba(0, 0, 0, 0.15);
+}

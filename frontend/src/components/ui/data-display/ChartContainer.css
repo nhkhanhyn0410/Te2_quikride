@@ -1,0 +1,126 @@
+/* ChartContainer Component Styles */
+
+.chart-container {
+  @apply shadow-sm border border-gray-200 rounded-lg;
+}
+
+.chart-container .ant-card-head {
+  @apply border-b border-gray-200 bg-gray-50;
+}
+
+.chart-container .ant-card-body {
+  @apply p-6;
+}
+
+/* Header styling */
+.chart-container-header {
+  @apply flex items-center justify-between w-full;
+}
+
+.chart-container-title {
+  @apply flex-1;
+}
+
+.chart-title {
+  @apply text-lg font-semibold text-gray-800 m-0;
+}
+
+.chart-subtitle {
+  @apply text-sm text-gray-500 m-0 mt-1;
+}
+
+/* Control buttons styling */
+.chart-type-selector {
+  @apply border-gray-300;
+}
+
+.chart-type-selector .ant-select-selector {
+  @apply border-gray-300 hover:border-blue-400;
+}
+
+.chart-export-btn,
+.chart-fullscreen-btn {
+  @apply text-gray-600 hover:text-blue-600 hover:bg-blue-50;
+}
+
+.chart-export-btn:hover,
+.chart-fullscreen-btn:hover {
+  @apply border-blue-300;
+}
+
+/* Content area */
+.chart-content {
+  @apply w-full;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chart-container .ant-card-body {
+    @apply p-4;
+  }
+  
+  .chart-container-header {
+    @apply flex-col items-start gap-3;
+  }
+  
+  .chart-title {
+    @apply text-base;
+  }
+  
+  .chart-subtitle {
+    @apply text-xs;
+  }
+  
+  .chart-type-selector {
+    @apply w-full;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container .ant-card-body {
+    @apply p-2;
+  }
+  
+  .chart-title {
+    @apply text-sm;
+  }
+  
+  .chart-subtitle {
+    @apply text-xs;
+  }
+}
+
+/* Loading state */
+.chart-container.ant-card-loading .chart-content {
+  min-height: 200px;
+}
+
+/* Fullscreen mode */
+.chart-container--fullscreen {
+  @apply fixed inset-0 z-50 m-0 rounded-none;
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+.chart-container--fullscreen .ant-card-body {
+  @apply h-full flex flex-col;
+}
+
+.chart-container--fullscreen .chart-content {
+  @apply flex-1;
+}
+
+/* Print styles */
+@media print {
+  .chart-container .ant-card-head-wrapper {
+    @apply hidden;
+  }
+  
+  .chart-container {
+    @apply shadow-none border-none;
+  }
+  
+  .chart-content {
+    @apply p-0;
+  }
+}
