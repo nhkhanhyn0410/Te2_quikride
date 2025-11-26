@@ -32,6 +32,10 @@ import PassengerInfoPage from './pages/PassengerInfoPage';
 import BookingConfirmationPage from './pages/BookingConfirmationPage';
 import MyTicketsPage from './pages/customer/MyTicketsPage';
 import MyReviewsPage from './pages/MyReviewsPage';
+import MyComplaintsPage from './pages/MyComplaintsPage';
+import ComplaintDetailPage from './pages/ComplaintDetailPage';
+import LoyaltyOverviewPage from './pages/LoyaltyOverviewPage';
+import LoyaltyHistoryPage from './pages/LoyaltyHistoryPage';
 import GuestTicketLookupPage from './pages/GuestTicketLookupPage';
 import CancelTicketPage from './pages/CancelTicketPage';
 
@@ -105,6 +109,42 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['customer']}>
               <MyReviewsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Customer Complaints */}
+        <Route
+          path="/complaints"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <MyComplaintsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/complaints/:id"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <ComplaintDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Customer Loyalty Program */}
+        <Route
+          path="/loyalty"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <LoyaltyOverviewPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/loyalty/history"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <LoyaltyHistoryPage />
             </ProtectedRoute>
           }
         />
