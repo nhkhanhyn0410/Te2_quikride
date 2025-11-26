@@ -69,12 +69,15 @@ class ReportService {
       // Calculate average booking value
       const averageBookingValue = totalBookings > 0 ? totalRevenue / totalBookings : 0;
 
-      // Revenue breakdown by route
-      const revenueByRoute = await this.getRevenueByRoute(bookings);
+      // Get cancellation statistics by route
+      const cancellationStatsByRoute = await this.getCancellationStatsByRoute(operatorId, start, end);
+
+      // Revenue breakdown by route (with cancellation rates)
+      const revenueByRoute = await this.getRevenueByRoute(bookings, cancellationStatsByRoute);
 
       // Top performing routes
       const topRoutes = revenueByRoute
-        .sort((a, b) => b.revenue - a.revenue)
+        .sort((a, b) => b.totalRevenue - a.totalRevenue)
         .slice(0, 10);
 
       // Revenue by payment method
@@ -123,9 +126,10 @@ class ReportService {
   /**
    * Calculate revenue breakdown by route
    * @param {Array} bookings - Bookings array
+   * @param {Map} cancellationStatsByRoute - Cancellation statistics by route
    * @returns {Array} Revenue by route
    */
-  async getRevenueByRoute(bookings) {
+  async getRevenueByRoute(bookings, cancellationStatsByRoute = new Map()) {
     const routeMap = new Map();
 
     bookings.forEach((booking) => {
@@ -154,17 +158,23 @@ class ReportService {
     });
 
     // Transform to match frontend expectations with correct field names
-    return Array.from(routeMap.values()).map(route => ({
-      routeId: route.routeId,
-      routeName: route.routeName,
-      origin: route.origin,
-      destination: route.destination,
-      totalRevenue: route.revenue, // Frontend expects totalRevenue
-      ticketCount: route.tickets, // Frontend expects ticketCount
-      bookings: route.bookings,
-      averagePrice: route.tickets > 0 ? Math.round(route.revenue / route.tickets) : 0, // Calculate average price per ticket
-      cancellationRate: 0, // TODO: Calculate from separate cancelled bookings query
-    }));
+    return Array.from(routeMap.values()).map(route => {
+      // Get cancellation rate from the stats map
+      const cancellationStats = cancellationStatsByRoute.get(route.routeId);
+      const cancellationRate = cancellationStats ? cancellationStats.cancellationRate : 0;
+
+      return {
+        routeId: route.routeId,
+        routeName: route.routeName,
+        origin: route.origin,
+        destination: route.destination,
+        totalRevenue: route.revenue, // Frontend expects totalRevenue
+        ticketCount: route.tickets, // Frontend expects ticketCount
+        bookings: route.bookings,
+        averagePrice: route.tickets > 0 ? Math.round(route.revenue / route.tickets) : 0, // Calculate average price per ticket
+        cancellationRate: cancellationRate, // Real cancellation rate from query
+      };
+    });
   }
 
   /**
@@ -365,6 +375,103 @@ class ReportService {
         totalRefunded: 0,
         cancellationsByRoute: [],
       };
+    }
+  }
+
+  /**
+   * Get cancellation statistics by route
+   * @param {String} operatorId - Operator ID
+   * @param {Date} start - Start date
+   * @param {Date} end - End date
+   * @returns {Promise<Map>} Map of routeId to cancellation stats
+   */
+  async getCancellationStatsByRoute(operatorId, start, end) {
+    try {
+      // Get all cancelled bookings for the period
+      const cancelledBookings = await Booking.aggregate([
+        {
+          $match: {
+            operatorId: new mongoose.Types.ObjectId(operatorId),
+            status: { $in: ['cancelled', 'refunded'] },
+            createdAt: { $gte: start, $lte: end },
+          },
+        },
+        {
+          $lookup: {
+            from: 'trips',
+            localField: 'tripId',
+            foreignField: '_id',
+            as: 'trip',
+          },
+        },
+        {
+          $unwind: '$trip',
+        },
+        {
+          $group: {
+            _id: '$trip.routeId',
+            cancelledCount: { $sum: 1 },
+          },
+        },
+      ]);
+
+      // Get total bookings by route for the period
+      const totalBookings = await Booking.aggregate([
+        {
+          $match: {
+            operatorId: new mongoose.Types.ObjectId(operatorId),
+            createdAt: { $gte: start, $lte: end },
+          },
+        },
+        {
+          $lookup: {
+            from: 'trips',
+            localField: 'tripId',
+            foreignField: '_id',
+            as: 'trip',
+          },
+        },
+        {
+          $unwind: '$trip',
+        },
+        {
+          $group: {
+            _id: '$trip.routeId',
+            totalCount: { $sum: 1 },
+          },
+        },
+      ]);
+
+      // Create a map of cancellation stats by route
+      const statsMap = new Map();
+
+      // Initialize with total bookings
+      totalBookings.forEach((item) => {
+        const routeId = item._id.toString();
+        statsMap.set(routeId, {
+          totalBookings: item.totalCount,
+          cancelledBookings: 0,
+          cancellationRate: 0,
+        });
+      });
+
+      // Add cancelled bookings counts
+      cancelledBookings.forEach((item) => {
+        const routeId = item._id.toString();
+        if (statsMap.has(routeId)) {
+          const stats = statsMap.get(routeId);
+          stats.cancelledBookings = item.cancelledCount;
+          stats.cancellationRate =
+            stats.totalBookings > 0
+              ? parseFloat(((item.cancelledCount / stats.totalBookings) * 100).toFixed(2))
+              : 0;
+        }
+      });
+
+      return statsMap;
+    } catch (error) {
+      console.error('Get cancellation stats by route error:', error);
+      return new Map();
     }
   }
 

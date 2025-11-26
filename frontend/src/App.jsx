@@ -30,6 +30,7 @@ import PassengerInfoPage from './pages/PassengerInfoPage';
 import BookingConfirmationPage from './pages/BookingConfirmationPage';
 import MyTicketsPage from './pages/customer/MyTicketsPage';
 import GuestTicketLookupPage from './pages/GuestTicketLookupPage';
+import CancelTicketPage from './pages/CancelTicketPage';
 
 // Payment Pages
 import VNPayReturn from './pages/payment/VNPayReturn';
@@ -93,6 +94,7 @@ function App() {
         {/* Customer Ticket Management */}
         <Route path="/my-tickets" element={<MyTicketsPage />} />
         <Route path="/tickets/lookup" element={<GuestTicketLookupPage />} />
+        <Route path="/tickets/cancel" element={<CancelTicketPage />} />
 
         {/* Payment Routes */}
         <Route path="/payment/vnpay-return" element={<VNPayReturn />} />

@@ -51,6 +51,11 @@ export const cancelBooking = async (bookingId, reason) => {
   return api.post(`/bookings/${bookingId}/cancel`, { reason });
 };
 
+// Cancel booking for guest users (no auth required)
+export const cancelBookingGuest = async ({ bookingId, email, phone, reason }) => {
+  return api.post('/bookings/guest/cancel', { bookingId, email, phone, reason });
+};
+
 // Payment APIs
 
 // Get payment methods
@@ -101,6 +106,7 @@ export default {
   confirmBooking,
   getBookingByCode,
   cancelBooking,
+  cancelBookingGuest,
   getPaymentMethods,
   getBankList,
   createPayment,

@@ -25,6 +25,9 @@ router.get('/code/:bookingCode', bookingController.getBookingByCode);
 // Get available seats for a trip
 router.get('/trips/:tripId/available-seats', bookingController.getAvailableSeats);
 
+// Cancel booking for guest users (no auth required)
+router.post('/guest/cancel', bookingController.cancelBookingGuest);
+
 /**
  * Protected customer routes
  */
