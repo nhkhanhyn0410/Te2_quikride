@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Button, Card, message } from 'antd';
 import { MailOutlined, LockOutlined, SafetyOutlined } from '@ant-design/icons';
-import useAuthStore from '../../store/authStore';
+import useAdminAuthStore from '../../store/adminAuthStore';
 import { adminAuth } from '../../services/adminApi';
 
 const AdminLoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login } = useAdminAuthStore();
 
   const onFinish = async (values) => {
     setLoading(true);

@@ -47,7 +47,7 @@ import {
 } from 'recharts';
 import dayjs from 'dayjs';
 import { reportsApi, downloadFile } from '../../services/reportApi';
-import useAuthStore from '../../store/authStore';
+import useOperatorAuthStore from '../../store/operatorAuthStore';
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -64,7 +64,7 @@ const ReportsPage = () => {
   ]);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [routes, setRoutes] = useState([]);
-  const { user } = useAuthStore();
+  const { operator: user } = useOperatorAuthStore();
 
   useEffect(() => {
     loadReport();

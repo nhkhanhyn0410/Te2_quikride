@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Button, Card, message } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
-import useAuthStore from '../../store/authStore';
+import useOperatorAuthStore from '../../store/operatorAuthStore';
 import { operatorAuth } from '../../services/operatorApi';
 
 const OperatorLoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login } = useOperatorAuthStore();
 
   const onFinish = async (values) => {
     setLoading(true);
