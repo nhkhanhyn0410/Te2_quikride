@@ -40,7 +40,7 @@ const AdminLoginPage = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-full mb-4 shadow-lg">
             <SafetyOutlined className="text-3xl text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">QuikRide Admin</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Vé xe nhanh Admin</h1>
           <p className="text-gray-600">System Administration Portal</p>
         </div>
 
@@ -75,7 +75,7 @@ const AdminLoginPage = () => {
             >
               <Input
                 prefix={<MailOutlined className="text-gray-400" />}
-                placeholder="admin@quikride.com"
+                placeholder="admin@vexenhanh.com"
                 className="rounded-lg"
               />
             </Form.Item>
@@ -133,7 +133,7 @@ const AdminLoginPage = () => {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-8">
-          © 2024 QuikRide. All rights reserved.
+          © 2024 Vé xe nhanh. All rights reserved.
         </p>
       </div>
     </div>

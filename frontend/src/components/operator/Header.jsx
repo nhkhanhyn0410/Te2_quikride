@@ -1,10 +1,21 @@
-import { useNavigate } from 'react-router-dom';
-import { Button, Dropdown, Avatar } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Button, Dropdown, Avatar, Badge, Typography, Breadcrumb, Space } from 'antd';
+import { 
+  UserOutlined, 
+  LogoutOutlined, 
+  SettingOutlined,
+  BellOutlined,
+  DashboardOutlined,
+  HomeOutlined,
+  CarOutlined,
+} from '@ant-design/icons';
 import useAuthStore from '../../store/authStore';
+
+const { Text } = Typography;
 
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
@@ -12,17 +23,52 @@ const Header = () => {
     navigate('/operator/login');
   };
 
+  // Generate breadcrumb items based on current path
+  const getBreadcrumbItems = () => {
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const items = [
+      {
+        title: (
+          <span className="flex items-center gap-1">
+            <HomeOutlined />
+            Operator
+          </span>
+        ),
+      },
+    ];
+
+    if (pathSegments.length > 1) {
+      const pageName = pathSegments[1];
+      const pageNames = {
+        dashboard: 'Dashboard',
+        routes: 'Tuyến đường',
+        buses: 'Quản lý xe',
+        trips: 'Chuyến xe',
+        employees: 'Nhân viên',
+        reports: 'Báo cáo',
+        vouchers: 'Voucher',
+        reviews: 'Đánh giá',
+      };
+      
+      items.push({
+        title: pageNames[pageName] || pageName,
+      });
+    }
+
+    return items;
+  };
+
   const menuItems = [
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: 'Hồ Sơ',
+      label: 'Thông tin công ty',
       onClick: () => navigate('/operator/profile'),
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
-      label: 'Cài Đặt',
+      label: 'Cài đặt',
       onClick: () => navigate('/operator/settings'),
     },
     {
@@ -31,39 +77,87 @@ const Header = () => {
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Đăng Xuất',
+      label: 'Đăng xuất',
       onClick: handleLogout,
       danger: true,
     },
   ];
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-white/95 backdrop-blur-md border-b border-neutral-200 px-6 py-4 shadow-sm sticky top-0 z-40">
       <div className="flex items-center justify-between">
-        {/* Page Title - can be dynamic based on route */}
-        <div>
-          <h2 className="text-2xl font-semibold text-gray-800">
-            {/* Will be overridden by individual pages */}
-          </h2>
+        {/* Left Side - Breadcrumb */}
+        <div className="flex items-center space-x-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+            <CarOutlined className="text-white text-lg" />
+          </div>
+          <div>
+            <Breadcrumb
+              items={getBreadcrumbItems()}
+              className="text-sm"
+            />
+            <Text className="text-xs text-neutral-500 block mt-1">
+              {user?.companyName || 'Nhà xe đối tác'}
+            </Text>
+          </div>
         </div>
 
-        {/* User Menu */}
+        {/* Right Side Actions */}
         <div className="flex items-center space-x-4">
-          <Dropdown menu={{ items: menuItems }} placement="bottomRight">
+          {/* Quick Stats */}
+          <div className="hidden lg:flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200">
+              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <Text className="text-red-700 text-xs font-medium">
+                15 chuyến hôm nay
+              </Text>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg border border-green-200">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <Text className="text-green-700 text-xs font-medium">
+                Doanh thu: 12.5M
+              </Text>
+            </div>
+          </div>
+
+          {/* Notifications */}
+          <Badge count={2} size="small">
             <Button
               type="text"
-              className="flex items-center space-x-2 hover:bg-gray-100"
+              icon={<BellOutlined className="text-lg" />}
+              className="hover:bg-neutral-100 w-10 h-10 rounded-lg flex items-center justify-center"
+            />
+          </Badge>
+
+          {/* Settings */}
+          <Button
+            type="text"
+            icon={<SettingOutlined className="text-lg" />}
+            onClick={() => navigate('/operator/settings')}
+            className="hover:bg-neutral-100 w-10 h-10 rounded-lg flex items-center justify-center"
+          />
+
+          {/* User Menu */}
+          <Dropdown 
+            menu={{ items: menuItems }} 
+            placement="bottomRight"
+            trigger={['click']}
+            overlayClassName="min-w-[220px]"
+          >
+            <Button
+              type="text"
+              className="flex items-center space-x-3 hover:bg-neutral-100 h-auto px-3 py-2 rounded-lg transition-all duration-200"
             >
               <Avatar
-                size="default"
+                size={36}
                 icon={<UserOutlined />}
-                className="bg-blue-600"
+                className="bg-gradient-to-br from-primary-500 to-red-600 shadow-md"
               />
-              <div className="text-left">
-                <div className="text-sm font-medium text-gray-700">
-                  {user?.companyName || 'Operator'}
+              <div className="text-left hidden sm:block">
+                <div className="text-sm font-semibold text-neutral-800">
+                  {user?.companyName || 'Nhà xe'}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-neutral-500">
                   {user?.email}
                 </div>
               </div>

@@ -67,7 +67,7 @@ Trip validation failed:
 
 1. Mở MongoDB Compass
 2. Connect: `mongodb://localhost:27017`
-3. Database: `quikride`
+3. Database: `vexenhanh`
 4. Collection: `buses`
 5. Tìm bus bị thiếu seatLayout:
 
@@ -134,7 +134,7 @@ mongosh
 
 ```javascript
 // Chọn database
-use quikride
+use vexenhanh
 
 // Kiểm tra bus nào thiếu seatLayout
 db.buses.find({

@@ -1,7 +1,7 @@
 {
-  "name": "quikride-frontend",
+  "name": "vexenhanh-frontend",
   "version": "1.0.0",
-  "description": "QuikRide Bus Booking System - Frontend",
+  "description": "Vé xe nhanh Bus Booking System - Frontend",
   "type": "module",
   "scripts": {
     "dev": "vite",

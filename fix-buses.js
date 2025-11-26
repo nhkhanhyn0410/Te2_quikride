@@ -9,7 +9,7 @@ const path = require('path');
 // Load environment from backend
 require('dotenv').config({ path: path.join(__dirname, 'backend/.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/quikride';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/vexenhanh';
 
 // Simple schemas
 const SeatLayoutSchema = new mongoose.Schema({

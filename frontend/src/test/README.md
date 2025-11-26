@@ -1,8 +1,8 @@
-# Frontend Testing Setup - QuikRide
+# Frontend Testing Setup - Vé xe nhanh
 
 ## Overview
 
-This directory contains testing configuration for the QuikRide frontend. The testing framework uses **Vitest** with **React Testing Library**.
+This directory contains testing configuration for the Vé xe nhanh frontend. The testing framework uses **Vitest** with **React Testing Library**.
 
 ## Test Structure
 

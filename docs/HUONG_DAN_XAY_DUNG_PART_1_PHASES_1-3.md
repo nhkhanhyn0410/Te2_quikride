@@ -1,4 +1,4 @@
-# HƯỚNG DẪN XÂY DỰNG DỰ ÁN QUIKRIDE - PART 1
+# HƯỚNG DẪN XÂY DỰNG DỰ ÁN VÉ XE NHANH - PART 1
 ## PHASES 1-3: SETUP ĐẾN BOOKING SYSTEM (MVP CORE)
 
 ---
@@ -38,7 +38,7 @@ Thiết lập nền tảng cơ sở hạ tầng cho toàn bộ dự án, bao g�
 #### 1. Khởi tạo Monorepo
 ```
 Thực hiện:
-1. Tạo thư mục gốc: Te2_quikride
+1. Tạo thư mục gốc: Te2_vexenhanh
 2. Khởi tạo Git repository:
    - git init
    - Tạo .gitignore (loại trừ: node_modules, .env, logs, dist, build)
@@ -52,7 +52,7 @@ Di chuyển vào thư mục backend:
 
 1. Khởi tạo npm:
    - npm init -y
-   - Đặt name: "quikride-backend"
+   - Đặt name: "vexenhanh-backend"
    - Đặt version: "1.0.0"
 
 2. Cài đặt Dependencies chính:
@@ -155,7 +155,7 @@ NODE_ENV=development
 PORT=5000
 
 # Database
-MONGODB_URI=mongodb://localhost:27017/quikride
+MONGODB_URI=mongodb://localhost:27017/vexenhanh
 
 # Redis
 REDIS_URL=redis://localhost:6379
@@ -171,13 +171,13 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
-EMAIL_FROM=noreply@quikride.com
+EMAIL_FROM=noreply@vexenhanh.com
 
 # SMS (VNPT/Viettel)
 SMS_PROVIDER=vnpt
 SMS_API_KEY=
 SMS_API_SECRET=
-SMS_BRAND_NAME=QuikRide
+SMS_BRAND_NAME=Vé xe nhanh
 
 # Payment Gateways
 VNPAY_TMN_CODE=
@@ -411,7 +411,7 @@ VITE_API_URL=http://localhost:5000/api/v1
 VITE_WS_URL=ws://localhost:5000
 
 # App Info
-VITE_APP_NAME=QuikRide
+VITE_APP_NAME=Vé xe nhanh
 VITE_APP_VERSION=1.0.0
 ```
 

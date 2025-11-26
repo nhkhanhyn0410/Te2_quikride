@@ -39,7 +39,7 @@ import banner from '@assets/images/home-banner.webp';
 import { ReactComponent as BusIcon } from '@assets/icons/bus.svg';
 
 // Usage
-<img src={logo} alt="QuikRide Logo" />
+<img src={logo} alt="Vé xe nhanh Logo" />
 <BusIcon className="w-6 h-6" />
 ```
 

@@ -328,9 +328,9 @@ When a trip status changes, all passengers receive a formatted HTML email with:
 Shorter messages for immediate updates:
 
 **Examples:**
-- Ongoing: "QuikRide: Chuyen xe Ha Noi - Da Nang (15/01 08:00) da khoi hanh. Chuc ban hanh trinh tot lanh!"
-- Completed: "QuikRide: Chuyen xe Ha Noi - Da Nang da hoan thanh. Cam on ban da su dung dich vu!"
-- Cancelled: "QuikRide: Chuyen xe Ha Noi - Da Nang (15/01 08:00) da bi huy. Vui long lien he nha xe de duoc ho tro."
+- Ongoing: "Vé xe nhanh: Chuyen xe Ha Noi - Da Nang (15/01 08:00) da khoi hanh. Chuc ban hanh trinh tot lanh!"
+- Completed: "Vé xe nhanh: Chuyen xe Ha Noi - Da Nang da hoan thanh. Cam on ban da su dung dich vu!"
+- Cancelled: "Vé xe nhanh: Chuyen xe Ha Noi - Da Nang (15/01 08:00) da bi huy. Vui long lien he nha xe de duoc ho tro."
 
 **Note:** SMS is only sent if SMS_ENABLED=true in environment configuration.
 
@@ -463,15 +463,15 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-password
-FROM_EMAIL=noreply@quikride.com
-FROM_NAME=QuikRide
+FROM_EMAIL=noreply@vexenhanh.com
+FROM_NAME=Vé xe nhanh
 
 # SMS Configuration
 SMS_ENABLED=true
 SMS_PROVIDER=vnpt
 SMS_API_KEY=your-api-key
 SMS_API_SECRET=your-secret-key
-SMS_BRAND_NAME=QuikRide
+SMS_BRAND_NAME=Vé xe nhanh
 VNPT_SMS_URL=https://cloudsms.vietguys.biz:4438/api/
 ```
 
@@ -567,8 +567,8 @@ No changes required - system queries bookings to find passengers to notify.
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/nhkhanhyn0410/Te2_quikride/issues
-- Email: support@quikride.com
+- GitHub Issues: https://github.com/nhkhanhyn0410/Te2_vexenhanh/issues
+- Email: support@vexenhanh.com
 
 ---
 

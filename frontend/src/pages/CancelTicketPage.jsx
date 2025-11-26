@@ -313,7 +313,7 @@ const CancelTicketPage = () => {
 
         <div className="mt-6 text-center text-sm text-gray-600">
           <p>Cần hỗ trợ? Liên hệ hotline: <strong>1900-xxxx</strong></p>
-          <p>Email: support@quikride.vn</p>
+          <p>Email: support@vexenhanh.vn</p>
         </div>
       </div>
     </div>

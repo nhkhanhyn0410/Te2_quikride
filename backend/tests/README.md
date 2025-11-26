@@ -1,8 +1,8 @@
-# Backend Testing Setup - QuikRide
+# Backend Testing Setup - Vé xe nhanh
 
 ## Overview
 
-This directory contains all backend tests for the QuikRide project. The testing framework uses **Jest** with **Supertest** for API testing.
+This directory contains all backend tests for the Vé xe nhanh project. The testing framework uses **Jest** with **Supertest** for API testing.
 
 ## Test Structure
 

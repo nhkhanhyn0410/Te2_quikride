@@ -1,4 +1,4 @@
-# HƯỚNG DẪN XÂY DỰNG DỰ ÁN QUIKRIDE - PART 3
+# HƯỚNG DẪN XÂY DỰNG DỰ ÁN VÉ XE NHANH - PART 3
 ## PHASES 6-7: SYSTEM ADMIN & ADVANCED FEATURES
 
 ---
@@ -53,7 +53,7 @@ Thêm field:
 
 Pre-defined admin:
 - Create seed script để tạo admin account mặc định:
-  * Email: admin@quikride.com
+  * Email: admin@vexenhanh.com
   * Password: (hash từ .env ADMIN_PASSWORD)
   * Role: admin
   * Permissions: all
@@ -1663,7 +1663,7 @@ Each tab có charts và tables tương ứng với report data
 
 Export Excel:
 - Click Export
-- Generate filename: QuikRide_Report_[Date].xlsx
+- Generate filename: VeXeNhanh_Report_[Date].xlsx
 - Download file
 ```
 
@@ -2140,7 +2140,7 @@ After payment success:
 Structure:
 
 1. Header:
-   - Title: "QuikRide Rewards"
+   - Title: "Vé xe nhanh Rewards"
 
 2. Current Tier Card:
    - Large card với tier icon/badge
@@ -3022,9 +3022,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'QuikRide API',
+      title: 'Vé xe nhanh API',
       version: '1.0.0',
-      description: 'API documentation for QuikRide bus booking system'
+      description: 'API documentation for Vé xe nhanh bus booking system'
     },
     servers: [
       {
@@ -3188,7 +3188,7 @@ SMS_PROVIDER=vnpt
 SMS_API_KEY=<production-key>
 
 # Frontend URL (production)
-FRONTEND_URL=https://quikride.com
+FRONTEND_URL=https://vexenhanh.com
 
 # Logging
 LOG_LEVEL=info
@@ -3264,7 +3264,7 @@ services:
       - redis
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://admin:password@mongodb:27017/quikride
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/vexenhanh
       - REDIS_URL=redis://redis:6379
 
   frontend:
@@ -3312,7 +3312,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /var/www/quikride
+            cd /var/www/vexenhanh
             git pull
             docker-compose down
             docker-compose up -d --build
@@ -3330,7 +3330,7 @@ jobs:
 ```javascript
 module.exports = {
   apps: [{
-    name: 'quikride-api',
+    name: 'vexenhanh-api',
     script: './src/server.js',
     instances: 4,
     exec_mode: 'cluster',
@@ -3440,10 +3440,10 @@ Sau khi hoàn thành Phase 7:
 ### HỆ THỐNG HOÀN CHỈNH
 
 **4 Web Applications:**
-1. Customer Web (quikride.com)
-2. Operator Dashboard (operator.quikride.com)
-3. Trip Manager Web (trip.quikride.com)
-4. System Admin (admin.quikride.com)
+1. Customer Web (vexenhanh.com)
+2. Operator Dashboard (operator.vexenhanh.com)
+3. Trip Manager Web (trip.vexenhanh.com)
+4. System Admin (admin.vexenhanh.com)
 
 **Core Features:**
 - Tìm kiếm & đặt vé real-time
@@ -3478,5 +3478,5 @@ Hệ thống đã hoàn thiện và sẵn sàng triển khai production với:
 
 ---
 
-**Chúc bạn thành công với dự án QuikRide!** 🚀
+**Chúc bạn thành công với dự án Vé xe nhanh!** 🚀
 

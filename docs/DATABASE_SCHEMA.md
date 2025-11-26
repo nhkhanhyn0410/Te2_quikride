@@ -1,8 +1,8 @@
-# Database Schema - QuikRide
+# Database Schema - Vé xe nhanh
 
 ## Tổng Quan
 
-QuikRide sử dụng **MongoDB** làm database chính với các lý do:
+Vé xe nhanh sử dụng **MongoDB** làm database chính với các lý do:
 - **Flexibility:** Schema linh hoạt cho việc mở rộng tính năng
 - **Scalability:** Dễ dàng scale horizontal
 - **Performance:** Tối ưu cho read-heavy operations (tìm kiếm chuyến xe)
@@ -991,10 +991,10 @@ Trip.find().lean().exec();
 
 ```bash
 # Daily backup
-mongodump --uri="mongodb://localhost:27017/quikride" --out=/backup/daily/$(date +%Y%m%d)
+mongodump --uri="mongodb://localhost:27017/vexenhanh" --out=/backup/daily/$(date +%Y%m%d)
 
 # Weekly full backup
-mongodump --uri="mongodb://localhost:27017/quikride" --archive=/backup/weekly/week_$(date +%W).gz --gzip
+mongodump --uri="mongodb://localhost:27017/vexenhanh" --archive=/backup/weekly/week_$(date +%W).gz --gzip
 
 # Retention: 7 days (daily), 4 weeks (weekly)
 ```
@@ -1003,7 +1003,7 @@ mongodump --uri="mongodb://localhost:27017/quikride" --archive=/backup/weekly/we
 
 ```bash
 # Restore from backup
-mongorestore --uri="mongodb://localhost:27017/quikride" /backup/daily/20240115
+mongorestore --uri="mongodb://localhost:27017/vexenhanh" /backup/daily/20240115
 ```
 
 ---

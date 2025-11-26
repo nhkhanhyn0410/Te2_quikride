@@ -60,7 +60,7 @@ const CustomerLoginPage = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
             <span className="text-3xl">🚌</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">QuikRide</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Vé xe nhanh</h1>
           <p className="text-gray-600">Đăng nhập để đặt vé và quản lý chuyến đi</p>
         </div>
 
@@ -167,7 +167,7 @@ const CustomerLoginPage = () => {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-8">
-          © 2024 QuikRide. All rights reserved.
+          © 2024 Vé xe nhanh. All rights reserved.
         </p>
       </div>
     </div>

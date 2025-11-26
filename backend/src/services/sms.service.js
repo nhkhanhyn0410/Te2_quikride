@@ -9,7 +9,7 @@ class SMSService {
     this.provider = process.env.SMS_PROVIDER || 'vnpt'; // 'vnpt' or 'viettel'
     this.apiKey = process.env.SMS_API_KEY;
     this.apiSecret = process.env.SMS_API_SECRET;
-    this.brandName = process.env.SMS_BRAND_NAME || 'QuikRide';
+    this.brandName = process.env.SMS_BRAND_NAME || 'Vé xe nhanh';
     this.enabled = process.env.SMS_ENABLED === 'true';
   }
 

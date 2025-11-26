@@ -26,8 +26,8 @@ class NotificationService {
     // SMS service (singleton instance)
     this.smsService = smsService;
 
-    this.fromEmail = process.env.FROM_EMAIL || 'noreply@quikride.com';
-    this.fromName = process.env.FROM_NAME || 'QuikRide';
+    this.fromEmail = process.env.FROM_EMAIL || 'noreply@vexenhanh.com';
+    this.fromName = process.env.FROM_NAME || 'Vé xe nhanh';
     this.emailEnabled = process.env.EMAIL_ENABLED !== 'false'; // Default enabled
     this.smsEnabled = process.env.SMS_ENABLED === 'true';
   }

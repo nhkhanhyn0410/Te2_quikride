@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import ThemeProvider from './components/providers/ThemeProvider';
 
 // Layouts
 import DashboardLayout from './components/operator/DashboardLayout';
@@ -25,6 +26,7 @@ import OperatorReviewsPage from './pages/OperatorReviewsPage';
 
 // Customer Pages
 import NewHomePage from './pages/NewHomePage';
+import NewsPage from './pages/NewsPage';
 import TripsPage from './pages/TripsPage';
 import TripDetailPage from './pages/TripDetailPage';
 import PassengerInfoPage from './pages/PassengerInfoPage';
@@ -59,20 +61,27 @@ import ContentManagementPage from './pages/admin/ContentManagementPage';
 
 function App() {
   return (
-    <>
+    <ThemeProvider>
       <Toaster
         position="top-right"
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#363636',
+            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
             color: '#fff',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
           },
           success: {
             duration: 3000,
             iconTheme: {
-              primary: '#4ade80',
+              primary: '#22c55e',
               secondary: '#fff',
+            },
+            style: {
+              background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
             },
           },
           error: {
@@ -80,6 +89,18 @@ function App() {
             iconTheme: {
               primary: '#ef4444',
               secondary: '#fff',
+            },
+            style: {
+              background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+            },
+          },
+          loading: {
+            iconTheme: {
+              primary: '#3b82f6',
+              secondary: '#fff',
+            },
+            style: {
+              background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
             },
           },
         }}
@@ -92,7 +113,9 @@ function App() {
 
         {/* Customer Booking Flow */}
         <Route path="/" element={<NewHomePage />} />
+        <Route path="/news" element={<NewsPage />} />
         <Route path="/trips" element={<TripsPage />} />
+        <Route path="/search-results" element={<TripsPage />} />
         <Route path="/trips/:tripId" element={<TripDetailPage />} />
         <Route path="/booking/passenger-info" element={<PassengerInfoPage />} />
         <Route path="/booking/confirmation/:bookingCode" element={<BookingConfirmationPage />} />
@@ -241,11 +264,25 @@ function App() {
         <Route
           path="*"
           element={
-            <div className="flex items-center justify-center h-screen bg-gray-50">
-              <div className="text-center">
-                <h1 className="text-6xl font-bold text-gray-800">404</h1>
-                <p className="text-gray-600 mt-4">Trang không tồn tại</p>
-                <a href="/" className="text-blue-600 hover:underline mt-2 inline-block">
+            <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-purple-50 flex items-center justify-center">
+              <div className="text-center p-8">
+                <div className="mb-8">
+                  <div className="text-8xl font-bold text-gradient-primary mb-4">404</div>
+                  <div className="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
+                </div>
+                <h2 className="text-2xl font-semibold text-neutral-800 mb-4">
+                  Trang không tồn tại
+                </h2>
+                <p className="text-neutral-600 mb-8 max-w-md mx-auto">
+                  Trang bạn đang tìm kiếm có thể đã được di chuyển, xóa hoặc không tồn tại.
+                </p>
+                <a 
+                  href="/" 
+                  className="inline-flex items-center px-6 py-3 bg-gradient-primary text-white font-medium rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
                   Về trang chủ
                 </a>
               </div>
@@ -253,7 +290,7 @@ function App() {
           }
         />
       </Routes>
-    </>
+    </ThemeProvider>
   );
 }
 

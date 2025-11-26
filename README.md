@@ -1,8 +1,8 @@
-# QuikRide - Hệ Thống Đặt Vé Xe Khách Trực Tuyến
+# Vé xe nhanh - Hệ Thống Đặt Vé Xe Khách Trực Tuyến
 
 <div align="center">
 
-  ![QuikRide Logo](https://via.placeholder.com/200x80/0ea5e9/ffffff?text=QuikRide)
+  ![Vé xe nhanh Logo](https://via.placeholder.com/200x80/0ea5e9/ffffff?text=Vé+xe+nhanh)
 
   <h3>🚌 Nền tảng đặt vé xe khách hiện đại, nhanh chóng và tiện lợi</h3>
   <p>Kết nối khách hàng với các nhà xe, tạo nên trải nghiệm đặt vé trực tuyến tuyệt vời</p>
@@ -39,7 +39,7 @@
 
 ## 🎯 Tổng Quan
 
-**QuikRide** là một hệ thống đặt vé xe khách trực tuyến toàn diện, được xây dựng theo kiến trúc hiện đại, cho phép:
+**Vé xe nhanh** là một hệ thống đặt vé xe khách trực tuyến toàn diện, được xây dựng theo kiến trúc hiện đại, cho phép:
 
 - 🔍 **Khách hàng:** Tìm kiếm, đặt vé và thanh toán dễ dàng 24/7
 - 🎫 **Vé điện tử:** Quản lý vé với mã QR an toàn, chống giả mạo
@@ -117,7 +117,7 @@
 Hệ thống được chia thành **4 ứng dụng web độc lập**:
 
 #### 1. 🌐 Customer Web (Trang Khách Hàng)
-- **URL:** `https://quikride.com`
+- **URL:** `https://vexenhanh.com`
 - **Mục đích:** Tìm kiếm và đặt vé cho khách hàng
 - **Tính năng:**
   - Tìm kiếm chuyến xe
@@ -128,7 +128,7 @@ Hệ thống được chia thành **4 ứng dụng web độc lập**:
 - **Đăng nhập:** Email/Phone + Password, OAuth (Google, Facebook)
 
 #### 2. 🏢 Operator Dashboard (Trang Nhà Xe)
-- **URL:** `https://operator.quikride.com`
+- **URL:** `https://operator.vexenhanh.com`
 - **Mục đích:** Quản lý hoạt động kinh doanh của nhà xe
 - **Tính năng:**
   - Dashboard doanh thu real-time
@@ -140,7 +140,7 @@ Hệ thống được chia thành **4 ứng dụng web độc lập**:
 - **Đăng nhập:** Business Email + Password (riêng biệt)
 
 #### 3. 📱 Trip Manager Web (Trang Quản Lý Chuyến)
-- **URL:** `https://trip.quikride.com`
+- **URL:** `https://trip.vexenhanh.com`
 - **Mục đích:** Soát vé và quản lý hành khách
 - **Tính năng:**
   - Quét mã QR xác thực vé
@@ -151,7 +151,7 @@ Hệ thống được chia thành **4 ứng dụng web độc lập**:
 - **Đăng nhập:** Employee ID + Password (riêng biệt)
 
 #### 4. ⚙️ System Admin (Trang Quản Trị Hệ Thống)
-- **URL:** `https://admin.quikride.com`
+- **URL:** `https://admin.vexenhanh.com`
 - **Mục đích:** Quản trị và giám sát toàn hệ thống
 - **Tính năng:**
   - Dashboard tổng quan hệ thống
@@ -639,8 +639,8 @@ MVP bao gồm Phase 1-4, cho phép hệ thống hoạt động cơ bản với �
 #### 1. Clone Repository
 
 ```bash
-git clone https://github.com/nhkhanhyn0410/Te2_quikride.git
-cd Te2_quikride
+git clone https://github.com/nhkhanhyn0410/Te2_vexenhanh.git
+cd Te2_vexenhanh
 ```
 
 #### 2. Backend Setup
@@ -663,7 +663,7 @@ nano .env
 **Cấu hình .env quan trọng:**
 ```env
 # Database
-MONGODB_URI=mongodb://localhost:27017/quikride
+MONGODB_URI=mongodb://localhost:27017/vexenhanh
 
 # Redis
 REDIS_URL=redis://localhost:6379
@@ -790,7 +790,7 @@ docker-compose up -d --build
 ### API Base URL
 ```
 Development: http://localhost:5000/api/v1
-Production:  https://api.quikride.com/v1
+Production:  https://api.vexenhanh.com/v1
 ```
 
 ### Swagger/OpenAPI Documentation
@@ -981,7 +981,7 @@ docker-compose -f docker-compose.prod.yml up -d
 npm install -g pm2
 cd backend
 npm run build
-pm2 start npm --name "quikride-api" -- start
+pm2 start npm --name "vexenhanh-api" -- start
 pm2 save
 pm2 startup
 ```
@@ -990,8 +990,8 @@ pm2 startup
 ```bash
 cd frontend
 npm run build
-# Copy dist/ to /var/www/quikride
-sudo cp -r dist/* /var/www/quikride/
+# Copy dist/ to /var/www/vexenhanh
+sudo cp -r dist/* /var/www/vexenhanh/
 ```
 
 #### Option 3: Cloud Platforms
@@ -1164,10 +1164,10 @@ VITE_DEBUG=true npm run dev
 tail -f backend/logs/app.log
 
 # PM2 logs
-pm2 logs quikride-api
+pm2 logs vexenhanh-api
 
 # Docker logs
-docker logs quikride-backend
+docker logs vexenhanh-backend
 ```
 
 ---
@@ -1181,7 +1181,7 @@ Chúng tôi hoan nghênh mọi đóng góp từ cộng đồng!
 1. **Fork** repository
 2. **Clone** fork của bạn:
    ```bash
-   git clone https://github.com/your-username/Te2_quikride.git
+   git clone https://github.com/your-username/Te2_vexenhanh.git
    ```
 3. **Tạo branch** mới:
    ```bash
@@ -1230,7 +1230,7 @@ Dự án này được phát hành dưới **MIT License**.
 ```
 MIT License
 
-Copyright (c) 2024 QuikRide Team
+Copyright (c) 2024 Vé xe nhanh Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -1267,10 +1267,10 @@ SOFTWARE.
 
 ### Contributors
 
-Thanks to all contributors who have helped make QuikRide better!
+Thanks to all contributors who have helped make Vé xe nhanh better!
 
-<a href="https://github.com/nhkhanhyn0410/Te2_quikride/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=nhkhanhyn0410/Te2_quikride" />
+<a href="https://github.com/nhkhanhyn0410/Te2_vexenhanh/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=nhkhanhyn0410/Te2_vexenhanh" />
 </a>
 
 ---
@@ -1279,18 +1279,18 @@ Thanks to all contributors who have helped make QuikRide better!
 
 ### Support Channels
 
-- 📧 **Email:** support@quikride.com
-- 🌐 **Website:** https://quikride.com
+- 📧 **Email:** support@vexenhanh.com
+- 🌐 **Website:** https://vexenhanh.com
 - 📱 **Hotline:** 1900-xxxx (8:00 - 22:00 hàng ngày)
-- 💬 **Slack:** [QuikRide Workspace](https://quikride.slack.com)
-- 🐛 **Bug Reports:** [GitHub Issues](https://github.com/nhkhanhyn0410/Te2_quikride/issues)
+- 💬 **Slack:** [Vé xe nhanh Workspace](https://vexenhanh.slack.com)
+- 🐛 **Bug Reports:** [GitHub Issues](https://github.com/nhkhanhyn0410/Te2_vexenhanh/issues)
 
 ### Social Media
 
-- 📘 **Facebook:** [@QuikRideVN](https://facebook.com/quikridevn)
-- 📸 **Instagram:** [@quikride.vn](https://instagram.com/quikride.vn)
-- 🐦 **Twitter:** [@QuikRideVN](https://twitter.com/quikridevn)
-- 💼 **LinkedIn:** [QuikRide](https://linkedin.com/company/quikride)
+- 📘 **Facebook:** [@VeXeNhanhVN](https://facebook.com/vexenhanhvn)
+- 📸 **Instagram:** [@vexenhanh.vn](https://instagram.com/vexenhanh.vn)
+- 🐦 **Twitter:** [@VeXeNhanhVN](https://twitter.com/vexenhanhvn)
+- 💼 **LinkedIn:** [Vé xe nhanh](https://linkedin.com/company/vexenhanh)
 
 ---
 
@@ -1312,20 +1312,20 @@ Cảm ơn tất cả maintainers và contributors của các dự án trên!
 
 ## 📊 Project Stats
 
-![GitHub stars](https://img.shields.io/github/stars/nhkhanhyn0410/Te2_quikride?style=social)
-![GitHub forks](https://img.shields.io/github/forks/nhkhanhyn0410/Te2_quikride?style=social)
-![GitHub issues](https://img.shields.io/github/issues/nhkhanhyn0410/Te2_quikride)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/nhkhanhyn0410/Te2_quikride)
-![GitHub last commit](https://img.shields.io/github/last-commit/nhkhanhyn0410/Te2_quikride)
+![GitHub stars](https://img.shields.io/github/stars/nhkhanhyn0410/Te2_vexenhanh?style=social)
+![GitHub forks](https://img.shields.io/github/forks/nhkhanhyn0410/Te2_vexenhanh?style=social)
+![GitHub issues](https://img.shields.io/github/issues/nhkhanhyn0410/Te2_vexenhanh)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/nhkhanhyn0410/Te2_vexenhanh)
+![GitHub last commit](https://img.shields.io/github/last-commit/nhkhanhyn0410/Te2_vexenhanh)
 
 ---
 
 <div align="center">
 
-  **Made with ❤️ by QuikRide Team**
+  **Made with ❤️ by Vé xe nhanh Team**
 
   If you find this project helpful, please give it a ⭐️!
 
-  [⬆ Back to Top](#quikride---hệ-thống-đặt-vé-xe-khách-trực-tuyến)
+  [⬆ Back to Top](#vé-xe-nhanh---hệ-thống-đặt-vé-xe-khách-trực-tuyến)
 
 </div>

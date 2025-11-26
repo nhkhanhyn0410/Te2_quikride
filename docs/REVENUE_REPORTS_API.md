@@ -611,8 +611,8 @@ export const exportRevenueToPDF = async (startDate, endDate) => {
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/nhkhanhyn0410/Te2_quikride/issues
-- Email: support@quikride.com
+- GitHub Issues: https://github.com/nhkhanhyn0410/Te2_vexenhanh/issues
+- Email: support@vexenhanh.com
 
 ---
 

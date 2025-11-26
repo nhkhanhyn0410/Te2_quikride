@@ -87,7 +87,7 @@ class UserService {
     }
 
     // Upload avatar mới lên Cloudinary
-    const uploadResult = await uploadImage(file, 'quikride/avatars');
+    const uploadResult = await uploadImage(file, 'vexenhanh/avatars');
 
     // Cập nhật avatar URL trong database
     user.avatar = uploadResult.url;

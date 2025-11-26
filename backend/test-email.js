@@ -21,7 +21,7 @@ async function testEmail() {
 
     await sendEmail({
       to: testEmail,
-      subject: 'Test Email - QuikRide',
+      subject: 'Test Email - Vé xe nhanh',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h1 style="color: #0ea5e9;">🎉 Email hoạt động!</h1>

@@ -22,7 +22,7 @@ describe('AuthService', () => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       expect(decoded.userId).toBe(payload.userId);
       expect(decoded.email).toBe(payload.email);
-      expect(decoded.iss).toBe('quikride'); // JWT uses 'iss' not 'issuer'
+      expect(decoded.iss).toBe('vexenhanh'); // JWT uses 'iss' not 'issuer'
     });
 
     it('should generate token with custom expiry', () => {

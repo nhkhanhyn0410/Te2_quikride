@@ -4,7 +4,7 @@
 November 17, 2025
 
 ## 🎯 Objectives
-Implement Phase 5.2 of the QuikRide project focusing on:
+Implement Phase 5.2 of the Vé xe nhanh project focusing on:
 1. Voucher Management System (UC-15)
 2. Dynamic Pricing for Trips
 3. Usage Reporting and Analytics

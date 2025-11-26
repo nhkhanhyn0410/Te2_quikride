@@ -16,7 +16,7 @@ class AuthService {
   static generateToken(payload, expiresIn = '7d') {
     return jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn,
-      issuer: 'quikride',
+      issuer: 'vexenhanh',
     });
   }
 
@@ -280,7 +280,7 @@ class AuthService {
     } else {
       // Tạo user mới với Facebook account
       user = await User.create({
-        email: email ? email.toLowerCase() : `facebook_${id}@quikride.temp`,
+        email: email ? email.toLowerCase() : `facebook_${id}@vexenhanh.temp`,
         fullName: name,
         facebookId: id,
         avatar: picture?.data?.url,

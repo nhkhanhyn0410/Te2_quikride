@@ -4,11 +4,11 @@ import CustomerFooter from './CustomerFooter';
 
 const { Content } = Layout;
 
-const CustomerLayout = ({ children }) => {
+const CustomerLayout = ({ children, className = '' }) => {
   return (
-    <Layout className="min-h-screen">
+    <Layout className="min-h-screen bg-white">
       <CustomerHeader />
-      <Content className="bg-gray-50">
+      <Content className={`flex-1 ${className}`}>
         {children}
       </Content>
       <CustomerFooter />

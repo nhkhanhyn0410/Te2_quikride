@@ -38,7 +38,7 @@ const Header = () => {
           className="!mb-0 text-blue-600 cursor-pointer"
           onClick={() => navigate("/")}
         >
-          🚌 QuikRide
+          🚌 Vé xe nhanh
         </Title>
 
         <Space size="middle">

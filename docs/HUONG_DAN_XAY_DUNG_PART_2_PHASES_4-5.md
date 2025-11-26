@@ -1,4 +1,4 @@
-# HƯỚNG DẪN XÂY DỰNG DỰ ÁN QUIKRIDE - PART 2
+# HƯỚNG DẪN XÂY DỰNG DỰ ÁN VÉ XE NHANH - PART 2
 ## PHASES 4-5: TICKET MANAGEMENT & OPERATOR ADMIN
 
 ---
@@ -518,7 +518,7 @@ Config (.env):
 - SMS_PROVIDER: 'vnpt' | 'viettel'
 - SMS_API_KEY
 - SMS_API_SECRET
-- SMS_BRAND_NAME: 'QuikRide'
+- SMS_BRAND_NAME: 'Vé xe nhanh'
 
 Functions:
 
@@ -547,7 +547,7 @@ Functions:
 2. sendBookingConfirmationSMS(booking, ticket)
    Message template:
    ```
-   QuikRide: Booking confirmed!
+   Vé xe nhanh: Booking confirmed!
    Code: [BOOKING_CODE]
    Trip: [ORIGIN] - [DESTINATION]
    Date: [DATE] [TIME]
@@ -563,7 +563,7 @@ Functions:
 3. sendCancellationSMS(booking, refundAmount)
    Message:
    ```
-   QuikRide: Booking [CODE] cancelled.
+   Vé xe nhanh: Booking [CODE] cancelled.
    Refund: [AMOUNT]đ
    Refund in 5-7 days.
    Questions? Call 1900xxxx
@@ -572,7 +572,7 @@ Functions:
 4. sendTripReminderSMS(booking, hoursBeforeDeparture)
    Message:
    ```
-   QuikRide: Trip in [X]h
+   Vé xe nhanh: Trip in [X]h
    [ORIGIN]-[DESTINATION] [DATE] [TIME]
    Pickup: [LOCATION]
    Code: [BOOKING_CODE]
@@ -583,7 +583,7 @@ Functions:
    - Dùng cho verification
    Message:
    ```
-   QuikRide OTP: [OTP_CODE]
+   Vé xe nhanh OTP: [OTP_CODE]
    Valid for 5 minutes.
    Do not share.
    ```

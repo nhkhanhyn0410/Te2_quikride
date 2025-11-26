@@ -59,7 +59,7 @@ const TripManagerLoginPage = () => {
             <CarOutlined className="text-3xl text-blue-500" />
           </div>
           <h2 className="text-3xl font-bold text-white mb-2">
-            QuikRide Trip Manager
+            Vé xe nhanh Trip Manager
           </h2>
           <p className="text-blue-100">
             Đăng nhập để quản lý chuyến xe
@@ -142,7 +142,7 @@ const TripManagerLoginPage = () => {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-blue-100 text-sm">
-            © 2024 QuikRide. All rights reserved.
+            © 2024 Vé xe nhanh. All rights reserved.
           </p>
         </div>
       </div>
