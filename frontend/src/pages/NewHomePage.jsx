@@ -16,6 +16,7 @@ import {
   SearchOutlined,
   SwapOutlined,
   CalendarOutlined,
+  EnvironmentOutlined,
   SafetyOutlined,
   ThunderboltOutlined,
   DollarOutlined,
