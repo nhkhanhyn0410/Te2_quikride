@@ -116,7 +116,7 @@ const TripsPage = () => {
     } else {
       // Trips page: show search form with pre-filled or empty values
       if (searchCriteria.fromCity && searchCriteria.toCity && searchCriteria.date) {
-        // If there are existing search criteria, use them
+        // If there are existing search criteria, use them and fetch those trips
         console.log('Pre-filling trips page form with criteria:', searchCriteria);
         searchForm.setFieldsValue({
           fromCity: searchCriteria.fromCity,
@@ -124,17 +124,19 @@ const TripsPage = () => {
           date: dayjs(searchCriteria.date),
           passengers: searchCriteria.passengers || 1
         });
+        fetchTrips(); // Fetch trips with existing criteria
       } else {
-        // Otherwise, show empty form with today's date
-        console.log('Showing empty search form on trips page');
+        // Otherwise, show empty form with today's date and fetch ALL trips
+        console.log('Showing empty search form on trips page and fetching all trips');
         searchForm.setFieldsValue({
           fromCity: '',
           toCity: '',
           date: dayjs(),
           passengers: 1
         });
+        // Fetch all available trips (no city/date filters)
+        fetchAllTrips();
       }
-      // Don't clear trips immediately - let user keep previous results or show empty state
       setShowSearchForm(true); // Always show search form on trips page
     }
   }, [location.pathname, searchCriteria]);
@@ -168,6 +170,41 @@ const TripsPage = () => {
       console.error('Fetch trips error:', error);
       setTrips([]);
       toast.error('Có lỗi xảy ra khi tìm kiếm chuyến xe');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllTrips = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching all available trips without filters...');
+
+      // Call search API without fromCity, toCity, date filters
+      // Backend will return all available trips
+      const response = await searchTrips({ passengers: 1 });
+
+      if (response.status === 'success' && response.data?.trips) {
+        setTrips(response.data.trips);
+
+        // Calculate max price for slider
+        if (response.data.trips.length > 0) {
+          const prices = response.data.trips.map(t => t.finalPrice);
+          const max = Math.max(...prices);
+          setMaxPrice(Math.ceil(max / 10000) * 10000);
+          setPriceRange([0, Math.ceil(max / 10000) * 10000]);
+        }
+
+        console.log(`✅ Loaded ${response.data.trips.length} available trips`);
+        toast.success(`Hiển thị ${response.data.trips.length} chuyến xe có sẵn`);
+      } else {
+        setTrips([]);
+        toast.info('Hiện không có chuyến xe nào');
+      }
+    } catch (error) {
+      console.error('Fetch all trips error:', error);
+      setTrips([]);
+      toast.error('Có lỗi xảy ra khi tải danh sách chuyến xe');
     } finally {
       setLoading(false);
     }
@@ -1062,7 +1099,15 @@ const TripsPage = () => {
                       </Button>
                     )}
                     <Button
-                      onClick={() => fetchTrips()}
+                      onClick={() => {
+                        // If on search-results or has criteria, refetch with criteria
+                        // Otherwise fetch all trips
+                        if (isSearchResults || (searchCriteria.fromCity && searchCriteria.toCity && searchCriteria.date)) {
+                          fetchTrips();
+                        } else {
+                          fetchAllTrips();
+                        }
+                      }}
                       icon={<ReloadOutlined />}
                       loading={loading}
                       size="large"
