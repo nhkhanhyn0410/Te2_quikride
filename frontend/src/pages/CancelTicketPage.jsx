@@ -201,17 +201,50 @@ const CancelTicketPage = () => {
 
           {currentStep === 1 && bookingInfo && (
             <div>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Chính sách hủy vé
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 rounded-lg p-6 mb-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <ExclamationCircleOutlined className="mr-2 text-yellow-600" />
+                  Chính sách hoàn tiền khi hủy vé
                 </h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li>• Hoàn 100% nếu hủy trước 24 giờ</li>
-                  <li>• Hoàn 80% nếu hủy trước 12 giờ</li>
-                  <li>• Hoàn 50% nếu hủy trước 6 giờ</li>
-                  <li>• Hoàn 20% nếu hủy trước 2 giờ</li>
-                  <li>• Không hoàn tiền nếu hủy trong vòng 2 giờ trước giờ khởi hành</li>
-                </ul>
+
+                <div className="bg-white rounded-lg p-4 mb-4">
+                  <div className="text-center mb-3">
+                    <div className="text-2xl font-bold text-green-600">✓ CÓ HOÀN TIỀN</div>
+                    <div className="text-sm text-gray-600 mt-1">Nếu hủy vé TRƯỚC 2 TIẾNG khởi hành</div>
+                  </div>
+                  <ul className="space-y-2 text-sm text-gray-700">
+                    <li className="flex items-center">
+                      <span className="text-green-500 mr-2">✓</span>
+                      <span>Hủy trước <strong>24 giờ</strong>: Hoàn <strong className="text-green-600">100%</strong></span>
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-green-500 mr-2">✓</span>
+                      <span>Hủy trước <strong>12 giờ</strong>: Hoàn <strong className="text-green-600">80%</strong></span>
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-green-500 mr-2">✓</span>
+                      <span>Hủy trước <strong>6 giờ</strong>: Hoàn <strong className="text-green-600">50%</strong></span>
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-green-500 mr-2">✓</span>
+                      <span>Hủy trước <strong>2 giờ</strong>: Hoàn <strong className="text-green-600">20%</strong></span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-red-600">✗ KHÔNG HOÀN TIỀN</div>
+                    <div className="text-sm text-gray-700 mt-2">
+                      • Hủy trong vòng <strong className="text-red-600">2 TIẾNG</strong> trước giờ khởi hành<br/>
+                      • Chuyến xe <strong className="text-red-600">ĐÃ KHỞI HÀNH</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 text-xs text-gray-600 text-center">
+                  Tiền hoàn sẽ được chuyển về tài khoản trong 3-7 ngày làm việc
+                </div>
               </div>
 
               <div className="bg-gray-50 rounded-lg p-4 mb-6">

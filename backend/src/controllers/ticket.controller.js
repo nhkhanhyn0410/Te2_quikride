@@ -99,6 +99,7 @@ class TicketController {
   /**
    * UC-27: Request OTP for ticket lookup (Step 1)
    * POST /api/tickets/lookup/request-otp
+   * Supports phone-only lookup (returns all tickets for that phone)
    */
   static async requestTicketLookupOTP(req, res) {
     try {
@@ -112,7 +113,8 @@ class TicketController {
 
       const { ticketCode, phone } = req.body;
 
-      const result = await TicketService.requestTicketLookupOTP(ticketCode, phone);
+      // Phone-only lookup support
+      const result = await TicketService.requestTicketLookupOTP(ticketCode || null, phone);
 
       res.json({
         success: true,
@@ -131,8 +133,9 @@ class TicketController {
   }
 
   /**
-   * UC-27: Verify OTP and get ticket (Step 2)
+   * UC-27: Verify OTP and get tickets (Step 2)
    * POST /api/tickets/lookup/verify-otp
+   * Returns single ticket if ticketCode provided, or all tickets for phone
    */
   static async verifyTicketLookupOTP(req, res) {
     try {
@@ -146,14 +149,13 @@ class TicketController {
 
       const { ticketCode, phone, otp } = req.body;
 
-      const ticket = await TicketService.verifyTicketLookupOTP(ticketCode, phone, otp);
+      // Support both single ticket lookup and phone-only (all tickets) lookup
+      const result = await TicketService.verifyTicketLookupOTP(ticketCode || null, phone, otp);
 
       res.json({
         success: true,
         message: 'Xác thực thành công',
-        data: {
-          ticket,
-        },
+        data: result, // Can be { ticket } or { tickets: [] }
       });
     } catch (error) {
       console.error('Verify OTP error:', error);
