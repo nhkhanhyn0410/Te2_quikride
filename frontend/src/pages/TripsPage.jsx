@@ -51,7 +51,7 @@ import dayjs from 'dayjs';
 import { toast } from 'react-hot-toast';
 import useBookingStore from '../store/bookingStore';
 import CustomerLayout from '../components/customer/CustomerLayout';
-import { searchTrips } from '../services/bookingApi';
+import { searchTrips, getTripDetails, getTripDynamicPrice } from '../services/bookingApi';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -140,63 +140,148 @@ const TripsPage = () => {
   const fetchTrips = async (criteria = searchCriteria) => {
     try {
       setLoading(true);
+      console.log('🔍 Fetching trips with criteria:', criteria);
+      
       const response = await searchTrips(criteria);
+      console.log('📡 API Response:', response);
 
       if (response.status === 'success' && response.data?.trips) {
-        setTrips(response.data.trips);
+        // Process trips data to ensure all required fields
+        const processedTrips = response.data.trips.map(trip => ({
+          ...trip,
+          // Extract city names from route data
+          fromCity: trip.routeId?.origin?.city || trip.routeId?.origin?.province || 'Điểm đi',
+          toCity: trip.routeId?.destination?.city || trip.routeId?.destination?.province || 'Điểm đến',
+          fromLocation: trip.routeId?.origin?.address || trip.routeId?.origin?.city,
+          toLocation: trip.routeId?.destination?.address || trip.routeId?.destination?.city,
+          // Calculate duration if not available
+          duration: trip.duration ? `${Math.floor(trip.duration / 60)}h ${trip.duration % 60}m` : 
+                   calculateDuration(trip.departureTime, trip.arrivalTime),
+          // Ensure operator info
+          operatorName: trip.operatorId?.companyName || 'Nhà xe',
+          operatorRating: trip.operatorId?.averageRating || 0,
+          // Ensure bus info
+          busType: trip.busId?.busType || 'Xe khách',
+          busNumber: trip.busId?.busNumber || 'N/A',
+          amenities: trip.busId?.amenities || [],
+          // Ensure pricing
+          finalPrice: trip.finalPrice || trip.basePrice || 0,
+          basePrice: trip.basePrice || 0,
+          discount: trip.discount || 0,
+          // Seat info
+          totalSeats: trip.totalSeats || 0,
+          availableSeats: trip.availableSeats || 0,
+        }));
+
+        setTrips(processedTrips);
 
         // Calculate max price for slider
-        if (response.data.trips.length > 0) {
-          const prices = response.data.trips.map(t => t.finalPrice);
+        if (processedTrips.length > 0) {
+          const prices = processedTrips.map(t => t.finalPrice);
           const max = Math.max(...prices);
           setMaxPrice(Math.ceil(max / 10000) * 10000);
           setPriceRange([0, Math.ceil(max / 10000) * 10000]);
         }
 
-        toast.success(`Tìm thấy ${response.data.trips.length} chuyến xe`);
+        console.log(`✅ Processed ${processedTrips.length} trips successfully`);
+        toast.success(`Tìm thấy ${processedTrips.length} chuyến xe`);
       } else {
         setTrips([]);
         toast.error('Không tìm thấy chuyến xe phù hợp');
       }
     } catch (error) {
-      console.error('Fetch trips error:', error);
+      console.error('❌ Fetch trips error:', error);
       setTrips([]);
-      toast.error('Có lỗi xảy ra khi tìm kiếm chuyến xe');
+      toast.error(typeof error === 'string' ? error : 'Có lỗi xảy ra khi tìm kiếm chuyến xe');
     } finally {
       setLoading(false);
     }
   };
 
+  // Helper function to calculate duration
+  const calculateDuration = (departureTime, arrivalTime) => {
+    if (!departureTime || !arrivalTime) return 'Đang cập nhật';
+    
+    const departure = new Date(departureTime);
+    const arrival = new Date(arrivalTime);
+    const diffMs = arrival - departure;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${diffHours}h ${diffMinutes}m`;
+  };
+
+  // Function to load dynamic pricing for trips (optional enhancement)
+  const loadDynamicPricing = async (tripId) => {
+    try {
+      const response = await getTripDynamicPrice(tripId);
+      if (response.status === 'success') {
+        return response.data;
+      }
+    } catch (error) {
+      console.warn('Could not load dynamic pricing for trip:', tripId, error);
+    }
+    return null;
+  };
+
   const fetchAllTrips = async () => {
     try {
       setLoading(true);
-      console.log('Fetching all available trips without filters...');
+      console.log('🚌 Fetching all available trips without filters...');
 
       // Call search API without fromCity, toCity, date filters
       // Backend will return all available trips
       const response = await searchTrips({ passengers: 1 });
+      console.log('📡 All trips API Response:', response);
 
       if (response.status === 'success' && response.data?.trips) {
-        setTrips(response.data.trips);
+        // Process trips data similar to fetchTrips
+        const processedTrips = response.data.trips.map(trip => ({
+          ...trip,
+          // Extract city names from route data
+          fromCity: trip.routeId?.origin?.city || trip.routeId?.origin?.province || 'Điểm đi',
+          toCity: trip.routeId?.destination?.city || trip.routeId?.destination?.province || 'Điểm đến',
+          fromLocation: trip.routeId?.origin?.address || trip.routeId?.origin?.city,
+          toLocation: trip.routeId?.destination?.address || trip.routeId?.destination?.city,
+          // Calculate duration if not available
+          duration: trip.duration ? `${Math.floor(trip.duration / 60)}h ${trip.duration % 60}m` : 
+                   calculateDuration(trip.departureTime, trip.arrivalTime),
+          // Ensure operator info
+          operatorName: trip.operatorId?.companyName || 'Nhà xe',
+          operatorRating: trip.operatorId?.averageRating || 0,
+          // Ensure bus info
+          busType: trip.busId?.busType || 'Xe khách',
+          busNumber: trip.busId?.busNumber || 'N/A',
+          amenities: trip.busId?.amenities || [],
+          // Ensure pricing
+          finalPrice: trip.finalPrice || trip.basePrice || 0,
+          basePrice: trip.basePrice || 0,
+          discount: trip.discount || 0,
+          // Seat info
+          totalSeats: trip.totalSeats || 0,
+          availableSeats: trip.availableSeats || 0,
+        }));
+
+        setTrips(processedTrips);
 
         // Calculate max price for slider
-        if (response.data.trips.length > 0) {
-          const prices = response.data.trips.map(t => t.finalPrice);
+        if (processedTrips.length > 0) {
+          const prices = processedTrips.map(t => t.finalPrice);
           const max = Math.max(...prices);
           setMaxPrice(Math.ceil(max / 10000) * 10000);
           setPriceRange([0, Math.ceil(max / 10000) * 10000]);
         }
 
-        console.log(`✅ Loaded ${response.data.trips.length} available trips`);
-        toast.success(`Hiển thị ${response.data.trips.length} chuyến xe có sẵn`);
+        console.log(`✅ Loaded ${processedTrips.length} available trips`);
+        toast.success(`Hiển thị ${processedTrips.length} chuyến xe có sẵn`);
       } else {
         setTrips([]);
         toast.info('Hiện không có chuyến xe nào');
       }
     } catch (error) {
-      console.error('Fetch all trips error:', error);
+      console.error('❌ Fetch all trips error:', error);
       setTrips([]);
-      toast.error('Có lỗi xảy ra khi tải danh sách chuyến xe');
+      toast.error(typeof error === 'string' ? error : 'Có lỗi xảy ra khi tải danh sách chuyến xe');
     } finally {
       setLoading(false);
     }
@@ -280,9 +365,20 @@ const TripsPage = () => {
     }
   };
 
-  const handleTripSelect = (trip) => {
-    setSelectedTrip(trip);
-    navigate(`/trips/${trip._id}`);
+  const handleTripSelect = async (trip) => {
+    try {
+      // Set loading state for this specific trip
+      setSelectedTrip(trip);
+      
+      // Optionally load more detailed trip information
+      console.log('🚌 Loading detailed trip information for:', trip._id);
+      
+      // Navigate to trip detail page
+      navigate(`/trips/${trip._id}`);
+    } catch (error) {
+      console.error('❌ Error selecting trip:', error);
+      toast.error('Có lỗi xảy ra khi chọn chuyến xe');
+    }
   };
 
   const handleSwapCities = () => {
@@ -308,11 +404,39 @@ const TripsPage = () => {
   const getBusTypes = () => {
     const types = new Set();
     trips.forEach(trip => {
-      if (trip.busId?.busType) {
-        types.add(trip.busId.busType);
+      if (trip.busType) {
+        types.add(trip.busType);
       }
     });
     return Array.from(types);
+  };
+
+  // Helper function to get amenity configuration
+  const getAmenityConfig = (amenity) => {
+    const amenityMap = {
+      'WiFi': { icon: '🌐', label: 'WiFi', bgColor: 'bg-blue-50', borderColor: 'border-blue-200', textColor: 'text-blue-700' },
+      'wifi': { icon: '🌐', label: 'WiFi', bgColor: 'bg-blue-50', borderColor: 'border-blue-200', textColor: 'text-blue-700' },
+      'AC': { icon: '❄️', label: 'Điều hòa', bgColor: 'bg-green-50', borderColor: 'border-green-200', textColor: 'text-green-700' },
+      'Air Conditioning': { icon: '❄️', label: 'Điều hòa', bgColor: 'bg-green-50', borderColor: 'border-green-200', textColor: 'text-green-700' },
+      'Charger': { icon: '🔌', label: 'Sạc điện thoại', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200', textColor: 'text-yellow-700' },
+      'USB Charger': { icon: '🔌', label: 'Sạc điện thoại', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200', textColor: 'text-yellow-700' },
+      'Entertainment': { icon: '📺', label: 'Giải trí', bgColor: 'bg-pink-50', borderColor: 'border-pink-200', textColor: 'text-pink-700' },
+      'TV': { icon: '📺', label: 'TV', bgColor: 'bg-pink-50', borderColor: 'border-pink-200', textColor: 'text-pink-700' },
+      'Toilet': { icon: '🚻', label: 'Toilet', bgColor: 'bg-cyan-50', borderColor: 'border-cyan-200', textColor: 'text-cyan-700' },
+      'Water': { icon: '💧', label: 'Nước uống', bgColor: 'bg-teal-50', borderColor: 'border-teal-200', textColor: 'text-teal-700' },
+      'Blanket': { icon: '🛏️', label: 'Chăn gối', bgColor: 'bg-purple-50', borderColor: 'border-purple-200', textColor: 'text-purple-700' },
+      'Pillow': { icon: '🛏️', label: 'Chăn gối', bgColor: 'bg-purple-50', borderColor: 'border-purple-200', textColor: 'text-purple-700' },
+      'Snack': { icon: '🍿', label: 'Đồ ăn nhẹ', bgColor: 'bg-orange-50', borderColor: 'border-orange-200', textColor: 'text-orange-700' },
+      'Reading Light': { icon: '💡', label: 'Đèn đọc sách', bgColor: 'bg-amber-50', borderColor: 'border-amber-200', textColor: 'text-amber-700' },
+    };
+
+    return amenityMap[amenity] || { 
+      icon: '✨', 
+      label: amenity, 
+      bgColor: 'bg-gray-50', 
+      borderColor: 'border-gray-200', 
+      textColor: 'text-gray-700' 
+    };
   };
 
   return (
@@ -1134,23 +1258,35 @@ const TripsPage = () => {
                       {/* Trip Header */}
                       <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-4">
                             <Avatar size="large" className="bg-gradient-to-r from-red-500 to-orange-500">
-                              {trip.operatorId?.companyName?.charAt(0)}
+                              {trip.operatorName?.charAt(0) || 'N'}
                             </Avatar>
                             <div>
                               <Text strong className="text-gray-800 text-lg">
-                                {trip.operatorId?.companyName}
+                                {trip.operatorName}
                               </Text>
                               <div className="flex items-center gap-2 mt-1">
                                 <Rate
                                   disabled
-                                  defaultValue={trip.operatorId?.averageRating || 0}
+                                  defaultValue={trip.operatorRating}
                                   size="small"
                                 />
                                 <Text className="text-xs text-gray-500">
-                                  ({trip.operatorId?.averageRating || 0}/5)
+                                  ({trip.operatorRating.toFixed(1)}/5)
                                 </Text>
+                                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                <Text className="text-xs text-gray-500 font-medium">
+                                  {trip.busType}
+                                </Text>
+                                {trip.busNumber && (
+                                  <>
+                                    <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                    <Text className="text-xs text-gray-500 font-medium">
+                                      {trip.busNumber}
+                                    </Text>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1158,9 +1294,83 @@ const TripsPage = () => {
                             <div className="text-3xl font-black text-red-600 mb-1">
                               {formatPrice(trip.finalPrice)}
                             </div>
-                            <Text className="text-sm text-gray-500">
-                              {trip.busId?.busType || 'N/A'}
-                            </Text>
+                            <div className="flex items-center justify-end gap-1">
+                              <UserOutlined className="text-blue-500 text-xs" />
+                              <Text className="text-sm text-gray-600 font-medium">
+                                {trip.availableSeats} chỗ trống
+                              </Text>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Route Information - Enhanced */}
+                      <div className="px-6 py-5 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b">
+                        <div className="flex items-center justify-center">
+                          <div className="flex items-center gap-6 w-full max-w-4xl">
+                            {/* Điểm đi */}
+                            <div className="flex-1 text-center">
+                              <div className="flex items-center justify-center gap-2 mb-2">
+                                <div className="w-3 h-3 bg-red-500 rounded-full shadow-lg animate-pulse"></div>
+                                <Text className="text-xs font-bold text-red-600 uppercase tracking-wider">
+                                  Điểm đi
+                                </Text>
+                              </div>
+                              <div className="bg-white rounded-2xl p-4 shadow-md border-2 border-red-100">
+                                <Text strong className="text-gray-900 text-xl block mb-1">
+                                  {trip.fromCity}
+                                </Text>
+                                {trip.fromLocation && trip.fromLocation !== trip.fromCity && (
+                                  <Text className="text-sm text-gray-600 font-medium">
+                                    {trip.fromLocation}
+                                  </Text>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* Thời gian di chuyển */}
+                            <div className="flex-shrink-0">
+                              <div className="text-center mb-2">
+                                <Text className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                  Thời gian
+                                </Text>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="w-4 h-4 bg-red-500 rounded-full shadow-lg"></div>
+                                <div className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-full shadow-lg">
+                                  <CarOutlined className="text-white text-lg" />
+                                  <Text className="text-white font-bold text-lg">
+                                    {trip.duration}
+                                  </Text>
+                                </div>
+                                <div className="w-4 h-4 bg-orange-500 rounded-full shadow-lg"></div>
+                              </div>
+                              <div className="mt-2 text-center">
+                                <Text className="text-xs text-gray-500 font-medium">
+                                  {formatTime(trip.departureTime)} → {formatTime(trip.arrivalTime)}
+                                </Text>
+                              </div>
+                            </div>
+                            
+                            {/* Điểm đến */}
+                            <div className="flex-1 text-center">
+                              <div className="flex items-center justify-center gap-2 mb-2">
+                                <div className="w-3 h-3 bg-orange-500 rounded-full shadow-lg animate-pulse"></div>
+                                <Text className="text-xs font-bold text-orange-600 uppercase tracking-wider">
+                                  Điểm đến
+                                </Text>
+                              </div>
+                              <div className="bg-white rounded-2xl p-4 shadow-md border-2 border-orange-100">
+                                <Text strong className="text-gray-900 text-xl block mb-1">
+                                  {trip.toCity}
+                                </Text>
+                                {trip.toLocation && trip.toLocation !== trip.toCity && (
+                                  <Text className="text-sm text-gray-600 font-medium">
+                                    {trip.toLocation}
+                                  </Text>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1169,79 +1379,177 @@ const TripsPage = () => {
                       <div className="p-6">
                         <Row gutter={[24, 16]} align="middle">
                           <Col xs={24} sm={8}>
-                            <div className="text-center p-4 bg-red-50 rounded-2xl">
-                              <div className="text-3xl font-black text-gray-800 mb-2">
-                                {formatTime(trip.departureTime)}
+                            <div className="text-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-2xl border-2 border-red-200 shadow-md">
+                              <div className="flex items-center justify-center gap-2 mb-3">
+                                <EnvironmentOutlined className="text-red-500 text-lg" />
+                                <Text className="text-sm font-bold text-red-600 uppercase tracking-wider">Điểm đi</Text>
                               </div>
-                              <div className="text-sm text-gray-600 mb-2 font-medium">
-                                {formatDate(trip.departureTime)}
-                              </div>
-                              <div className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full">
-                                {trip.fromLocation}
-                              </div>
-                            </div>
-                          </Col>
-
-                          <Col xs={24} sm={8}>
-                            <div className="text-center p-4">
-                              <div className="flex items-center justify-center gap-3 mb-3">
-                                <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
-                                <div className="flex-1 h-1 bg-gradient-to-r from-red-500 via-orange-400 to-orange-500 rounded-full"></div>
-                                <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center">
-                                  <CarOutlined className="text-white text-sm" />
+                              
+                              {/* Departure time */}
+                              <div className="bg-white rounded-xl p-3 mb-3 border-2 border-red-100 shadow-sm">
+                                <div className="text-3xl font-black text-red-600 mb-1">
+                                  {formatTime(trip.departureTime)}
                                 </div>
-                                <div className="flex-1 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-red-500 rounded-full"></div>
-                                <div className="w-4 h-4 bg-orange-500 rounded-full animate-pulse"></div>
+                                <div className="text-sm text-gray-600 font-medium">
+                                  {formatDate(trip.departureTime)}
+                                </div>
                               </div>
-                              <div className="text-sm text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full">
-                                {trip.duration || 'Đang cập nhật'}
+                              
+                              {/* Location */}
+                              <div className="bg-red-500 text-white px-4 py-3 rounded-xl shadow-md">
+                                <Text className="text-xs font-bold uppercase tracking-wider block mb-1 text-red-100">
+                                  Thành phố
+                                </Text>
+                                <Text className="text-lg font-bold block mb-1">
+                                  {trip.fromCity}
+                                </Text>
+                                {trip.fromLocation && trip.fromLocation !== trip.fromCity && (
+                                  <Text className="text-sm text-red-100 font-medium">
+                                    {trip.fromLocation}
+                                  </Text>
+                                )}
                               </div>
                             </div>
                           </Col>
 
                           <Col xs={24} sm={8}>
-                            <div className="text-center p-4 bg-orange-50 rounded-2xl">
-                              <div className="text-3xl font-black text-gray-800 mb-2">
-                                {formatTime(trip.arrivalTime)}
+                            <div className="text-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
+                              <div className="flex items-center justify-center gap-2 mb-3">
+                                <ClockCircleOutlined className="text-blue-500" />
+                                <Text className="text-sm font-semibold text-gray-700">Hành trình</Text>
                               </div>
-                              <div className="text-sm text-gray-600 mb-2 font-medium">
-                                {formatDate(trip.arrivalTime)}
+                              
+                              {/* Route visualization */}
+                              <div className="flex items-center justify-center gap-3 mb-4">
+                                <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-md"></div>
+                                <div className="flex-1 h-3 bg-gradient-to-r from-red-500 via-orange-400 to-orange-500 rounded-full relative overflow-hidden">
+                                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-orange-400 to-orange-500 rounded-full animate-pulse"></div>
+                                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-orange-400">
+                                    <CarOutlined className="text-orange-600 text-sm" />
+                                  </div>
+                                </div>
+                                <div className="w-4 h-4 bg-orange-500 rounded-full animate-pulse shadow-md"></div>
                               </div>
-                              <div className="text-xs text-gray-500 bg-white px-3 py-1 rounded-full">
-                                {trip.toLocation}
+                              
+                              {/* Duration info */}
+                              <div className="bg-white px-4 py-3 rounded-xl border-2 border-blue-100 shadow-sm">
+                                <Text className="text-xs text-blue-600 font-bold uppercase tracking-wider block mb-1">
+                                  Thời gian di chuyển
+                                </Text>
+                                <div className="text-2xl font-black text-gray-800 mb-1">
+                                  {trip.duration}
+                                </div>
+                                <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
+                                  <span>{formatTime(trip.departureTime)}</span>
+                                  <span>→</span>
+                                  <span>{formatTime(trip.arrivalTime)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </Col>
+
+                          <Col xs={24} sm={8}>
+                            <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl border-2 border-orange-200 shadow-md">
+                              <div className="flex items-center justify-center gap-2 mb-3">
+                                <SendOutlined className="text-orange-500 text-lg" />
+                                <Text className="text-sm font-bold text-orange-600 uppercase tracking-wider">Điểm đến</Text>
+                              </div>
+                              
+                              {/* Arrival time */}
+                              <div className="bg-white rounded-xl p-3 mb-3 border-2 border-orange-100 shadow-sm">
+                                <div className="text-3xl font-black text-orange-600 mb-1">
+                                  {formatTime(trip.arrivalTime)}
+                                </div>
+                                <div className="text-sm text-gray-600 font-medium">
+                                  {formatDate(trip.arrivalTime)}
+                                </div>
+                              </div>
+                              
+                              {/* Location */}
+                              <div className="bg-orange-500 text-white px-4 py-3 rounded-xl shadow-md">
+                                <Text className="text-xs font-bold uppercase tracking-wider block mb-1 text-orange-100">
+                                  Thành phố
+                                </Text>
+                                <Text className="text-lg font-bold block mb-1">
+                                  {trip.toCity}
+                                </Text>
+                                {trip.toLocation && trip.toLocation !== trip.toCity && (
+                                  <Text className="text-sm text-orange-100 font-medium">
+                                    {trip.toLocation}
+                                  </Text>
+                                )}
                               </div>
                             </div>
                           </Col>
                         </Row>
 
-                        {/* Trip Features & Action */}
+                        {/* Bus Amenities */}
                         <div className="mt-6 pt-6 border-t border-gray-100">
+                          <div className="mb-4">
+                            <Text strong className="text-gray-700 flex items-center gap-2 mb-3">
+                              <GiftOutlined className="text-purple-500" />
+                              Tiện ích xe
+                            </Text>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                              {/* Render amenities from backend data */}
+                              {trip.amenities && trip.amenities.length > 0 ? (
+                                trip.amenities.map((amenity, index) => {
+                                  const amenityConfig = getAmenityConfig(amenity);
+                                  return (
+                                    <div key={index} className={`flex items-center gap-2 p-3 rounded-xl border ${amenityConfig.bgColor} ${amenityConfig.borderColor}`}>
+                                      <span className={amenityConfig.textColor}>{amenityConfig.icon}</span>
+                                      <Text className={`text-sm font-medium ${amenityConfig.textColor}`}>
+                                        {amenityConfig.label}
+                                      </Text>
+                                    </div>
+                                  );
+                                })
+                              ) : (
+                                // Default amenities if no specific amenities data
+                                <>
+                                  <div className="flex items-center gap-2 p-3 bg-green-50 rounded-xl border border-green-200">
+                                    <SafetyOutlined className="text-green-600" />
+                                    <Text className="text-sm font-medium text-green-700">Bảo hiểm</Text>
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-xl border border-blue-200">
+                                    <span className="text-blue-600">❄️</span>
+                                    <Text className="text-sm font-medium text-blue-700">Điều hòa</Text>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 p-3 bg-indigo-50 rounded-xl border border-indigo-200">
+                                    <WifiOutlined className="text-indigo-600" />
+                                    <Text className="text-sm font-medium text-indigo-700">WiFi</Text>
+                                  </div>
+
+                                  {trip.busType === 'Giường nằm' && (
+                                    <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-xl border border-purple-200">
+                                      <span className="text-purple-600">🛏️</span>
+                                      <Text className="text-sm font-medium text-purple-700">Chăn gối</Text>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+
+
+                            </div>
+                          </div>
+
                           <Row gutter={[16, 16]} align="middle">
                             <Col xs={24} sm={16}>
-                              <div className="flex flex-wrap gap-2">
-                                <Tag
-                                  color="blue"
-                                  icon={<UserOutlined />}
-                                  className="px-3 py-1 rounded-full border-0 bg-blue-100 text-blue-700"
-                                >
-                                  {trip.availableSeats} chỗ trống
-                                </Tag>
-                                {trip.busId?.amenities?.includes('WiFi') && (
-                                  <Tag
-                                    color="green"
-                                    icon={<WifiOutlined />}
-                                    className="px-3 py-1 rounded-full border-0 bg-green-100 text-green-700"
-                                  >
-                                    WiFi miễn phí
-                                  </Tag>
-                                )}
-                                <Tag
-                                  color="purple"
-                                  icon={<SafetyOutlined />}
-                                  className="px-3 py-1 rounded-full border-0 bg-purple-100 text-purple-700"
-                                >
-                                  Bảo hiểm
-                                </Tag>
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
+                                  <UserOutlined className="text-blue-600" />
+                                  <Text className="text-sm font-bold text-blue-700">
+                                    {trip.availableSeats} chỗ trống
+                                  </Text>
+                                </div>
+                                <div className="flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-xl border border-orange-200">
+                                  <ClockCircleOutlined className="text-orange-600" />
+                                  <Text className="text-sm font-medium text-orange-700">
+                                    Khởi hành {formatTime(trip.departureTime)}
+                                  </Text>
+                                </div>
                               </div>
                             </Col>
 
