@@ -1,22 +1,22 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Dropdown, Avatar, Badge, Typography, Breadcrumb, Space } from 'antd';
-import { 
-  UserOutlined, 
-  LogoutOutlined, 
+import {
+  UserOutlined,
+  LogoutOutlined,
   SettingOutlined,
   BellOutlined,
   DashboardOutlined,
   HomeOutlined,
   CarOutlined,
 } from '@ant-design/icons';
-import useAuthStore from '../../store/authStore';
+import useOperatorAuthStore from '../../store/operatorAuthStore';
 
 const { Text } = Typography;
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuthStore();
+  const { operator: user, logout } = useOperatorAuthStore();
 
   const handleLogout = () => {
     logout();

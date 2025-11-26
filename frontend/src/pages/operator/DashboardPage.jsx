@@ -38,7 +38,7 @@ import {
 } from 'recharts';
 import dayjs from 'dayjs';
 import api from '../../services/api';
-import useAuthStore from '../../store/authStore';
+import useOperatorAuthStore from '../../store/operatorAuthStore';
 
 const { Option } = Select;
 
@@ -46,7 +46,7 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('month');
   const [stats, setStats] = useState(null);
-  const { user } = useAuthStore();
+  const { operator: user } = useOperatorAuthStore();
 
   useEffect(() => {
     loadDashboardStats();

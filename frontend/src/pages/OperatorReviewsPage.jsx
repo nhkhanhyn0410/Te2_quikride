@@ -36,7 +36,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/vi';
 import { getOperatorReviews, addOperatorResponse } from '../services/reviewApi';
-import useAuthStore from '../store/authStore';
+import useOperatorAuthStore from '../store/operatorAuthStore';
 
 dayjs.extend(relativeTime);
 dayjs.locale('vi');
@@ -46,7 +46,7 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const OperatorReviewsPage = () => {
-  const { user } = useAuthStore();
+  const { operator: user } = useOperatorAuthStore();
   const operatorId = user?.operatorId;
 
   const [reviews, setReviews] = useState([]);
