@@ -383,7 +383,7 @@ class DashboardService {
         $group: {
           _id: groupBy,
           count: { $sum: 1 },
-          revenue: { $sum: '$total' },
+          revenue: { $sum: '$finalPrice' },  // Use finalPrice instead of total
         },
       },
       {

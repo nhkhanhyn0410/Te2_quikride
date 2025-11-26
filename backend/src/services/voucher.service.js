@@ -439,7 +439,7 @@ class VoucherService {
         $group: {
           _id: null,
           totalDiscount: { $sum: '$discount' },
-          totalRevenue: { $sum: '$total' },
+          totalRevenue: { $sum: '$finalPrice' },  // Use finalPrice instead of total
           confirmedCount: {
             $sum: { $cond: [{ $eq: ['$status', 'confirmed'] }, 1, 0] },
           },
