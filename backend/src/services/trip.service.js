@@ -508,11 +508,11 @@ class TripService {
     const query = {
       status: 'scheduled',
       availableSeats: { $gte: passengers },
-      departureTime: { $gt: new Date() },
     };
 
-    // Date filter
+    // Date/Time filter
     if (date) {
+      // If date is specified, search for trips on that specific date
       const startOfDay = new Date(date);
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(date);
@@ -523,6 +523,16 @@ class TripService {
         $lte: endOfDay,
       };
       console.log('📅 Date range:', { startOfDay, endOfDay });
+    } else {
+      // If no date specified (browse all mode), show trips from last 7 days to future
+      // This helps with demo/testing and allows users to see recent trips
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      query.departureTime = {
+        $gte: sevenDaysAgo, // Include trips from last 7 days
+      };
+      console.log('📅 Browse mode: showing trips from last 7 days to future', { sevenDaysAgo });
     }
 
     // Price range filter
