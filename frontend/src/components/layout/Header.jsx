@@ -1,11 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button, Space, Dropdown } from 'antd';
-import {
-  LoginOutlined,
-  UserOutlined,
-  DownOutlined,
-  LogoutOutlined,
-} from '@ant-design/icons';
+import { FiLogIn, FiUser, FiChevronDown, FiLogOut } from 'react-icons/fi';
 import useAuthStore from '../../store/authStore';
 import toast from 'react-hot-toast';
 
@@ -22,13 +17,13 @@ const Header = () => {
     {
       key: 'my-tickets',
       label: 'Vé của tôi',
-      icon: <UserOutlined />,
+      icon: <FiUser />,
       onClick: () => navigate('/my-tickets'),
     },
     {
       key: 'logout',
       label: 'Đăng xuất',
-      icon: <LogoutOutlined />,
+      icon: <FiLogOut />,
       onClick: handleLogout,
     },
   ];
@@ -87,9 +82,9 @@ const Header = () => {
               <Dropdown menu={{ items: userMenuItems }} trigger={['click']}>
                 <Button type="text">
                   <Space>
-                    <UserOutlined />
+                    <FiUser />
                     {user?.name || 'Tài khoản'}
-                    <DownOutlined />
+                    <FiChevronDown />
                   </Space>
                 </Button>
               </Dropdown>
@@ -98,7 +93,7 @@ const Header = () => {
                 type="primary"
                 onClick={() => navigate('/login')}
                 className="bg-red-600 hover:bg-red-700 border-red-600"
-                icon={<LoginOutlined />}
+                icon={<FiLogIn />}
               >
                 Đăng nhập
               </Button>

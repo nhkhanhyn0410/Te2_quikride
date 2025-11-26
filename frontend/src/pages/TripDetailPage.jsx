@@ -14,9 +14,10 @@ import {
   Badge,
 } from 'antd';
 import {
-  ArrowLeftOutlined,
-  EnvironmentOutlined,
-} from '@ant-design/icons';
+  FiArrowLeft,
+  FiMapPin,
+  FiAlertCircle,
+} from 'react-icons/fi';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import { getTripDetails, getAvailableSeats } from '../services/bookingApi';
@@ -151,7 +152,7 @@ const TripDetailPage = () => {
       <div className="bg-gradient-to-r from-gray-700 to-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Button
-            icon={<ArrowLeftOutlined />}
+            icon={<FiArrowLeft />}
             onClick={() => navigate('/trips')}
             className="mb-4 text-white border-white hover:bg-white/20"
           >
@@ -198,7 +199,7 @@ const TripDetailPage = () => {
                         <div>
                           <Text strong>{point.name}</Text>
                           <div className="text-sm text-gray-500">
-                            <EnvironmentOutlined /> {point.address}
+                            <FiMapPin className="inline mr-1" /> {point.address}
                           </div>
                         </div>
                         <Text strong className="text-red-600">
@@ -230,7 +231,7 @@ const TripDetailPage = () => {
                         <div>
                           <Text strong>{point.name}</Text>
                           <div className="text-sm text-gray-500">
-                            <EnvironmentOutlined /> {point.address}
+                            <FiMapPin className="inline mr-1" /> {point.address}
                           </div>
                         </div>
                         <Text strong className="text-red-600">
@@ -386,8 +387,8 @@ const TripDetailPage = () => {
 
               {/* Refund Notice */}
               <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-3">
-                <Text className="text-xs text-orange-700 block text-center">
-                  <Badge status="warning" /> Không hoàn tiền
+                <Text className="text-xs text-orange-700 flex items-center justify-center gap-2">
+                  <FiAlertCircle /> Không hoàn tiền
                 </Text>
               </div>
             </Card>

@@ -96,6 +96,25 @@ export const getPublicVouchers = async (filters) => {
   return api.get(`/vouchers/public?${queryString}`);
 };
 
+// Get popular routes (fetch upcoming trips and group by routes)
+export const getPopularRoutes = async () => {
+  try {
+    // Fetch trips for the next 7 days
+    const today = new Date();
+    const nextWeek = new Date(today);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    // We'll fetch trips without specific from/to to get all routes
+    // Then group them by route on the frontend
+    const response = await api.get('/trips/popular-routes');
+    return response;
+  } catch (error) {
+    // Fallback: return empty array if endpoint doesn't exist
+    console.error('Failed to fetch popular routes:', error);
+    return { status: 'success', data: { routes: [] } };
+  }
+};
+
 export default {
   searchTrips,
   getTripDetails,
@@ -114,4 +133,5 @@ export default {
   queryPaymentStatus,
   validateVoucher,
   getPublicVouchers,
+  getPopularRoutes,
 };

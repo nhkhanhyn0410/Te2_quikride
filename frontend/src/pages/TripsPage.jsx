@@ -17,14 +17,17 @@ import {
   DatePicker,
 } from 'antd';
 import {
-  ClockCircleOutlined,
-  SearchOutlined,
-  SwapOutlined,
-  CalendarOutlined,
-  EnvironmentOutlined,
-  FilterOutlined,
-} from '@ant-design/icons';
-import { FiBriefcase, FiWifi, FiMonitor, FiZap } from 'react-icons/fi';
+  FiClock,
+  FiSearch,
+  FiCalendar,
+  FiMapPin,
+  FiFilter,
+  FiWifi,
+  FiMonitor,
+  FiZap,
+  FiTv,
+} from 'react-icons/fi';
+import { MdSwapHoriz } from 'react-icons/md';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import { searchTrips } from '../services/bookingApi';
@@ -198,7 +201,7 @@ const TripsPage = () => {
                     <Input
                       size="large"
                       placeholder="Từ..."
-                      prefix={<EnvironmentOutlined className="text-gray-400" />}
+                      prefix={<FiMapPin className="text-gray-400" />}
                     />
                   </Form.Item>
                 </Col>
@@ -207,7 +210,7 @@ const TripsPage = () => {
                   <Button
                     type="primary"
                     shape="circle"
-                    icon={<SwapOutlined className="text-white" />}
+                    icon={<MdSwapHoriz className="text-white text-xl" />}
                     onClick={handleSwapCities}
                     size="large"
                     className="bg-red-600 hover:bg-red-700 border-red-600"
@@ -223,7 +226,7 @@ const TripsPage = () => {
                     <Input
                       size="large"
                       placeholder="Đến..."
-                      prefix={<EnvironmentOutlined className="text-gray-400" />}
+                      prefix={<FiMapPin className="text-gray-400" />}
                     />
                   </Form.Item>
                 </Col>
@@ -240,7 +243,7 @@ const TripsPage = () => {
                       format="DD/MM/YYYY"
                       placeholder="dd/mm/yyyy"
                       disabledDate={disabledDate}
-                      suffixIcon={<CalendarOutlined />}
+                      suffixIcon={<FiCalendar />}
                     />
                   </Form.Item>
                 </Col>
@@ -250,7 +253,7 @@ const TripsPage = () => {
                     type="primary"
                     htmlType="submit"
                     size="large"
-                    icon={<SearchOutlined />}
+                    icon={<FiSearch />}
                     className="w-full bg-red-600 hover:bg-red-700 border-red-600"
                   >
                     Tìm kiếm
@@ -267,7 +270,10 @@ const TripsPage = () => {
         <Row gutter={[24, 24]}>
           {/* Filters Sidebar */}
           <Col xs={24} lg={6}>
-            <Card title="Bộ Lọc" className="sticky top-4">
+            <Card
+              title={<><FiFilter className="inline mr-2" />Bộ Lọc</>}
+              className="sticky top-4"
+            >
               <div className="mb-6">
                 <Text strong className="block mb-3">
                   Sắp Xếp Theo
@@ -377,7 +383,7 @@ const TripsPage = () => {
                           <Col xs={8} className="text-center">
                             <div className="border-t-2 border-dashed border-gray-300 relative">
                               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white px-2">
-                                <ClockCircleOutlined className="text-gray-400" />
+                                <FiClock className="text-gray-400" />
                               </div>
                             </div>
                             <Text className="text-xs text-gray-500 block mt-2">
@@ -401,19 +407,19 @@ const TripsPage = () => {
                         <div className="mt-4 flex gap-3 text-sm text-gray-600">
                           <Space>
                             <FiWifi />
-                            <span>sofa</span>
+                            <span>WiFi</span>
                           </Space>
                           <Space>
-                            <FiWifi />
-                            <span>wifi</span>
-                          </Space>
-                          <Space>
-                            <FiMonitor />
+                            <FiTv />
                             <span>TV</span>
                           </Space>
                           <Space>
+                            <FiMonitor />
+                            <span>Màn hình</span>
+                          </Space>
+                          <Space>
                             <FiZap />
-                            <span>Mobile Charging</span>
+                            <span>Sạc điện thoại</span>
                           </Space>
                         </div>
                       </Col>

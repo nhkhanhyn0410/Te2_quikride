@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -9,21 +9,25 @@ import {
   Row,
   Col,
   Typography,
-  Space,
+  Spin,
 } from 'antd';
 import {
-  SearchOutlined,
-  SwapOutlined,
-  CalendarOutlined,
-  SafetyOutlined,
-  SyncOutlined,
-  CustomerServiceOutlined,
-  EnvironmentOutlined,
-} from '@ant-design/icons';
-import { FiLock, FiRefreshCw, FiHeadphones } from 'react-icons/fi';
+  FiSearch,
+  FiMapPin,
+  FiCalendar,
+  FiLock,
+  FiRefreshCw,
+  FiHeadphones,
+  FiWifi,
+  FiMonitor,
+  FiZap,
+  FiTv,
+} from 'react-icons/fi';
+import { MdSwapHoriz } from 'react-icons/md';
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
 import useBookingStore from '../store/bookingStore';
+import { getPopularRoutes } from '../services/bookingApi';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 
@@ -34,6 +38,28 @@ const SearchPage = () => {
   const { searchCriteria, setSearchCriteria } = useBookingStore();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [popularRoutes, setPopularRoutes] = useState([]);
+  const [loadingRoutes, setLoadingRoutes] = useState(false);
+
+  useEffect(() => {
+    fetchPopularRoutes();
+  }, []);
+
+  const fetchPopularRoutes = async () => {
+    try {
+      setLoadingRoutes(true);
+      const response = await getPopularRoutes();
+      if (response.status === 'success' && response.data?.routes) {
+        setPopularRoutes(response.data.routes);
+      }
+    } catch (error) {
+      console.error('Error fetching popular routes:', error);
+      // Use fallback data if API fails
+      setPopularRoutes([]);
+    } finally {
+      setLoadingRoutes(false);
+    }
+  };
 
   const handleSearch = async (values) => {
     try {
@@ -84,65 +110,27 @@ const SearchPage = () => {
       toCity: to,
       date: dayjs(),
     });
+    // Auto search when clicking a route
+    handleSearch({
+      fromCity: from,
+      toCity: to,
+      date: dayjs(),
+    });
   };
 
-  // Popular routes data
-  const popularRoutes = [
-    {
-      from: 'Kathmandu',
-      fromDetails: 'New Buspark',
-      to: 'Pyuthan',
-      toDetails: 'Hrs',
-      duration: '12 Hrs',
-      price: 'Rs. 1600',
-      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
-    },
-    {
-      from: 'Pokhara',
-      fromDetails: '',
-      to: 'Pokhara',
-      toDetails: '8 Hrs',
-      duration: '8 Hrs',
-      price: 'Rs. 1300',
-      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
-    },
-    {
-      from: 'Kathmandu',
-      fromDetails: '',
-      to: 'Lumbini',
-      toDetails: '12 Hrs',
-      duration: '12 Hrs',
-      price: 'Rs. 2200',
-      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
-    },
-    {
-      from: 'Kathmandu',
-      fromDetails: '',
-      to: 'Chitwan',
-      toDetails: '6 Hrs',
-      duration: '6 Hrs',
-      price: 'Rs. 1000',
-      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
-    },
-    {
-      from: 'Pokhara',
-      fromDetails: '',
-      to: 'Mustang',
-      toDetails: '16 Hrs',
-      duration: '16 Hrs',
-      price: 'Rs. 2000',
-      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
-    },
-    {
-      from: 'Pokhara',
-      fromDetails: '',
-      to: 'Pyuthan',
-      toDetails: '8 Hrs',
-      duration: '8 Hrs',
-      price: 'Rs. 1400',
-      amenities: ['Internet', 'Snaks', 'TV', 'Mobile Charging'],
-    },
-  ];
+  const getAmenityIcon = (amenity) => {
+    const amenityLower = amenity.toLowerCase();
+    if (amenityLower.includes('wifi') || amenityLower.includes('internet')) {
+      return <FiWifi className="inline mr-1" />;
+    } else if (amenityLower.includes('tv') || amenityLower.includes('tivi')) {
+      return <FiTv className="inline mr-1" />;
+    } else if (amenityLower.includes('charging') || amenityLower.includes('sạc')) {
+      return <FiZap className="inline mr-1" />;
+    } else if (amenityLower.includes('monitor') || amenityLower.includes('màn hình')) {
+      return <FiMonitor className="inline mr-1" />;
+    }
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -155,7 +143,7 @@ const SearchPage = () => {
           <div className="max-w-7xl mx-auto h-full flex items-center justify-center">
             <div className="text-center text-gray-500 opacity-30">
               <div className="text-9xl mb-4">🚌</div>
-              <Text className="text-2xl">Bus Showcase Image</Text>
+              <Text className="text-2xl">Hình ảnh giới thiệu xe</Text>
             </div>
           </div>
         </div>
@@ -194,7 +182,7 @@ const SearchPage = () => {
                     <Input
                       size="large"
                       placeholder="Từ..."
-                      prefix={<EnvironmentOutlined className="text-gray-400" />}
+                      prefix={<FiMapPin className="text-gray-400" />}
                       className="!py-3"
                     />
                   </Form.Item>
@@ -205,7 +193,7 @@ const SearchPage = () => {
                   <Button
                     type="primary"
                     shape="circle"
-                    icon={<SwapOutlined className="text-white" />}
+                    icon={<MdSwapHoriz className="text-white text-xl" />}
                     onClick={handleSwapCities}
                     size="large"
                     className="bg-red-600 hover:bg-red-700 border-red-600"
@@ -222,7 +210,7 @@ const SearchPage = () => {
                     <Input
                       size="large"
                       placeholder="Đến..."
-                      prefix={<EnvironmentOutlined className="text-gray-400" />}
+                      prefix={<FiMapPin className="text-gray-400" />}
                       className="!py-3"
                     />
                   </Form.Item>
@@ -241,7 +229,7 @@ const SearchPage = () => {
                       format="DD/MM/YYYY"
                       placeholder="dd/mm/yyyy"
                       disabledDate={disabledDate}
-                      suffixIcon={<CalendarOutlined />}
+                      suffixIcon={<FiCalendar />}
                     />
                   </Form.Item>
                 </Col>
@@ -253,7 +241,7 @@ const SearchPage = () => {
                     htmlType="submit"
                     size="large"
                     loading={loading}
-                    icon={<SearchOutlined />}
+                    icon={<FiSearch />}
                     className="w-full !py-6 !h-auto text-lg font-semibold bg-red-600 hover:bg-red-700 border-red-600"
                   >
                     Tìm kiếm
@@ -338,81 +326,98 @@ const SearchPage = () => {
             </Title>
           </div>
 
-          <Row gutter={[24, 24]}>
-            {popularRoutes.map((route, index) => (
-              <Col xs={24} sm={12} lg={8} key={index}>
-                <Card
-                  className="hover:shadow-xl transition-all cursor-pointer border-gray-200"
-                  onClick={() => handleRouteClick(route.from, route.to)}
-                >
-                  {/* Route Header */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <Text strong className="block text-base">
-                          From
-                        </Text>
-                        <Title level={5} className="!mb-0">
-                          {route.from}
-                        </Title>
-                        {route.fromDetails && (
-                          <Text className="text-xs text-gray-500">
-                            {route.fromDetails}
+          {loadingRoutes ? (
+            <div className="flex justify-center py-12">
+              <Spin size="large" tip="Đang tải tuyến đường phổ biến..." />
+            </div>
+          ) : popularRoutes.length === 0 ? (
+            <div className="text-center py-12">
+              <Text className="text-gray-500">Không có tuyến đường phổ biến</Text>
+            </div>
+          ) : (
+            <Row gutter={[24, 24]}>
+              {popularRoutes.map((route, index) => (
+                <Col xs={24} sm={12} lg={8} key={index}>
+                  <Card
+                    className="hover:shadow-xl transition-all cursor-pointer border-gray-200"
+                    onClick={() => handleRouteClick(route.from, route.to)}
+                  >
+                    {/* Route Header */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <Text strong className="block text-base">
+                            Từ
                           </Text>
-                        )}
-                      </div>
-                      <div className="text-center px-2">
-                        <div className="text-gray-400">........</div>
-                      </div>
-                      <div className="text-right">
-                        <Text strong className="block text-base">
-                          To Hrs
-                        </Text>
-                        <Title level={5} className="!mb-0">
-                          {route.to}
-                        </Title>
-                        {route.toDetails && (
-                          <Text className="text-xs text-gray-500">
-                            {route.toDetails}
+                          <Title level={5} className="!mb-0">
+                            {route.from}
+                          </Title>
+                        </div>
+                        <div className="text-center px-2">
+                          <div className="text-gray-400">→</div>
+                        </div>
+                        <div className="text-right">
+                          <Text strong className="block text-base">
+                            Đến
                           </Text>
-                        )}
+                          <Title level={5} className="!mb-0">
+                            {route.to}
+                          </Title>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Amenities */}
-                    <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-                      {route.amenities.map((amenity, i) => (
-                        <span key={i} className="flex items-center gap-1">
-                          <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                          {amenity}
+                      {/* Route Info */}
+                      <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
+                        <span className="flex items-center gap-1">
+                          <FiMapPin />
+                          {route.distance || 'N/A'} km
                         </span>
-                      ))}
-                    </div>
-                  </div>
+                        {route.duration && (
+                          <span className="flex items-center gap-1">
+                            • {route.duration}
+                          </span>
+                        )}
+                      </div>
 
-                  {/* Price and Button */}
-                  <div className="flex items-center justify-between pt-4 border-t">
-                    <div>
-                      <Text className="text-2xl font-bold text-red-600">
-                        {route.price}
-                      </Text>
+                      {/* Amenities */}
+                      {route.amenities && route.amenities.length > 0 && (
+                        <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                          {route.amenities.map((amenity, i) => (
+                            <span key={i} className="flex items-center gap-1">
+                              {getAmenityIcon(amenity)}
+                              {amenity}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <Button
-                      type="primary"
-                      size="large"
-                      className="bg-red-600 hover:bg-red-700 border-red-600"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRouteClick(route.from, route.to);
-                      }}
-                    >
-                      Đặt Chỗ
-                    </Button>
-                  </div>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+
+                    {/* Price and Button */}
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div>
+                        <Text className="text-xs text-gray-500 block">Từ</Text>
+                        <Text className="text-2xl font-bold text-red-600">
+                          {route.minPrice ? `${route.minPrice.toLocaleString('vi-VN')}đ` : 'N/A'}
+                        </Text>
+                      </div>
+                      <Button
+                        type="primary"
+                        size="large"
+                        className="bg-red-600 hover:bg-red-700 border-red-600"
+                        icon={<FiSearch />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRouteClick(route.from, route.to);
+                        }}
+                      >
+                        Đặt Vé
+                      </Button>
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          )}
         </div>
       </div>
 
