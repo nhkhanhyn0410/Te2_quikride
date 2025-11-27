@@ -170,18 +170,15 @@ const LoyaltyHistoryPage = () => {
     };
   };
 
-  if (loading && !history.length) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spin size="large" tip="Đang tải lịch sử..." />
-      </div>
-    );
-  }
-
   const tierColor = user ? getTierColor(user.loyaltyTier) : '#1890ff';
 
   return (
     <CustomerLayout>
+      {loading && !history.length ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <Spin size="large" tip="Đang tải lịch sử..." />
+        </div>
+      ) : (
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="bg-white shadow-sm">
@@ -309,6 +306,7 @@ const LoyaltyHistoryPage = () => {
         )}
       </div>
       </div>
+      )}
     </CustomerLayout>
   );
 };

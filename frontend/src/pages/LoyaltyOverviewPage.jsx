@@ -68,22 +68,19 @@ const LoyaltyOverviewPage = () => {
     fetchOverview();
   };
 
-  if (loading || !overview) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spin size="large" tip="Đang tải thông tin loyalty..." />
-      </div>
-    );
-  }
-
-  const currentTier = overview.currentTier;
-  const nextTier = overview.nextTier;
-  const points = overview.points;
-  const tierColor = getTierColor(currentTier.name);
-  const tierGradient = getTierGradient(currentTier.name);
+  const currentTier = overview?.currentTier;
+  const nextTier = overview?.nextTier;
+  const points = overview?.points;
+  const tierColor = currentTier ? getTierColor(currentTier.name) : '#1890ff';
+  const tierGradient = currentTier ? getTierGradient(currentTier.name) : { from: '#1890ff', to: '#096dd9' };
 
   return (
     <CustomerLayout>
+      {loading || !overview ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <Spin size="large" tip="Đang tải thông tin loyalty..." />
+        </div>
+      ) : (
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div
@@ -385,9 +382,10 @@ const LoyaltyOverviewPage = () => {
         open={redeemModalOpen}
         onCancel={() => setRedeemModalOpen(false)}
         onSuccess={handleRedeemSuccess}
-        currentPoints={points.total}
+        currentPoints={points?.total}
       />
       </div>
+      )}
     </CustomerLayout>
   );
 };

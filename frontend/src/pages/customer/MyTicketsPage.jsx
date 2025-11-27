@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Tabs,
   Card,
@@ -22,7 +23,8 @@ import {
   QrcodeOutlined,
   CalendarOutlined,
   EnvironmentOutlined,
-  UserOutlined
+  UserOutlined,
+  ArrowLeftOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import CustomerLayout from '../../components/layouts/CustomerLayout';
@@ -37,6 +39,7 @@ const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
 
 const MyTicketsPage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -284,6 +287,13 @@ const MyTicketsPage = () => {
         <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-6">
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate('/')}
+            className="mb-4"
+          >
+            Quay lại
+          </Button>
           <h1 className="text-3xl font-bold text-gray-800">
             <QrcodeOutlined className="mr-2" />
             Quản lý vé của tôi
