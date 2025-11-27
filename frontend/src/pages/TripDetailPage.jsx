@@ -29,6 +29,7 @@ import useBookingStore from '../store/bookingStore';
 import SeatMapComponent from '../components/SeatMapComponent';
 import ReviewsSection from '../components/ReviewsSection';
 import { getAmenityIcon } from '../utils/constants';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 
 const { Title, Text } = Typography;
 
@@ -470,7 +471,8 @@ const TripDetailPage = () => {
           </Col>
         </Row>
       </div>
-    </div>
+      </div>
+    </CustomerLayout>
   );
 };
 

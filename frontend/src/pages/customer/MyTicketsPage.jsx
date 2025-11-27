@@ -25,6 +25,7 @@ import {
   UserOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import CustomerLayout from '../../components/layouts/CustomerLayout';
 import {
   getCustomerTickets,
   cancelTicket,
@@ -278,8 +279,9 @@ const MyTicketsPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800">
@@ -464,7 +466,8 @@ const MyTicketsPage = () => {
           </div>
         </Modal>
       </div>
-    </div>
+      </div>
+    </CustomerLayout>
   );
 };
 

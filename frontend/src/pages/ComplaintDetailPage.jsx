@@ -45,6 +45,7 @@ import {
   getPriorityColor,
 } from '../services/complaintApi';
 import useAuthStore from '../store/authStore';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 
 dayjs.extend(relativeTime);
 dayjs.locale('vi');
@@ -288,10 +289,11 @@ const ComplaintDetailPage = () => {
     !complaint.satisfactionRating;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Button
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/complaints')}
@@ -526,7 +528,8 @@ const ComplaintDetailPage = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+      </div>
+    </CustomerLayout>
   );
 };
 

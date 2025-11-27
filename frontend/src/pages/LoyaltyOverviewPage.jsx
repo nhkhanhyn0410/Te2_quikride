@@ -33,6 +33,7 @@ import {
   getTierRequirements,
 } from '../services/loyaltyApi';
 import RedeemPointsModal from '../components/RedeemPointsModal';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -82,14 +83,15 @@ const LoyaltyOverviewPage = () => {
   const tierGradient = getTierGradient(currentTier.name);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div
-        className="shadow-lg"
-        style={{
-          background: `linear-gradient(135deg, ${tierGradient.from} 0%, ${tierGradient.to} 100%)`,
-        }}
-      >
+    <CustomerLayout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div
+          className="shadow-lg"
+          style={{
+            background: `linear-gradient(135deg, ${tierGradient.from} 0%, ${tierGradient.to} 100%)`,
+          }}
+        >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
             <div>
@@ -385,7 +387,8 @@ const LoyaltyOverviewPage = () => {
         onSuccess={handleRedeemSuccess}
         currentPoints={points.total}
       />
-    </div>
+      </div>
+    </CustomerLayout>
   );
 };
 

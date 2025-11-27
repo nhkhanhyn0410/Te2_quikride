@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Result, Button } from 'antd';
 import { CloseCircleOutlined, HomeOutlined, RedoOutlined } from '@ant-design/icons';
+import CustomerLayout from '../../components/layouts/CustomerLayout';
 
 const BookingFailure = () => {
   const navigate = useNavigate();
@@ -9,8 +10,9 @@ const BookingFailure = () => {
   const bookingCode = searchParams.get('bookingCode');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 p-4 flex items-center justify-center">
-      <div className="max-w-2xl w-full">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 p-4 flex items-center justify-center">
+        <div className="max-w-2xl w-full">
         <Result
           status="error"
           title="Đặt vé thất bại"
@@ -63,8 +65,9 @@ const BookingFailure = () => {
             Vui lòng thử lại hoặc chọn phương thức thanh toán khác
           </p>
         </div>
+        </div>
       </div>
-    </div>
+    </CustomerLayout>
   );
 };
 

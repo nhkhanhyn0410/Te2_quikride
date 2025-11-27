@@ -10,6 +10,7 @@ import {
 import dayjs from 'dayjs';
 import { getBookingByCode } from '../services/bookingApi';
 import useBookingStore from '../store/bookingStore';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 
 const { Title, Text } = Typography;
 
@@ -114,8 +115,9 @@ const BookingConfirmationPage = () => {
   const isSuccess = booking.status === 'confirmed' || booking.paymentStatus === 'paid';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Success/Failure Message */}
         <Card className="mb-6">
           <Result
@@ -274,8 +276,9 @@ const BookingConfirmationPage = () => {
             </Text>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </CustomerLayout>
   );
 };
 

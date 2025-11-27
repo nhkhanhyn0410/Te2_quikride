@@ -29,6 +29,7 @@ import {
   requestTicketLookupOTP,
   verifyTicketLookupOTP,
 } from '../services/ticketApi';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 
 const { Step } = Steps;
 
@@ -148,8 +149,9 @@ const GuestTicketLookupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12">
+        <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
@@ -426,8 +428,9 @@ const GuestTicketLookupPage = () => {
             </div>
           )}
         </Modal>
+        </div>
       </div>
-    </div>
+    </CustomerLayout>
   );
 };
 

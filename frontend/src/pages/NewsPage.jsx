@@ -5,6 +5,7 @@ import {
     FireOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 import NewsCard from '../components/ui/NewsCard';
 
 const { Title, Text, Paragraph } = Typography;
@@ -97,8 +98,9 @@ const NewsPage = () => {
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-red-50">
-            <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
+        <CustomerLayout>
+            <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-red-50">
+                <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
                 {/* Header */}
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-100 to-orange-100 text-red-700 rounded-full font-medium text-sm mb-6">
@@ -197,7 +199,8 @@ const NewsPage = () => {
                     </Button>
                 </div>
             </div>
-        </div>
+            </div>
+        </CustomerLayout>
     );
 };
 
