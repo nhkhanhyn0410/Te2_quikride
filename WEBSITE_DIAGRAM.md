@@ -1936,6 +1936,488 @@ sequenceDiagram
 
 ---
 
+## 14. Danh Sách Chức Năng Hệ Thống
+
+### 14.1. Chức Năng Khách Hàng (Customer/User)
+
+#### Xác Thực & Quản Lý Tài Khoản
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 1 | Đăng ký tài khoản | Đăng ký bằng email hoặc số điện thoại với xác thực |
+| 2 | Đăng nhập | Đăng nhập bằng email hoặc số điện thoại |
+| 3 | Đăng nhập OAuth | Đăng nhập bằng Google hoặc Facebook |
+| 4 | Xác thực email | Xác thực địa chỉ email bằng mã token |
+| 5 | Xác thực điện thoại | Xác thực số điện thoại bằng OTP |
+| 6 | Quên mật khẩu | Yêu cầu đặt lại mật khẩu qua email |
+| 7 | Đặt lại mật khẩu | Tạo mật khẩu mới bằng token |
+| 8 | Đổi mật khẩu | Cập nhật mật khẩu cho người dùng đã đăng nhập |
+| 9 | Quản lý thông tin cá nhân | Xem và cập nhật hồ sơ (tên, ngày sinh, giới tính, ảnh đại diện) |
+| 10 | Tải lên ảnh đại diện | Tải lên và quản lý ảnh đại diện |
+| 11 | Xóa ảnh đại diện | Xóa ảnh đại diện hiện tại |
+| 12 | Đăng xuất | Kết thúc phiên đăng nhập |
+
+#### Tìm Kiếm & Đặt Vé
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 13 | Tìm kiếm chuyến xe | Tìm kiếm theo điểm đi, điểm đến, ngày, giờ (Công khai) |
+| 14 | Xem chi tiết chuyến | Xem thông tin chi tiết về chuyến xe (Công khai) |
+| 15 | Kiểm tra giá động | Xem giá theo thời gian thực dựa trên nhu cầu |
+| 16 | Xem sơ đồ ghế | Xem sơ đồ ghế trống và đã đặt |
+| 17 | Chọn ghế | Chọn ghế ngồi trên sơ đồ tương tác |
+| 18 | Giữ chỗ | Giữ ghế tạm thời (15 phút) |
+| 19 | Gia hạn giữ chỗ | Kéo dài thời gian giữ chỗ |
+| 20 | Hủy giữ chỗ | Hủy ghế đang giữ |
+| 21 | Nhập thông tin hành khách | Nhập thông tin cho từng ghế |
+| 22 | Hành khách thường dùng | Lưu/xóa hành khách thường đi (tối đa 5 người) |
+| 23 | Xác nhận đặt vé | Xác nhận và tạo đơn đặt vé |
+| 24 | Đặt vé khách | Đặt vé không cần tài khoản (với xác thực OTP) |
+
+#### Thanh Toán & Voucher
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 25 | Xem phương thức thanh toán | Xem các tùy chọn thanh toán có sẵn |
+| 26 | Thanh toán VNPay | Thanh toán qua cổng VNPay |
+| 27 | Xem danh sách ngân hàng | Xem ngân hàng hỗ trợ cho VNPay |
+| 28 | Tạo giao dịch thanh toán | Tạo giao dịch thanh toán mới |
+| 29 | Kiểm tra trạng thái thanh toán | Truy vấn trạng thái giao dịch |
+| 30 | Lịch sử thanh toán | Xem tất cả giao dịch thanh toán |
+| 31 | Áp dụng voucher | Áp dụng và xác thực mã giảm giá |
+| 32 | Xem voucher công khai | Duyệt voucher có sẵn |
+
+#### Quản Lý Vé
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 33 | Vé của tôi | Xem tất cả vé (sắp tới, đã đi, đã hủy) |
+| 34 | Lọc vé | Lọc theo trạng thái, thời gian, mã đặt vé |
+| 35 | Chi tiết vé | Xem thông tin chi tiết vé với mã QR |
+| 36 | Tải vé PDF | Tải vé dạng PDF |
+| 37 | Gửi lại vé | Gửi lại vé qua email/SMS |
+| 38 | Hủy vé | Hủy vé và tính hoàn tiền |
+| 39 | Đổi vé | Đổi sang chuyến khác |
+| 40 | Tra cứu vé khách | Tra cứu vé không cần đăng nhập (với OTP) |
+
+#### Chương Trình Khách Hàng Thân Thiết
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 41 | Tổng quan điểm thưởng | Xem điểm, hạng, và quyền lợi |
+| 42 | Lịch sử điểm | Xem lịch sử giao dịch điểm |
+| 43 | Tích điểm | Tự động tích điểm từ đặt vé |
+| 44 | Đổi điểm | Đổi điểm lấy giảm giá |
+| 45 | Hệ thống hạng | 4 hạng: Đồng, Bạc, Vàng, Bạch Kim |
+| 46 | Quyền lợi theo hạng | Giảm giá và đặc quyền theo hạng |
+
+#### Đánh Giá & Phản Hồi
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 47 | Tạo đánh giá | Đánh giá chuyến đã hoàn thành (1-5 sao) |
+| 48 | Đánh giá đa khía cạnh | Đánh giá xe, tài xế, đúng giờ, dịch vụ |
+| 49 | Đánh giá kèm ảnh | Tải lên tối đa 5 ảnh |
+| 50 | Đánh giá của tôi | Xem tất cả đánh giá đã gửi |
+| 51 | Xem đánh giá chuyến | Xem đánh giá của chuyến cụ thể |
+| 52 | Xem đánh giá nhà xe | Xem đánh giá của nhà xe |
+| 53 | Lời mời đánh giá | Nhận email mời đánh giá |
+
+#### Khiếu Nại & Hỗ Trợ
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 54 | Tạo khiếu nại | Gửi khiếu nại với danh mục và độ ưu tiên |
+| 55 | Danh mục khiếu nại | Đặt vé, thanh toán, dịch vụ, tài xế, xe, hoàn tiền, kỹ thuật, khác |
+| 56 | Khiếu nại của tôi | Xem tất cả khiếu nại đã gửi |
+| 57 | Chi tiết khiếu nại | Xem trạng thái và cập nhật |
+| 58 | Thêm ghi chú | Thêm ghi chú/bình luận vào khiếu nại |
+| 59 | Đánh giá mức độ hài lòng | Đánh giá khiếu nại đã giải quyết |
+
+#### Nội Dung & Thông Tin
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 60 | Xem tin tức/blog | Đọc bài viết tin tức và blog |
+| 61 | Xem FAQ | Xem câu hỏi thường gặp |
+| 62 | Xem banner quảng cáo | Xem banner khuyến mãi |
+| 63 | Tuyến đường phổ biến | Xem tuyến đường xu hướng/phổ biến |
+
+---
+
+### 14.2. Chức Năng Nhà Xe (Operator)
+
+#### Xác Thực & Hồ Sơ
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 64 | Đăng ký nhà xe | Đăng ký công ty vận tải |
+| 65 | Đăng nhập nhà xe | Đăng nhập vào bảng điều khiển |
+| 66 | Quản lý hồ sơ | Xem và cập nhật hồ sơ nhà xe |
+| 67 | Xem chi tiết hồ sơ | Lấy thông tin nhà xe |
+
+#### Dashboard & Báo Cáo
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 68 | Thống kê dashboard | Xem chỉ số chính (doanh thu, đặt vé, chuyến) |
+| 69 | Báo cáo doanh thu | Phân tích doanh thu chi tiết |
+| 70 | Tổng quan doanh thu | Tổng quan doanh thu nhanh |
+| 71 | Doanh thu theo tuyến | Phân tích doanh thu theo tuyến |
+| 72 | Xu hướng doanh thu | Xu hướng theo ngày/tuần/tháng |
+| 73 | Báo cáo hủy vé | Phân tích hủy đặt vé |
+| 74 | Chỉ số tăng trưởng | Chỉ số phát triển kinh doanh |
+| 75 | Xuất Excel | Tải báo cáo dạng Excel |
+| 76 | Xuất PDF | Tải báo cáo dạng PDF |
+
+#### Quản Lý Tuyến Đường
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 77 | Tạo tuyến đường | Định nghĩa tuyến xe mới |
+| 78 | Xem tuyến đường | Danh sách tất cả tuyến |
+| 79 | Chi tiết tuyến | Xem thông tin chi tiết tuyến |
+| 80 | Cập nhật tuyến | Sửa thông tin tuyến |
+| 81 | Xóa tuyến | Xóa tuyến đường |
+| 82 | Bật/Tắt tuyến | Kích hoạt/vô hiệu hóa tuyến |
+| 83 | Thêm điểm đón | Định nghĩa điểm đón khách |
+| 84 | Xóa điểm đón | Xóa điểm đón |
+| 85 | Thêm điểm trả | Định nghĩa điểm trả khách |
+| 86 | Xóa điểm trả | Xóa điểm trả |
+
+#### Quản Lý Đội Xe
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 87 | Thêm xe | Thêm xe mới vào đội |
+| 88 | Xem danh sách xe | Danh sách tất cả xe |
+| 89 | Chi tiết xe | Xem thông tin chi tiết xe |
+| 90 | Cập nhật xe | Sửa thông tin xe |
+| 91 | Xóa xe | Xóa xe khỏi đội |
+| 92 | Đổi trạng thái xe | Đặt xe hoạt động/bảo trì/ngưng hoạt động |
+| 93 | Thống kê đội xe | Xem thống kê đội xe |
+| 94 | Mẫu sơ đồ ghế | Sử dụng sơ đồ ghế có sẵn |
+| 95 | Tùy chỉnh sơ đồ ghế | Tạo sơ đồ ghế tùy chỉnh |
+| 96 | Xác thực sơ đồ ghế | Kiểm tra cấu hình ghế |
+
+#### Quản Lý Nhân Viên
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 97 | Thêm nhân viên | Thêm tài xế và quản lý chuyến |
+| 98 | Xem nhân viên | Danh sách tất cả nhân viên |
+| 99 | Chi tiết nhân viên | Xem thông tin nhân viên |
+| 100 | Cập nhật nhân viên | Sửa thông tin nhân viên |
+| 101 | Xóa nhân viên | Xóa nhân viên |
+| 102 | Đổi trạng thái nhân viên | Đặt hoạt động/không hoạt động/tạm ngưng |
+| 103 | Thống kê nhân viên | Xem chỉ số nhân viên |
+| 104 | Nhân viên khả dụng | Tìm nhân viên cho phân công |
+| 105 | Đặt lại mật khẩu nhân viên | Reset mật khẩu đăng nhập |
+
+#### Quản Lý Chuyến Xe
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 106 | Tạo chuyến | Lên lịch chuyến mới |
+| 107 | Tạo chuyến định kỳ | Lên lịch chuyến lặp lại |
+| 108 | Xem chuyến | Danh sách tất cả chuyến |
+| 109 | Chi tiết chuyến | Xem thông tin chuyến |
+| 110 | Cập nhật chuyến | Sửa thông tin chuyến |
+| 111 | Xóa chuyến | Xóa chuyến |
+| 112 | Hủy chuyến | Hủy chuyến đã lên lịch |
+| 113 | Thống kê chuyến | Xem chỉ số chuyến |
+| 114 | Cấu hình giá động | Cấu hình giá tăng, giảm giá sớm |
+| 115 | Giá theo nhu cầu | Tự động điều chỉnh giá theo tỷ lệ đặt |
+| 116 | Phụ phí giờ cao điểm | Giá phụ thu giờ cao điểm |
+| 117 | Phụ phí cuối tuần | Phụ thu cuối tuần |
+| 118 | Giảm giá đặt sớm | Giảm giá cho đặt vé trước |
+
+#### Quản Lý Đặt Vé
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 119 | Xem đặt vé | Danh sách đặt vé của nhà xe |
+| 120 | Thống kê đặt vé | Xem chỉ số đặt vé |
+| 121 | Cập nhật thanh toán | Đánh dấu thanh toán đã nhận |
+| 122 | Lọc đặt vé | Lọc theo trạng thái, ngày, thanh toán |
+
+#### Quản Lý Voucher
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 123 | Tạo voucher | Tạo mã giảm giá |
+| 124 | Xem voucher | Danh sách tất cả voucher |
+| 125 | Chi tiết voucher | Xem thông tin voucher |
+| 126 | Cập nhật voucher | Sửa thông tin voucher |
+| 127 | Xóa voucher | Xóa voucher |
+| 128 | Kích hoạt voucher | Bật voucher để sử dụng |
+| 129 | Vô hiệu voucher | Tắt voucher |
+| 130 | Thống kê voucher | Xem thống kê sử dụng |
+| 131 | Báo cáo voucher | Phân tích sử dụng chi tiết |
+
+#### Thanh Toán & Hoàn Tiền
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 132 | Xem thanh toán | Danh sách tất cả thanh toán |
+| 133 | Thống kê thanh toán | Phân tích thanh toán |
+| 134 | Xử lý hoàn tiền | Hoàn tiền cho hủy vé |
+
+#### Quản Lý Đánh Giá
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 135 | Phản hồi đánh giá | Trả lời đánh giá khách hàng |
+| 136 | Xem đánh giá nhà xe | Xem tất cả đánh giá nhà xe |
+
+---
+
+### 14.3. Chức Năng Nhân Viên (Employee - Trip Manager & Driver)
+
+#### Xác Thực
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 137 | Đăng nhập nhân viên | Đăng nhập bằng username/password |
+| 138 | Xem hồ sơ | Lấy thông tin nhân viên |
+
+#### Quản Lý Chuyến (Trip Manager & Driver)
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 139 | Chuyến được phân công | Xem chuyến được giao |
+| 140 | Chi tiết chuyến | Xem thông tin chuyến và hành khách |
+| 141 | Bắt đầu chuyến | Khởi động thực hiện chuyến |
+| 142 | Hoàn thành chuyến | Đánh dấu chuyến hoàn thành |
+| 143 | Cập nhật trạng thái chuyến | Đổi trạng thái (đã lên lịch, đang đi, hoàn thành, hủy) |
+| 144 | Hủy chuyến | Hủy chuyến với lý do |
+
+#### Xác Minh Vé (Trip Manager)
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 145 | Xem hành khách | Danh sách tất cả hành khách trên chuyến |
+| 146 | Quét mã QR | Quét và xác minh mã QR vé |
+| 147 | Xác thực vé | Kiểm tra tính hợp lệ vé |
+| 148 | Check-in hành khách | Đánh dấu hành khách đã lên xe |
+
+#### Theo Dõi Hành Trình (Trip Manager)
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 149 | Xem chi tiết hành trình | Xem điểm dừng và lịch sử trạng thái |
+| 150 | Cập nhật trạng thái hành trình | Cập nhật vị trí/trạng thái hiện tại |
+| 151 | Trạng thái hành trình | Chuẩn bị, kiểm vé, đang đi, tại điểm dừng, hoàn thành |
+| 152 | Quản lý điểm dừng | Đánh dấu đến điểm dừng |
+| 153 | Cập nhật vị trí | Ghi vị trí GPS |
+| 154 | Ghi chú hành trình | Thêm ghi chú trong chuyến |
+| 155 | Theo dõi thời gian thực tế | Ghi thời gian khởi hành/đến thực tế |
+
+---
+
+### 14.4. Chức Năng Quản Trị Viên (Admin)
+
+#### Xác Thực
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 156 | Đăng nhập admin | Đăng nhập vào trang quản trị |
+| 157 | Xem hồ sơ | Lấy thông tin admin |
+
+#### Quản Lý Người Dùng (UC-22)
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 158 | Xem người dùng | Danh sách tất cả khách hàng |
+| 159 | Chi tiết người dùng | Xem thông tin người dùng chi tiết |
+| 160 | Chặn người dùng | Chặn tài khoản với lý do |
+| 161 | Mở chặn người dùng | Khôi phục quyền truy cập |
+| 162 | Đặt lại mật khẩu người dùng | Reset mật khẩu người dùng |
+| 163 | Thống kê người dùng | Xem chỉ số và phân tích người dùng |
+
+#### Quản Lý Nhà Xe (UC-23)
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 164 | Xem nhà xe | Danh sách tất cả nhà xe |
+| 165 | Chi tiết nhà xe | Xem thông tin nhà xe |
+| 166 | Duyệt nhà xe | Duyệt đăng ký nhà xe chờ |
+| 167 | Từ chối nhà xe | Từ chối đăng ký với lý do |
+| 168 | Tạm ngưng nhà xe | Tạm ngưng hoạt động nhà xe |
+| 169 | Khôi phục nhà xe | Khôi phục nhà xe đã tạm ngưng |
+
+#### Quản Lý Khiếu Nại (UC-25)
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 170 | Xem tất cả khiếu nại | Danh sách tất cả khiếu nại hệ thống |
+| 171 | Thống kê khiếu nại | Xem chỉ số khiếu nại |
+| 172 | Phân công khiếu nại | Phân công khiếu nại cho admin |
+| 173 | Cập nhật trạng thái | Đổi trạng thái khiếu nại |
+| 174 | Cập nhật độ ưu tiên | Đổi độ ưu tiên khiếu nại |
+| 175 | Giải quyết khiếu nại | Đánh dấu khiếu nại đã giải quyết |
+| 176 | Lọc khiếu nại | Lọc theo trạng thái, danh mục, độ ưu tiên |
+
+#### Quản Lý Nội Dung (UC-24)
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 177 | Quản lý Banner | Tạo, cập nhật, xóa banner quảng cáo |
+| 178 | Quản lý Blog | Tạo, cập nhật, xóa bài blog |
+| 179 | Quản lý FAQ | Tạo, cập nhật, xóa FAQ |
+| 180 | Thống kê nội dung | Xem chỉ số tương tác nội dung |
+
+#### Báo Cáo Hệ Thống (UC-26)
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 181 | Tổng quan hệ thống | Xem thống kê toàn hệ thống |
+| 182 | Phân tích nền tảng | Theo dõi hiệu suất hệ thống |
+
+---
+
+### 14.5. Chức Năng Hệ Thống (System-wide Features)
+
+#### Xác Thực & Bảo Mật
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 183 | Xác thực JWT | Xác thực dựa trên token bảo mật |
+| 184 | Làm mới token | Tự động làm mới token |
+| 185 | Phân quyền theo vai trò | Phân quyền Customer, Operator, Employee, Admin |
+| 186 | Quản lý phiên | Theo dõi phiên hoạt động |
+| 187 | Phiên khách | Đặt vé ẩn danh với OTP |
+
+#### Thông Báo
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 188 | Thông báo Email | Cảnh báo email tự động |
+| 189 | Thông báo SMS | Cảnh báo SMS cho đặt vé, vé |
+| 190 | Xác nhận đặt vé | Email/SMS xác nhận đặt vé |
+| 191 | Xác nhận thanh toán | Thông báo thanh toán thành công |
+| 192 | Cập nhật trạng thái chuyến | Thông báo thay đổi chuyến cho hành khách |
+| 193 | Lời mời đánh giá | Tự động gửi yêu cầu đánh giá sau chuyến |
+| 194 | Cập nhật WebSocket | Cập nhật trực tiếp đặt vé/ghế |
+
+#### Tích Hợp Cổng Thanh Toán
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 195 | Tích hợp VNPay | Cổng thanh toán Việt Nam |
+| 196 | Xử lý Callback | Xử lý phản hồi VNPay |
+| 197 | Xử lý Return | Xử lý chuyển hướng VNPay |
+| 198 | Truy vấn trạng thái giao dịch | Truy vấn trạng thái giao dịch VNPay |
+| 199 | Nhiều phương thức thanh toán | Tiền mặt, thẻ, ví di động |
+
+#### Quản Lý Ghế
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 200 | Dịch vụ khóa ghế | Ngăn đặt trùng |
+| 201 | Giữ/Nhả ghế | Đặt ghế tạm thời |
+| 202 | Trạng thái ghế thời gian thực | Cập nhật trạng thái ghế trực tiếp |
+| 203 | Công cụ tạo sơ đồ ghế | Cấu hình ghế linh hoạt |
+
+#### Lập Lịch & Tự Động Hóa
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 204 | Chuyến định kỳ | Tự động tạo chuyến lặp lại |
+| 205 | Dọn dẹp giữ chỗ hết hạn | Tự động nhả ghế hết hạn |
+| 206 | Dọn dẹp thanh toán hết hạn | Xử lý thanh toán bỏ dở |
+| 207 | Hết hạn điểm | Tự động hết hạn điểm sau 1 năm |
+| 208 | Dịch vụ lập lịch | Xử lý công việc nền |
+
+#### Tạo PDF
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 209 | PDF vé | Tạo vé in được |
+| 210 | Tạo mã QR | Tạo mã QR vé |
+| 211 | Xuất PDF báo cáo | Xuất báo cáo dạng PDF |
+
+#### Hệ Thống Đặt Vé Khách
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 212 | Xác thực OTP | Xác minh phone/email bằng OTP |
+| 213 | Quản lý phiên khách | Phiên xác thực tạm thời |
+| 214 | Gia hạn phiên khách | Kéo dài thời gian phiên |
+| 215 | Tra cứu vé khách | Tìm vé không cần tài khoản |
+
+#### Tìm Kiếm & Lọc
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 216 | Tìm kiếm chuyến | Tìm kiếm chuyến đa tiêu chí |
+| 217 | Tìm kiếm tuyến | Tìm tuyến đường |
+| 218 | Tìm kiếm xe | Tìm xe |
+| 219 | Tìm kiếm nhà xe | Tìm nhà xe |
+| 220 | Lọc nâng cao | Lọc theo giá, giờ, loại xe, nhà xe |
+
+#### Tính Năng Thời Gian Thực
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 221 | Hỗ trợ WebSocket | Cập nhật thời gian thực |
+| 222 | Ghế trống trực tiếp | Trạng thái ghế tức thời |
+| 223 | Theo dõi hành trình | Tiến trình chuyến thời gian thực |
+
+#### Phân Tích Dữ Liệu
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 224 | Phân tích Dashboard | Dashboard theo vai trò |
+| 225 | Phân tích Doanh thu | Báo cáo tài chính |
+| 226 | Phân tích Đặt vé | Xu hướng đặt vé |
+| 227 | Phân tích Hủy vé | Mẫu hình hủy |
+| 228 | Chỉ số Tăng trưởng | Theo dõi tăng trưởng kinh doanh |
+
+#### Tính Năng Multi-tenant
+| STT | Chức Năng | Mô Tả |
+|-----|-----------|-------|
+| 229 | Cô lập nhà xe | Dữ liệu riêng biệt mỗi nhà xe |
+| 230 | Định giá độc lập | Mỗi nhà xe đặt giá riêng |
+| 231 | Tuyến độc lập | Tuyến riêng theo nhà xe |
+| 232 | Đội xe độc lập | Xe riêng theo nhà xe |
+
+---
+
+### 14.6. Tổng Kết Chức Năng
+
+#### Phân Loại Theo Use Case
+
+```mermaid
+graph TB
+    subgraph "Customer Features (UC-1 to UC-12, UC-27)"
+        UC1[UC-1: Tìm kiếm chuyến]
+        UC2[UC-2 to UC-7: Đặt vé & chọn ghế]
+        UC8[UC-8: Quản lý vé]
+        UC9[UC-9: Hủy vé]
+        UC10[UC-10: Đổi vé]
+        UC11[UC-11: Chương trình khách hàng thân thiết]
+        UC12[UC-12: Đánh giá]
+        UC27[UC-27: Tra cứu vé khách]
+    end
+
+    subgraph "Operator Features (UC-13 to UC-17)"
+        UC13[UC-13: Dashboard nhà xe]
+        UC14[UC-14: Quản lý tuyến & xe]
+        UC15[UC-15: Quản lý nhân viên]
+        UC16[UC-16: Quản lý chuyến]
+        UC17[UC-17: Quản lý voucher]
+    end
+
+    subgraph "Employee Features (UC-18 to UC-21)"
+        UC18[UC-18: Đăng nhập Trip Manager]
+        UC19[UC-19: Xác minh vé QR]
+        UC20[UC-20: Xem hành khách]
+        UC21[UC-21: Cập nhật trạng thái chuyến]
+    end
+
+    subgraph "Admin Features (UC-22 to UC-26)"
+        UC22[UC-22: Quản lý người dùng]
+        UC23[UC-23: Quản lý nhà xe]
+        UC24[UC-24: Quản lý nội dung]
+        UC25[UC-25: Quản lý khiếu nại]
+        UC26[UC-26: Báo cáo hệ thống]
+    end
+```
+
+#### Thống Kê Chức Năng
+
+| Nhóm Chức Năng | Số Lượng | Tỷ Lệ |
+|----------------|----------|-------|
+| **Customer/User** | 63 chức năng | 27% |
+| **Operator** | 72 chức năng | 31% |
+| **Employee** | 19 chức năng | 8% |
+| **Admin** | 27 chức năng | 12% |
+| **System-wide** | 51 chức năng | 22% |
+| **TỔNG CỘNG** | **232 chức năng** | **100%** |
+
+#### Đặc Điểm Kỹ Thuật
+
+- **15 Models** trong MongoDB
+- **17 Backend Routes** với CRUD đầy đủ
+- **25+ Services** cho business logic
+- **RESTful API** architecture
+- **JWT Authentication** & Role-based Access Control
+- **Real-time WebSocket** integration
+- **Payment Gateway** integration (VNPay)
+- **SMS/Email Notification** services
+- **PDF Generation** service
+- **QR Code** generation & verification
+- **Dynamic Pricing** engine
+- **Seat Locking** mechanism
+- **Background Job Scheduler**
+- **File Upload** handling
+- **Guest Session** management
+
+---
+
 ## Tổng Kết Kiến Trúc
 
 ### Technology Stack Diagram
