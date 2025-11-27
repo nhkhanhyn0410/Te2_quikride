@@ -810,7 +810,177 @@ graph TD
     end
 ```
 
-## 6. Class Diagram (UML) - Các Entities Chính
+## 6. Class Diagram (UML) - Tổng Quan & Chi Tiết
+
+### 6.0. Class Diagram Tổng Quan - Toàn Bộ Hệ Thống
+
+```mermaid
+classDiagram
+    %% User & Authentication
+    class User {
+        +ObjectId _id
+        +String email
+        +String phone
+        +String loyaltyTier
+        +Integer totalPoints
+    }
+
+    class Operator {
+        +ObjectId _id
+        +String companyName
+        +String businessLicense
+        +String verificationStatus
+        +Float averageRating
+    }
+
+    class Employee {
+        +ObjectId _id
+        +ObjectId operatorId
+        +String role
+        +String licenseNumber
+    }
+
+    class Admin {
+        +ObjectId _id
+        +String username
+        +String role
+    }
+
+    %% Transportation
+    class Route {
+        +ObjectId _id
+        +ObjectId operatorId
+        +String routeCode
+        +Object origin
+        +Object destination
+    }
+
+    class Bus {
+        +ObjectId _id
+        +ObjectId operatorId
+        +String busNumber
+        +Object seatLayout
+    }
+
+    class Trip {
+        +ObjectId _id
+        +ObjectId routeId
+        +ObjectId busId
+        +ObjectId driverId
+        +ObjectId tripManagerId
+        +DateTime departureTime
+        +Float finalPrice
+    }
+
+    %% Booking System
+    class Booking {
+        +ObjectId _id
+        +String bookingCode
+        +ObjectId tripId
+        +ObjectId customerId
+        +ObjectId voucherId
+        +Float finalPrice
+        +String status
+    }
+
+    class Payment {
+        +ObjectId _id
+        +String paymentCode
+        +ObjectId bookingId
+        +String paymentMethod
+        +String status
+    }
+
+    class Ticket {
+        +ObjectId _id
+        +String ticketCode
+        +ObjectId bookingId
+        +String qrCode
+        +String status
+    }
+
+    class Voucher {
+        +ObjectId _id
+        +String code
+        +ObjectId operatorId
+        +String discountType
+    }
+
+    %% Reviews & Feedback
+    class Review {
+        +ObjectId _id
+        +ObjectId userId
+        +ObjectId bookingId
+        +ObjectId tripId
+        +Integer overallRating
+    }
+
+    class Complaint {
+        +ObjectId _id
+        +String ticketNumber
+        +ObjectId userId
+        +ObjectId bookingId
+        +ObjectId assignedTo
+    }
+
+    %% Content
+    class Banner {
+        +ObjectId _id
+        +String title
+        +ObjectId createdBy
+    }
+
+    class Blog {
+        +ObjectId _id
+        +String title
+        +ObjectId authorId
+    }
+
+    class FAQ {
+        +ObjectId _id
+        +String question
+        +ObjectId createdBy
+    }
+
+    %% Relationships - User Management
+    Operator "1" --> "*" Employee : employs
+    Operator "1" --> "*" Route : creates
+    Operator "1" --> "*" Bus : owns
+    Operator "1" --> "*" Trip : operates
+    Operator "1" --> "*" Voucher : creates
+
+    %% Relationships - Transportation
+    Route "1" --> "*" Trip : has
+    Bus "1" --> "*" Trip : assigned_to
+    Employee "1" --> "*" Trip : drives/manages
+
+    %% Relationships - Booking
+    User "1" --> "*" Booking : creates
+    Trip "1" --> "*" Booking : receives
+    Booking "1" --> "1" Payment : has
+    Booking "1" --> "1" Ticket : generates
+    Voucher "0..1" --> "*" Booking : applied_to
+
+    %% Relationships - Reviews
+    User "1" --> "*" Review : writes
+    Booking "1" --> "0..1" Review : reviewed_by
+    Trip "1" --> "*" Review : rated_by
+
+    %% Relationships - Complaints
+    User "1" --> "*" Complaint : files
+    Booking "1" --> "*" Complaint : about
+    Admin "0..1" --> "*" Complaint : handles
+
+    %% Relationships - Content
+    Admin "1" --> "*" Banner : creates
+    Admin "1" --> "*" Blog : writes
+    Admin "1" --> "*" FAQ : manages
+
+    %% Additional Key Relationships
+    Payment "1" --> "1" Booking : belongs_to
+    Ticket "1" --> "1" Booking : for
+    Ticket "1" --> "0..1" Employee : verified_by
+```
 
 ### 6.1. User Management Classes
 
