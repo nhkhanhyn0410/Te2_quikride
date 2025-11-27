@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "ve-xe-nhanh-backend",
   "version": "1.0.0",
   "description": "Vé xe nhanh Bus Booking System - Backend API",
