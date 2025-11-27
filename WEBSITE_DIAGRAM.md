@@ -810,7 +810,396 @@ graph TD
     end
 ```
 
-## 6. Luồng Thanh Toán
+## 6. Class Diagram (UML) - Các Entities Chính
+
+### 6.1. User Management Classes
+
+```mermaid
+classDiagram
+    class User {
+        +ObjectId _id
+        +String email
+        +String phone
+        +String password
+        +String fullName
+        +String loyaltyTier
+        +Integer totalPoints
+        +Array pointsHistory
+        +Array savedPassengers
+        +Boolean isActive
+        +register()
+        +login()
+        +verifyEmail()
+        +updateProfile()
+        +earnPoints()
+        +redeemPoints()
+        +checkTier()
+    }
+
+    class Operator {
+        +ObjectId _id
+        +String email
+        +String companyName
+        +String businessLicense
+        +String verificationStatus
+        +Float averageRating
+        +Integer totalTrips
+        +Float totalRevenue
+        +register()
+        +submitVerification()
+        +createRoute()
+        +addBus()
+        +scheduleTrip()
+        +viewReports()
+        +createVoucher()
+    }
+
+    class Employee {
+        +ObjectId _id
+        +ObjectId operatorId
+        +String role
+        +String fullName
+        +String licenseNumber
+        +String status
+        +login()
+        +updateProfile()
+        +viewAssignedTrips()
+        +updateTripStatus()
+    }
+
+    class Admin {
+        +ObjectId _id
+        +String username
+        +String email
+        +String role
+        +Array permissions
+        +verifyOperator()
+        +manageUsers()
+        +handleComplaints()
+        +manageContent()
+        +viewSystemReports()
+    }
+
+    Operator "1" --> "*" Employee : employs
+```
+
+### 6.2. Transportation System Classes
+
+```mermaid
+classDiagram
+    class Route {
+        +ObjectId _id
+        +ObjectId operatorId
+        +String routeCode
+        +String routeName
+        +Object origin
+        +Object destination
+        +Array stops
+        +Float distance
+        +Integer estimatedDuration
+        +Boolean isActive
+        +create()
+        +update()
+        +addStop()
+        +removeStop()
+        +deactivate()
+    }
+
+    class Bus {
+        +ObjectId _id
+        +ObjectId operatorId
+        +String busNumber
+        +String busType
+        +Object seatLayout
+        +Array amenities
+        +Integer totalSeats
+        +String status
+        +create()
+        +updateLayout()
+        +scheduleMaintenance()
+        +calculateOccupancy()
+        +retire()
+    }
+
+    class Trip {
+        +ObjectId _id
+        +ObjectId routeId
+        +ObjectId busId
+        +ObjectId driverId
+        +ObjectId tripManagerId
+        +DateTime departureTime
+        +Float finalPrice
+        +Array bookedSeats
+        +String status
+        +Integer availableSeats
+        +create()
+        +calculatePrice()
+        +applyDynamicPricing()
+        +bookSeat()
+        +releaseSeat()
+        +updateStatus()
+        +complete()
+        +cancel()
+    }
+
+    Route "1" --> "*" Trip : has
+    Bus "1" --> "*" Trip : assigned_to
+    Trip --> Route : uses
+    Trip --> Bus : uses
+```
+
+### 6.3. Booking & Payment Classes
+
+```mermaid
+classDiagram
+    class Booking {
+        +ObjectId _id
+        +String bookingCode
+        +ObjectId tripId
+        +ObjectId customerId
+        +Array seats
+        +Float finalPrice
+        +String status
+        +String paymentStatus
+        +Boolean isHeld
+        +DateTime heldUntil
+        +create()
+        +lockSeats()
+        +applyVoucher()
+        +calculateTotal()
+        +confirmBooking()
+        +cancelBooking()
+        +processRefund()
+        +checkExpiry()
+    }
+
+    class Payment {
+        +ObjectId _id
+        +String paymentCode
+        +ObjectId bookingId
+        +String paymentMethod
+        +Float amount
+        +String status
+        +String transactionId
+        +initiate()
+        +generatePaymentUrl()
+        +processWebhook()
+        +complete()
+        +fail()
+        +refund()
+        +verifyTransaction()
+    }
+
+    class Ticket {
+        +ObjectId _id
+        +String ticketCode
+        +ObjectId bookingId
+        +String qrCode
+        +String qrCodeData
+        +Array passengers
+        +String status
+        +generate()
+        +generateQRCode()
+        +encryptQRData()
+        +sendEmail()
+        +verify()
+        +markAsUsed()
+        +cancel()
+    }
+
+    class Voucher {
+        +ObjectId _id
+        +String code
+        +String discountType
+        +Float discountValue
+        +Integer maxUsageTotal
+        +DateTime validUntil
+        +Boolean isActive
+        +create()
+        +validate()
+        +apply()
+        +calculateDiscount()
+        +incrementUsage()
+        +deactivate()
+    }
+
+    Booking "1" --> "1" Payment : has
+    Booking "1" --> "1" Ticket : generates
+    Booking "*" --> "0..1" Voucher : uses
+```
+
+### 6.4. Review & Complaint Classes
+
+```mermaid
+classDiagram
+    class Review {
+        +ObjectId _id
+        +ObjectId userId
+        +ObjectId bookingId
+        +ObjectId tripId
+        +Integer overallRating
+        +Integer vehicleRating
+        +Integer driverRating
+        +String comment
+        +Array images
+        +String status
+        +create()
+        +validate()
+        +uploadImages()
+        +submit()
+        +approve()
+        +reject()
+        +updateOperatorRating()
+    }
+
+    class Complaint {
+        +ObjectId _id
+        +String ticketNumber
+        +String subject
+        +String category
+        +String priority
+        +String status
+        +ObjectId assignedTo
+        +Array notes
+        +create()
+        +assignToAdmin()
+        +addNote()
+        +updateStatus()
+        +resolve()
+        +close()
+        +reopen()
+    }
+
+    Review --> Booking : reviews
+    Review --> Trip : rates
+    Complaint --> Booking : about
+```
+
+### 6.5. Content Management Classes
+
+```mermaid
+classDiagram
+    class Banner {
+        +ObjectId _id
+        +String title
+        +String imageUrl
+        +String link
+        +Boolean isActive
+        +Integer displayOrder
+        +DateTime validFrom
+        +DateTime validUntil
+        +create()
+        +update()
+        +uploadImage()
+        +activate()
+        +deactivate()
+        +checkValidity()
+    }
+
+    class Blog {
+        +ObjectId _id
+        +String title
+        +String slug
+        +String content
+        +ObjectId authorId
+        +Boolean isPublished
+        +Integer viewCount
+        +create()
+        +update()
+        +publish()
+        +unpublish()
+        +incrementViewCount()
+        +generateSlug()
+    }
+
+    class FAQ {
+        +ObjectId _id
+        +String question
+        +String answer
+        +String category
+        +Boolean isActive
+        +Integer displayOrder
+        +create()
+        +update()
+        +activate()
+        +deactivate()
+        +reorder()
+    }
+
+    Admin --> Banner : manages
+    Admin --> Blog : writes
+    Admin --> FAQ : manages
+```
+
+### 6.6. Service Classes
+
+```mermaid
+classDiagram
+    class SeatLockService {
+        +Redis redisClient
+        +Integer TTL
+        +lockSeats(tripId, seats, userId)
+        +unlockSeats(tripId, seats)
+        +checkLock(tripId, seatNumber)
+        +extendLock(tripId, seats)
+        +cleanupExpired()
+    }
+
+    class PricingService {
+        +calculateBasePrice(route)
+        +applyDynamicPricing(trip, demandFactor)
+        +applyEarlyBirdDiscount(trip, bookingDate)
+        +applyPeakHoursPremium(trip)
+        +applyWeekendPremium(trip)
+        +calculateFinalPrice(trip, voucher, loyaltyDiscount)
+    }
+
+    class NotificationService {
+        +sendBookingConfirmation(booking)
+        +sendPaymentReceipt(payment)
+        +sendTicket(ticket)
+        +sendCancellationNotice(booking)
+        +sendTripReminder(booking)
+        +sendEmail(to, subject, template, data)
+        +sendSMS(phone, message)
+    }
+
+    class QRCodeService {
+        +generateQRCode(data)
+        +encryptQRData(ticketData)
+        +decryptQRData(qrCodeData)
+        +verifyQRCode(qrCodeData)
+        +toBase64Image(qrCode)
+    }
+
+    class LoyaltyService {
+        +calculatePoints(amount)
+        +addPoints(userId, points, reason)
+        +redeemPoints(userId, points)
+        +updateTier(userId)
+        +checkTierBenefits(userId)
+        +expirePoints()
+        +getPointsHistory(userId)
+    }
+
+    class AnalyticsService {
+        +getRevenueReport(operatorId, dateRange)
+        +getOccupancyReport(operatorId, dateRange)
+        +getPopularRoutes(operatorId)
+        +getCustomerInsights(operatorId)
+        +exportToExcel(data)
+        +exportToPDF(data)
+    }
+
+    Booking --> SeatLockService : uses
+    Trip --> PricingService : uses
+    Booking --> NotificationService : uses
+    Ticket --> QRCodeService : uses
+    User --> LoyaltyService : uses
+    Operator --> AnalyticsService : uses
+```
+
+## 7. Luồng Thanh Toán
 
 ```mermaid
 flowchart TD
@@ -853,7 +1242,7 @@ flowchart TD
     CANCEL_BOOKING --> END([Đặt vé thất bại])
 ```
 
-## 7. Hệ Thống Loyalty Points
+## 8. Hệ Thống Loyalty Points
 
 ```mermaid
 graph LR
@@ -886,7 +1275,7 @@ graph LR
     end
 ```
 
-## 8. Quy Trình Xác Minh Vé (QR Code)
+## 9. Quy Trình Xác Minh Vé (QR Code)
 
 ```mermaid
 sequenceDiagram
@@ -928,7 +1317,7 @@ sequenceDiagram
     Note over TM: Passenger allowed to board
 ```
 
-## 9. Workflow Operator
+## 10. Workflow Operator
 
 ```mermaid
 flowchart TD
@@ -964,7 +1353,7 @@ flowchart TD
     MANAGE -->|Create new| SCHEDULE
 ```
 
-## 10. Complaint Resolution Flow
+## 11. Complaint Resolution Flow
 
 ```mermaid
 stateDiagram-v2
@@ -1008,7 +1397,7 @@ stateDiagram-v2
     end note
 ```
 
-## 11. Real-time Updates với Socket.IO
+## 12. Real-time Updates với Socket.IO
 
 ```mermaid
 graph TB
@@ -1054,7 +1443,7 @@ graph TB
     TRIP_STATUS -->|Subscribe| TRIPMGR
 ```
 
-## 12. Seat Locking Mechanism
+## 13. Seat Locking Mechanism
 
 ```mermaid
 sequenceDiagram
