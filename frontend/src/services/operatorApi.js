@@ -14,6 +14,13 @@ export const operatorAuth = {
   updateProfile: (data) => api.put('/operators/me/profile', data),
 };
 
+// ==================== Dashboard ====================
+
+export const dashboardApi = {
+  // Get dashboard statistics
+  getStats: (params = {}) => api.get('/operators/dashboard/stats', { params }),
+};
+
 // ==================== Routes ====================
 
 export const routesApi = {
@@ -159,6 +166,7 @@ export const seatLayoutApi = {
 // Export all APIs
 export default {
   auth: operatorAuth,
+  dashboard: dashboardApi,
   routes: routesApi,
   buses: busesApi,
   employees: employeesApi,

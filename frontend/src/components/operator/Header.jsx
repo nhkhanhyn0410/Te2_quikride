@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Dropdown, Avatar, Badge, Typography, Breadcrumb, Space } from 'antd';
 import {
@@ -10,6 +11,7 @@ import {
   CarOutlined,
 } from '@ant-design/icons';
 import useOperatorAuthStore from '../../store/operatorAuthStore';
+import { dashboardApi } from '../../services/operatorApi';
 
 const { Text } = Typography;
 
@@ -17,10 +19,50 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { operator: user, logout } = useOperatorAuthStore();
+  const [stats, setStats] = useState({
+    todayTrips: 0,
+    todayRevenue: 0,
+  });
+
+  // Fetch today's quick stats
+  useEffect(() => {
+    const fetchQuickStats = async () => {
+      try {
+        const response = await dashboardApi.getStats({ period: 'day' });
+        if (response.data?.success && response.data?.data) {
+          const data = response.data.data;
+          setStats({
+            todayTrips: data.trips?.total || 0,
+            todayRevenue: data.revenue?.totalRevenue || 0,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching quick stats:', error);
+        // Keep default values on error
+      }
+    };
+
+    if (user) {
+      fetchQuickStats();
+      // Refresh every 5 minutes
+      const interval = setInterval(fetchQuickStats, 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
     navigate('/operator/login');
+  };
+
+  // Format currency for display
+  const formatRevenue = (amount) => {
+    if (amount >= 1000000) {
+      return `${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `${(amount / 1000).toFixed(1)}K`;
+    }
+    return amount.toLocaleString('vi-VN');
   };
 
   // Generate breadcrumb items based on current path
@@ -107,15 +149,15 @@ const Header = () => {
           {/* Quick Stats */}
           <div className="hidden lg:flex items-center gap-4">
             <div className="flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg border border-red-200">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
               <Text className="text-red-700 text-xs font-medium">
-                15 chuyến hôm nay
+                {stats.todayTrips} chuyến hôm nay
               </Text>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg border border-green-200">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <Text className="text-green-700 text-xs font-medium">
-                Doanh thu: 12.5M
+                Doanh thu: {formatRevenue(stats.todayRevenue)}đ
               </Text>
             </div>
           </div>
