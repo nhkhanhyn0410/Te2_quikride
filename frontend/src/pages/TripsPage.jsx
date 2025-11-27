@@ -1252,51 +1252,52 @@ const TripsPage = () => {
                   {filteredTrips.map((trip) => (
                     <Card
                       key={trip._id}
-                      className="hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 rounded-3xl border-0 shadow-lg overflow-hidden group"
+                      className="hover:shadow-xl hover:scale-[1.01] transition-all duration-300 rounded-2xl border border-neutral-200 shadow-md overflow-hidden group bg-white"
                       bodyStyle={{ padding: '0' }}
                     >
                       {/* Trip Header */}
-                      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
+                      <div className="bg-neutral-50 px-6 py-5 border-b border-neutral-200">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <Avatar size="large" className="bg-gradient-to-r from-red-500 to-orange-500">
+                            <Avatar 
+                              size={48} 
+                              className="bg-gradient-to-br from-primary-500 to-primary-600 text-white font-semibold shadow-md"
+                            >
                               {trip.operatorName?.charAt(0) || 'N'}
                             </Avatar>
                             <div>
-                              <Text strong className="text-gray-800 text-lg">
+                              <Text strong className="text-neutral-800 text-lg font-semibold">
                                 {trip.operatorName}
                               </Text>
-                              <div className="flex items-center gap-2 mt-1">
+                              <div className="flex items-center gap-3 mt-1">
                                 <Rate
                                   disabled
                                   defaultValue={trip.operatorRating}
                                   size="small"
+                                  className="text-warning-500"
                                 />
-                                <Text className="text-xs text-gray-500">
+                                <Text className="text-xs text-neutral-500 font-medium">
                                   ({trip.operatorRating.toFixed(1)}/5)
                                 </Text>
-                                <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                                <Text className="text-xs text-gray-500 font-medium">
+                                <div className="w-1 h-1 bg-neutral-300 rounded-full"></div>
+                                <Tag color="blue" className="text-xs font-medium border-0 bg-blue-50 text-blue-700">
                                   {trip.busType}
-                                </Text>
+                                </Tag>
                                 {trip.busNumber && (
-                                  <>
-                                    <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                                    <Text className="text-xs text-gray-500 font-medium">
-                                      {trip.busNumber}
-                                    </Text>
-                                  </>
+                                  <Tag color="green" className="text-xs font-medium border-0 bg-green-50 text-green-700">
+                                    {trip.busNumber}
+                                  </Tag>
                                 )}
                               </div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-3xl font-black text-red-600 mb-1">
+                            <div className="text-2xl font-bold text-primary-600 mb-1">
                               {formatPrice(trip.finalPrice)}
                             </div>
-                            <div className="flex items-center justify-end gap-1">
-                              <UserOutlined className="text-blue-500 text-xs" />
-                              <Text className="text-sm text-gray-600 font-medium">
+                            <div className="flex items-center justify-end gap-2 px-3 py-1 bg-blue-50 rounded-lg">
+                              <UserOutlined className="text-blue-600 text-sm" />
+                              <Text className="text-sm text-blue-700 font-medium">
                                 {trip.availableSeats} chỗ trống
                               </Text>
                             </div>
@@ -1377,111 +1378,6 @@ const TripsPage = () => {
 
                       {/* Trip Details */}
                       <div className="p-6">
-                        <Row gutter={[24, 16]} align="middle">
-                          <Col xs={24} sm={8}>
-                            <div className="text-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-2xl border-2 border-red-200 shadow-md">
-                              <div className="flex items-center justify-center gap-2 mb-3">
-                                <EnvironmentOutlined className="text-red-500 text-lg" />
-                                <Text className="text-sm font-bold text-red-600 uppercase tracking-wider">Điểm đi</Text>
-                              </div>
-                              
-                              {/* Departure time */}
-                              <div className="bg-white rounded-xl p-3 mb-3 border-2 border-red-100 shadow-sm">
-                                <div className="text-3xl font-black text-red-600 mb-1">
-                                  {formatTime(trip.departureTime)}
-                                </div>
-                                <div className="text-sm text-gray-600 font-medium">
-                                  {formatDate(trip.departureTime)}
-                                </div>
-                              </div>
-                              
-                              {/* Location */}
-                              <div className="bg-red-500 text-white px-4 py-3 rounded-xl shadow-md">
-                                <Text className="text-xs font-bold uppercase tracking-wider block mb-1 text-red-100">
-                                  Thành phố
-                                </Text>
-                                <Text className="text-lg font-bold block mb-1">
-                                  {trip.fromCity}
-                                </Text>
-                                {trip.fromLocation && trip.fromLocation !== trip.fromCity && (
-                                  <Text className="text-sm text-red-100 font-medium">
-                                    {trip.fromLocation}
-                                  </Text>
-                                )}
-                              </div>
-                            </div>
-                          </Col>
-
-                          <Col xs={24} sm={8}>
-                            <div className="text-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
-                              <div className="flex items-center justify-center gap-2 mb-3">
-                                <ClockCircleOutlined className="text-blue-500" />
-                                <Text className="text-sm font-semibold text-gray-700">Hành trình</Text>
-                              </div>
-                              
-                              {/* Route visualization */}
-                              <div className="flex items-center justify-center gap-3 mb-4">
-                                <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-md"></div>
-                                <div className="flex-1 h-3 bg-gradient-to-r from-red-500 via-orange-400 to-orange-500 rounded-full relative overflow-hidden">
-                                  <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-orange-400 to-orange-500 rounded-full animate-pulse"></div>
-                                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-orange-400">
-                                    <CarOutlined className="text-orange-600 text-sm" />
-                                  </div>
-                                </div>
-                                <div className="w-4 h-4 bg-orange-500 rounded-full animate-pulse shadow-md"></div>
-                              </div>
-                              
-                              {/* Duration info */}
-                              <div className="bg-white px-4 py-3 rounded-xl border-2 border-blue-100 shadow-sm">
-                                <Text className="text-xs text-blue-600 font-bold uppercase tracking-wider block mb-1">
-                                  Thời gian di chuyển
-                                </Text>
-                                <div className="text-2xl font-black text-gray-800 mb-1">
-                                  {trip.duration}
-                                </div>
-                                <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
-                                  <span>{formatTime(trip.departureTime)}</span>
-                                  <span>→</span>
-                                  <span>{formatTime(trip.arrivalTime)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </Col>
-
-                          <Col xs={24} sm={8}>
-                            <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl border-2 border-orange-200 shadow-md">
-                              <div className="flex items-center justify-center gap-2 mb-3">
-                                <SendOutlined className="text-orange-500 text-lg" />
-                                <Text className="text-sm font-bold text-orange-600 uppercase tracking-wider">Điểm đến</Text>
-                              </div>
-                              
-                              {/* Arrival time */}
-                              <div className="bg-white rounded-xl p-3 mb-3 border-2 border-orange-100 shadow-sm">
-                                <div className="text-3xl font-black text-orange-600 mb-1">
-                                  {formatTime(trip.arrivalTime)}
-                                </div>
-                                <div className="text-sm text-gray-600 font-medium">
-                                  {formatDate(trip.arrivalTime)}
-                                </div>
-                              </div>
-                              
-                              {/* Location */}
-                              <div className="bg-orange-500 text-white px-4 py-3 rounded-xl shadow-md">
-                                <Text className="text-xs font-bold uppercase tracking-wider block mb-1 text-orange-100">
-                                  Thành phố
-                                </Text>
-                                <Text className="text-lg font-bold block mb-1">
-                                  {trip.toCity}
-                                </Text>
-                                {trip.toLocation && trip.toLocation !== trip.toCity && (
-                                  <Text className="text-sm text-orange-100 font-medium">
-                                    {trip.toLocation}
-                                  </Text>
-                                )}
-                              </div>
-                            </div>
-                          </Col>
-                        </Row>
 
                         {/* Bus Amenities */}
                         <div className="mt-6 pt-6 border-t border-gray-100">
