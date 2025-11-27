@@ -190,7 +190,9 @@ stateDiagram-v2
     end note
 ```
 
-## 5. Sơ Đồ Database - Quan Hệ Chính
+## 5. Sơ Đồ Database
+
+### 5.1. Tổng Quan Quan Hệ Database
 
 ```mermaid
 erDiagram
@@ -198,11 +200,13 @@ erDiagram
     USER ||--o{ REVIEW : writes
     USER ||--o{ COMPLAINT : files
     USER {
-        ObjectId _id
-        string email
+        ObjectId _id PK
+        string email UK
+        string phone UK
         string fullName
         string loyaltyTier
         int totalPoints
+        boolean isActive
     }
 
     OPERATOR ||--o{ ROUTE : manages
@@ -211,119 +215,559 @@ erDiagram
     OPERATOR ||--o{ EMPLOYEE : employs
     OPERATOR ||--o{ VOUCHER : creates
     OPERATOR {
-        ObjectId _id
+        ObjectId _id PK
+        string email UK
         string companyName
-        string businessLicense
+        string businessLicense UK
         string verificationStatus
         float averageRating
+        boolean isActive
+    }
+
+    EMPLOYEE ||--o{ TRIP : "driver/manager"
+    EMPLOYEE {
+        ObjectId _id PK
+        ObjectId operatorId FK
+        string role
+        string licenseNumber
+        string phone
     }
 
     ROUTE ||--o{ TRIP : has
     ROUTE {
-        ObjectId _id
-        ObjectId operatorId
-        string routeCode
+        ObjectId _id PK
+        ObjectId operatorId FK
+        string routeCode UK
         object origin
         object destination
-        array stops
     }
 
     BUS ||--o{ TRIP : assigned
     BUS {
-        ObjectId _id
-        ObjectId operatorId
-        string busNumber
+        ObjectId _id PK
+        ObjectId operatorId FK
+        string busNumber UK
         object seatLayout
-        array amenities
+        int totalSeats
     }
 
     TRIP ||--o{ BOOKING : receives
     TRIP {
-        ObjectId _id
-        ObjectId routeId
-        ObjectId busId
-        ObjectId driverId
-        ObjectId tripManagerId
+        ObjectId _id PK
+        ObjectId routeId FK
+        ObjectId busId FK
+        ObjectId driverId FK
+        ObjectId tripManagerId FK
         DateTime departureTime
-        float finalPrice
-        array bookedSeats
         string status
     }
 
     BOOKING ||--|| PAYMENT : has
     BOOKING ||--|| TICKET : generates
+    BOOKING ||--o{ REVIEW : "can have"
     BOOKING {
-        ObjectId _id
-        string bookingCode
-        ObjectId tripId
-        ObjectId customerId
-        array seats
-        float finalPrice
+        ObjectId _id PK
+        string bookingCode UK
+        ObjectId tripId FK
+        ObjectId customerId FK
+        ObjectId voucherId FK
         string status
-        string paymentStatus
     }
 
     PAYMENT {
-        ObjectId _id
-        string paymentCode
-        ObjectId bookingId
+        ObjectId _id PK
+        string paymentCode UK
+        ObjectId bookingId FK
         string paymentMethod
-        float amount
         string status
-        string transactionId
     }
 
     TICKET {
-        ObjectId _id
-        string ticketCode
-        ObjectId bookingId
-        string qrCode
+        ObjectId _id PK
+        string ticketCode UK
+        ObjectId bookingId FK
         string qrCodeData
-        array passengers
-        string status
-    }
-
-    EMPLOYEE ||--o{ TRIP : manages
-    EMPLOYEE {
-        ObjectId _id
-        ObjectId operatorId
-        string role
-        string licenseNumber
         string status
     }
 
     VOUCHER ||--o{ BOOKING : appliedTo
     VOUCHER {
-        ObjectId _id
-        string code
-        ObjectId operatorId
+        ObjectId _id PK
+        string code UK
+        ObjectId operatorId FK
         string discountType
-        float discountValue
-        DateTime validFrom
         DateTime validUntil
     }
 
-    REVIEW }o--|| BOOKING : reviews
     REVIEW }o--|| TRIP : rates
     REVIEW {
-        ObjectId _id
-        ObjectId userId
-        ObjectId tripId
+        ObjectId _id PK
+        ObjectId userId FK
+        ObjectId bookingId FK
+        ObjectId tripId FK
         int overallRating
-        string comment
-        DateTime createdAt
     }
 
-    COMPLAINT }o--|| USER : filedBy
     COMPLAINT }o--|| BOOKING : about
     COMPLAINT {
-        ObjectId _id
-        string ticketNumber
-        string subject
-        string category
+        ObjectId _id PK
+        string ticketNumber UK
+        ObjectId userId FK
+        ObjectId bookingId FK
         string status
-        string priority
     }
+
+    ADMIN {
+        ObjectId _id PK
+        string email UK
+        string username UK
+        string role
+    }
+
+    BANNER {
+        ObjectId _id PK
+        string title
+        string imageUrl
+        boolean isActive
+    }
+
+    BLOG {
+        ObjectId _id PK
+        string title
+        string slug UK
+        boolean isPublished
+    }
+
+    FAQ {
+        ObjectId _id PK
+        string question
+        string answer
+        string category
+    }
+```
+
+### 5.2. User Management - Chi Tiết
+
+```mermaid
+erDiagram
+    USER {
+        ObjectId _id PK "Primary Key"
+        string email UK "Unique, required"
+        string phone UK "Unique, 10 digits"
+        string password "Hashed"
+        string googleId "OAuth Google"
+        string facebookId "OAuth Facebook"
+        string fullName "Required"
+        Date dateOfBirth
+        string gender "male|female|other"
+        string avatar "URL"
+        boolean isEmailVerified "Default: false"
+        boolean isPhoneVerified "Default: false"
+        string emailVerificationToken
+        string phoneOTP
+        Date phoneOTPExpiry
+        string loyaltyTier "bronze|silver|gold|platinum"
+        int totalPoints "Default: 0"
+        array pointsHistory "Point transactions"
+        array savedPassengers "Max 5"
+        boolean isActive "Default: true"
+        boolean isBlocked "Default: false"
+        string blockedReason
+        Date blockedAt
+        Date createdAt
+        Date updatedAt
+    }
+
+    OPERATOR {
+        ObjectId _id PK
+        string email UK "Unique, required"
+        string password "Hashed"
+        string companyName "Required"
+        string businessLicense UK "Unique, required"
+        string taxCode "Required"
+        string logo "URL"
+        string website
+        string phone "Required"
+        string address "Required"
+        object bankInfo "Bank details"
+        string verificationStatus "pending|approved|rejected"
+        Date verificationDate
+        string rejectionReason
+        float averageRating "0-5"
+        int totalReviews
+        int totalTrips
+        float totalRevenue
+        float commissionRate "Default: 0.1"
+        boolean isActive "Default: true"
+        boolean isSuspended "Default: false"
+        string suspensionReason
+        Date createdAt
+        Date updatedAt
+    }
+
+    EMPLOYEE {
+        ObjectId _id PK
+        ObjectId operatorId FK "Reference to Operator"
+        string role "driver|trip_manager"
+        string fullName "Required"
+        string phone UK "Unique per operator"
+        string email
+        string password "Hashed"
+        Date dateOfBirth
+        string idCard "National ID"
+        string address
+        string licenseNumber "For drivers"
+        string licenseClass "For drivers: A1|A2|B1|B2|etc"
+        Date licenseExpiry "For drivers"
+        string photo "URL"
+        string status "active|inactive|on_leave"
+        Date createdAt
+        Date updatedAt
+    }
+
+    ADMIN {
+        ObjectId _id PK
+        string username UK "Unique, required"
+        string email UK "Unique, required"
+        string password "Hashed"
+        string fullName "Required"
+        string role "super_admin|admin|moderator"
+        array permissions "Feature permissions"
+        boolean isActive "Default: true"
+        Date lastLoginAt
+        Date createdAt
+        Date updatedAt
+    }
+
+    USER ||--o{ BOOKING : "creates bookings"
+    OPERATOR ||--o{ EMPLOYEE : "employs"
+```
+
+### 5.3. Transportation System - Chi Tiết
+
+```mermaid
+erDiagram
+    ROUTE {
+        ObjectId _id PK
+        ObjectId operatorId FK "Reference to Operator"
+        string routeCode UK "Unique, auto-generated"
+        string routeName
+        object origin "city, province, station, address, coordinates"
+        object destination "city, province, station, address, coordinates"
+        array pickupPoints "name, address, coordinates"
+        array dropoffPoints "name, address, coordinates"
+        array stops "name, address, order, estimatedArrival, duration"
+        float distance "In kilometers"
+        int estimatedDuration "In minutes"
+        boolean isActive "Default: true"
+        Date createdAt
+        Date updatedAt
+    }
+
+    BUS {
+        ObjectId _id PK
+        ObjectId operatorId FK "Reference to Operator"
+        string busNumber UK "License plate, unique"
+        string busType "limousine|sleeper|seater|double_decker"
+        object seatLayout "floors, rows, columns, layout(2D), totalSeats"
+        array amenities "wifi|power|ac|toilet|water|blanket|pillow"
+        int totalSeats "Calculated from layout"
+        string status "active|maintenance|retired"
+        Date lastMaintenanceDate
+        Date nextMaintenanceDate
+        int totalTrips "Statistics"
+        float totalEarnings "Statistics"
+        float averageOccupancy "Statistics"
+        boolean isActive "Default: true"
+        Date createdAt
+        Date updatedAt
+    }
+
+    TRIP {
+        ObjectId _id PK
+        ObjectId routeId FK "Reference to Route"
+        ObjectId busId FK "Reference to Bus"
+        ObjectId operatorId FK "Reference to Operator"
+        ObjectId driverId FK "Reference to Employee(driver)"
+        ObjectId tripManagerId FK "Reference to Employee(trip_manager)"
+        DateTime departureTime "Required"
+        DateTime arrivalTime "Calculated"
+        float basePrice "Base ticket price"
+        float discount "Percentage 0-100"
+        float finalPrice "After discount"
+        object dynamicPricing "demand, earlybird, peakhours, weekend"
+        int totalSeats "From bus"
+        int availableSeats "Real-time count"
+        array bookedSeats "seatNumber, bookingId, passengerName"
+        string status "scheduled|ongoing|completed|cancelled"
+        object journeyTracking "currentStop, actualTimes, statusHistory"
+        boolean isRecurring "Default: false"
+        ObjectId recurringGroupId "For recurring trips"
+        string notes
+        Date createdAt
+        Date updatedAt
+    }
+
+    ROUTE ||--o{ TRIP : "has many trips"
+    BUS ||--o{ TRIP : "assigned to trips"
+```
+
+### 5.4. Booking & Payment System - Chi Tiết
+
+```mermaid
+erDiagram
+    BOOKING {
+        ObjectId _id PK
+        string bookingCode UK "Unique, auto-generated"
+        ObjectId tripId FK "Reference to Trip"
+        ObjectId customerId FK "Reference to User, null for guest"
+        ObjectId operatorId FK "Reference to Operator"
+        string status "pending|confirmed|cancelled|completed|refunded"
+        array seats "seatNumber, price, passengerName, phone, email, idCard"
+        object contactInfo "name, phone, email"
+        object pickupPoint "name, address, time"
+        object dropoffPoint "name, address, time"
+        float totalPrice "Sum of seat prices"
+        float discount "From voucher or loyalty"
+        ObjectId voucherId FK "Applied voucher"
+        string voucherCode
+        float voucherDiscount
+        float finalPrice "After all discounts"
+        string paymentMethod "vnpay|momo|zalopay|cash|credit|debit"
+        string paymentStatus "pending|completed|failed|refunded"
+        string paymentId "Reference to Payment"
+        Date paidAt
+        string paymentUrl
+        string qrCode
+        Date cancelledAt
+        string cancelReason
+        string cancelledBy "user|operator|system"
+        float refundAmount
+        Date refundedAt
+        string specialRequests
+        string operatorNotes
+        boolean isGuestBooking "Default: false"
+        boolean isHeld "Seat lock status"
+        Date heldUntil "15 min expiry"
+        Date createdAt
+        Date updatedAt
+    }
+
+    PAYMENT {
+        ObjectId _id PK
+        string paymentCode UK "Unique, auto-generated"
+        ObjectId bookingId FK "Reference to Booking"
+        ObjectId customerId FK "Reference to User"
+        ObjectId operatorId FK "Reference to Operator"
+        string paymentMethod "vnpay|momo|zalopay|cash|credit_card|debit_card"
+        float amount "Payment amount"
+        string currency "VND"
+        string status "pending|processing|completed|failed|cancelled|refunded"
+        string transactionId "Gateway transaction ID"
+        string paymentUrl "Payment gateway URL"
+        string qrCode "For QR payments"
+        Date initiatedAt
+        Date processedAt
+        string processedBy "user|admin|system"
+        object gatewayResponse "Raw gateway data"
+        float refundAmount
+        Date refundedAt
+        string refundReason
+        string notes
+        Date createdAt
+        Date updatedAt
+    }
+
+    TICKET {
+        ObjectId _id PK
+        string ticketCode UK "Unique, auto-generated"
+        ObjectId bookingId FK "Reference to Booking"
+        ObjectId customerId FK "Reference to User, null for guest"
+        ObjectId tripId FK "Reference to Trip"
+        ObjectId operatorId FK "Reference to Operator"
+        string qrCode "Base64 encoded image"
+        string qrCodeData "Encrypted JSON"
+        array passengers "seatNumber, fullName, phone, email, idCard"
+        object routeInfo "origin, destination, times"
+        object busInfo "busNumber, busType, seatNumbers"
+        string status "issued|verified|used|cancelled"
+        Date verifiedAt
+        ObjectId verifiedBy FK "Employee who verified"
+        Date scannedAt
+        object scanLocation "GPS coordinates"
+        string pdfUrl "Deprecated"
+        string pdfFileName "Deprecated"
+        Date createdAt
+        Date updatedAt
+    }
+
+    BOOKING ||--|| PAYMENT : "has one payment"
+    BOOKING ||--|| TICKET : "generates one ticket"
+```
+
+### 5.5. Reviews & Vouchers - Chi Tiết
+
+```mermaid
+erDiagram
+    REVIEW {
+        ObjectId _id PK
+        ObjectId userId FK "Reference to User"
+        ObjectId bookingId FK "Reference to Booking"
+        ObjectId tripId FK "Reference to Trip"
+        ObjectId operatorId FK "Reference to Operator"
+        int overallRating "1-5 stars, required"
+        int vehicleRating "1-5 stars"
+        int driverRating "1-5 stars"
+        int punctualityRating "1-5 stars"
+        int serviceRating "1-5 stars"
+        string comment "Max 500 chars"
+        array images "Max 5 images, URLs"
+        string status "pending|approved|rejected"
+        boolean isVerified "Customer took the trip"
+        string adminResponse
+        Date createdAt
+        Date updatedAt
+    }
+
+    VOUCHER {
+        ObjectId _id PK
+        string code UK "Uppercase, unique"
+        string name "Display name"
+        string description
+        ObjectId operatorId FK "null for system-wide"
+        string discountType "percentage|fixed"
+        float discountValue "Percentage(0-100) or amount"
+        float maxDiscountAmount "For percentage type"
+        float minBookingAmount "Minimum to apply"
+        int maxUsageTotal "null for unlimited"
+        int maxUsagePerCustomer "Default: 1"
+        int currentUsageCount "Current usage"
+        Date validFrom
+        Date validUntil
+        boolean isActive "Default: true"
+        array applicableRoutes "Route IDs, empty for all"
+        Date createdAt
+        Date updatedAt
+    }
+
+    COMPLAINT {
+        ObjectId _id PK
+        string ticketNumber UK "Unique, auto-generated"
+        string subject "Required"
+        string description "Detailed description"
+        string category "booking|payment|service|driver|vehicle|refund|technical|other"
+        string priority "low|medium|high|urgent"
+        string status "open|in_progress|resolved|closed|rejected"
+        ObjectId userId FK "Reference to User"
+        string userEmail
+        string userPhone
+        ObjectId bookingId FK "Reference to Booking"
+        ObjectId operatorId FK "Reference to Operator"
+        ObjectId tripId FK "Reference to Trip"
+        ObjectId assignedTo FK "Admin ID"
+        Date assignedAt
+        array attachments "fileName, fileUrl, fileType, uploadedAt"
+        array notes "content, noteAuthor, timestamp"
+        string resolutionNotes
+        Date resolutionDate
+        Date createdAt
+        Date updatedAt
+    }
+
+    REVIEW }o--|| BOOKING : "reviews one booking"
+    REVIEW }o--|| TRIP : "rates one trip"
+    VOUCHER ||--o{ BOOKING : "applied to bookings"
+    COMPLAINT }o--|| BOOKING : "about one booking"
+```
+
+### 5.6. Content Management - Chi Tiết
+
+```mermaid
+erDiagram
+    BANNER {
+        ObjectId _id PK
+        string title "Required"
+        string description
+        string imageUrl "Required, Cloudinary URL"
+        string link "CTA link"
+        string linkTarget "_blank|_self"
+        boolean isActive "Default: true"
+        int displayOrder "Sort order"
+        Date validFrom
+        Date validUntil
+        Date createdAt
+        Date updatedAt
+    }
+
+    BLOG {
+        ObjectId _id PK
+        string title "Required"
+        string slug UK "URL-friendly, unique"
+        string content "HTML content"
+        string excerpt "Short summary"
+        string featuredImage "Cloudinary URL"
+        string author "Admin name"
+        string category "news|guide|promotion|announcement"
+        array tags "Search tags"
+        boolean isPublished "Default: false"
+        Date publishedAt
+        int viewCount "Default: 0"
+        Date createdAt
+        Date updatedAt
+    }
+
+    FAQ {
+        ObjectId _id PK
+        string question "Required"
+        string answer "Required, HTML"
+        string category "booking|payment|account|general|technical"
+        int displayOrder "Sort order"
+        boolean isActive "Default: true"
+        int viewCount "Default: 0"
+        Date createdAt
+        Date updatedAt
+    }
+```
+
+### 5.7. Indexes và Constraints
+
+```mermaid
+graph TD
+    subgraph "Performance Indexes"
+        IDX1[User: email, phone]
+        IDX2[Operator: businessLicense, email]
+        IDX3[Booking: bookingCode, tripId, customerId]
+        IDX4[Trip: departureTime, routeId, status]
+        IDX5[Payment: paymentCode, bookingId]
+        IDX6[Ticket: ticketCode, bookingId]
+        IDX7[Review: tripId, userId, operatorId]
+        IDX8[Voucher: code, validUntil]
+        IDX9[Route: routeCode, operatorId]
+        IDX10[Bus: busNumber, operatorId]
+    end
+
+    subgraph "Unique Constraints"
+        UK1[User.email UNIQUE]
+        UK2[User.phone UNIQUE]
+        UK3[Operator.businessLicense UNIQUE]
+        UK4[Booking.bookingCode UNIQUE]
+        UK5[Ticket.ticketCode UNIQUE]
+        UK6[Payment.paymentCode UNIQUE]
+        UK7[Voucher.code UNIQUE]
+        UK8[Route.routeCode UNIQUE]
+        UK9[Bus.busNumber UNIQUE per operator]
+    end
+
+    subgraph "Foreign Key Relationships"
+        FK1[Booking.tripId → Trip._id]
+        FK2[Booking.customerId → User._id]
+        FK3[Trip.routeId → Route._id]
+        FK4[Trip.busId → Bus._id]
+        FK5[Employee.operatorId → Operator._id]
+        FK6[Review.bookingId → Booking._id]
+        FK7[Payment.bookingId → Booking._id]
+        FK8[Ticket.bookingId → Booking._id]
+    end
 ```
 
 ## 6. Luồng Thanh Toán
