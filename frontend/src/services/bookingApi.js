@@ -16,6 +16,12 @@ export const getTripDetails = async (tripId) => {
   return api.get(`/trips/${tripId}`);
 };
 
+// Get dynamic price for a trip
+export const getTripDynamicPrice = async (tripId, bookingDate) => {
+  const params = bookingDate ? `?bookingDate=${bookingDate}` : '';
+  return api.get(`/trips/${tripId}/dynamic-price${params}`);
+};
+
 // Get available seats for a trip
 export const getAvailableSeats = async (tripId) => {
   return api.get(`/bookings/trips/${tripId}/available-seats`);
@@ -99,6 +105,7 @@ export const getPublicVouchers = async (filters) => {
 export default {
   searchTrips,
   getTripDetails,
+  getTripDynamicPrice,
   getAvailableSeats,
   holdSeats,
   extendHold,
