@@ -14,8 +14,19 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Get token from Zustand persist storage (auth-storage)
-    const authData = localStorage.getItem('auth-storage');
+    // Determine which auth storage to use based on the request URL
+    let storageKey = 'auth-storage'; // Default to customer auth
+
+    if (config.url?.includes('/operators/')) {
+      storageKey = 'operator-auth-storage';
+    } else if (config.url?.includes('/admin/')) {
+      storageKey = 'admin-auth-storage';
+    } else if (config.url?.includes('/trip-manager/')) {
+      storageKey = 'trip-manager-auth-storage';
+    }
+
+    // Get token from appropriate Zustand persist storage
+    const authData = localStorage.getItem(storageKey);
     if (authData) {
       try {
         const { state } = JSON.parse(authData);
@@ -23,13 +34,13 @@ api.interceptors.request.use(
           config.headers.Authorization = `Bearer ${state.token}`;
         }
       } catch (error) {
-        console.error('Error parsing auth data:', error);
+        console.error(`Error parsing ${storageKey}:`, error);
       }
     }
 
-    // Get guest session token if available
+    // Get guest session token if available (only for customer routes)
     const guestToken = localStorage.getItem('guest-token');
-    if (guestToken && !config.headers.Authorization) {
+    if (guestToken && !config.headers.Authorization && storageKey === 'auth-storage') {
       config.headers['x-guest-token'] = guestToken;
     }
 
@@ -53,25 +64,37 @@ api.interceptors.response.use(
 
       if (status === 401) {
         // Check if this is a login/register request - don't redirect
-        const isAuthRequest = error.config.url?.includes('/auth/login') ||
-                              error.config.url?.includes('/auth/register');
+        const isAuthRequest = error.config.url?.includes('/login') ||
+                              error.config.url?.includes('/register');
 
         if (!isAuthRequest) {
-          // Unauthorized - clear all auth data and redirect
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('auth-storage'); // Zustand persist key
-          localStorage.removeItem('guest-token');
-
-          // Redirect based on current path
+          // Determine which auth storage to clear based on the request URL
           const currentPath = window.location.pathname;
-          if (currentPath.startsWith('/admin')) {
-            window.location.href = '/admin/login';
-          } else if (currentPath.startsWith('/operator')) {
+
+          if (error.config.url?.includes('/operators/') || currentPath.startsWith('/operator')) {
+            // Clear operator auth
+            localStorage.removeItem('operator-token');
+            localStorage.removeItem('operator');
+            localStorage.removeItem('operator-auth-storage');
             window.location.href = '/operator/login';
-          } else if (currentPath.startsWith('/trip-manager')) {
+          } else if (error.config.url?.includes('/admin/') || currentPath.startsWith('/admin')) {
+            // Clear admin auth
+            localStorage.removeItem('admin-token');
+            localStorage.removeItem('admin');
+            localStorage.removeItem('admin-auth-storage');
+            window.location.href = '/admin/login';
+          } else if (error.config.url?.includes('/trip-manager/') || currentPath.startsWith('/trip-manager')) {
+            // Clear trip manager auth
+            localStorage.removeItem('trip-manager-token');
+            localStorage.removeItem('trip-manager');
+            localStorage.removeItem('trip-manager-auth-storage');
             window.location.href = '/trip-manager/login';
           } else {
+            // Clear customer auth
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('auth-storage');
+            localStorage.removeItem('guest-token');
             window.location.href = '/login';
           }
         }
