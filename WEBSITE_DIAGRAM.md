@@ -1199,17 +1199,291 @@ classDiagram
     Operator --> AnalyticsService : uses
 ```
 
-## 7. Luồng Thanh Toán
+## 7. Payment System - Class Diagram & Flow
+
+### 7.1. Payment System Class Diagram
+
+```mermaid
+classDiagram
+    class Booking {
+        +ObjectId _id
+        +String bookingCode
+        +ObjectId tripId
+        +ObjectId customerId
+        +ObjectId paymentId
+        +String status
+        +String paymentStatus
+        +Float finalPrice
+        +lockSeats()
+        +confirmBooking()
+        +cancelBooking()
+        +processRefund()
+    }
+
+    class Payment {
+        +ObjectId _id
+        +String paymentCode
+        +ObjectId bookingId
+        +String paymentMethod
+        +Float amount
+        +String status
+        +String transactionId
+        +Object gatewayResponse
+        +initiate()
+        +complete()
+        +fail()
+        +refund()
+    }
+
+    class Ticket {
+        +ObjectId _id
+        +String ticketCode
+        +ObjectId bookingId
+        +String qrCode
+        +String status
+        +generate()
+        +verify()
+        +cancel()
+    }
+
+    class PaymentGateway {
+        <<interface>>
+        +createPaymentUrl(payment)*
+        +processWebhook(data)*
+        +verifySignature(data)*
+        +refund(payment)*
+    }
+
+    class VNPayGateway {
+        +String tmnCode
+        +String secretKey
+        +String apiUrl
+        +createPaymentUrl(payment)
+        +processWebhook(data)
+        +verifySignature(data)
+        +refund(payment)
+        +generateSecureHash(params)
+    }
+
+    class MomoGateway {
+        +String partnerCode
+        +String accessKey
+        +String secretKey
+        +createPaymentUrl(payment)
+        +processWebhook(data)
+        +verifySignature(data)
+        +refund(payment)
+        +generateQRCode(payment)
+    }
+
+    class ZaloPayGateway {
+        +String appId
+        +String key1
+        +String key2
+        +createPaymentUrl(payment)
+        +processWebhook(data)
+        +verifySignature(data)
+        +refund(payment)
+    }
+
+    class CashPayment {
+        +validateCashPayment()
+        +confirmCashReceived()
+        +holdBooking(duration)
+    }
+
+    class PaymentProcessor {
+        -Map~String,PaymentGateway~ gateways
+        +processPayment(booking, method)
+        +handleWebhook(method, data)
+        +processRefund(payment)
+        +selectGateway(method)
+    }
+
+    class TransactionLog {
+        +ObjectId _id
+        +ObjectId paymentId
+        +String action
+        +Object requestData
+        +Object responseData
+        +DateTime timestamp
+        +log()
+    }
+
+    Booking "1" --> "1" Payment : has
+    Booking "1" --> "1" Ticket : generates
+    Payment --> PaymentGateway : uses
+    PaymentGateway <|.. VNPayGateway : implements
+    PaymentGateway <|.. MomoGateway : implements
+    PaymentGateway <|.. ZaloPayGateway : implements
+    PaymentGateway <|.. CashPayment : implements
+    PaymentProcessor --> PaymentGateway : manages
+    Payment "1" --> "*" TransactionLog : tracks
+```
+
+### 7.2. Payment Flow Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Customer
+    participant Frontend
+    participant BookingService
+    participant PaymentProcessor
+    participant PaymentGateway
+    participant Database
+    participant Gateway as Payment Gateway API
+    participant NotificationService
+
+    Customer->>Frontend: Confirm booking & select payment method
+    Frontend->>BookingService: POST /bookings/create
+    BookingService->>Database: Create Booking (status: pending)
+    Database-->>BookingService: Booking created
+
+    BookingService->>PaymentProcessor: initiate(booking, paymentMethod)
+    PaymentProcessor->>Database: Create Payment (status: pending)
+
+    alt VNPay/Momo/ZaloPay
+        PaymentProcessor->>PaymentGateway: selectGateway(method)
+        PaymentGateway->>PaymentGateway: createPaymentUrl(payment)
+        PaymentGateway->>Gateway: API Request
+        Gateway-->>PaymentGateway: Payment URL
+        PaymentGateway-->>Frontend: Redirect URL
+
+        Frontend->>Gateway: Redirect customer
+        Customer->>Gateway: Complete payment
+
+        Gateway->>PaymentProcessor: Webhook callback
+        PaymentProcessor->>PaymentGateway: processWebhook(data)
+        PaymentGateway->>PaymentGateway: verifySignature(data)
+
+        alt Signature valid
+            PaymentProcessor->>Database: Update Payment (status: completed)
+            PaymentProcessor->>Database: Update Booking (status: confirmed)
+            PaymentProcessor->>BookingService: generateTicket(booking)
+            BookingService->>Database: Create Ticket with QR
+            BookingService->>NotificationService: sendTicket(customer)
+            NotificationService-->>Customer: Email with ticket
+            PaymentProcessor-->>Frontend: Payment success
+        else Signature invalid
+            PaymentProcessor->>Database: Update Payment (status: failed)
+            PaymentProcessor-->>Frontend: Payment failed
+        end
+
+    else Cash Payment
+        PaymentProcessor->>Database: Update Booking (isHeld: true, heldUntil: +24h)
+        PaymentProcessor-->>Frontend: Booking held, pending payment
+
+        Note over Customer: Customer pays at office
+
+        opt Admin confirms
+            PaymentProcessor->>Database: Update Payment (status: completed)
+            PaymentProcessor->>Database: Update Booking (status: confirmed)
+            PaymentProcessor->>BookingService: generateTicket(booking)
+        end
+    end
+```
+
+### 7.3. Payment State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Pending: Payment initiated
+
+    Pending --> Processing: Gateway request sent
+    Processing --> Completed: Payment successful
+    Processing --> Failed: Payment declined
+    Processing --> Timeout: Gateway timeout
+
+    Pending --> Cancelled: User cancelled
+    Processing --> Cancelled: User cancelled
+
+    Completed --> Refunding: Refund requested
+    Refunding --> Refunded: Refund processed
+    Refunding --> RefundFailed: Refund declined
+
+    Failed --> [*]
+    Timeout --> [*]
+    Cancelled --> [*]
+    Refunded --> [*]
+    RefundFailed --> [*]
+
+    note right of Completed
+        Booking confirmed
+        Ticket generated
+        Email sent
+    end note
+
+    note right of Refunding
+        Calculate refund amount
+        Process via gateway
+        Update booking status
+    end note
+```
+
+### 7.4. Payment Gateway Integration Details
+
+```mermaid
+classDiagram
+    class PaymentRequest {
+        +ObjectId bookingId
+        +Float amount
+        +String currency
+        +String returnUrl
+        +String cancelUrl
+        +Object customerInfo
+        +validate()
+    }
+
+    class PaymentResponse {
+        +String transactionId
+        +String paymentUrl
+        +String qrCode
+        +String status
+        +DateTime expiredAt
+    }
+
+    class WebhookData {
+        +String transactionId
+        +String status
+        +Float amount
+        +String signature
+        +DateTime transactionTime
+        +Object rawData
+        +verify()
+    }
+
+    class RefundRequest {
+        +ObjectId paymentId
+        +String transactionId
+        +Float refundAmount
+        +String reason
+    }
+
+    class RefundResponse {
+        +String refundId
+        +String status
+        +Float refundedAmount
+        +DateTime refundedAt
+    }
+
+    PaymentGateway --> PaymentRequest : accepts
+    PaymentGateway --> PaymentResponse : returns
+    PaymentGateway --> WebhookData : processes
+    PaymentGateway --> RefundRequest : accepts
+    PaymentGateway --> RefundResponse : returns
+```
+
+### 7.5. Luồng Thanh Toán Tổng Quan (Flowchart)
 
 ```mermaid
 flowchart TD
     START([Khách hàng xác nhận đặt vé]) --> SELECT{Chọn phương thức thanh toán}
 
-    SELECT -->|VNPay| VNPAY[Tạo payment URL VNPay]
-    SELECT -->|Momo| MOMO[Tạo QR Momo]
-    SELECT -->|ZaloPay| ZALO[Tạo QR ZaloPay]
+    SELECT -->|VNPay| VNPAY[PaymentProcessor<br/>selectGateway VNPay]
+    SELECT -->|Momo| MOMO[PaymentProcessor<br/>selectGateway Momo]
+    SELECT -->|ZaloPay| ZALO[PaymentProcessor<br/>selectGateway ZaloPay]
     SELECT -->|Thẻ tín dụng| CARD[Payment gateway thẻ]
-    SELECT -->|Tiền mặt| CASH[Giữ chỗ - Thanh toán sau]
+    SELECT -->|Tiền mặt| CASH[CashPayment<br/>holdBooking 24h]
 
     VNPAY --> REDIRECT[Redirect đến VNPay]
     MOMO --> QRCODE[Hiển thị QR code]
@@ -1220,25 +1494,29 @@ flowchart TD
     QRCODE --> CUSTOMER_PAY
     CARDFORM --> CUSTOMER_PAY
 
-    CUSTOMER_PAY -->|Thành công| WEBHOOK[Webhook callback]
+    CUSTOMER_PAY -->|Thành công| WEBHOOK[Webhook callback<br/>verifySignature]
     CUSTOMER_PAY -->|Thất bại| FAILED
     CUSTOMER_PAY -->|Timeout| FAILED
 
-    WEBHOOK --> UPDATE_PAYMENT[Update payment status: completed]
-    UPDATE_PAYMENT --> UPDATE_BOOKING[Update booking status: confirmed]
-    UPDATE_BOOKING --> GEN_TICKET[Generate ticket + QR code]
-    GEN_TICKET --> SEND_EMAIL[Gửi email ticket]
-    SEND_EMAIL --> ADD_POINTS[Cộng điểm loyalty]
+    WEBHOOK --> VERIFY{Signature<br/>valid?}
+    VERIFY -->|Yes| UPDATE_PAYMENT[Update Payment<br/>status: completed]
+    VERIFY -->|No| FAILED
+
+    UPDATE_PAYMENT --> UPDATE_BOOKING[Update Booking<br/>status: confirmed]
+    UPDATE_BOOKING --> GEN_TICKET[Generate Ticket<br/>with QR code]
+    GEN_TICKET --> LOG_TRANSACTION[Log to<br/>TransactionLog]
+    LOG_TRANSACTION --> SEND_EMAIL[NotificationService<br/>sendTicket]
+    SEND_EMAIL --> ADD_POINTS[LoyaltyService<br/>addPoints]
     ADD_POINTS --> SUCCESS([Đặt vé thành công])
 
-    CASH --> HOLD[Hold booking 24h]
-    HOLD --> MANUAL_CONFIRM{Admin xác nhận thanh toán}
-    MANUAL_CONFIRM -->|Đã thanh toán| UPDATE_BOOKING
+    CASH --> HOLD[Hold booking 24h<br/>isHeld: true]
+    HOLD --> MANUAL_CONFIRM{Admin xác nhận<br/>thanh toán}
+    MANUAL_CONFIRM -->|Đã thanh toán| UPDATE_PAYMENT
     MANUAL_CONFIRM -->|Không thanh toán| TIMEOUT
 
-    FAILED[Payment failed] --> RELEASE_SEATS[Giải phóng ghế]
+    FAILED[Payment failed<br/>TransactionLog] --> RELEASE_SEATS[SeatLockService<br/>releaseSeat]
     TIMEOUT[Timeout] --> RELEASE_SEATS
-    RELEASE_SEATS --> CANCEL_BOOKING[Cancel booking]
+    RELEASE_SEATS --> CANCEL_BOOKING[Cancel booking<br/>status: cancelled]
     CANCEL_BOOKING --> END([Đặt vé thất bại])
 ```
 
