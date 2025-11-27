@@ -173,8 +173,10 @@ const authorize = (...roles) => {
       });
     }
 
-    // Kiểm tra role
-    if (!roles.includes(req.user.role)) {
+    // Kiểm tra role - use req.userRole from authenticate middleware
+    // This ensures consistency across different user types (User, BusOperator, Employee)
+    const userRole = req.userRole || req.user.role;
+    if (!roles.includes(userRole)) {
       return res.status(403).json({
         status: 'error',
         message: 'Bạn không có quyền truy cập tài nguyên này',
