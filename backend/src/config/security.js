@@ -10,7 +10,7 @@ module.exports = {
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES || '1d',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES || '7d',
     rememberMeExpiresIn: '30d',
-    issuer: 'quikride',
+    issuer: 'vexenhanh',
   },
 
   // Session Configuration

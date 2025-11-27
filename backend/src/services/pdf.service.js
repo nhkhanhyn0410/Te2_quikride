@@ -34,8 +34,8 @@ class PDFService {
           size: 'A4',
           margin: 50,
           info: {
-            Title: `QuikRide Ticket - ${ticketCode}`,
-            Author: 'QuikRide',
+            Title: `Vé xe nhanh Ticket - ${ticketCode}`,
+            Author: 'Vé xe nhanh',
             Subject: 'Bus Ticket',
           },
         });
@@ -297,7 +297,7 @@ class PDFService {
           .fontSize(8)
           .fillColor('#94a3b8')
           .text(
-            'QuikRide - Nền tảng đặt vé xe khách trực tuyến',
+            'Vé xe nhanh - Nền tảng đặt vé xe khách trực tuyến',
             margin,
             doc.page.height - 40,
             { align: 'center' }
@@ -338,7 +338,7 @@ class PDFService {
       .fontSize(28)
       .fillColor(primaryColor)
       .font('Helvetica-Bold')
-      .text('QuikRide', margin, 50);
+      .text('Vé xe nhanh', margin, 50);
 
     doc
       .fontSize(10)

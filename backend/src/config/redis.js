@@ -29,7 +29,7 @@ const connectRedis = async () => {
     await redisClient.connect();
 
     // Test connection
-    await redisClient.set('test', 'QuikRide Redis Connection OK');
+    await redisClient.set('test', 'Redis Connection OK');
     const testValue = await redisClient.get('test');
     console.log('✅ Redis Test:', testValue);
 

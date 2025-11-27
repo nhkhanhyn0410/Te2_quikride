@@ -14,7 +14,7 @@ cloudinary.config({
  * @param {string} folder - Folder name in Cloudinary
  * @returns {Promise<object>} - Upload result
  */
-const uploadImage = async (file, folder = 'quikride') => {
+const uploadImage = async (file, folder = 'vexenhanh') => {
   try {
     const result = await cloudinary.uploader.upload(file, {
       folder,

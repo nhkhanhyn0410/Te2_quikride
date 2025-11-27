@@ -420,7 +420,7 @@ class LoyaltyService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>🎁 QuikRide</h1>
+            <h1>🎁 Vé xe nhanh</h1>
             <p>Bạn đã nhận được điểm thưởng!</p>
           </div>
 
@@ -456,7 +456,7 @@ class LoyaltyService {
 
             <p style="margin-top: 30px; color: #666; font-size: 14px;">
               Trân trọng,<br>
-              Đội ngũ QuikRide
+              Đội ngũ Vé xe nhanh
             </p>
           </div>
         </div>
@@ -516,7 +516,7 @@ class LoyaltyService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>⏰ QuikRide</h1>
+            <h1>⏰ Vé xe nhanh</h1>
             <p>Thông báo hết hạn điểm thưởng</p>
           </div>
 
@@ -539,7 +539,7 @@ class LoyaltyService {
 
             <p style="margin-top: 30px; color: #666; font-size: 14px;">
               Trân trọng,<br>
-              Đội ngũ QuikRide
+              Đội ngũ Vé xe nhanh
             </p>
           </div>
         </div>

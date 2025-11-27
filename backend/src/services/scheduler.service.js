@@ -241,7 +241,7 @@ class SchedulerService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>⏰ QuikRide</h1>
+            <h1>⏰ Vé xe nhanh</h1>
             <p>${title}</p>
           </div>
 
@@ -269,7 +269,7 @@ class SchedulerService {
 
             <p style="margin-top: 30px; color: #666; font-size: 14px;">
               Chúc bạn có một chuyến đi an toàn và vui vẻ!<br>
-              Đội ngũ QuikRide
+              Đội ngũ Vé xe nhanh
             </p>
           </div>
         </div>

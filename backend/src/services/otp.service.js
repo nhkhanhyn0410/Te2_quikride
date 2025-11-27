@@ -126,7 +126,7 @@ class OTPService {
     const mailOptions = {
       from: process.env.EMAIL_FROM,
       to: email,
-      subject: 'Mã xác thực QuikRide',
+      subject: 'Mã xác thực Vé xe nhanh',
       html: `
         <h2>Mã xác thực của bạn</h2>
         <p>Mã OTP của bạn là: <strong>${otp}</strong></p>
@@ -169,7 +169,7 @@ class OTPService {
         password: process.env.VNPT_SMS_PASSWORD,
         brandname: process.env.VNPT_SMS_BRANDNAME,
         to: phone,
-        message: `Ma xac thuc QuikRide cua ban la: ${otp}. Ma co hieu luc trong 5 phut.`,
+        message: `Ma xac thuc Vé xe nhanh cua ban la: ${otp}. Ma co hieu luc trong 5 phut.`,
       }
     );
     */

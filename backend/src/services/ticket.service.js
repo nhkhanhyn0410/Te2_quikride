@@ -136,15 +136,15 @@ class TicketService {
           },
           pickupPoint: booking.pickupPoint
             ? {
-                name: booking.pickupPoint.name,
-                address: booking.pickupPoint.address,
-              }
+              name: booking.pickupPoint.name,
+              address: booking.pickupPoint.address,
+            }
             : null,
           dropoffPoint: booking.dropoffPoint
             ? {
-                name: booking.dropoffPoint.name,
-                address: booking.dropoffPoint.address,
-              }
+              name: booking.dropoffPoint.name,
+              address: booking.dropoffPoint.address,
+            }
             : null,
           busNumber: trip.busId.busNumber,
           busType: trip.busId.busType,
@@ -395,7 +395,7 @@ class TicketService {
         try {
           await sendEmail({
             to: booking.contactInfo.email,
-            subject: 'Mã OTP tra cứu vé - QuikRide',
+            subject: 'Mã OTP tra cứu vé - Vé xe nhanh',
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #0ea5e9;">Mã OTP tra cứu vé</h1>
@@ -890,7 +890,7 @@ class TicketService {
 
     // Send SMS notification
     try {
-      const message = `QuikRide: Ve ${ticket.ticketCode} da bi huy.
+      const message = `Ve xe nhanh: Ve ${ticket.ticketCode} da bi huy.
 ${refundInfo.refundAmount > 0 ? `So tien hoan: ${refundInfo.refundAmount.toLocaleString('vi-VN')} VND` : 'Khong hoan tien'}
 ${refundInfo.appliedRule}`;
 
@@ -1160,7 +1160,7 @@ ${refundInfo.appliedRule}`;
 
       // Send SMS notification
       try {
-        const message = `QuikRide: Ve ${oldTicket.ticketCode} da duoc doi sang chuyen moi.
+        const message = `Ve xe nhanh: Ve ${oldTicket.ticketCode} da duoc doi sang chuyen moi.
 Ma ve moi: ${newTicket.ticketCode}
 Tuyen: ${newTrip.routeId.routeName}
 Gio di: ${moment(newTrip.departureTime).tz('Asia/Ho_Chi_Minh').format('HH:mm DD/MM/YYYY')}

@@ -172,7 +172,7 @@ class SMSService {
   async sendTicketSMS(ticketData) {
     const { phone, bookingCode, ticketCode, routeName, departureTime, seatNumbers, ticketUrl } = ticketData;
 
-    const message = `QuikRide: Ve cua ban da san sang!
+    const message = `Ve xe nhanh: Ve cua ban da san sang!
 Ma ve: ${ticketCode}
 Ma dat cho: ${bookingCode}
 Tuyen: ${routeName}
@@ -191,7 +191,7 @@ Lien he: 1900-xxxx`;
    * @returns {Promise<Object>} SMS send result
    */
   async sendOTP(phone, otp) {
-    const message = `QuikRide: Ma xac thuc OTP cua ban la: ${otp}. Ma co hieu luc trong 5 phut. KHONG chia se ma nay voi bat ky ai.`;
+    const message = `Ve xe nhanh: Ma xac thuc OTP cua ban la: ${otp}. Ma co hieu luc trong 5 phut. KHONG chia se ma nay voi bat ky ai.`;
 
     return await this.sendSMS(phone, message);
   }
@@ -204,7 +204,7 @@ Lien he: 1900-xxxx`;
   async sendTripReminder(reminderData) {
     const { phone, routeName, departureTime, pickupPoint, seatNumbers } = reminderData;
 
-    const message = `QuikRide: Nhac nho chuyen di!
+    const message = `Ve xe nhanh: Nhac nho chuyen di!
 Tuyen: ${routeName}
 Gio di: ${departureTime}
 Diem don: ${pickupPoint}
@@ -222,9 +222,8 @@ Vui long co mat truoc 15 phut!`;
   async sendCancellationSMS(cancellationData) {
     const { phone, bookingCode, routeName, refundAmount } = cancellationData;
 
-    const message = `QuikRide: Ve ${bookingCode} (${routeName}) da duoc huy.${
-      refundAmount > 0 ? ` Tien hoan: ${refundAmount.toLocaleString('vi-VN')} VND.` : ''
-    } Lien he: 1900-xxxx`;
+    const message = `Ve xe nhanh: Ve ${bookingCode} (${routeName}) da duoc huy.${refundAmount > 0 ? ` Tien hoan: ${refundAmount.toLocaleString('vi-VN')} VND.` : ''
+      } Lien he: 1900-xxxx`;
 
     return await this.sendSMS(phone, message);
   }

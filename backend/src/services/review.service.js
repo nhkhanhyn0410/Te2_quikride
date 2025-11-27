@@ -340,7 +340,7 @@ class ReviewService {
 
       const result = await notificationService.sendEmail(
         user.email,
-        '⭐ Đánh giá chuyến đi của bạn - QuikRide',
+        '⭐ Đánh giá chuyến đi của bạn - Vé xe nhanh',
         emailContent
       );
 
@@ -427,14 +427,14 @@ class ReviewService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>⭐ QuikRide</h1>
+            <h1>⭐ Vé xe nhanh</h1>
             <p>Đánh giá chuyến đi của bạn</p>
           </div>
 
           <div class="content">
             <h2>Xin chào ${userName}!</h2>
             <p>
-              Cảm ơn bạn đã sử dụng dịch vụ QuikRide.
+              Cảm ơn bạn đã sử dụng dịch vụ Vé xe nhanh.
               Chúng tôi hy vọng bạn đã có một chuyến đi tuyệt vời!
             </p>
 
@@ -470,7 +470,7 @@ class ReviewService {
 
             <p style="margin-top: 30px; color: #666; font-size: 14px;">
               Trân trọng,<br>
-              Đội ngũ QuikRide
+              Đội ngũ Vé xe nhanh
             </p>
           </div>
         </div>
@@ -529,7 +529,7 @@ class ReviewService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>💬 QuikRide</h1>
+            <h1>💬 Vé xe nhanh</h1>
             <p>Nhà xe đã phản hồi đánh giá của bạn</p>
           </div>
 
@@ -549,7 +549,7 @@ class ReviewService {
 
             <p style="margin-top: 30px; color: #666; font-size: 14px;">
               Trân trọng,<br>
-              Đội ngũ QuikRide
+              Đội ngũ Vé xe nhanh
             </p>
           </div>
         </div>

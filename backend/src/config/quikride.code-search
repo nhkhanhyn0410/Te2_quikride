@@ -1,0 +1,148 @@
+# Query: quikride
+
+95 results - 25 files
+
+backend\.env.example:
+   7: MONGODB_URI=mongodb://localhost:27017/quikride
+   8: MONGODB_TEST_URI=mongodb://localhost:27017/quikride_test
+  33: EMAIL_FROM=noreply@quikride.com
+  34: EMAIL_FROM_NAME=QuikRide
+  46: SMS_BRAND_NAME=QuikRide
+
+backend\AUTHENTICATION.md:
+  241: MONGODB_URI=mongodb://localhost:27017/quikride
+
+backend\package.json:
+   2:   "name": "ve-xe-nhanh-backend",
+   4:   "description": "Vé xe nhanh Bus Booking System - Backend API",
+  24:   "author": "Vé xe nhanh Team",
+
+backend\scripts\check-and-fix-buses.js:
+  13: const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/quikride';
+
+backend\scripts\clearData.js:
+   2:  * Enhanced Seed Script for QuikRide Database
+  32:     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/quikride', {
+  63:             email: 'admin@quikride.com',
+  76:                 email: 'operator1@quikride.com',
+
+backend\scripts\fix-bus-seat-layout.js:
+  15:     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/quikride', {
+
+backend\scripts\seedData.js:
+    2:  * Enhanced Seed Script for QuikRide Database
+   32:     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/quikride', {
+   66:         email: 'admin@quikride.com',
+  128:         email: 'operator1@quikride.com',
+  144:         email: 'operator2@quikride.com',
+  160:         email: 'operator3@quikride.com',
+  825:     console.log('   Admin: admin@quikride.com / admin123');
+  826:     console.log('   Operator: operator1@quikride.com / operator123');
+
+backend\scripts\seedRoutesEmployees.js:
+    20:     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/quikride', {
+    48:         email: 'operator1@quikride.com',
+    64:         email: 'operator2@quikride.com',
+    80:         email: 'operator3@quikride.com',
+    96:         email: 'operator4@quikride.com',
+   112:         email: 'operator5@quikride.com',
+  1473:     console.log('   Operators: operator1@quikride.com / operator123');
+
+backend\src\server.js:
+  136:     message: 'API is running',
+  147:     message: 'API v1',
+
+backend\src\config\cloudinary.js:
+  17: const uploadImage = async (file, folder = 've-xe-nhanh') => {
+
+backend\src\config\email.js:
+   81:           cid: 'qrcode@ve-xe-nhanh', // CID for referencing in HTML
+   87:           'cid:qrcode@ve-xe-nhanh'
+  118:     subject: 'Chào mừng đến với Vé xe nhanh!',
+  121:         <h1 style="color: #0ea5e9;">Chào mừng đến với Vé xe nhanh!</h1>
+  123:         <p>Cảm ơn bạn đã đăng ký tài khoản tại Vé xe nhanh. Chúng tôi rất vui được phục vụ bạn!</p>
+  130:           Đội ngũ Vé xe nhanh
+  138:     subject: 'Xác thực email - Vé xe nhanh',
+  159:     subject: 'Đặt lại mật khẩu - Vé xe nhanh',
+  187:             <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">Vé xe nhanh</h1>
+  200:             Cảm ơn bạn đã đặt vé tại Vé xe nhanh. Vé điện tử của bạn đã sẵn sàng!
+  254:               <a href="${ticketData.ticketUrl}" style="color: #0ea5e9; text-decoration: none; font-weight: bold;">Vé xe nhanh.com</a>
+  282:               Vé xe nhanh - Nền tảng đặt vé xe khách trực tuyến<br>
+  283:               Hotline: 1900-xxxx | Email: support@vexenhanh.com
+  321:           Đội ngũ QuikRide
+  335:             <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">Vé xe nhanh</h1>
+  437:               📧 Email: support@vexenhanh.com
+  444:               Vé xe nhanh - Nền tảng đặt vé xe khách trực tuyến<br>
+  464:             <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">Vé xe nhanh</h1>
+  598:               📧 Email: support@vexenhanh.com
+  605:               Vé xe nhanh - Nền tảng đặt vé xe khách trực tuyến<br>
+
+backend\src\config\redis.js:
+  32:     await redisClient.set('test', 'Vé xe nhanh Redis Connection OK');
+
+backend\src\config\security.js:
+  13:     issuer: 've-xe-nhanh',
+
+backend\src\controllers\employee.controller.js:
+  66:         issuer: 've-xe-nhanh'
+
+backend\src\models\README.md:
+    1: # Models Documentation - QuikRide Backend
+    5: This directory contains all Mongoose models for the QuikRide application.
+  115:   companyName: 'QuikRide Express',
+  116:   email: 'contact@quikride.com',
+
+backend\src\services\cancellation.service.js:
+  155:       description: 'Chính sách hủy vé của Vé xe nhanh',
+
+backend\src\services\loyalty.service.js:
+  423:             <h1>🎁 Vé xe nhanh</h1>
+  459:               Đội ngũ Vé xe nhanh
+  519:             <h1>⏰ Vé xe nhanh</h1>
+  542:               Đội ngũ Vé xe nhanh
+
+backend\src\services\notification.service.js:
+  338:             <h1>${statusIcon} Vé xe nhanh</h1>
+  380:                 Cảm ơn bạn đã sử dụng dịch vụ Vé xe nhanh!
+  390:               📧 Email: support@vexenhanh.com
+  398:                ${new Date().getFullYear()} QuikRide - Hệ thống đặt vé xe khách trực tuyến
+  413:         smsMessage = `QuikRide: Chuyen xe ${routeName} (${departureTime}) da khoi hanh. Chuc ban hanh trinh tot lanh!`;
+  416:         smsMessage = `QuikRide: Chuyen xe ${routeName} da hoan thanh. Cam on ban da su dung dich vu!`;
+  419:         smsMessage = `QuikRide: Chuyen xe ${routeName} (${departureTime}) da bi huy. Vui long lien he nha xe de duoc ho tro.`;
+  422:         smsMessage = `QuikRide: Trang thai chuyen xe ${routeName} da duoc cap nhat thanh: ${newStatusLabel}`;
+
+backend\src\services\otp.service.js:
+  129:       subject: 'Mã xác thực - Vé xe nhanh',
+  172:         message: `Ma xac thuc Ve xe nhanh cua ban la: ${otp}. Ma co hieu luc trong 5 phut.`,
+
+backend\src\services\pdf.service.js:
+   37:             Title: `Vé xe nhanh Ticket - ${ticketCode}`,
+   38:             Author: 'Vé xe nhanh',
+  300:             'Vé xe nhanh - Nền tảng đặt vé xe khách trực tuyến',
+  341:       .text('Vé xe nhanh', margin, 50);
+
+backend\src\services\report.service.js:
+  560:       workbook.creator = 'Vé xe nhanh';
+
+backend\src\services\review.service.js:
+  343:         '⭐ Đánh giá chuyến đi của bạn - Vé xe nhanh',
+  430:             <h1>⭐ Vé xe nhanh</h1>
+  437:               Cảm ơn bạn đã sử dụng dịch vụ Vé xe nhanh.
+  473:               Đội ngũ Vé xe nhanh
+  532:             <h1>💬 Vé xe nhanh</h1>
+  552:               Đội ngũ Vé xe nhanh
+
+backend\src\services\scheduler.service.js:
+  244:             <h1>⏰ Vé xe nhanh</h1>
+  272:               Đội ngũ Vé xe nhanh
+
+backend\src\services\sms.service.js:
+  175:     const message = `Ve xe nhanh: Ve cua ban da san sang!
+  194:     const message = `Ve xe nhanh: Ma xac thuc OTP cua ban la: ${otp}. Ma co hieu luc trong 5 phut. KHONG chia se ma nay voi bat ky ai.`;
+  207:     const message = `Ve xe nhanh: Nhac nho chuyen di!
+  225:     const message = `Ve xe nhanh: Ve ${bookingCode} (${routeName}) da duoc huy.${
+
+backend\src\services\ticket.service.js:
+   398:             subject: 'Mã OTP tra cứu vé - Ve xe nhanh',
+   893:       const message = `Ve xe nhanh: Ve ${ticket.ticketCode} da bi huy.
+  1163:         const message = `Ve xe nhanh: Ve ${oldTicket.ticketCode} da duoc doi sang chuyen moi.

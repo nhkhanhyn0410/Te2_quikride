@@ -557,7 +557,7 @@ class ReportService {
   async exportToExcel(reportData) {
     try {
       const workbook = new ExcelJS.Workbook();
-      workbook.creator = 'QuikRide';
+      workbook.creator = 'Vé xe nhanh';
       workbook.created = new Date();
 
       // Summary sheet

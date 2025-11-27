@@ -78,13 +78,13 @@ const sendEmail = async ({ to, subject, html, text, attachments = [], qrCodeData
           filename: 'qrcode.png',
           content: base64Data,
           encoding: 'base64',
-          cid: 'qrcode@quikride', // CID for referencing in HTML
+          cid: 'qrcode@vexenhanh', // CID for referencing in HTML
         });
 
         // Replace data URL with CID reference in HTML
         finalHtml = html.replace(
           new RegExp(qrCodeDataUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-          'cid:qrcode@quikride'
+          'cid:qrcode@vexenhanh'
         );
 
         console.log('📎 QR code converted to inline attachment (CID)');
@@ -115,19 +115,19 @@ const sendEmail = async ({ to, subject, html, text, attachments = [], qrCodeData
 const emailTemplates = {
   // Welcome email template
   welcome: (name) => ({
-    subject: 'Chào mừng đến với QuikRide!',
+    subject: 'Chào mừng đến với Vé xe nhanh!',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #0ea5e9;">Chào mừng đến với QuikRide!</h1>
+        <h1 style="color: #0ea5e9;">Chào mừng đến với Vé xe nhanh!</h1>
         <p>Xin chào <strong>${name}</strong>,</p>
-        <p>Cảm ơn bạn đã đăng ký tài khoản tại QuikRide. Chúng tôi rất vui được phục vụ bạn!</p>
+        <p>Cảm ơn bạn đã đăng ký tài khoản tại Vé xe nhanh. Chúng tôi rất vui được phục vụ bạn!</p>
         <p>Bạn có thể bắt đầu tìm kiếm và đặt vé xe ngay bây giờ.</p>
         <a href="${process.env.FRONTEND_URL}" style="display: inline-block; background: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 20px;">
           Khám phá ngay
         </a>
         <p style="margin-top: 30px; color: #666; font-size: 14px;">
           Trân trọng,<br>
-          Đội ngũ QuikRide
+          Đội ngũ Vé xe nhanh
         </p>
       </div>
     `,
@@ -135,7 +135,7 @@ const emailTemplates = {
 
   // Email verification template
   emailVerification: (name, token) => ({
-    subject: 'Xác thực email - QuikRide',
+    subject: 'Xác thực email - Vé xe nhanh',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #0ea5e9;">Xác thực email của bạn</h1>
@@ -156,7 +156,7 @@ const emailTemplates = {
 
   // Password reset template
   passwordReset: (name, resetUrl) => ({
-    subject: 'Đặt lại mật khẩu - QuikRide',
+    subject: 'Đặt lại mật khẩu - Vé xe nhanh',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #0ea5e9;">Đặt lại mật khẩu</h1>
@@ -184,7 +184,7 @@ const emailTemplates = {
         <div style="background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           <!-- Header -->
           <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 20px; margin-bottom: 20px;">
-            <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">QuikRide</h1>
+            <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">Vé xe nhanh</h1>
             <p style="color: #64748b; margin: 5px 0; font-size: 14px;">Đặt vé xe khách trực tuyến</p>
           </div>
 
@@ -197,7 +197,7 @@ const emailTemplates = {
 
           <h2 style="color: #1e293b; margin-top: 30px;">Xin chào ${ticketData.passengerName}!</h2>
           <p style="color: #475569; line-height: 1.6;">
-            Cảm ơn bạn đã đặt vé tại QuikRide. Vé điện tử của bạn đã sẵn sàng!
+            Cảm ơn bạn đã đặt vé tại Vé xe nhanh. Vé điện tử của bạn đã sẵn sàng!
           </p>
 
           <!-- Booking Info -->
@@ -251,7 +251,7 @@ const emailTemplates = {
             </div>
             <p style="color: #64748b; font-size: 13px; margin-top: 15px;">
               💡 <em>Bạn cũng có thể xem vé trực tuyến tại</em>
-              <a href="${ticketData.ticketUrl}" style="color: #0ea5e9; text-decoration: none; font-weight: bold;">quikride.com</a>
+              <a href="${ticketData.ticketUrl}" style="color: #0ea5e9; text-decoration: none; font-weight: bold;">vexenhanh.com</a>
             </p>
           </div>
 
@@ -279,8 +279,8 @@ const emailTemplates = {
           <!-- Footer -->
           <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #94a3b8; font-size: 12px; margin: 5px 0;">
-              QuikRide - Nền tảng đặt vé xe khách trực tuyến<br>
-              Hotline: 1900-xxxx | Email: support@quikride.com
+              Vé xe nhanh - Nền tảng đặt vé xe khách trực tuyến<br>
+              Hotline: 1900-xxxx | Email: support@vexenhanh.com
             </p>
             <p style="color: #cbd5e1; font-size: 11px; margin: 10px 0;">
               Email này được gửi tự động, vui lòng không reply.
@@ -318,7 +318,7 @@ const emailTemplates = {
 
         <p style="margin-top: 30px; color: #666; font-size: 14px;">
           Trân trọng,<br>
-          Đội ngũ QuikRide
+          Đội ngũ Vé xe nhanh
         </p>
       </div>
     `,
@@ -332,7 +332,7 @@ const emailTemplates = {
         <div style="background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           <!-- Header -->
           <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 20px; margin-bottom: 20px;">
-            <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">QuikRide</h1>
+            <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">Vé xe nhanh</h1>
             <p style="color: #64748b; margin: 5px 0; font-size: 14px;">Đặt vé xe khách trực tuyến</p>
           </div>
 
@@ -434,14 +434,14 @@ const emailTemplates = {
             </p>
             <p style="color: #0ea5e9; margin: 10px 0; font-size: 14px;">
               📞 Hotline: 1900-xxxx<br>
-              📧 Email: support@quikride.com
+              📧 Email: support@vexenhanh.com
             </p>
           </div>
 
           <!-- Footer -->
           <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #94a3b8; font-size: 12px; margin: 5px 0;">
-              QuikRide - Nền tảng đặt vé xe khách trực tuyến<br>
+              Vé xe nhanh - Nền tảng đặt vé xe khách trực tuyến<br>
               Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi
             </p>
             <p style="color: #cbd5e1; font-size: 11px; margin: 10px 0;">
@@ -461,7 +461,7 @@ const emailTemplates = {
         <div style="background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           <!-- Header -->
           <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 20px; margin-bottom: 20px;">
-            <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">QuikRide</h1>
+            <h1 style="color: #0ea5e9; margin: 0; font-size: 28px;">Vé xe nhanh</h1>
             <p style="color: #64748b; margin: 5px 0; font-size: 14px;">Đặt vé xe khách trực tuyến</p>
           </div>
 
@@ -595,14 +595,14 @@ const emailTemplates = {
             </p>
             <p style="color: #0ea5e9; margin: 10px 0; font-size: 14px;">
               📞 Hotline: 1900-xxxx<br>
-              📧 Email: support@quikride.com
+              📧 Email: support@vexenhanh.com
             </p>
           </div>
 
           <!-- Footer -->
           <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
             <p style="color: #94a3b8; font-size: 12px; margin: 5px 0;">
-              QuikRide - Nền tảng đặt vé xe khách trực tuyến<br>
+              Vé xe nhanh - Nền tảng đặt vé xe khách trực tuyến<br>
               Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi
             </p>
             <p style="color: #cbd5e1; font-size: 11px; margin: 10px 0;">

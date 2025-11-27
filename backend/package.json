@@ -1,7 +1,7 @@
 {
-  "name": "quikride-backend",
+  "name": "ve-xe-nhanh-backend",
   "version": "1.0.0",
-  "description": "QuikRide Bus Booking System - Backend API",
+  "description": "Vé xe nhanh Bus Booking System - Backend API",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -21,7 +21,7 @@
     "mongodb",
     "redis"
   ],
-  "author": "QuikRide Team",
+  "author": "Vé xe nhanh Team",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.0",

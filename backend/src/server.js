@@ -133,7 +133,7 @@ app.use('/api/', limiter);
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'success',
-    message: 'QuikRide API is running',
+    message: 'API is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
   });
@@ -144,7 +144,7 @@ const API_VERSION = process.env.API_VERSION || 'v1';
 app.get(`/api/${API_VERSION}`, (req, res) => {
   res.status(200).json({
     status: 'success',
-    message: 'QuikRide API v1',
+    message: 'API v1',
     version: '1.0.0',
     documentation: `/api/${API_VERSION}/docs`,
   });

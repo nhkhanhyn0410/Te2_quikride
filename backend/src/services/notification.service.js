@@ -335,7 +335,7 @@ class NotificationService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>${statusIcon} QuikRide</h1>
+            <h1>${statusIcon} Vé xe nhanh</h1>
             <p>Cập nhật trạng thái chuyến xe</p>
           </div>
 
@@ -377,7 +377,7 @@ class NotificationService {
             ${newStatus === 'completed'
         ? `
               <p>
-                Cảm ơn bạn đã sử dụng dịch vụ QuikRide!
+                Cảm ơn bạn đã sử dụng dịch vụ Vé xe nhanh!
                 Đừng quên đánh giá chuyến đi của bạn để giúp chúng tôi cải thiện dịch vụ.
               </p>
             `
@@ -387,7 +387,7 @@ class NotificationService {
             <p style="margin-top: 30px; color: #666;">
               Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ:
               <br>
-              📧 Email: support@quikride.com
+              📧 Email: support@vexenhanh.com
               <br>
               📞 Hotline: 1900-xxxx
             </p>
@@ -395,7 +395,7 @@ class NotificationService {
 
           <div class="footer">
             <p>
-               ${new Date().getFullYear()} QuikRide - Hệ thống đặt vé xe khách trực tuyến
+               ${new Date().getFullYear()} Vé xe nhanh - Hệ thống đặt vé xe khách trực tuyến
             </p>
             <p style="font-size: 12px; color: #94a3b8;">
               Email này được gửi tự động, vui lòng không trả lời.
@@ -410,16 +410,16 @@ class NotificationService {
     let smsMessage = '';
     switch (newStatus) {
       case 'ongoing':
-        smsMessage = `QuikRide: Chuyen xe ${routeName} (${departureTime}) da khoi hanh. Chuc ban hanh trinh tot lanh!`;
+        smsMessage = `Ve xe nhanh: Chuyen xe ${routeName} (${departureTime}) da khoi hanh. Chuc ban hanh trinh tot lanh!`;
         break;
       case 'completed':
-        smsMessage = `QuikRide: Chuyen xe ${routeName} da hoan thanh. Cam on ban da su dung dich vu!`;
+        smsMessage = `Ve xe nhanh: Chuyen xe ${routeName} da hoan thanh. Cam on ban da su dung dich vu!`;
         break;
       case 'cancelled':
-        smsMessage = `QuikRide: Chuyen xe ${routeName} (${departureTime}) da bi huy. Vui long lien he nha xe de duoc ho tro.`;
+        smsMessage = `Ve xe nhanh: Chuyen xe ${routeName} (${departureTime}) da bi huy. Vui long lien he nha xe de duoc ho tro.`;
         break;
       default:
-        smsMessage = `QuikRide: Trang thai chuyen xe ${routeName} da duoc cap nhat thanh: ${newStatusLabel}`;
+        smsMessage = `Ve xe nhanh: Trang thai chuyen xe ${routeName} da duoc cap nhat thanh: ${newStatusLabel}`;
     }
 
     return {

@@ -63,7 +63,7 @@ exports.login = async (req, res, next) => {
       process.env.JWT_SECRET || 'your-secret-key',
       {
         expiresIn: '7d',
-        issuer: 'quikride'
+        issuer: 'vexenhanh'
       }
     );
 
