@@ -208,31 +208,31 @@ const MyComplaintsPage = () => {
         {/* Header */}
         <div className="bg-white shadow-sm mb-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Button
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/')}
-            className="mb-4"
-          >
-            Quay lại
-          </Button>
-          <div className="flex justify-between items-center mb-4">
-            <Title level={2} className="mb-0">
-              <MdReportProblem className="text-orange-500 mr-2 inline" />
-              Khiếu nại của tôi
-            </Title>
             <Button
-              type="primary"
-              size="large"
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalOpen(true)}
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate('/')}
+              className="mb-4"
             >
-              Tạo khiếu nại mới
+              Quay lại
             </Button>
-          </div>
+            <div className="flex justify-between items-center mb-4">
+              <Title level={2} className="mb-0">
+                <MdReportProblem className="text-orange-500 mr-2 inline" />
+                Khiếu nại của tôi
+              </Title>
+              <Button
+                type="primary"
+                size="large"
+                icon={<PlusOutlined />}
+                onClick={() => setIsModalOpen(true)}
+              >
+                Tạo khiếu nại mới
+              </Button>
+            </div>
 
-          {/* Statistics */}
-          {complaints.length > 0 && (
-            <Row gutter={16} className="mt-4">
+            {/* Statistics */}
+            {complaints.length > 0 && (
+              <Row gutter={16} className="mt-4">
               <Col xs={12} sm={6}>
                 <Card>
                   <Statistic
@@ -273,13 +273,13 @@ const MyComplaintsPage = () => {
                   />
                 </Card>
               </Col>
-            </Row>
-          )}
+              </Row>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+        {/* Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         {/* Filters */}
         <Card className="mb-4">
           <Space wrap>
@@ -381,14 +381,15 @@ const MyComplaintsPage = () => {
             )}
           </>
         )}
-      </div>
+        </div>
 
-      {/* Create Complaint Modal */}
-      <CreateComplaintModal
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        onSuccess={handleComplaintCreated}
-      />
+        {/* Create Complaint Modal */}
+        <CreateComplaintModal
+          open={isModalOpen}
+          onCancel={() => setIsModalOpen(false)}
+          onSuccess={handleComplaintCreated}
+        />
+      </div>
     </CustomerLayout>
   );
 };
