@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import bookingApi from '../services/bookingApi';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 
 const { TextArea } = Input;
 
@@ -94,8 +95,9 @@ const CancelTicketPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
         <Card>
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Hủy Vé</h1>
@@ -315,8 +317,9 @@ const CancelTicketPage = () => {
           <p>Cần hỗ trợ? Liên hệ hotline: <strong>1900-xxxx</strong></p>
           <p>Email: support@vexenhanh.vn</p>
         </div>
+        </div>
       </div>
-    </div>
+    </CustomerLayout>
   );
 };
 

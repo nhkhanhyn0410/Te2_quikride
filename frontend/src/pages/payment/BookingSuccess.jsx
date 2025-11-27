@@ -12,6 +12,7 @@ import {
 import dayjs from 'dayjs';
 import useBookingStore from '../../store/bookingStore';
 import api from '../../services/api';
+import CustomerLayout from '../../components/layouts/CustomerLayout';
 
 const BookingSuccess = () => {
   const navigate = useNavigate();
@@ -208,8 +209,9 @@ const BookingSuccess = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 py-8">
-      <div className="max-w-3xl mx-auto">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4 py-8">
+        <div className="max-w-3xl mx-auto">
         <Result
           status="success"
           title="Đặt vé thành công!"
@@ -453,8 +455,9 @@ const BookingSuccess = () => {
             </Button>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </CustomerLayout>
   );
 };
 

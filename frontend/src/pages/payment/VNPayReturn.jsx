@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Spin, Result, Button } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import api from '../../services/api';
+import CustomerLayout from '../../components/layouts/CustomerLayout';
 
 const VNPayReturn = () => {
   const navigate = useNavigate();
@@ -85,8 +86,9 @@ const VNPayReturn = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="max-w-md w-full">
+    <CustomerLayout>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="max-w-md w-full">
         <Result
           status={result.success ? 'success' : 'error'}
           title={result.success ? 'Thanh toán thành công!' : 'Thanh toán thất bại'}
@@ -133,8 +135,9 @@ const VNPayReturn = () => {
             )}
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </CustomerLayout>
   );
 };
 

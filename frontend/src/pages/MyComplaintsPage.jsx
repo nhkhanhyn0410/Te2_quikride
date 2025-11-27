@@ -29,6 +29,7 @@ import { MdReportProblem } from 'react-icons/md';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/vi';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 import {
   getMyComplaints,
   getCategoryLabel,
@@ -201,10 +202,11 @@ const MyComplaintsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm mb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm mb-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center mb-4">
             <Title level={2} className="mb-0">
               <MdReportProblem className="text-orange-500 mr-2 inline" />
@@ -379,7 +381,7 @@ const MyComplaintsPage = () => {
         onCancel={() => setIsModalOpen(false)}
         onSuccess={handleComplaintCreated}
       />
-    </div>
+    </CustomerLayout>
   );
 };
 

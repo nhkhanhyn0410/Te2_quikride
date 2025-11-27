@@ -29,6 +29,7 @@ import useBookingStore from '../store/bookingStore';
 import SeatMapComponent from '../components/SeatMapComponent';
 import ReviewsSection from '../components/ReviewsSection';
 import { getAmenityIcon } from '../utils/constants';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 
 const { Title, Text } = Typography;
 
@@ -163,10 +164,11 @@ const TripDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Button
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/trips')}
@@ -377,7 +379,8 @@ const TripDetailPage = () => {
           </Col>
         </Row>
       </div>
-    </div>
+      </div>
+    </CustomerLayout>
   );
 };
 

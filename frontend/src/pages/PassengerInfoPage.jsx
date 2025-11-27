@@ -40,6 +40,7 @@ import {
 import useBookingStore from '../store/bookingStore';
 import useAuthStore from '../store/authStore';
 import GuestOTPModal from '../components/GuestOTPModal';
+import CustomerLayout from '../components/layouts/CustomerLayout';
 
 const { Title, Text } = Typography;
 const { Step } = Steps;
@@ -427,10 +428,11 @@ const PassengerInfoPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <CustomerLayout>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
             Quay lại
           </Button>
@@ -731,7 +733,8 @@ const PassengerInfoPage = () => {
         onCancel={() => setShowGuestOTPModal(false)}
         onSuccess={handleGuestOTPSuccess}
       />
-    </div>
+      </div>
+    </CustomerLayout>
   );
 };
 
