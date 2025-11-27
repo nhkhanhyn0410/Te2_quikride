@@ -73,7 +73,7 @@ const Sidebar = () => {
       <div className="p-6 border-b border-blue-700/50">
         <Link to="/operator/dashboard" className="flex items-center space-x-3 group">
           <div className="w-12 h-12 bg-gradient-to-br from-white to-blue-100 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
-            <span className="text-2xl">🚌</span>
+            <span className="text-2xl"><BusFront /></span>
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Vé xe nhanh</h1>
