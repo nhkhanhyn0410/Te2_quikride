@@ -1101,22 +1101,338 @@ sequenceDiagram
 
 ## Tổng Kết Kiến Trúc
 
-### Công Nghệ Sử Dụng
+### Technology Stack Diagram
 
-| Thành phần | Công nghệ |
-|------------|-----------|
-| **Frontend** | React 18 + Vite + Tailwind CSS + Ant Design |
-| **State Management** | Zustand (with persistence) |
-| **Real-time** | Socket.IO |
-| **Backend** | Express.js + Node.js |
-| **Database** | MongoDB + Mongoose |
-| **Caching** | Redis |
-| **Authentication** | JWT Tokens |
-| **File Storage** | Cloudinary |
-| **Payment** | VNPay, Momo, ZaloPay |
-| **QR Codes** | qrcode + crypto encryption |
-| **Email** | Nodemailer + Resend |
-| **Testing** | Jest + Vitest + React Testing Library |
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        REACT[React 18.2.0]
+        VITE[Vite 5.0.0]
+        ANTD[Ant Design 5.11.0]
+        TAILWIND[Tailwind CSS 3.3.5]
+        ZUSTAND[Zustand 4.4.6]
+        RRD[React Router 6.20.0]
+        SOCKETCLIENT[Socket.IO Client 4.6.0]
+        AXIOS_FE[Axios 1.6.0]
+        RECHARTS[Recharts 3.4.1]
+        QRREACT[QRCode.React 3.1.0]
+        DAYJS[Day.js 1.11.10]
+    end
+
+    subgraph "Backend Layer"
+        EXPRESS[Express 4.18.2]
+        MONGOOSE[Mongoose 8.0.0]
+        SOCKETIO[Socket.IO 4.6.0]
+        REDIS_LIB[Redis 4.6.0]
+        JWT[JsonWebToken 9.0.2]
+        BCRYPT[BCryptJS 2.4.3]
+        AXIOS_BE[Axios 1.6.0]
+        NODEMAILER[Nodemailer 6.9.7]
+        QRCODE[QRCode 1.5.3]
+        CLOUDINARY_LIB[Cloudinary 1.41.0]
+        MULTER[Multer 1.4.5]
+        PDFKIT[PDFKit 0.13.0]
+        EXCELJS[ExcelJS 4.4.0]
+        CRON[Node-Cron 4.2.1]
+    end
+
+    subgraph "Security Layer"
+        HELMET[Helmet 7.1.0]
+        CORS[CORS 2.8.5]
+        RATELIMIT[Express Rate Limit 7.1.0]
+        VALIDATOR[Express Validator 7.0.1]
+        SANITIZE[Express Mongo Sanitize 2.2.0]
+        XSS[XSS-Clean 0.1.4]
+        HPP[HPP 0.2.3]
+    end
+
+    subgraph "Database Layer"
+        MONGODB[(MongoDB 8.0+)]
+        REDIS_DB[(Redis 4.6+)]
+    end
+
+    subgraph "External Services"
+        VNPAY_SVC[VNPay Payment]
+        CLOUDINARY_SVC[Cloudinary CDN]
+        EMAIL_SVC[Email Service]
+        SMS_SVC[SMS Service]
+    end
+
+    subgraph "Testing & Quality"
+        VITEST[Vitest 1.0.0]
+        JEST[Jest 29.7.0]
+        RTL[React Testing Library 14.1.0]
+        ESLINT[ESLint 8.54.0]
+        PRETTIER[Prettier 3.1.0]
+    end
+
+    REACT --> VITE
+    REACT --> ANTD
+    REACT --> TAILWIND
+    REACT --> ZUSTAND
+    REACT --> RRD
+    REACT --> SOCKETCLIENT
+    REACT --> AXIOS_FE
+    REACT --> RECHARTS
+
+    EXPRESS --> MONGOOSE
+    EXPRESS --> SOCKETIO
+    EXPRESS --> REDIS_LIB
+    EXPRESS --> JWT
+    EXPRESS --> BCRYPT
+
+    EXPRESS --> HELMET
+    EXPRESS --> CORS
+    EXPRESS --> RATELIMIT
+    EXPRESS --> VALIDATOR
+
+    MONGOOSE --> MONGODB
+    REDIS_LIB --> REDIS_DB
+
+    EXPRESS --> CLOUDINARY_LIB
+    EXPRESS --> NODEMAILER
+    EXPRESS --> QRCODE
+
+    CLOUDINARY_LIB --> CLOUDINARY_SVC
+    NODEMAILER --> EMAIL_SVC
+    AXIOS_BE --> VNPAY_SVC
+```
+
+### Chi Tiết Công Nghệ Sử Dụng
+
+#### Frontend Dependencies
+
+| Package | Version | Mục đích sử dụng |
+|---------|---------|------------------|
+| **react** | 18.2.0 | Core UI library |
+| **react-dom** | 18.2.0 | DOM rendering |
+| **vite** | 5.0.0 | Build tool & dev server |
+| **react-router-dom** | 6.20.0 | Client-side routing |
+| **antd** | 5.11.0 | UI component library |
+| **@ant-design/icons** | 5.2.6 | Icon library |
+| **tailwindcss** | 3.3.5 | Utility-first CSS framework |
+| **zustand** | 4.4.6 | State management (với persistence) |
+| **axios** | 1.6.0 | HTTP client |
+| **socket.io-client** | 4.6.0 | Real-time communication |
+| **recharts** | 3.4.1 | Charts & data visualization |
+| **qrcode.react** | 3.1.0 | QR code generation |
+| **html5-qrcode** | 2.3.8 | QR code scanning |
+| **react-qr-scanner** | 1.0.0-alpha.11 | QR scanner component |
+| **dayjs** | 1.11.10 | Date manipulation |
+| **react-hot-toast** | 2.4.1 | Toast notifications |
+| **lucide-react** | 0.555.0 | Icon library |
+| **react-icons** | 5.5.0 | Icon library |
+
+#### Backend Dependencies
+
+| Package | Version | Mục đích sử dụng |
+|---------|---------|------------------|
+| **express** | 4.18.2 | Web framework |
+| **mongoose** | 8.0.0 | MongoDB ODM |
+| **redis** | 4.6.0 | Redis client (caching, pub/sub) |
+| **socket.io** | 4.6.0 | Real-time WebSocket server |
+| **jsonwebtoken** | 9.0.2 | JWT authentication |
+| **bcryptjs** | 2.4.3 | Password hashing |
+| **dotenv** | 16.3.1 | Environment variables |
+| **axios** | 1.6.0 | HTTP client (payment gateways) |
+| **cors** | 2.8.5 | Cross-Origin Resource Sharing |
+| **helmet** | 7.1.0 | Security headers |
+| **express-rate-limit** | 7.1.0 | Rate limiting |
+| **express-validator** | 7.0.1 | Request validation |
+| **express-mongo-sanitize** | 2.2.0 | MongoDB injection prevention |
+| **xss-clean** | 0.1.4 | XSS attack prevention |
+| **hpp** | 0.2.3 | HTTP parameter pollution |
+| **morgan** | 1.10.0 | HTTP request logger |
+| **compression** | 1.7.4 | Response compression |
+| **cookie-parser** | 1.4.6 | Cookie parsing |
+| **nodemailer** | 6.9.7 | Email sending |
+| **cloudinary** | 1.41.0 | Image/file storage |
+| **multer** | 1.4.5-lts.1 | File upload handling |
+| **qrcode** | 1.5.3 | QR code generation |
+| **pdfkit** | 0.13.0 | PDF generation |
+| **exceljs** | 4.4.0 | Excel file generation |
+| **moment** | 2.30.1 | Date/time manipulation |
+| **moment-timezone** | 0.5.43 | Timezone handling |
+| **node-cron** | 4.2.1 | Scheduled tasks |
+| **uuid** | 8.3.2 | UUID generation |
+
+#### Development & Testing Tools
+
+| Package | Version | Mục đích sử dụng |
+|---------|---------|------------------|
+| **Frontend Testing** |
+| **vitest** | 1.0.0 | Unit testing framework |
+| **@vitest/ui** | 1.0.0 | Test UI |
+| **@vitest/coverage-v8** | 1.6.1 | Code coverage |
+| **@testing-library/react** | 14.1.0 | React testing utilities |
+| **@testing-library/jest-dom** | 6.1.4 | DOM matchers |
+| **@testing-library/user-event** | 14.5.1 | User interaction simulation |
+| **jsdom** | 27.2.0 | DOM implementation for testing |
+| **Backend Testing** |
+| **jest** | 29.7.0 | Testing framework |
+| **supertest** | 6.3.3 | HTTP assertion library |
+| **Code Quality** |
+| **eslint** | 8.54.0 | JavaScript linter |
+| **eslint-config-airbnb** | 19.0.4 / 15.0.0 | Airbnb style guide |
+| **eslint-config-prettier** | 9.1.0 | Prettier integration |
+| **eslint-plugin-security** | 1.7.1 | Security linting |
+| **prettier** | 3.1.0 | Code formatter |
+| **autoprefixer** | 10.4.16 | CSS autoprefixer |
+| **postcss** | 8.4.31 | CSS processor |
+| **Dev Tools** |
+| **nodemon** | 3.0.1 | Auto-restart on file changes |
+| **concurrently** | 8.2.2 | Run multiple commands |
+
+### Architecture Layers
+
+```mermaid
+graph LR
+    subgraph "Presentation Layer"
+        UI[React Components]
+        ROUTING[React Router]
+        STATE[Zustand Store]
+    end
+
+    subgraph "Business Logic Layer"
+        API_ROUTES[Express Routes]
+        CONTROLLERS[Controllers]
+        SERVICES[Business Services]
+        MIDDLEWARE[Middleware]
+    end
+
+    subgraph "Data Access Layer"
+        MODELS[Mongoose Models]
+        CACHE[Redis Cache]
+        QUEUE[Redis Queue]
+    end
+
+    subgraph "External Integration Layer"
+        PAYMENT[Payment Gateways]
+        STORAGE[Cloud Storage]
+        MESSAGING[Email/SMS]
+    end
+
+    UI --> ROUTING
+    ROUTING --> STATE
+    STATE --> API_ROUTES
+    API_ROUTES --> CONTROLLERS
+    CONTROLLERS --> SERVICES
+    SERVICES --> MIDDLEWARE
+    SERVICES --> MODELS
+    SERVICES --> CACHE
+    SERVICES --> PAYMENT
+    SERVICES --> STORAGE
+    SERVICES --> MESSAGING
+```
+
+### Security Implementation
+
+```mermaid
+graph TD
+    REQUEST[Incoming Request] --> HELMET[Helmet: Security Headers]
+    HELMET --> CORS[CORS: Origin Validation]
+    CORS --> RATELIMIT[Rate Limiting]
+    RATELIMIT --> HPP[HPP: Parameter Pollution]
+    HPP --> SANITIZE[Mongo Sanitize: NoSQL Injection]
+    SANITIZE --> XSS[XSS Clean: Cross-Site Scripting]
+    XSS --> VALIDATOR[Express Validator: Input Validation]
+    VALIDATOR --> JWT[JWT: Authentication]
+    JWT --> AUTH[Authorization Check]
+    AUTH --> CONTROLLER[Controller Handler]
+
+    CONTROLLER --> ENCRYPT[BCrypt: Password Hashing]
+    CONTROLLER --> COMPRESSION[Compression: Response Size]
+    COMPRESSION --> RESPONSE[Response to Client]
+```
+
+### Data Flow Architecture
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Vite as Vite Dev Server
+    participant React as React App
+    participant Zustand as State Store
+    participant Axios
+    participant Express as Express API
+    participant Service as Business Service
+    participant Redis
+    participant Mongoose
+    participant MongoDB
+
+    Client->>Vite: HTTP Request
+    Vite->>React: Serve React App
+    React->>Zustand: Get/Update State
+    React->>Axios: API Call
+    Axios->>Express: HTTP Request
+    Express->>Service: Process Request
+
+    alt Cache Available
+        Service->>Redis: Check Cache
+        Redis-->>Service: Return Cached Data
+    else Cache Miss
+        Service->>Mongoose: Query Database
+        Mongoose->>MongoDB: Execute Query
+        MongoDB-->>Mongoose: Return Data
+        Mongoose-->>Service: Return Models
+        Service->>Redis: Update Cache
+    end
+
+    Service-->>Express: Return Response
+    Express-->>Axios: JSON Response
+    Axios-->>Zustand: Update State
+    Zustand-->>React: Re-render UI
+    React-->>Client: Updated View
+```
+
+### Performance Optimization
+
+| Kỹ thuật | Công nghệ | Mô tả |
+|----------|-----------|-------|
+| **Caching** | Redis | Cache query results, session data, seat locks |
+| **Compression** | Express Compression | Gzip response compression |
+| **Code Splitting** | Vite + React.lazy | Dynamic imports, route-based splitting |
+| **Image Optimization** | Cloudinary | CDN, automatic format conversion, resizing |
+| **Database Indexing** | MongoDB | Compound indexes on frequent queries |
+| **Connection Pooling** | Mongoose | Reuse database connections |
+| **Rate Limiting** | Express Rate Limit | Prevent API abuse |
+| **Lazy Loading** | React Suspense | Load components on demand |
+| **Memoization** | React.memo | Prevent unnecessary re-renders |
+| **WebSocket** | Socket.IO | Real-time updates without polling |
+
+### Deployment Requirements
+
+| Component | Requirement | Notes |
+|-----------|-------------|-------|
+| **Runtime** | Node.js ≥18.0.0 | ES2022 features required |
+| **Package Manager** | npm ≥9.0.0 | Workspace support |
+| **Database** | MongoDB ≥6.0 | Time series collections |
+| **Cache** | Redis ≥4.6 | Pub/Sub support |
+| **Memory** | 2GB+ RAM | For backend processes |
+| **Storage** | 20GB+ | Logs, uploads, backups |
+| **Network** | HTTPS/WSS | SSL/TLS certificates |
+| **Ports** | 3000 (Frontend), 5000 (Backend) | Configurable via ENV |
+
+### Environment Variables Structure
+
+```mermaid
+graph LR
+    subgraph "Backend ENV"
+        PORT[PORT=5000]
+        NODE_ENV[NODE_ENV=production]
+        MONGO[MONGODB_URI]
+        REDIS_URL[REDIS_URL]
+        JWT_SECRET[JWT_SECRET]
+        CLOUDINARY[CLOUDINARY_*]
+        VNPAY[VNPAY_*]
+        EMAIL[EMAIL_*]
+    end
+
+    subgraph "Frontend ENV"
+        VITE_API[VITE_API_URL]
+        VITE_WS[VITE_WS_URL]
+    end
+```
 
 ### Đặc Điểm Nổi Bật
 
@@ -1128,5 +1444,11 @@ sequenceDiagram
 6. **QR Code Verification**: Mã hóa QR code để bảo mật
 7. **Guest Booking**: Không bắt buộc tài khoản
 8. **Recurring Trips**: Tạo chuyến xe định kỳ tự động
-9. **Multi-payment**: 6 phương thức thanh toán
+9. **Multi-payment**: 6 phương thức thanh toán (VNPay, Momo, ZaloPay, Credit Card, Debit Card, Cash)
 10. **Responsive Design**: Mobile-first approach
+11. **Comprehensive Security**: Helmet, CORS, Rate Limiting, Input Validation, XSS Protection
+12. **Automated Tasks**: Node-Cron cho point expiry, booking cleanup, report generation
+13. **File Export**: Excel & PDF generation cho reports và tickets
+14. **Image Processing**: Cloudinary CDN với automatic optimization
+15. **Email Notifications**: Automated emails cho booking confirmations, cancellations, reminders
+
