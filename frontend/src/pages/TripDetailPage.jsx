@@ -157,17 +157,20 @@ const TripDetailPage = () => {
 
   if (loading || !trip) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-screen bg-neutral-50">
-        <Spin size="large" />
-        <div className="mt-4 text-center">
-          <Text className="text-neutral-600 text-lg">Đang tải thông tin chuyến xe...</Text>
+      <CustomerLayout>
+        <div className="flex flex-col justify-center items-center min-h-screen bg-neutral-50">
+          <Spin size="large" />
+          <div className="mt-4 text-center">
+            <Text className="text-neutral-600 text-lg">Đang tải thông tin chuyến xe...</Text>
+          </div>
         </div>
-      </div>
+      </CustomerLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <CustomerLayout>
+      <div className="min-h-screen bg-neutral-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">

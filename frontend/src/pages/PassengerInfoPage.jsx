@@ -424,7 +424,13 @@ const PassengerInfoPage = () => {
   };
 
   if (!selectedTrip) {
-    return <Spin fullscreen />;
+    return (
+      <CustomerLayout>
+        <div className="flex justify-center items-center min-h-screen">
+          <Spin size="large" tip="Đang tải thông tin chuyến xe..." />
+        </div>
+      </CustomerLayout>
+    );
   }
 
   return (

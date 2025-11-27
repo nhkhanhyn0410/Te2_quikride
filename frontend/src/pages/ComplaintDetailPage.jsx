@@ -278,9 +278,11 @@ const ComplaintDetailPage = () => {
 
   if (loading || !complaint) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spin size="large" tip="Đang tải thông tin khiếu nại..." />
-      </div>
+      <CustomerLayout>
+        <div className="flex justify-center items-center min-h-screen">
+          <Spin size="large" tip="Đang tải thông tin khiếu nại..." />
+        </div>
+      </CustomerLayout>
     );
   }
 
