@@ -119,27 +119,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Quick Stats */}
-      <div className="relative p-4 border-t border-blue-700/50">
-        <div className="bg-blue-800/50 rounded-lg p-3 backdrop-blur-sm border border-blue-700/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-blue-300 font-medium">Hôm nay</span>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-xs text-green-400 font-medium">Hoạt động</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div>
-              <span className="text-blue-400 block">Chuyến xe</span>
-              <span className="text-white font-semibold">15</span>
-            </div>
-            <div>
-              <span className="text-blue-400 block">Doanh thu</span>
-              <span className="text-white font-semibold">12.5M</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Footer */}
       <div className="relative p-4 border-t border-blue-700/50">
