@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   Rate,
@@ -20,6 +21,7 @@ import {
   EnvironmentOutlined,
   CalendarOutlined,
   ShopOutlined,
+  ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { FaBus, FaUserTie, FaClock, FaSmile } from 'react-icons/fa';
 import dayjs from 'dayjs';
@@ -34,6 +36,7 @@ dayjs.locale('vi');
 const { Text, Title, Paragraph } = Typography;
 
 const MyReviewsPage = () => {
+  const navigate = useNavigate();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -224,6 +227,13 @@ const MyReviewsPage = () => {
         {/* Header */}
         <div className="bg-white shadow-sm mb-6">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <Button
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate('/')}
+              className="mb-4"
+            >
+              Quay lại
+            </Button>
             <Title level={2} className="mb-0">
               <StarOutlined className="text-yellow-500 mr-2" />
               Đánh giá của tôi

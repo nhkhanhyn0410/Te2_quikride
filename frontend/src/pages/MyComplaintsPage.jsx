@@ -24,6 +24,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   SyncOutlined,
+  ArrowLeftOutlined,
 } from '@ant-design/icons';
 import { MdReportProblem } from 'react-icons/md';
 import dayjs from 'dayjs';
@@ -207,6 +208,13 @@ const MyComplaintsPage = () => {
         {/* Header */}
         <div className="bg-white shadow-sm mb-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate('/')}
+            className="mb-4"
+          >
+            Quay lại
+          </Button>
           <div className="flex justify-between items-center mb-4">
             <Title level={2} className="mb-0">
               <MdReportProblem className="text-orange-500 mr-2 inline" />
