@@ -317,6 +317,11 @@ erDiagram
         string status
     }
 
+    ADMIN ||--o{ BANNER : creates
+    ADMIN ||--o{ BLOG : writes
+    ADMIN ||--o{ FAQ : manages
+    ADMIN ||--o{ COMPLAINT : handles
+
     ADMIN {
         ObjectId _id PK
         string email UK
@@ -329,6 +334,7 @@ erDiagram
         string title
         string imageUrl
         boolean isActive
+        ObjectId createdBy FK
     }
 
     BLOG {
@@ -336,6 +342,7 @@ erDiagram
         string title
         string slug UK
         boolean isPublished
+        ObjectId authorId FK
     }
 
     FAQ {
@@ -343,6 +350,7 @@ erDiagram
         string question
         string answer
         string category
+        ObjectId createdBy FK
     }
 ```
 
@@ -684,6 +692,18 @@ erDiagram
 
 ```mermaid
 erDiagram
+    ADMIN ||--o{ BANNER : creates
+    ADMIN ||--o{ BLOG : writes
+    ADMIN ||--o{ FAQ : manages
+
+    ADMIN {
+        ObjectId _id PK
+        string username UK "Unique, required"
+        string email UK "Unique, required"
+        string fullName "Required"
+        string role "super_admin|admin|moderator"
+    }
+
     BANNER {
         ObjectId _id PK
         string title "Required"
@@ -695,6 +715,8 @@ erDiagram
         int displayOrder "Sort order"
         Date validFrom
         Date validUntil
+        ObjectId createdBy FK "Admin who created"
+        ObjectId updatedBy FK "Admin who last updated"
         Date createdAt
         Date updatedAt
     }
@@ -706,11 +728,13 @@ erDiagram
         string content "HTML content"
         string excerpt "Short summary"
         string featuredImage "Cloudinary URL"
-        string author "Admin name"
+        ObjectId authorId FK "Admin author ID"
+        string authorName "Admin name, cached"
         string category "news|guide|promotion|announcement"
         array tags "Search tags"
         boolean isPublished "Default: false"
         Date publishedAt
+        ObjectId publishedBy FK "Admin who published"
         int viewCount "Default: 0"
         Date createdAt
         Date updatedAt
@@ -724,6 +748,8 @@ erDiagram
         int displayOrder "Sort order"
         boolean isActive "Default: true"
         int viewCount "Default: 0"
+        ObjectId createdBy FK "Admin who created"
+        ObjectId updatedBy FK "Admin who last updated"
         Date createdAt
         Date updatedAt
     }
@@ -744,6 +770,10 @@ graph TD
         IDX8[Voucher: code, validUntil]
         IDX9[Route: routeCode, operatorId]
         IDX10[Bus: busNumber, operatorId]
+        IDX11[Blog: slug, category, isPublished]
+        IDX12[Banner: isActive, displayOrder]
+        IDX13[FAQ: category, isActive]
+        IDX14[Complaint: assignedTo, status]
     end
 
     subgraph "Unique Constraints"
@@ -756,6 +786,10 @@ graph TD
         UK7[Voucher.code UNIQUE]
         UK8[Route.routeCode UNIQUE]
         UK9[Bus.busNumber UNIQUE per operator]
+        UK10[Admin.username UNIQUE]
+        UK11[Admin.email UNIQUE]
+        UK12[Blog.slug UNIQUE]
+        UK13[Complaint.ticketNumber UNIQUE]
     end
 
     subgraph "Foreign Key Relationships"
@@ -767,6 +801,12 @@ graph TD
         FK6[Review.bookingId → Booking._id]
         FK7[Payment.bookingId → Booking._id]
         FK8[Ticket.bookingId → Booking._id]
+        FK9[Banner.createdBy → Admin._id]
+        FK10[Blog.authorId → Admin._id]
+        FK11[FAQ.createdBy → Admin._id]
+        FK12[Complaint.assignedTo → Admin._id]
+        FK13[Voucher.operatorId → Operator._id]
+        FK14[Ticket.verifiedBy → Employee._id]
     end
 ```
 
