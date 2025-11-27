@@ -12,6 +12,8 @@ import {
   TrophyOutlined,
 } from '@ant-design/icons';
 
+import Icon from "../../components/icon";
+
 const Sidebar = () => {
   const location = useLocation();
 
@@ -72,8 +74,8 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="p-6 border-b border-blue-700/50">
         <Link to="/operator/dashboard" className="flex items-center space-x-3 group">
-          <div className="w-12 h-12 bg-gradient-to-br from-white to-blue-100 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
-            <span className="text-2xl">🚌</span>
+          <div className="w-12 h-12 bg-gradient-to-b from-red-900 via-red-600 to-red-900 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
+            <span className="text-2xl"><Icon name="Bus" className="text-white"/></span>
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Vé xe nhanh</h1>
