@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Auth Pages
 import OperatorLoginPage from './pages/auth/OperatorLoginPage';
+import OperatorRegisterPage from './pages/auth/OperatorRegisterPage';
 import TripManagerLoginPage from './pages/auth/TripManagerLoginPage';
 import AdminLoginPage from './pages/auth/AdminLoginPage';
 import CustomerLoginPage from './pages/auth/CustomerLoginPage';
@@ -181,6 +182,7 @@ function App() {
 
         {/* Operator Auth Routes */}
         <Route path="/operator/login" element={<OperatorLoginPage />} />
+        <Route path="/operator/register" element={<OperatorRegisterPage />} />
 
         {/* Operator Dashboard Routes - Protected */}
         <Route
