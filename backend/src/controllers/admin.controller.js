@@ -745,7 +745,7 @@ exports.getUserStatistics = async (req, res) => {
 exports.getSystemOverview = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    const Operator = require('../models/Operator');
+    const BusOperator = require('../models/BusOperator');
     const Trip = require('../models/Trip');
     const Route = require('../models/Route');
 
@@ -761,9 +761,9 @@ exports.getSystemOverview = async (req, res) => {
     const activeUsers = await User.countDocuments({ isActive: true, isBlocked: false });
 
     // Operator Statistics
-    const totalOperators = await Operator.countDocuments();
-    const approvedOperators = await Operator.countDocuments({ verificationStatus: 'approved' });
-    const pendingOperators = await Operator.countDocuments({ verificationStatus: 'pending' });
+    const totalOperators = await BusOperator.countDocuments();
+    const approvedOperators = await BusOperator.countDocuments({ verificationStatus: 'approved' });
+    const pendingOperators = await BusOperator.countDocuments({ verificationStatus: 'pending' });
 
     // Booking Statistics
     const totalBookings = await Booking.countDocuments({
