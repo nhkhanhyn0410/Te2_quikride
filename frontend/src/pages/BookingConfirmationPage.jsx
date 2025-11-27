@@ -88,27 +88,31 @@ const BookingConfirmationPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spin size="large" tip="Đang tải thông tin đặt vé..." />
-      </div>
+      <CustomerLayout>
+        <div className="flex justify-center items-center min-h-screen">
+          <Spin size="large" tip="Đang tải thông tin đặt vé..." />
+        </div>
+      </CustomerLayout>
     );
   }
 
   if (!booking) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card>
-          <Result
-            status="404"
-            title="Không tìm thấy thông tin đặt vé"
-            extra={
-              <Button type="primary" onClick={() => navigate('/')}>
-                Về trang chủ
-              </Button>
-            }
-          />
-        </Card>
-      </div>
+      <CustomerLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Card>
+            <Result
+              status="404"
+              title="Không tìm thấy thông tin đặt vé"
+              extra={
+                <Button type="primary" onClick={() => navigate('/')}>
+                  Về trang chủ
+                </Button>
+              }
+            />
+          </Card>
+        </div>
+      </CustomerLayout>
     );
   }
 

@@ -202,9 +202,11 @@ const BookingSuccess = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Spin size="large" />
-      </div>
+      <CustomerLayout>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <Spin size="large" tip="Đang tải thông tin đặt vé..." />
+        </div>
+      </CustomerLayout>
     );
   }
 
