@@ -988,45 +988,6 @@ const TripsPage = () => {
 
                   <Divider />
 
-                  {/* Time Filter */}
-                  {isSearchResults && (
-                    <>
-                      <div className="mb-4">
-                        <Text strong className="text-gray-700 flex items-center gap-2 mb-3">
-                          <ClockCircleOutlined className="text-purple-500" />
-                          Giờ khởi hành
-                        </Text>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button
-                            size="small"
-                            className="rounded-lg border-gray-200 hover:border-red-300 text-xs"
-                          >
-                            🌅 Sáng sớm (6-12h)
-                          </Button>
-                          <Button
-                            size="small"
-                            className="rounded-lg border-gray-200 hover:border-red-300 text-xs"
-                          >
-                            ☀️ Buổi chiều (12-18h)
-                          </Button>
-                          <Button
-                            size="small"
-                            className="rounded-lg border-gray-200 hover:border-red-300 text-xs"
-                          >
-                            🌆 Buổi tối (18-22h)
-                          </Button>
-                          <Button
-                            size="small"
-                            className="rounded-lg border-gray-200 hover:border-red-300 text-xs"
-                          >
-                            🌙 Đêm muộn (22-6h)
-                          </Button>
-                        </div>
-                      </div>
-                      <Divider />
-                    </>
-                  )}
-
                   {/* Bus Type */}
                   <div className="mb-4">
                     <Text strong className="text-gray-700 flex items-center gap-2 mb-3">
@@ -1048,92 +1009,6 @@ const TripsPage = () => {
                       ))}
                     </Select>
                   </div>
-
-                  <Divider />
-
-                  {/* Amenities Filter */}
-                  {isSearchResults && (
-                    <>
-                      <div className="mb-4">
-                        <Text strong className="text-gray-700 flex items-center gap-2 mb-3">
-                          <WifiOutlined className="text-cyan-500" />
-                          Tiện ích
-                        </Text>
-                        <div className="space-y-2">
-                          <Checkbox className="w-full">
-                            <span className="text-sm">🌐 WiFi miễn phí</span>
-                          </Checkbox>
-                          <Checkbox className="w-full">
-                            <span className="text-sm">❄️ Điều hòa</span>
-                          </Checkbox>
-                          <Checkbox className="w-full">
-                            <span className="text-sm">🔌 Sạc điện thoại</span>
-                          </Checkbox>
-                          <Checkbox className="w-full">
-                            <span className="text-sm">🍿 Đồ ăn nhẹ</span>
-                          </Checkbox>
-                        </div>
-                      </div>
-                      <Divider />
-                    </>
-                  )}
-
-                  {/* Operator Filter */}
-                  {/* Rating Filter - Only for Search Results */}
-                  {isSearchResults && (
-                    <>
-                      <Divider />
-                      <div className="mb-4">
-                        <Text strong className="text-gray-700 flex items-center gap-2 mb-3">
-                          <StarOutlined className="text-yellow-500" />
-                          Đánh giá nhà xe
-                        </Text>
-                        <div className="space-y-2">
-                          {[5, 4, 3].map((rating) => (
-                            <div
-                              key={rating}
-                              className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-yellow-50 transition-colors cursor-pointer"
-                            >
-                              <div className="flex items-center gap-2">
-                                <Rate disabled defaultValue={rating} className="text-sm" />
-                                <span className="text-sm text-gray-600">trở lên</span>
-                              </div>
-                              <Checkbox />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Seats Available Filter - Only for Search Results */}
-                  {isSearchResults && (
-                    <>
-                      <Divider />
-                      <div className="mb-4">
-                        <Text strong className="text-gray-700 flex items-center gap-2 mb-3">
-                          <UserOutlined className="text-blue-500" />
-                          Số chỗ trống
-                        </Text>
-                        <div className="grid grid-cols-2 gap-2">
-                          {[
-                            { label: '1-5 chỗ', value: '1-5', color: 'red' },
-                            { label: '6-10 chỗ', value: '6-10', color: 'orange' },
-                            { label: '11-20 chỗ', value: '11-20', color: 'green' },
-                            { label: '20+ chỗ', value: '20+', color: 'blue' }
-                          ].map((seat) => (
-                            <Button
-                              key={seat.value}
-                              size="small"
-                              className={`h-10 rounded-xl border-2 transition-all text-xs font-medium border-gray-200 hover:border-${seat.color}-300 hover:bg-${seat.color}-50`}
-                            >
-                              {seat.label}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
 
                   <Divider />
 
@@ -1253,7 +1128,7 @@ const TripsPage = () => {
                     <Card
                       key={trip._id}
                       className="hover:shadow-xl hover:scale-[1.01] transition-all duration-300 rounded-2xl border border-neutral-200 shadow-md overflow-hidden group bg-white"
-                      bodyStyle={{ padding: '0' }}
+                      styles={{ body: { padding: 0 } }}
                     >
                       {/* Trip Header */}
                       <div className="bg-neutral-50 px-6 py-5 border-b border-neutral-200">

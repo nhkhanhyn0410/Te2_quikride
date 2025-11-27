@@ -25,17 +25,17 @@ const StandardPanel = ({
     small: {
       padding: 16,
       titleLevel: 5,
-      bodyStyle: { padding: 16 },
+      styles: { body: { padding: 16 } },
     },
     medium: {
       padding: 24,
       titleLevel: 4,
-      bodyStyle: { padding: 24 },
+      styles: { body: { padding: 24 } },
     },
     large: {
       padding: 32,
       titleLevel: 3,
-      bodyStyle: { padding: 32 },
+      styles: { body: { padding: 32 } },
     },
   };
 
@@ -107,7 +107,7 @@ const StandardPanel = ({
     <Card
       loading={loading}
       className={`${variantClasses[variant]} ${className}`}
-      bodyStyle={config.bodyStyle}
+      styles={config.styles}
       {...props}
     >
       {renderHeader()}

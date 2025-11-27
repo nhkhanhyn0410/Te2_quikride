@@ -166,7 +166,7 @@ app.use(`/api/${API_VERSION}/tickets`, ticketRoutes);
 app.use(`/api/${API_VERSION}/trip-manager`, tripManagerRoutes);
 app.use(`/api/${API_VERSION}/complaints`, complaintRoutes);
 app.use(`/api/${API_VERSION}/content`, contentRoutes);
-app.use(`/api/${API_VERSION}`, reviewRoutes);
+app.use(`/api/${API_VERSION}/reviews`, reviewRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
