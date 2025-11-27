@@ -355,38 +355,34 @@ class NotificationService {
               <h3 style="margin-top: 0; color: #334155;">Thông tin chuyến xe:</h3>
               <p><strong>Tuyến đường:</strong> ${routeName}</p>
               <p><strong>Thời gian khởi hành:</strong> ${departureTime}</p>
-              ${
-                trip.routeId?.origin?.city
-                  ? `<p><strong>Điểm đi:</strong> ${trip.routeId.origin.city}</p>`
-                  : ''
-              }
-              ${
-                trip.routeId?.destination?.city
-                  ? `<p><strong>Điểm đến:</strong> ${trip.routeId.destination.city}</p>`
-                  : ''
-              }
+              ${trip.routeId?.origin?.city
+        ? `<p><strong>Điểm đi:</strong> ${trip.routeId.origin.city}</p>`
+        : ''
+      }
+              ${trip.routeId?.destination?.city
+        ? `<p><strong>Điểm đến:</strong> ${trip.routeId.destination.city}</p>`
+        : ''
+      }
             </div>
 
-            ${
-              newStatus === 'cancelled'
-                ? `
+            ${newStatus === 'cancelled'
+        ? `
               <p style="color: #dc2626; font-weight: bold;">
                 ⚠️ Chuyến xe đã bị hủy. Vui lòng liên hệ nhà xe để được hỗ trợ hoàn tiền.
               </p>
             `
-                : ''
-            }
+        : ''
+      }
 
-            ${
-              newStatus === 'completed'
-                ? `
+            ${newStatus === 'completed'
+        ? `
               <p>
                 Cảm ơn bạn đã sử dụng dịch vụ QuikRide!
                 Đừng quên đánh giá chuyến đi của bạn để giúp chúng tôi cải thiện dịch vụ.
               </p>
             `
-                : ''
-            }
+        : ''
+      }
 
             <p style="margin-top: 30px; color: #666;">
               Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ:
@@ -399,7 +395,7 @@ class NotificationService {
 
           <div class="footer">
             <p>
-              © ${new Date().getFullYear()} QuikRide - Hệ thống đặt vé xe khách trực tuyến
+               ${new Date().getFullYear()} QuikRide - Hệ thống đặt vé xe khách trực tuyến
             </p>
             <p style="font-size: 12px; color: #94a3b8;">
               Email này được gửi tự động, vui lòng không trả lời.

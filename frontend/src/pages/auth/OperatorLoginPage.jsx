@@ -110,7 +110,7 @@ const OperatorLoginPage = () => {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500 mt-8">
-          © 2024 Vé xe nhanh. All rights reserved.
+          . All rights reserved.
         </p>
       </div>
     </div>

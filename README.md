@@ -1230,7 +1230,7 @@ Dự án này được phát hành dưới **MIT License**.
 ```
 MIT License
 
-Copyright (c) 2024 Vé xe nhanh Team
+Copyright (c) Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

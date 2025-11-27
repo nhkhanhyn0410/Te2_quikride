@@ -186,7 +186,7 @@ const AdminSidebar = () => {
       {/* Footer */}
       <div className="relative p-4 border-t border-slate-700/50">
         <Text className="text-xs text-slate-500 text-center block">
-          © 2024 Vé xe nhanh Admin Panel
+           Admin Panel
         </Text>
         <Text className="text-xs text-slate-600 text-center block mt-1">
           Version 2.1.0

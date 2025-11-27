@@ -124,10 +124,10 @@ const Sidebar = () => {
       {/* Footer */}
       <div className="relative p-4 border-t border-blue-700/50">
         <p className="text-xs text-blue-300 text-center">
-          © 2024 Vé xe nhanh
+          
         </p>
         <p className="text-xs text-blue-400 text-center mt-1">
-          Operator Panel v2.1.0
+          Operator Panel
         </p>
       </div>
     </div>

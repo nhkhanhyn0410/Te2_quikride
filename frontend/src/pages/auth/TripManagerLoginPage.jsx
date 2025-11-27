@@ -142,7 +142,7 @@ const TripManagerLoginPage = () => {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-blue-100 text-sm">
-            © 2024 Vé xe nhanh. All rights reserved.
+            . All rights reserved.
           </p>
         </div>
       </div>
