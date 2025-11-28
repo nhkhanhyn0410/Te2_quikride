@@ -1,6 +1,7 @@
 const OperatorService = require('../services/operator.service');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
+const logger = require('../utils/logger');
 
 /**
  * Admin Controller
@@ -50,7 +51,7 @@ exports.getAllOperators = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get operators error:', error);
+    logger.error('Get operators error:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy danh sách nhà xe thất bại',
