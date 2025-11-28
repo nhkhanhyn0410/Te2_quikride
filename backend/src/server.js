@@ -201,18 +201,35 @@ server.listen(PORT, () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  logger.error('LỖI KHÔNG ĐƯỢC XỬ LÝ! Đang tắt...');
-  logger.error(err.name, err.message);
+  logger.error('LỖI KHÔNG ĐƯỢC XỬ LÝ (unhandledRejection)! Đang tắt...');
+  if (err instanceof Error) {
+    logger.error(`${err.name}: ${err.message}\n${err.stack}`);
+  } else {
+    logger.error(JSON.stringify(err));
+  }
   server.close(() => {
     process.exit(1);
   });
 });
 
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  logger.error('LỖI KHÔNG ĐƯỢC XỬ LÝ (uncaughtException)! Đang tắt...');
+  if (err instanceof Error) {
+    logger.error(`${err.name}: ${err.message}\n${err.stack}`);
+  } else {
+    logger.error(JSON.stringify(err));
+  }
+  process.exit(1); // Nếu server chưa khởi tạo xong
+});
+
 // Handle SIGTERM
 process.on('SIGTERM', () => {
+  logger.info('SIGTERM RECEIVED. Đang tắt server một cách nhẹ nhàng...');
   server.close(() => {
-    logger.info('Tiến trình đã kết thúc!');
+    logger.info('Server đã tắt. Tiến trình kết thúc!');
   });
 });
+
 
 module.exports = app;
