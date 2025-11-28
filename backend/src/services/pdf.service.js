@@ -314,16 +314,16 @@ class PDFService {
         doc.end();
 
         stream.on('finish', () => {
-          console.log('✅ PDF ticket generated successfully:', outputPath);
+          console.log('PDF ticket generated successfully:', outputPath);
           resolve(outputPath);
         });
 
         stream.on('error', (error) => {
-          console.error('❌ PDF generation error:', error);
+          console.error(' PDF generation error:', error);
           reject(error);
         });
       } catch (error) {
-        console.error('❌ PDF generation error:', error);
+        console.error(' PDF generation error:', error);
         reject(error);
       }
     });
@@ -401,10 +401,10 @@ class PDFService {
     try {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
-        console.log('✅ PDF deleted:', filePath);
+        console.log('PDF deleted:', filePath);
       }
     } catch (error) {
-      console.error('❌ PDF deletion error:', error);
+      console.error(' PDF deletion error:', error);
     }
   }
 }

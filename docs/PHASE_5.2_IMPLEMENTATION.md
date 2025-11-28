@@ -11,7 +11,7 @@ Implement Phase 5.2 of the Vé xe nhanh project focusing on:
 
 ---
 
-## ✅ Completed Features
+## Completed Features
 
 ### 1. Voucher Management System
 
@@ -19,54 +19,54 @@ Implement Phase 5.2 of the Vé xe nhanh project focusing on:
 **File:** `backend/src/models/Voucher.js`
 
 **Features:**
-- ✅ Comprehensive voucher schema with all required fields
-- ✅ Discount types: percentage and fixed amount
-- ✅ Usage limits (total and per customer)
-- ✅ Validity period management
-- ✅ Applicable conditions:
+- Comprehensive voucher schema with all required fields
+- Discount types: percentage and fixed amount
+- Usage limits (total and per customer)
+- Validity period management
+- Applicable conditions:
   - Routes restriction
   - Customer tiers (bronze, silver, gold, platinum)
   - Specific customers
   - Days of week
-- ✅ Virtual fields: `isExpired`, `isNotYetValid`, `isValid`, `remainingUsage`
-- ✅ Instance methods: `calculateDiscount()`, `incrementUsage()`, `canBeUsed()`
-- ✅ Static methods: `findActive()`, `findByCode()`, `getStatistics()`
+- Virtual fields: `isExpired`, `isNotYetValid`, `isValid`, `remainingUsage`
+- Instance methods: `calculateDiscount()`, `incrementUsage()`, `canBeUsed()`
+- Static methods: `findActive()`, `findByCode()`, `getStatistics()`
 
 #### 1.2 Voucher Service
 **File:** `backend/src/services/voucher.service.js`
 
 **Features:**
-- ✅ `create()` - Create new voucher with validation
-- ✅ `validateForBooking()` - Validate voucher for specific booking
-- ✅ `applyToBooking()` - Apply voucher and increment usage
-- ✅ `releaseFromBooking()` - Release voucher from cancelled booking
-- ✅ `getById()`, `getByCode()` - Retrieve vouchers
-- ✅ `getActive()` - Get active vouchers with filters
-- ✅ `getByOperator()` - Get vouchers for specific operator
-- ✅ `update()` - Update voucher details
-- ✅ `activate()` - **NEW** Activate voucher
-- ✅ `deactivate()` - Deactivate voucher
-- ✅ `delete()` - Delete unused voucher
-- ✅ `getStatistics()` - Get voucher statistics
-- ✅ `getPublicVouchers()` - Get public vouchers for customers
-- ✅ `getUsageReport()` - **NEW** Detailed usage report with pagination
-- ✅ `generateCode()` - Generate unique voucher code
+- `create()` - Create new voucher with validation
+- `validateForBooking()` - Validate voucher for specific booking
+- `applyToBooking()` - Apply voucher and increment usage
+- `releaseFromBooking()` - Release voucher from cancelled booking
+- `getById()`, `getByCode()` - Retrieve vouchers
+- `getActive()` - Get active vouchers with filters
+- `getByOperator()` - Get vouchers for specific operator
+- `update()` - Update voucher details
+- `activate()` - **NEW** Activate voucher
+- `deactivate()` - Deactivate voucher
+- `delete()` - Delete unused voucher
+- `getStatistics()` - Get voucher statistics
+- `getPublicVouchers()` - Get public vouchers for customers
+- `getUsageReport()` - **NEW** Detailed usage report with pagination
+- `generateCode()` - Generate unique voucher code
 
 #### 1.3 Voucher Controller
 **File:** `backend/src/controllers/voucher.controller.js`
 
 **Endpoints:**
-- ✅ `POST /api/v1/vouchers/validate` - Validate voucher (Public)
-- ✅ `GET /api/v1/vouchers/public` - Get public vouchers (Public)
-- ✅ `POST /api/v1/operators/vouchers` - Create voucher (Operator)
-- ✅ `GET /api/v1/operators/vouchers` - List operator vouchers (Operator)
-- ✅ `GET /api/v1/operators/vouchers/statistics` - Get statistics (Operator)
-- ✅ `GET /api/v1/operators/vouchers/:id` - Get voucher details (Operator)
-- ✅ `GET /api/v1/operators/vouchers/:id/usage-report` - **NEW** Usage report (Operator)
-- ✅ `PUT /api/v1/operators/vouchers/:id` - Update voucher (Operator)
-- ✅ `PUT /api/v1/operators/vouchers/:id/activate` - **NEW** Activate voucher (Operator)
-- ✅ `PUT /api/v1/operators/vouchers/:id/deactivate` - Deactivate voucher (Operator)
-- ✅ `DELETE /api/v1/operators/vouchers/:id` - Delete voucher (Operator)
+- `POST /api/v1/vouchers/validate` - Validate voucher (Public)
+- `GET /api/v1/vouchers/public` - Get public vouchers (Public)
+- `POST /api/v1/operators/vouchers` - Create voucher (Operator)
+- `GET /api/v1/operators/vouchers` - List operator vouchers (Operator)
+- `GET /api/v1/operators/vouchers/statistics` - Get statistics (Operator)
+- `GET /api/v1/operators/vouchers/:id` - Get voucher details (Operator)
+- `GET /api/v1/operators/vouchers/:id/usage-report` - **NEW** Usage report (Operator)
+- `PUT /api/v1/operators/vouchers/:id` - Update voucher (Operator)
+- `PUT /api/v1/operators/vouchers/:id/activate` - **NEW** Activate voucher (Operator)
+- `PUT /api/v1/operators/vouchers/:id/deactivate` - Deactivate voucher (Operator)
+- `DELETE /api/v1/operators/vouchers/:id` - Delete voucher (Operator)
 
 #### 1.4 Usage Report Features
 **New Endpoint:** `GET /api/v1/operators/vouchers/:id/usage-report`
@@ -167,7 +167,7 @@ dynamicPricing: {
 ```
 
 **New Method:**
-- ✅ `calculateDynamicPrice(bookingDate)` - Calculate price with all dynamic factors
+- `calculateDynamicPrice(bookingDate)` - Calculate price with all dynamic factors
 
 **Price Calculation Logic:**
 1. **Base Price:** Starting point
@@ -181,15 +181,15 @@ dynamicPricing: {
 **File:** `backend/src/services/trip.service.js`
 
 **New Methods:**
-- ✅ `configureDynamicPricing(tripId, operatorId, pricingConfig)` - Configure pricing
-- ✅ `getDynamicPrice(tripId, bookingDate)` - Get current dynamic price
+- `configureDynamicPricing(tripId, operatorId, pricingConfig)` - Configure pricing
+- `getDynamicPrice(tripId, bookingDate)` - Get current dynamic price
 
 #### 2.3 Dynamic Pricing Controller
 **File:** `backend/src/controllers/trip.controller.js`
 
 **New Endpoints:**
-- ✅ `PUT /api/v1/operators/trips/:id/dynamic-pricing` - Configure dynamic pricing (Operator)
-- ✅ `GET /api/v1/trips/:id/dynamic-price` - Get dynamic price (Public)
+- `PUT /api/v1/operators/trips/:id/dynamic-pricing` - Configure dynamic pricing (Operator)
+- `GET /api/v1/trips/:id/dynamic-price` - Get dynamic price (Public)
 
 **Example Request:**
 ```bash
@@ -252,16 +252,16 @@ PUT /api/v1/operators/trips/123/dynamic-pricing
 **File:** `backend/src/models/Booking.js`
 
 **Existing Voucher Fields:**
-- ✅ `voucherCode` - Voucher code used
-- ✅ `voucherId` - Reference to Voucher
-- ✅ `voucherDiscount` - Discount amount applied
+- `voucherCode` - Voucher code used
+- `voucherId` - Reference to Voucher
+- `voucherDiscount` - Discount amount applied
 
 These fields are already integrated and work with the voucher system.
 
 #### 3.2 Routes Integration
 **Files Updated:**
-- ✅ `backend/src/routes/operator.routes.js` - Added voucher and dynamic pricing routes
-- ✅ `backend/src/routes/trip.routes.js` - Added dynamic price endpoint
+- `backend/src/routes/operator.routes.js` - Added voucher and dynamic pricing routes
+- `backend/src/routes/trip.routes.js` - Added dynamic price endpoint
 
 ---
 
@@ -319,20 +319,20 @@ These fields are already integrated and work with the voucher system.
 ## 📁 Files Modified
 
 ### Models
-- ✅ `backend/src/models/Voucher.js` (already existed, no changes)
-- ✅ `backend/src/models/Trip.js` (added dynamic pricing fields and method)
+- `backend/src/models/Voucher.js` (already existed, no changes)
+- `backend/src/models/Trip.js` (added dynamic pricing fields and method)
 
 ### Services
-- ✅ `backend/src/services/voucher.service.js` (added activate and getUsageReport)
-- ✅ `backend/src/services/trip.service.js` (added dynamic pricing methods)
+- `backend/src/services/voucher.service.js` (added activate and getUsageReport)
+- `backend/src/services/trip.service.js` (added dynamic pricing methods)
 
 ### Controllers
-- ✅ `backend/src/controllers/voucher.controller.js` (added activate and usage report)
-- ✅ `backend/src/controllers/trip.controller.js` (added dynamic pricing endpoints)
+- `backend/src/controllers/voucher.controller.js` (added activate and usage report)
+- `backend/src/controllers/trip.controller.js` (added dynamic pricing endpoints)
 
 ### Routes
-- ✅ `backend/src/routes/operator.routes.js` (added new voucher and trip routes)
-- ✅ `backend/src/routes/trip.routes.js` (added dynamic price route)
+- `backend/src/routes/operator.routes.js` (added new voucher and trip routes)
+- `backend/src/routes/trip.routes.js` (added dynamic price route)
 
 ---
 
@@ -396,15 +396,15 @@ All new endpoints follow the existing `/api/v1` pattern.
 ## 🔐 Security Considerations
 
 ### Voucher Management
-- ✅ Ownership verification for all operator endpoints
-- ✅ Cannot modify voucher code after creation
-- ✅ Cannot manually change usage count
-- ✅ Cannot delete vouchers that have been used
+- Ownership verification for all operator endpoints
+- Cannot modify voucher code after creation
+- Cannot manually change usage count
+- Cannot delete vouchers that have been used
 
 ### Dynamic Pricing
-- ✅ Only operators can configure pricing for their trips
-- ✅ Public endpoint only reads data (no modifications)
-- ✅ Input validation for all pricing parameters
+- Only operators can configure pricing for their trips
+- Public endpoint only reads data (no modifications)
+- Input validation for all pricing parameters
 
 ---
 
@@ -424,7 +424,7 @@ All new endpoints follow the existing `/api/v1` pattern.
 
 ---
 
-## ✅ Checklist Completion
+## Checklist Completion
 
 - [x] Implement Voucher Model
 - [x] UC-15: APIs quản lý voucher

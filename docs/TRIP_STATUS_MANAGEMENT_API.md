@@ -281,12 +281,12 @@ Content-Type: application/json
 ### Valid Transitions
 
 ```
-scheduled → ongoing     ✅ Trip starts/departs
-scheduled → cancelled   ✅ Trip cancelled before departure
-ongoing → completed     ✅ Trip finishes
-ongoing → cancelled     ✅ Trip cancelled during journey
-completed → *           ❌ Final state - no transitions
-cancelled → *           ❌ Final state - no transitions
+scheduled → ongoing     Trip starts/departs
+scheduled → cancelled   Trip cancelled before departure
+ongoing → completed     Trip finishes
+ongoing → cancelled     Trip cancelled during journey
+completed → *            Final state - no transitions
+cancelled → *            Final state - no transitions
 ```
 
 ### Validation Rules
@@ -311,13 +311,13 @@ When a trip status changes, all passengers receive a formatted HTML email with:
 - Contact information
 
 **For completed status:**
-- Subject: "✅ Chuyến xe đã hoàn thành - [Route Name]"
+- Subject: "Chuyến xe đã hoàn thành - [Route Name]"
 - Thank you message
 - Review request
 - Contact information
 
 **For cancelled status:**
-- Subject: "❌ Chuyến xe đã bị hủy - [Route Name]"
+- Subject: " Chuyến xe đã bị hủy - [Route Name]"
 - Cancellation notice
 - Refund instructions
 - Urgent styling (red highlights)

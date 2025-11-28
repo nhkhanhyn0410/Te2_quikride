@@ -54,7 +54,7 @@ class QRService {
 
       return result;
     } catch (error) {
-      console.error('❌ Encryption error:', error);
+      console.error(' Encryption error:', error);
       throw new Error('Failed to encrypt QR data');
     }
   }
@@ -98,7 +98,7 @@ class QRService {
 
       const result = JSON.parse(decrypted.toString());
 
-      console.log('✅ QR decrypted successfully:', {
+      console.log('QR decrypted successfully:', {
         ticketCode: result.ticketCode,
         bookingId: result.bookingId,
         version: result.version,
@@ -106,7 +106,7 @@ class QRService {
 
       return result;
     } catch (error) {
-      console.error('❌ Decryption error:', error);
+      console.error(' Decryption error:', error);
       console.error('QR text that failed:', encryptedText);
       throw new Error('QR code không hợp lệ hoặc bị hỏng: ' + error.message);
     }
@@ -169,7 +169,7 @@ class QRService {
         rawData: qrData, // Original data (don't expose to client)
       };
     } catch (error) {
-      console.error('❌ QR generation error:', error);
+      console.error(' QR generation error:', error);
       throw new Error('Failed to generate QR code');
     }
   }
@@ -267,7 +267,7 @@ class QRService {
 
       return buffer;
     } catch (error) {
-      console.error('❌ QR buffer generation error:', error);
+      console.error(' QR buffer generation error:', error);
       throw new Error('Failed to generate QR buffer');
     }
   }

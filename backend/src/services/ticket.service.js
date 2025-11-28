@@ -7,6 +7,7 @@ const SMSService = require('./sms.service');
 const CancellationService = require('./cancellation.service');
 const redisClient = require('../config/redis');
 const moment = require('moment-timezone');
+const logger = require('../utils/logger');
 
 // Lazy-load BookingService to avoid circular dependency
 let BookingService = null;
@@ -32,7 +33,7 @@ class TicketService {
       // Check if ticket already exists
       const existingTicket = await Ticket.findOne({ bookingId });
       if (existingTicket) {
-        console.log('⚠️ Ticket already exists for booking:', bookingId);
+        logger.warn('⚠️ Ticket already exists for booking: ' + bookingId);
         return existingTicket;
       }
 
@@ -92,10 +93,10 @@ class TicketService {
       });
 
       // Create ticket document
-      console.log('=== CREATING TICKET ===');
-      console.log('Booking ID:', booking._id);
-      console.log('Booking customerId (raw):', booking.customerId);
-      console.log('Booking customerId type:', typeof booking.customerId);
+      logger.debug('=== CREATING TICKET ===');
+      logger.debug('Booking ID: ' + booking._id);
+      logger.debug('Booking customerId (raw): ' + booking.customerId);
+      logger.debug('Booking customerId type: ' + typeof booking.customerId);
 
       // Handle both populated (object) and non-populated (ObjectId) customerId
       let ticketCustomerId = null;
@@ -108,8 +109,8 @@ class TicketService {
           ticketCustomerId = booking.customerId;
         }
       }
-      console.log('Ticket customerId:', ticketCustomerId);
-      console.log('Is Guest Booking:', !ticketCustomerId);
+      logger.debug('Ticket customerId: ' + ticketCustomerId);
+      logger.debug('Is Guest Booking: ' + !ticketCustomerId);
 
       const ticket = await Ticket.create({
         ticketCode,
@@ -153,10 +154,10 @@ class TicketService {
         status: 'valid',
       });
 
-      console.log('✅ Ticket with QR code generated successfully:', ticketCode);
+      logger.success('Ticket with QR code generated successfully: ' + ticketCode);
       return ticket;
     } catch (error) {
-      console.error('❌ Ticket generation error:', error);
+      logger.error(' Ticket generation error: ' + error.message);
       throw error;
     }
   }
@@ -190,7 +191,7 @@ class TicketService {
       const isDemoMode = process.env.DEMO_MODE === 'true';
 
       if (isDemoMode) {
-        console.log('📝 Demo mode: Simulating email and SMS notifications');
+        logger.info('📝 Demo mode: Simulating email and SMS notifications');
         results.email.sent = true;
         results.email.demo = true;
         results.sms.sent = true;
@@ -200,8 +201,8 @@ class TicketService {
         ticket.markSmsSent();
         await ticket.save();
 
-        console.log('✅ [DEMO] Email would be sent to:', contactEmail);
-        console.log('✅ [DEMO] SMS would be sent to:', contactPhone);
+        logger.success('[DEMO] Email would be sent to: ' + contactEmail);
+        logger.success('[DEMO] SMS would be sent to: ' + contactPhone);
 
         return results;
       }
@@ -241,9 +242,9 @@ class TicketService {
 
           ticket.markEmailSent();
           results.email.sent = true;
-          console.log('✅ Ticket email sent to:', contactEmail);
+          logger.success('Ticket email sent to: ' + contactEmail);
         } catch (error) {
-          console.error('❌ Email sending failed:', error);
+          logger.error(' Email sending failed: ' + error.message);
           results.email.error = error.message;
         }
       }
@@ -266,12 +267,12 @@ class TicketService {
           if (smsResult.success) {
             ticket.markSmsSent();
             results.sms.sent = true;
-            console.log('✅ Ticket SMS sent to:', contactPhone);
+            logger.success('Ticket SMS sent to: ' + contactPhone);
           } else {
             results.sms.error = smsResult.error;
           }
         } catch (error) {
-          console.error('❌ SMS sending failed:', error);
+          logger.error(' SMS sending failed: ' + error.message);
           results.sms.error = error.message;
         }
       }
@@ -280,7 +281,7 @@ class TicketService {
 
       return results;
     } catch (error) {
-      console.error('❌ Notification sending error:', error);
+      logger.error(' Notification sending error: ' + error.message);
       // Return partial results instead of throwing to not fail the booking
       return {
         email: { sent: false, error: error.message },
@@ -377,13 +378,13 @@ class TicketService {
     const redis = await redisClient;
     await redis.setEx(otpKey, 300, otp); // 5 minutes
 
-    console.log(`🔐 OTP for ${ticketCode ? 'ticket ' + ticketCode : 'phone ' + phone}: ${otp} (Demo: use 123456)`);
+    logger.info(`🔐 OTP for ${ticketCode ? 'ticket ' + ticketCode : 'phone ' + phone}: ${otp} (Demo: use 123456)`);
 
     // Send OTP via SMS
     try {
       await SMSService.sendOTP(phone, otp);
     } catch (error) {
-      console.error('Failed to send OTP SMS:', error);
+      logger.error('Failed to send OTP SMS: ' + error.message);
       // Continue anyway - for development, OTP is logged
     }
 
@@ -411,7 +412,7 @@ class TicketService {
             `,
           });
         } catch (error) {
-          console.error('Failed to send OTP email:', error);
+          logger.error('Failed to send OTP email: ' + error.message);
         }
       }
     }
@@ -457,7 +458,7 @@ class TicketService {
       // Delete OTP after successful verification
       await redis.del(otpKey);
     } else {
-      console.log('⚠️ Demo OTP (123456) accepted for testing');
+      logger.warn('Demo OTP (123456) accepted for testing');
     }
 
     // Return based on lookup type
@@ -561,10 +562,10 @@ class TicketService {
    * @returns {Promise<Object>} Tickets with metadata
    */
   static async getCustomerTickets(customerId, filters = {}) {
-    console.log('=== GET CUSTOMER TICKETS ===');
-    console.log('Customer ID:', customerId);
-    console.log('Customer ID type:', typeof customerId);
-    console.log('Filters:', filters);
+    logger.debug('=== GET CUSTOMER TICKETS ===');
+    logger.debug('Customer ID: ' + customerId);
+    logger.debug('Customer ID type: ' + typeof customerId);
+    logger.debug('Filters: ' + JSON.stringify(filters));
 
     const query = { customerId };
     const now = new Date();
@@ -628,7 +629,7 @@ class TicketService {
     const skip = (page - 1) * limit;
 
     // Get tickets
-    console.log('Final query:', JSON.stringify(query, null, 2));
+    logger.debug('Final query: ' + JSON.stringify(query, null, 2));
     const tickets = await Ticket.find(query)
       .populate('tripId')
       .populate('operatorId', 'companyName phone email logo')
@@ -637,15 +638,15 @@ class TicketService {
       .skip(skip)
       .limit(limit);
 
-    console.log('Found tickets:', tickets.length);
+    logger.debug('Found tickets: ' + tickets.length);
     if (tickets.length > 0) {
       const firstTicket = tickets[0];
-      console.log('First ticket customerId:', firstTicket.customerId);
-      console.log('First ticket code:', firstTicket.ticketCode);
-      console.log('First ticket tripId:', firstTicket.tripId ? 'populated' : 'NULL');
-      console.log('First ticket operatorId:', firstTicket.operatorId ? 'populated' : 'NULL');
-      console.log('First ticket bookingId:', firstTicket.bookingId ? 'populated' : 'NULL');
-      console.log('First ticket structure (no QR):', JSON.stringify({
+      logger.debug('First ticket customerId: ' + firstTicket.customerId);
+      logger.debug('First ticket code: ' + firstTicket.ticketCode);
+      logger.debug('First ticket tripId: ' + (firstTicket.tripId ? 'populated' : 'NULL'));
+      logger.debug('First ticket operatorId: ' + (firstTicket.operatorId ? 'populated' : 'NULL'));
+      logger.debug('First ticket bookingId: ' + (firstTicket.bookingId ? 'populated' : 'NULL'));
+      logger.debug('First ticket structure (no QR): ' + JSON.stringify({
         _id: firstTicket._id,
         ticketCode: firstTicket.ticketCode,
         customerId: firstTicket.customerId,
@@ -663,7 +664,7 @@ class TicketService {
 
     // Get total count
     const total = await Ticket.countDocuments(query);
-    console.log('Total matching tickets:', total);
+    logger.debug('Total matching tickets: ' + total);
 
     // Calculate stats
     const stats = {
@@ -697,11 +698,11 @@ class TicketService {
       stats,
     };
 
-    console.log('Returning result:', {
+    logger.debug('Returning result: ' + JSON.stringify({
       ticketCount: tickets.length,
       pagination: result.pagination,
       stats: result.stats
-    });
+    }));
 
     return result;
   }
@@ -813,7 +814,7 @@ class TicketService {
         passengers: ticket.passengers,
       };
     } catch (error) {
-      console.error('❌ QR verification error:', error);
+      logger.error(' QR verification error: ' + error.message);
       return {
         success: false,
         error: error.message || 'Lỗi xác thực QR code',
@@ -882,9 +883,9 @@ class TicketService {
         subject: emailTemplate.subject,
         html: emailTemplate.html,
       });
-      console.log('✅ Cancellation email sent to:', booking.contactInfo.email);
+      logger.success('Cancellation email sent to: ' + booking.contactInfo.email);
     } catch (error) {
-      console.error('❌ Failed to send cancellation email:', error);
+      logger.error(' Failed to send cancellation email: ' + error.message);
       // Don't fail the cancellation if email fails
     }
 
@@ -895,9 +896,9 @@ ${refundInfo.refundAmount > 0 ? `So tien hoan: ${refundInfo.refundAmount.toLocal
 ${refundInfo.appliedRule}`;
 
       await SMSService.sendSMS(booking.contactInfo.phone, message);
-      console.log('✅ Cancellation SMS sent to:', booking.contactInfo.phone);
+      logger.success('Cancellation SMS sent to: ' + booking.contactInfo.phone);
     } catch (error) {
-      console.error('❌ Failed to send cancellation SMS:', error);
+      logger.error(' Failed to send cancellation SMS: ' + error.message);
       // Don't fail the cancellation if SMS fails
     }
 
@@ -1056,7 +1057,7 @@ ${refundInfo.appliedRule}`;
             });
           }
         } catch (error) {
-          console.error('Refund for ticket change failed:', error);
+          logger.error('Refund for ticket change failed: ' + error.message);
           // Don't fail the change if refund fails
         }
       }
@@ -1153,9 +1154,9 @@ ${refundInfo.appliedRule}`;
           html: emailTemplate.html,
         });
 
-        console.log('✅ Ticket change email sent to:', oldBooking.contactInfo.email);
+        logger.success('Ticket change email sent to: ' + oldBooking.contactInfo.email);
       } catch (error) {
-        console.error('❌ Failed to send ticket change email:', error);
+        logger.error(' Failed to send ticket change email: ' + error.message);
       }
 
       // Send SMS notification
@@ -1167,9 +1168,9 @@ Gio di: ${moment(newTrip.departureTime).tz('Asia/Ho_Chi_Minh').format('HH:mm DD/
 ${priceDifference !== 0 ? `Chenh lech: ${priceDifference > 0 ? '+' : ''}${priceDifference.toLocaleString('vi-VN')} VND` : ''}`;
 
         await SMSService.sendSMS(oldBooking.contactInfo.phone, message);
-        console.log('✅ Ticket change SMS sent to:', oldBooking.contactInfo.phone);
+        logger.success('Ticket change SMS sent to: ' + oldBooking.contactInfo.phone);
       } catch (error) {
-        console.error('❌ Failed to send ticket change SMS:', error);
+        logger.error(' Failed to send ticket change SMS: ' + error.message);
       }
 
       return {

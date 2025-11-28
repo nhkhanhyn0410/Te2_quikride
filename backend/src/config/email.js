@@ -101,10 +101,10 @@ const sendEmail = async ({ to, subject, html, text, attachments = [], qrCodeData
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent:', info.messageId);
+    console.log('Email sent:', info.messageId);
     return info;
   } catch (error) {
-    console.error('❌ Email send error:', error);
+    console.error(' Email send error:', error);
     throw new Error(`Failed to send email: ${error.message}`);
   }
 };
@@ -191,7 +191,7 @@ const emailTemplates = {
           <!-- Success Message -->
           <div style="text-align: center; margin: 30px 0;">
             <div style="display: inline-block; background: #d1fae5; color: #065f46; padding: 10px 20px; border-radius: 20px; font-size: 14px;">
-              ✅ Đặt vé thành công
+              Đặt vé thành công
             </div>
           </div>
 
@@ -339,7 +339,7 @@ const emailTemplates = {
           <!-- Cancellation Message -->
           <div style="text-align: center; margin: 30px 0;">
             <div style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 10px 20px; border-radius: 20px; font-size: 14px;">
-              ❌ Vé đã được hủy
+               Vé đã được hủy
             </div>
           </div>
 
@@ -488,7 +488,7 @@ const emailTemplates = {
 
           <!-- Old Ticket Info -->
           <div style="background: #fef2f2; padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444; margin: 20px 0;">
-            <h3 style="color: #dc2626; margin-top: 0;">❌ Vé cũ (Đã hủy)</h3>
+            <h3 style="color: #dc2626; margin-top: 0;"> Vé cũ (Đã hủy)</h3>
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 8px 0; color: #7f1d1d; width: 40%;">Mã đặt chỗ:</td>
@@ -515,7 +515,7 @@ const emailTemplates = {
 
           <!-- New Ticket Info -->
           <div style="background: #d1fae5; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; margin: 20px 0;">
-            <h3 style="color: #065f46; margin-top: 0;">✅ Vé mới</h3>
+            <h3 style="color: #065f46; margin-top: 0;">Vé mới</h3>
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 8px 0; color: #047857; width: 40%;">Mã đặt chỗ:</td>

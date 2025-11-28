@@ -183,14 +183,14 @@ const TripsPage = () => {
           setPriceRange([0, Math.ceil(max / 10000) * 10000]);
         }
 
-        console.log(`✅ Processed ${processedTrips.length} trips successfully`);
+        console.log(`Processed ${processedTrips.length} trips successfully`);
         toast.success(`Tìm thấy ${processedTrips.length} chuyến xe`);
       } else {
         setTrips([]);
         toast.error('Không tìm thấy chuyến xe phù hợp');
       }
     } catch (error) {
-      console.error('❌ Fetch trips error:', error);
+      console.error(' Fetch trips error:', error);
       setTrips([]);
       toast.error(typeof error === 'string' ? error : 'Có lỗi xảy ra khi tìm kiếm chuyến xe');
     } finally {
@@ -272,14 +272,14 @@ const TripsPage = () => {
           setPriceRange([0, Math.ceil(max / 10000) * 10000]);
         }
 
-        console.log(`✅ Loaded ${processedTrips.length} available trips`);
+        console.log(`Loaded ${processedTrips.length} available trips`);
         toast.success(`Hiển thị ${processedTrips.length} chuyến xe có sẵn`);
       } else {
         setTrips([]);
         toast.info('Hiện không có chuyến xe nào');
       }
     } catch (error) {
-      console.error('❌ Fetch all trips error:', error);
+      console.error(' Fetch all trips error:', error);
       setTrips([]);
       toast.error(typeof error === 'string' ? error : 'Có lỗi xảy ra khi tải danh sách chuyến xe');
     } finally {
@@ -376,7 +376,7 @@ const TripsPage = () => {
       // Navigate to trip detail page
       navigate(`/trips/${trip._id}`);
     } catch (error) {
-      console.error('❌ Error selecting trip:', error);
+      console.error(' Error selecting trip:', error);
       toast.error('Có lỗi xảy ra khi chọn chuyến xe');
     }
   };

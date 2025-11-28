@@ -42,7 +42,7 @@ class SchedulerService {
       await this.cleanupExpiredSeatLocks();
     });
 
-    console.log('✅ Scheduler service initialized');
+    console.log('Scheduler service initialized');
   }
 
   /**
@@ -89,10 +89,10 @@ class SchedulerService {
       }
 
       console.log(
-        `✅ Sent reminders for ${trips24h.length} trips (24h) and ${trips2h.length} trips (2h)`
+        `Sent reminders for ${trips24h.length} trips (24h) and ${trips2h.length} trips (2h)`
       );
     } catch (error) {
-      console.error('❌ Error sending trip reminders:', error);
+      console.error(' Error sending trip reminders:', error);
     }
   }
 
@@ -165,9 +165,9 @@ class SchedulerService {
         await this.delay(100);
       }
 
-      console.log(`✅ Sent ${timeframe} reminders for trip ${trip._id}`);
+      console.log(`Sent ${timeframe} reminders for trip ${trip._id}`);
     } catch (error) {
-      console.error(`❌ Error sending ${timeframe} reminders for trip:`, error);
+      console.error(` Error sending ${timeframe} reminders for trip:`, error);
     }
   }
 
@@ -320,9 +320,9 @@ class SchedulerService {
         await this.delay(200);
       }
 
-      console.log(`✅ Sent ${sent} review invitations (${skipped} skipped)`);
+      console.log(`Sent ${sent} review invitations (${skipped} skipped)`);
     } catch (error) {
-      console.error('❌ Error sending review invitations:', error);
+      console.error(' Error sending review invitations:', error);
     }
   }
 
@@ -336,10 +336,10 @@ class SchedulerService {
       const result = await loyaltyService.cleanupExpiredPoints();
 
       console.log(
-        `✅ Expired points cleanup: ${result.usersAffected} users, ${result.pointsRemoved} points removed`
+        `Expired points cleanup: ${result.usersAffected} users, ${result.pointsRemoved} points removed`
       );
     } catch (error) {
-      console.error('❌ Error cleaning up expired points:', error);
+      console.error(' Error cleaning up expired points:', error);
     }
   }
 
@@ -352,7 +352,7 @@ class SchedulerService {
       // For now, just log
       console.log('🧹 Cleaning up expired seat locks...');
     } catch (error) {
-      console.error('❌ Error cleaning up seat locks:', error);
+      console.error(' Error cleaning up seat locks:', error);
     }
   }
 
@@ -373,7 +373,7 @@ class SchedulerService {
     Object.values(this.jobs).forEach((job) => {
       if (job) job.stop();
     });
-    console.log('✅ All jobs stopped');
+    console.log('All jobs stopped');
   }
 
   /**
@@ -384,7 +384,7 @@ class SchedulerService {
     Object.values(this.jobs).forEach((job) => {
       if (job) job.start();
     });
-    console.log('✅ All jobs started');
+    console.log('All jobs started');
   }
 }
 

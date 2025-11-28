@@ -42,14 +42,14 @@ class SMSService {
       );
 
       if (response.data && response.data.CodeResult === '100') {
-        console.log('✅ VNPT SMS sent successfully to:', phone);
+        logger.success('VNPT SMS sent successfully to: ' + phone);
         return {
           success: true,
           messageId: response.data.SMSID,
           provider: 'vnpt',
         };
       } else {
-        console.error('❌ VNPT SMS failed:', response.data);
+        logger.error(' VNPT SMS failed: ' + JSON.stringify(response.data));
         return {
           success: false,
           error: response.data?.Message || 'SMS sending failed',
@@ -57,7 +57,7 @@ class SMSService {
         };
       }
     } catch (error) {
-      console.error('❌ VNPT SMS error:', error.message);
+      logger.error(' VNPT SMS error: ' + error.message);
       return {
         success: false,
         error: error.message,
@@ -94,14 +94,14 @@ class SMSService {
       );
 
       if (response.data && response.data.status === 'success') {
-        console.log('✅ Viettel SMS sent successfully to:', phone);
+        logger.success('Viettel SMS sent successfully to: ' + phone);
         return {
           success: true,
           messageId: response.data.messageId,
           provider: 'viettel',
         };
       } else {
-        console.error('❌ Viettel SMS failed:', response.data);
+        logger.error(' Viettel SMS failed: ' + JSON.stringify(response.data));
         return {
           success: false,
           error: response.data?.message || 'SMS sending failed',
@@ -109,7 +109,7 @@ class SMSService {
         };
       }
     } catch (error) {
-      console.error('❌ Viettel SMS error:', error.message);
+      logger.error(' Viettel SMS error: ' + error.message);
       return {
         success: false,
         error: error.message,
@@ -126,7 +126,7 @@ class SMSService {
    */
   async sendSMS(phone, message) {
     if (!this.enabled) {
-      console.log('⚠️ SMS service is disabled');
+      logger.warn('SMS service is disabled');
       return {
         success: false,
         error: 'SMS service is disabled',
@@ -235,10 +235,10 @@ Vui long co mat truoc 15 phut!`;
    * @returns {Promise<Object>} Mock result
    */
   async mockSend(phone, message) {
-    console.log('📱 [MOCK SMS]');
-    console.log(`To: ${phone}`);
-    console.log(`Message: ${message}`);
-    console.log('---');
+    logger.info('📱 [MOCK SMS]');
+    logger.info(`To: ${phone}`);
+    logger.info(`Message: ${message}`);
+    logger.info('---');
 
     return {
       success: true,

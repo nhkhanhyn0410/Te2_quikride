@@ -1046,10 +1046,10 @@ Payment.gatewayResponse: { select: false }
 ## Conclusion
 
 Database schema được thiết kế để:
-- ✅ **Flexible:** Dễ dàng mở rộng tính năng
-- ✅ **Performant:** Tối ưu với indexes và caching
-- ✅ **Scalable:** Sẵn sàng cho horizontal scaling
-- ✅ **Secure:** Bảo mật data với encryption và access control
-- ✅ **Maintainable:** Document structure rõ ràng, dễ maintain
+- **Flexible:** Dễ dàng mở rộng tính năng
+- **Performant:** Tối ưu với indexes và caching
+- **Scalable:** Sẵn sàng cho horizontal scaling
+- **Secure:** Bảo mật data với encryption và access control
+- **Maintainable:** Document structure rõ ràng, dễ maintain
 
 Các relationships được thiết kế cân bằng giữa **normalization** (tránh duplicate) và **denormalization** (performance cho read operations).

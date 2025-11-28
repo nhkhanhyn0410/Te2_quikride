@@ -20,12 +20,12 @@ class BusService {
         row.forEach(seat => {
           // Count only actual seats (not empty, not aisle, not driver, not floor marker)
           if (seat &&
-              seat !== '' &&
-              seat !== 'DRIVER' &&
-              seat !== 'FLOOR_2' &&
-              seat !== '🚗' &&
-              seat.toUpperCase() !== 'AISLE' &&
-              !seat.toLowerCase().includes('aisle')) {
+            seat !== '' &&
+            seat !== 'DRIVER' &&
+            seat !== 'FLOOR_2' &&
+            seat !== '🚗' &&
+            seat.toUpperCase() !== 'AISLE' &&
+            !seat.toLowerCase().includes('aisle')) {
             count++;
           }
         });
@@ -278,8 +278,8 @@ class BusService {
     Object.assign(bus, updateData);
     await bus.save();
 
-    console.log('✅ UPDATE BUS - Saved totalSeats:', bus.seatLayout.totalSeats);
-    console.log('✅ UPDATE BUS - Bus object saved successfully');
+    console.log('UPDATE BUS - Saved totalSeats:', bus.seatLayout.totalSeats);
+    console.log('UPDATE BUS - Bus object saved successfully');
 
     return bus;
   }

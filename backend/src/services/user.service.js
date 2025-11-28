@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { uploadImage, deleteImage } = require('../config/cloudinary');
+const logger = require('../utils/logger');
 
 /**
  * User Service
@@ -81,7 +82,7 @@ class UserService {
         const publicId = publicIdWithExtension.split('.')[0];
         await deleteImage(publicId);
       } catch (error) {
-        console.error('Error deleting old avatar:', error);
+        logger.error('Error deleting old avatar: ' + error.message);
         // Continue even if delete fails
       }
     }
@@ -123,7 +124,7 @@ class UserService {
       const publicId = publicIdWithExtension.split('.')[0];
       await deleteImage(publicId);
     } catch (error) {
-      console.error('Error deleting avatar from Cloudinary:', error);
+      logger.error('Error deleting avatar from Cloudinary: ' + error.message);
     }
 
     // Xóa avatar URL khỏi database

@@ -250,7 +250,7 @@ const BusesPage = () => {
             <label className="block mb-2 font-medium">Sơ Đồ Ghế:</label>
             {seatLayout ? (
               <div className="p-4 bg-gray-50 rounded">
-                <p>✅ Đã tạo sơ đồ: {seatLayout.totalSeats} ghế</p>
+                <p>Đã tạo sơ đồ: {seatLayout.totalSeats} ghế</p>
                 <Button size="small" onClick={() => setLayoutModalVisible(true)}>
                   Chỉnh Sửa
                 </Button>

@@ -11,15 +11,15 @@ const connectRedis = async () => {
     });
 
     redisClient.on('error', (err) => {
-      console.error('❌ Redis Client Error:', err);
+      console.error(' Redis Client Error:', err);
     });
 
     redisClient.on('connect', () => {
-      console.log('✅ Redis Connected');
+      console.log('Redis Connected');
     });
 
     redisClient.on('ready', () => {
-      console.log('✅ Redis Ready');
+      console.log('Redis Ready');
     });
 
     redisClient.on('reconnecting', () => {
@@ -31,11 +31,11 @@ const connectRedis = async () => {
     // Test connection
     await redisClient.set('test', 'Redis Connection OK');
     const testValue = await redisClient.get('test');
-    console.log('✅ Redis Test:', testValue);
+    console.log('Redis Test:', testValue);
 
     return redisClient;
   } catch (error) {
-    console.error('❌ Error connecting to Redis:', error.message);
+    console.error(' Error connecting to Redis:', error.message);
     // Don't exit process, Redis is not critical for initial setup
     // process.exit(1);
   }

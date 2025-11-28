@@ -94,9 +94,9 @@ const MyTicketsPage = () => {
           total: pagination.total || 0,
         });
 
-        console.log('✅ Tickets set:', tickets.length);
+        console.log('Tickets set:', tickets.length);
       } else {
-        console.error('❌ Response not successful:', response);
+        console.error(' Response not successful:', response);
       }
     } catch (error) {
       console.error('Fetch tickets error:', error);

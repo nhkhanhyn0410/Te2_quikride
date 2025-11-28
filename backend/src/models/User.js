@@ -347,7 +347,7 @@ userSchema.methods.removeExpiredPoints = async function () {
     // Update loyalty tier
     this.updateLoyaltyTier();
 
-    console.log(`✅ Removed ${expiredPoints} expired points for user ${this._id}`);
+    console.log(`Removed ${expiredPoints} expired points for user ${this._id}`);
   }
 
   return expiredPoints;

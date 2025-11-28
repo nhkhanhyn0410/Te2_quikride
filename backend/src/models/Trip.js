@@ -544,7 +544,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
   // Validate status
   const validJourneyStatuses = ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'];
   if (!validJourneyStatuses.includes(status)) {
-    console.error('❌ Invalid journey status:', status);
+    console.error(' Invalid journey status:', status);
     throw new Error(`Trạng thái hành trình không hợp lệ: ${status}`);
   }
 
@@ -575,7 +575,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
     case 'at_stop':
       // REQUIRED: stopIndex must be provided when at_stop
       if (stopIndex === undefined || stopIndex === null) {
-        console.error('❌ Missing stopIndex for at_stop status');
+        console.error(' Missing stopIndex for at_stop status');
         throw new Error('Vui lòng chọn điểm dừng khi cập nhật trạng thái "Tại điểm dừng"');
       }
 
@@ -604,7 +604,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       const isCorrectingAtStop = oldStatus === 'at_stop';
 
       if (requestedStopIndex > expectedNextStop && !isMovingFromOrigin && !isCorrectingAtStop) {
-        console.error('❌ Cannot skip stops:', {
+        console.error(' Cannot skip stops:', {
           requestedStopIndex,
           expectedNextStop,
           oldStopIndex,
@@ -622,7 +622,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       if (!this.journey.stoppedAt.includes(newStopIndex)) {
         this.journey.stoppedAt.push(newStopIndex);
         this.journey.stoppedAt.sort((a, b) => a - b); // Keep sorted
-        console.log('✅ Marked stop as visited:', newStopIndex, 'Total visited:', this.journey.stoppedAt);
+        console.log('Marked stop as visited:', newStopIndex, 'Total visited:', this.journey.stoppedAt);
       }
       break;
 
@@ -697,7 +697,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
 
   await this.save();
 
-  console.log('✅ Journey updated successfully:', {
+  console.log('Journey updated successfully:', {
     tripId: this._id,
     oldStatus,
     newStatus: this.journey.currentStatus,

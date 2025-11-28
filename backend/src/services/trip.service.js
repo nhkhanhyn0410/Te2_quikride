@@ -3,6 +3,7 @@ const Route = require('../models/Route');
 const Bus = require('../models/Bus');
 const Employee = require('../models/Employee');
 const { v4: uuidv4 } = require('uuid');
+const logger = require('../utils/logger');
 
 /**
  * Trip Service
@@ -502,7 +503,7 @@ class TripService {
       sortOrder = 'asc',
     } = searchCriteria;
 
-    console.log('🔍 Search criteria:', { fromCity, toCity, date, passengers });
+    logger.debug('🔍 Search criteria: ' + JSON.stringify({ fromCity, toCity, date, passengers }));
 
     // Build query
     const query = {
@@ -522,7 +523,7 @@ class TripService {
         $gte: startOfDay,
         $lte: endOfDay,
       };
-      console.log('📅 Date range:', { startOfDay, endOfDay });
+      logger.debug('📅 Date range: ' + JSON.stringify({ startOfDay, endOfDay }));
     } else {
       // If no date specified (browse all mode), show trips from last 7 days to future
       // This helps with demo/testing and allows users to see recent trips
@@ -532,7 +533,7 @@ class TripService {
       query.departureTime = {
         $gte: sevenDaysAgo, // Include trips from last 7 days
       };
-      console.log('📅 Browse mode: showing trips from last 7 days to future', { sevenDaysAgo });
+      logger.debug('📅 Browse mode: showing trips from last 7 days to future ' + JSON.stringify({ sevenDaysAgo }));
     }
 
     // Price range filter
@@ -570,13 +571,13 @@ class TripService {
       .sort(sortCriteria)
       .lean();
 
-    console.log(`🚌 Found ${trips.length} trips from database`);
+    logger.debug(`🚌 Found ${trips.length} trips from database`);
     if (trips.length > 0) {
-      console.log('Sample trip routes:', trips.slice(0, 2).map(t => ({
+      logger.debug('Sample trip routes: ' + JSON.stringify(trips.slice(0, 2).map(t => ({
         from: t.routeId?.origin?.city,
         to: t.routeId?.destination?.city,
         departure: t.departureTime
-      })));
+      }))));
     }
 
     // Filter by cities (after populate)
@@ -597,27 +598,27 @@ class TripService {
           return fromMatch && toMatch;
         }
       );
-      console.log(`🏙️  After city filter (${fromCity} → ${toCity}): ${trips.length} trips`);
+      logger.debug(`🏙️  After city filter (${fromCity} → ${toCity}): ${trips.length} trips`);
     } else if (fromCity) {
       trips = trips.filter(
         (trip) => {
           if (!trip.routeId) return false;
 
           return trip.routeId.origin.province?.toLowerCase().includes(fromCity.toLowerCase()) ||
-                 trip.routeId.origin.city?.toLowerCase().includes(fromCity.toLowerCase());
+            trip.routeId.origin.city?.toLowerCase().includes(fromCity.toLowerCase());
         }
       );
-      console.log(`🏙️  After fromCity filter (${fromCity}): ${trips.length} trips`);
+      logger.debug(`🏙️  After fromCity filter (${fromCity}): ${trips.length} trips`);
     } else if (toCity) {
       trips = trips.filter(
         (trip) => {
           if (!trip.routeId) return false;
 
           return trip.routeId.destination.province?.toLowerCase().includes(toCity.toLowerCase()) ||
-                 trip.routeId.destination.city?.toLowerCase().includes(toCity.toLowerCase());
+            trip.routeId.destination.city?.toLowerCase().includes(toCity.toLowerCase());
         }
       );
-      console.log(`🏙️  After toCity filter (${toCity}): ${trips.length} trips`);
+      logger.debug(`🏙️  After toCity filter (${toCity}): ${trips.length} trips`);
     }
 
     // Filter by bus type (after populate)
@@ -655,7 +656,7 @@ class TripService {
       });
     }
 
-    console.log(`✅ Returning ${trips.length} trips after all filters`);
+    logger.debug(`Returning ${trips.length} trips after all filters`);
     return trips;
   }
 

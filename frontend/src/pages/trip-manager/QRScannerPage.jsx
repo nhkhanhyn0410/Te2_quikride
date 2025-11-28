@@ -188,11 +188,11 @@ const QRScannerPage = () => {
         html5QrCode
           .scanFile(file, true) // true = show image
           .then((decodedText) => {
-            console.log('✅ QR code decoded successfully:', decodedText);
+            console.log('QR code decoded successfully:', decodedText);
             resolve(decodedText);
           })
           .catch((err) => {
-            console.error('❌ QR decode failed:', err);
+            console.error(' QR decode failed:', err);
             reject(err);
           });
       });
@@ -202,7 +202,7 @@ const QRScannerPage = () => {
       // Verify ticket
       await verifyTicket(decodedText);
     } catch (error) {
-      console.error('❌ Upload QR error:', error);
+      console.error(' Upload QR error:', error);
 
       // Provide more specific error messages
       let errorMessage = 'Không thể đọc mã QR từ ảnh.';

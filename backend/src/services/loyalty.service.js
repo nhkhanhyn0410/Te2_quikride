@@ -74,7 +74,7 @@ class LoyaltyService {
       user.addPoints(`Hoàn thành chuyến đi - Booking ${booking.bookingCode}`, pointsToAward, booking.tripId);
       await user.save();
 
-      console.log(`✅ Awarded ${pointsToAward} points to user ${userId}`);
+      console.log(`Awarded ${pointsToAward} points to user ${userId}`);
 
       // Send notification
       if (user.email) {
@@ -93,7 +93,7 @@ class LoyaltyService {
         message: `Bạn đã nhận được ${pointsToAward} điểm!`,
       };
     } catch (error) {
-      console.error('❌ Error awarding points:', error);
+      console.error(' Error awarding points:', error);
       throw error;
     }
   }
@@ -125,7 +125,7 @@ class LoyaltyService {
       user.redeemPoints(points, `Đổi ${points} điểm lấy giảm giá ${discountAmount.toLocaleString('vi-VN')} VND`);
       await user.save();
 
-      console.log(`✅ Redeemed ${points} points for user ${userId}`);
+      console.log(`Redeemed ${points} points for user ${userId}`);
 
       return {
         success: true,
@@ -135,7 +135,7 @@ class LoyaltyService {
         message: `Đã đổi ${points} điểm lấy giảm giá ${discountAmount.toLocaleString('vi-VN')} VND`,
       };
     } catch (error) {
-      console.error('❌ Error redeeming points:', error);
+      console.error(' Error redeeming points:', error);
       throw error;
     }
   }
@@ -206,7 +206,7 @@ class LoyaltyService {
         },
       };
     } catch (error) {
-      console.error('❌ Error getting loyalty history:', error);
+      console.error(' Error getting loyalty history:', error);
       throw error;
     }
   }
@@ -272,7 +272,7 @@ class LoyaltyService {
         redemptionValue: user.totalPoints * 1000, // 1 point = 1,000 VND
       };
     } catch (error) {
-      console.error('❌ Error getting loyalty overview:', error);
+      console.error(' Error getting loyalty overview:', error);
       throw error;
     }
   }
@@ -348,7 +348,7 @@ class LoyaltyService {
       }
 
       console.log(
-        `✅ Cleanup completed: ${totalUsersAffected} users, ${totalPointsRemoved} points removed`
+        `Cleanup completed: ${totalUsersAffected} users, ${totalPointsRemoved} points removed`
       );
 
       return {
@@ -357,7 +357,7 @@ class LoyaltyService {
         pointsRemoved: totalPointsRemoved,
       };
     } catch (error) {
-      console.error('❌ Error cleaning up expired points:', error);
+      console.error(' Error cleaning up expired points:', error);
       throw error;
     }
   }

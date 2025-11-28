@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 const SeatService = require('./seat.service');
 const AuthService = require('./auth.service');
+const logger = require('../utils/logger');
 
 /**
  * WebSocket Service
@@ -28,7 +29,7 @@ class WebSocketService {
 
     this.setupEventHandlers();
 
-    console.log('✅ WebSocket Server Initialized');
+    logger.success('WebSocket Server Initialized');
   }
 
   /**
@@ -36,7 +37,7 @@ class WebSocketService {
    */
   setupEventHandlers() {
     this.io.on('connection', (socket) => {
-      console.log(`🔌 Client connected: ${socket.id}`);
+      logger.info(`🔌 Client connected: ${socket.id}`);
 
       // Handle authentication (optional)
       socket.on('authenticate', async (data) => {
@@ -46,10 +47,10 @@ class WebSocketService {
             const decoded = AuthService.verifyToken(token);
             socket.userId = decoded.userId;
             socket.authenticated = true;
-            console.log(`✅ Socket ${socket.id} authenticated as user ${socket.userId}`);
+            logger.success(`Socket ${socket.id} authenticated as user ${socket.userId}`);
           }
         } catch (error) {
-          console.error('Socket authentication error:', error.message);
+          logger.error('Socket authentication error: ' + error.message);
           socket.authenticated = false;
         }
       });
@@ -73,7 +74,7 @@ class WebSocketService {
           }
           this.connectedClients.get(tripId).add(socket.id);
 
-          console.log(`📍 Socket ${socket.id} joined trip ${tripId}`);
+          logger.info(`📍 Socket ${socket.id} joined trip ${tripId}`);
 
           // Send initial seat status
           const seatStatus = await SeatService.getTripSeatStatus(tripId);
@@ -86,7 +87,7 @@ class WebSocketService {
             timestamp: new Date(),
           });
         } catch (error) {
-          console.error('Error joining trip:', error);
+          logger.error('Error joining trip: ' + error.message);
           socket.emit('error', { message: error.message });
         }
       });
@@ -107,10 +108,10 @@ class WebSocketService {
               }
             }
 
-            console.log(`📍 Socket ${socket.id} left trip ${tripId}`);
+            logger.info(`📍 Socket ${socket.id} left trip ${tripId}`);
           }
         } catch (error) {
-          console.error('Error leaving trip:', error);
+          logger.error('Error leaving trip: ' + error.message);
         }
       });
 
@@ -133,14 +134,14 @@ class WebSocketService {
             timestamp: new Date(),
           });
         } catch (error) {
-          console.error('Error requesting seat status:', error);
+          logger.error('Error requesting seat status: ' + error.message);
           socket.emit('error', { message: error.message });
         }
       });
 
       // Handle disconnect
       socket.on('disconnect', () => {
-        console.log(`🔌 Client disconnected: ${socket.id}`);
+        logger.info(`🔌 Client disconnected: ${socket.id}`);
 
         // Remove from all trip rooms
         if (socket.currentTripId) {
@@ -155,7 +156,7 @@ class WebSocketService {
 
       // Handle errors
       socket.on('error', (error) => {
-        console.error('Socket error:', error);
+        logger.error('Socket error: ' + error.message);
       });
     });
   }
@@ -167,7 +168,7 @@ class WebSocketService {
   async broadcastSeatUpdate(tripId) {
     try {
       if (!this.io) {
-        console.warn('WebSocket server not initialized');
+        logger.warn('WebSocket server not initialized');
         return;
       }
 
@@ -182,9 +183,9 @@ class WebSocketService {
         timestamp: new Date(),
       });
 
-      console.log(`📢 Broadcasted seat update for trip ${tripId} to ${this.connectedClients.get(tripId)?.size || 0} clients`);
+      logger.info(`📢 Broadcasted seat update for trip ${tripId} to ${this.connectedClients.get(tripId)?.size || 0} clients`);
     } catch (error) {
-      console.error('Error broadcasting seat update:', error);
+      logger.error('Error broadcasting seat update: ' + error.message);
     }
   }
 
@@ -197,7 +198,7 @@ class WebSocketService {
   async broadcastSeatAction(tripId, seats, action) {
     try {
       if (!this.io) {
-        console.warn('WebSocket server not initialized');
+        logger.warn('WebSocket server not initialized');
         return;
       }
 
@@ -211,7 +212,7 @@ class WebSocketService {
       // Also send full seat status
       await this.broadcastSeatUpdate(tripId);
     } catch (error) {
-      console.error('Error broadcasting seat action:', error);
+      logger.error('Error broadcasting seat action: ' + error.message);
     }
   }
 

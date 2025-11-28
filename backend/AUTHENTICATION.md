@@ -1,6 +1,6 @@
 # Authentication System - Phase 1.4
 
-## ✅ Hoàn thành
+## Hoàn thành
 
 Phase 1.4 - Authentication System đã được implement đầy đủ với các tính năng sau:
 
@@ -253,17 +253,17 @@ RATE_LIMIT_WINDOW=60000
 
 ## 🔐 Security Best Practices Implemented
 
-1. ✅ Password hashing với bcrypt (salt rounds: 12)
-2. ✅ JWT tokens với expiration
-3. ✅ Separate access & refresh tokens
-4. ✅ Rate limiting (100 requests/phút/IP)
-5. ✅ Input validation
-6. ✅ Password strength validation (1 lowercase, 1 uppercase, 1 digit, min 6 chars)
-7. ✅ Email & phone verification
-8. ✅ Secure password reset với token expiry
-9. ✅ Account blocking mechanism
-10. ✅ CORS configuration
-11. ✅ Helmet.js security headers
+1. Password hashing với bcrypt (salt rounds: 12)
+2. JWT tokens với expiration
+3. Separate access & refresh tokens
+4. Rate limiting (100 requests/phút/IP)
+5. Input validation
+6. Password strength validation (1 lowercase, 1 uppercase, 1 digit, min 6 chars)
+7. Email & phone verification
+8. Secure password reset với token expiry
+9. Account blocking mechanism
+10. CORS configuration
+11. Helmet.js security headers
 
 ---
 

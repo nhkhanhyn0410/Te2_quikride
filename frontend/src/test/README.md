@@ -135,14 +135,14 @@ The test environment includes:
 ## Covered Functionality
 
 ### authStore Tests
-- ✅ Initial state
-- ✅ setUser action
-- ✅ setToken action
-- ✅ login action
-- ✅ logout action
-- ✅ updateUser action
-- ✅ setLoading action
-- ✅ State persistence across instances
+- Initial state
+- setUser action
+- setToken action
+- login action
+- logout action
+- updateUser action
+- setLoading action
+- State persistence across instances
 
 ## Next Steps
 

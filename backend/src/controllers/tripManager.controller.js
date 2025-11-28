@@ -618,7 +618,7 @@ class TripManagerController {
 
       // Validate input
       if (!status) {
-        console.error('❌ Missing status in journey update');
+        console.error(' Missing status in journey update');
         return res.status(400).json({
           success: false,
           message: 'Trạng thái hành trình là bắt buộc',
@@ -627,7 +627,7 @@ class TripManagerController {
 
       const validJourneyStatuses = ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'];
       if (!validJourneyStatuses.includes(status)) {
-        console.error('❌ Invalid journey status:', status);
+        console.error(' Invalid journey status:', status);
         return res.status(400).json({
           success: false,
           message: `Trạng thái không hợp lệ. Chỉ chấp nhận: ${validJourneyStatuses.join(', ')}`,
@@ -640,7 +640,7 @@ class TripManagerController {
       const trip = await Trip.findById(tripId);
 
       if (!trip) {
-        console.error('❌ Trip not found:', tripId);
+        console.error(' Trip not found:', tripId);
         return res.status(404).json({
           success: false,
           message: 'Không tìm thấy chuyến xe',
@@ -687,7 +687,7 @@ class TripManagerController {
           message = 'Trạng thái hành trình đã được cập nhật';
       }
 
-      console.log('✅ Journey status updated successfully:', {
+      console.log('Journey status updated successfully:', {
         oldStatus: result.oldStatus,
         newStatus: result.newStatus,
         oldStopIndex: result.oldStopIndex,
@@ -734,7 +734,7 @@ class TripManagerController {
         },
       });
     } catch (error) {
-      console.error('❌ Update journey status error:', error);
+      console.error(' Update journey status error:', error);
       console.error('Error stack:', error.stack);
 
       // Handle specific error messages

@@ -65,14 +65,14 @@ const DashboardPage = () => {
 
       if (response.success) {
         setStats(response.data);
-        console.log('✅ Stats loaded:', {
+        console.log('Stats loaded:', {
           revenue: response.data.revenue,
           bookings: response.data.bookings,
           trips: response.data.trips,
           hasTrends: !!response.data.trends
         });
       } else {
-        console.error('❌ Response not successful:', response);
+        console.error(' Response not successful:', response);
       }
     } catch (error) {
       message.error(error || 'Không thể tải thống kê dashboard');

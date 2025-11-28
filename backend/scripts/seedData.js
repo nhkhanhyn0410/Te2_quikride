@@ -8,6 +8,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const logger = require('../utils/logger');
 
 // Import models
 const User = require('../src/models/User');
@@ -33,9 +34,9 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log('✅ MongoDB Connected');
+    logger.log('MongoDB Connected');
   } catch (error) {
-    console.error('❌ MongoDB Connection Error:', error);
+    logger.error('MongoDB Connection Error:', error);
     process.exit(1);
   }
 };
@@ -43,10 +44,10 @@ const connectDB = async () => {
 // Enhanced seed data with full journey tracking
 const seedData = async () => {
   try {
-    console.log('\n🌱 Starting to seed database with enhanced data...\n');
+    logger.log('\nStarting to seed database with enhanced data...\n');
 
     // ==================== CLEAR ALL EXISTING DATA ====================
-    console.log('🗑️  Clearing ALL existing data...');
+    logger.log('Clearing ALL existing data...');
     await User.deleteMany({});
     await BusOperator.deleteMany({});
     await Employee.deleteMany({});
@@ -55,10 +56,10 @@ const seedData = async () => {
     await Trip.deleteMany({});
     await Booking.deleteMany({});
     await Ticket.deleteMany({});
-    console.log('✅ Cleared all existing data\n');
+    logger.log('Cleared all existing data\n');
 
     // ==================== USERS ====================
-    console.log('👥 Creating Users...');
+    logger.log('Creating Users...');
 
     const users = await User.create([
       // Admin
@@ -118,10 +119,10 @@ const seedData = async () => {
       },
     ]);
 
-    console.log(`✅ Created ${users.length} users\n`);
+    console.log(`Created ${users.length} users\n`);
 
     // ==================== BUS OPERATORS ====================
-    console.log('🏢 Creating Bus Operators...');
+    console.log('Creating Bus Operators...');
 
     const operators = await BusOperator.create([
       {
@@ -174,10 +175,10 @@ const seedData = async () => {
       },
     ]);
 
-    console.log(`✅ Created ${operators.length} bus operators\n`);
+    logger.log(`Created ${operators.length} bus operators\n`);
 
     // ==================== EMPLOYEES ====================
-    console.log('👨‍✈️ Creating Employees (Drivers & Trip Managers)...');
+    console.log('Creating Employees (Drivers & Trip Managers)...');
 
     const employees = await Employee.create([
       // Phương Trang - Drivers
@@ -288,10 +289,10 @@ const seedData = async () => {
       },
     ]);
 
-    console.log(`✅ Created ${employees.length} employees\n`);
+    logger.log(`Created ${employees.length} employees\n`);
 
     // ==================== BUSES ====================
-    console.log('🚌 Creating Buses with Seat Layouts...');
+    console.log('Creating Buses with Seat Layouts...');
 
     const buses = await Bus.create([
       // Phương Trang - Limousine 24 ghế
@@ -366,10 +367,10 @@ const seedData = async () => {
       },
     ]);
 
-    console.log(`✅ Created ${buses.length} buses with seat layouts\n`);
+    console.log(`Created ${buses.length} buses with seat layouts\n`);
 
     // ==================== ROUTES WITH STOPS ====================
-    console.log('🗺️  Creating Routes with Stops...');
+    console.log('Creating Routes with Stops...');
 
     const routes = await Route.create([
       // Route 1: TP.HCM → Đà Lạt (có 3 điểm dừng)
@@ -619,10 +620,10 @@ const seedData = async () => {
       },
     ]);
 
-    console.log(`✅ Created ${routes.length} routes with stops\n`);
+    console.log(`Created ${routes.length} routes with stops\n`);
 
     // ==================== TRIPS WITH JOURNEY TRACKING ====================
-    console.log('🚍 Creating Trips with Journey Tracking...');
+    console.log('Creating Trips with Journey Tracking...');
 
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -803,19 +804,19 @@ const seedData = async () => {
       },
     ]);
 
-    console.log(`✅ Created ${trips.length} trips with journey tracking\n`);
+    logger.log(`Created ${trips.length} trips with journey tracking\n`);
 
     // ==================== SUMMARY ====================
-    console.log('\n📊 ==================== SEED SUMMARY ====================');
-    console.log(`✅ Users: ${users.length}`);
-    console.log(`✅ Bus Operators: ${operators.length}`);
-    console.log(`✅ Employees: ${employees.length}`);
+    logger.log('\n==================== SEED SUMMARY ====================');
+    logger.log(`Users: ${users.length}`);
+    logger.log(`Bus Operators: ${operators.length}`);
+    console.log(`Employees: ${employees.length}`);
     console.log(`   - Drivers: ${employees.filter(e => e.role === 'driver').length}`);
     console.log(`   - Trip Managers: ${employees.filter(e => e.role === 'trip_manager').length}`);
-    console.log(`✅ Buses: ${buses.length}`);
-    console.log(`✅ Routes: ${routes.length}`);
+    console.log(`Buses: ${buses.length}`);
+    console.log(`Routes: ${routes.length}`);
     console.log(`   - Total Stops Configured: ${routes.reduce((sum, r) => sum + r.stops.length, 0)}`);
-    console.log(`✅ Trips: ${trips.length}`);
+    console.log(`Trips: ${trips.length}`);
     console.log(`   - Scheduled: ${trips.filter(t => t.status === 'scheduled').length}`);
     console.log(`   - Ongoing: ${trips.filter(t => t.status === 'ongoing').length}`);
     console.log('========================================================\n');
@@ -829,7 +830,7 @@ const seedData = async () => {
     console.log('   Customer: customer1@gmail.com / 123456\n');
 
   } catch (error) {
-    console.error('❌ Error seeding database:', error);
+    console.error(' Error seeding database:', error);
     console.error(error.stack);
     process.exit(1);
   }
@@ -840,7 +841,7 @@ const main = async () => {
   await connectDB();
   await seedData();
   await mongoose.connection.close();
-  console.log('👋 Database connection closed. Goodbye!\n');
+  console.log('Database connection closed. Goodbye!\n');
   process.exit(0);
 };
 

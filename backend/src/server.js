@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const http = require('http');
+const logger = require('./utils/logger');
 
 // Load environment variables
 dotenv.config();
@@ -192,17 +193,15 @@ schedulerService.initialize();
 
 // Start server
 server.listen(PORT, () => {
-  console.log(`🚀 Server đang chạy ở chế độ ${process.env.NODE_ENV} trên port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`📍 API endpoint: http://localhost:${PORT}/api/${API_VERSION}`);
-  console.log(`🔌 WebSocket server ready for real-time updates`);
-  console.log(`⏰ Scheduler service active`);
+  logger.success(`Server đang chạy ở chế độ ${process.env.NODE_ENV} trên port ${PORT}`);
+  logger.success(`Health check: http://localhost:${PORT}/health`);
+  logger.success(`API endpoint: http://localhost:${PORT}/api/${API_VERSION}`);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  console.error('❌ UNHANDLED REJECTION! Shutting down...');
-  console.error(err.name, err.message);
+  logger.error(' UNHANDLED REJECTION! Shutting down...');
+  logger.error(err.name, err.message);
   server.close(() => {
     process.exit(1);
   });
@@ -210,9 +209,9 @@ process.on('unhandledRejection', (err) => {
 
 // Handle SIGTERM
 process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  logger.log('SIGTERM RECEIVED. Shutting down gracefully');
   server.close(() => {
-    console.log('💥 Process terminated!');
+    logger.log('Process terminated!');
   });
 });
 

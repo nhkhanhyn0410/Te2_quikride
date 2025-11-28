@@ -1,8 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const chalk = require('chalk');
 
 /**
- * Simple logger utility
+ * Enhanced logger utility with colored console output
  * For production, consider using Winston or Pino
  */
 
@@ -15,17 +16,34 @@ if (!fs.existsSync(logsDir)) {
 const logFile = path.join(logsDir, process.env.LOG_FILE || 'app.log');
 const errorLogFile = path.join(logsDir, 'error.log');
 
+const timestamp = () =>
+  new Date().toLocaleString('en-GB', { hour12: false });
+
+// Độ rộng tối đa cho label (SUCCESS = 7)
+const LABEL_WIDTH = 7;
+
+const format = (label, labelColor, textColor, message) => {
+  const paddedLabel = label.padEnd(LABEL_WIDTH, ' '); // căn đều
+  console.log(
+    chalk.gray(`[${timestamp()}]`) +
+    '  ' +
+    labelColor(paddedLabel) +
+    '  ' +
+    textColor(message)
+  );
+};
+
 /**
- * Format log message
+ * Format log message for file writing
  * @param {string} level - Log level
  * @param {string} message - Log message
  * @param {object} meta - Additional metadata
  * @returns {string} - Formatted log message
  */
 const formatLog = (level, message, meta = {}) => {
-  const timestamp = new Date().toISOString();
+  const ts = new Date().toISOString();
   const metaStr = Object.keys(meta).length > 0 ? ` | ${JSON.stringify(meta)}` : '';
-  return `[${timestamp}] [${level.toUpperCase()}] ${message}${metaStr}\n`;
+  return `[${ts}] [${level.toUpperCase()}] ${message}${metaStr}\n`;
 };
 
 /**
@@ -36,59 +54,58 @@ const formatLog = (level, message, meta = {}) => {
 const writeLog = (file, message) => {
   fs.appendFile(file, message, (err) => {
     if (err) {
-      console.error('Error writing to log file:', err);
+      // Use the new logger format for internal errors
+      format('ERROR', chalk.red, chalk.redBright, 'Error writing to log file: ' + err.message);
     }
   });
 };
 
 /**
- * Logger object
+ * Logger object with colored console output
  */
 const logger = {
-  /**
-   * Info level log
-   */
-  info: (message, meta = {}) => {
-    const log = formatLog('info', message, meta);
-    console.log(log);
+  info: (msg, meta = {}) => {
+    format('INFO', chalk.blue, chalk.cyan, msg);
     if (process.env.NODE_ENV !== 'test') {
-      writeLog(logFile, log);
+      writeLog(logFile, formatLog('log', msg, meta));
     }
   },
 
-  /**
-   * Error level log
-   */
-  error: (message, meta = {}) => {
-    const log = formatLog('error', message, meta);
-    console.error(log);
+  success: (msg, meta = {}) => {
+    format('SUCCESS', chalk.green, chalk.greenBright, msg);
     if (process.env.NODE_ENV !== 'test') {
-      writeLog(errorLogFile, log);
-      writeLog(logFile, log);
+      writeLog(logFile, formatLog('success', msg, meta));
     }
   },
 
-  /**
-   * Warning level log
-   */
-  warn: (message, meta = {}) => {
-    const log = formatLog('warn', message, meta);
-    console.warn(log);
+  warn: (msg, meta = {}) => {
+    format('WARN', chalk.yellow, chalk.yellowBright, msg);
     if (process.env.NODE_ENV !== 'test') {
-      writeLog(logFile, log);
+      writeLog(logFile, formatLog('warn', msg, meta));
     }
   },
 
-  /**
-   * Debug level log
-   */
-  debug: (message, meta = {}) => {
+  error: (msg, meta = {}) => {
+    format('ERROR', chalk.red, chalk.redBright, msg);
+    if (process.env.NODE_ENV !== 'test') {
+      writeLog(errorLogFile, formatLog('error', msg, meta));
+      writeLog(logFile, formatLog('error', msg, meta));
+    }
+  },
+
+  debug: (msg, meta = {}) => {
     if (process.env.LOG_LEVEL === 'debug' || process.env.NODE_ENV === 'development') {
-      const log = formatLog('debug', message, meta);
-      console.log(log);
+      format('DEBUG', chalk.magenta, chalk.magentaBright, msg);
       if (process.env.NODE_ENV !== 'test') {
-        writeLog(logFile, log);
+        writeLog(logFile, formatLog('debug', msg, meta));
       }
+    }
+  },
+
+  start: (msg, meta = {}) => {
+    format('START', chalk.hex('#9d4edd'), chalk.hex('#9d4edd'), msg);
+    if (process.env.NODE_ENV !== 'test') {
+      writeLog(logFile, formatLog('start', msg, meta));
     }
   },
 };

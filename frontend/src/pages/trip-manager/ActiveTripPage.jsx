@@ -1120,7 +1120,7 @@ const ActiveTripPage = () => {
               <Select.Option value="checking_tickets">🎫 Đang soát vé</Select.Option>
               <Select.Option value="in_transit">🚌 Đang di chuyển</Select.Option>
               <Select.Option value="at_stop">📍 Tại điểm dừng</Select.Option>
-              <Select.Option value="completed">✅ Hoàn thành</Select.Option>
+              <Select.Option value="completed">Hoàn thành</Select.Option>
             </Select>
           </Form.Item>
 

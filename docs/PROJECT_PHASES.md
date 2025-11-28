@@ -88,11 +88,11 @@ Thiết lập nền tảng cơ sở hạ tầng cho toàn bộ dự án, bao g�
 - [ ] Viết unit tests cho authentication
 
 ### Deliverables
-- ✅ Project structure hoàn chỉnh
-- ✅ Database connection hoạt động
-- ✅ Authentication APIs hoạt động
-- ✅ Basic UI components (Login, Register)
-- ✅ Documentation (API docs, Setup guide)
+- Project structure hoàn chỉnh
+- Database connection hoạt động
+- Authentication APIs hoạt động
+- Basic UI components (Login, Register)
+- Documentation (API docs, Setup guide)
 
 ### Tech Stack
 - **Backend:** Node.js, Express, MongoDB, Redis, JWT, bcrypt
@@ -172,10 +172,10 @@ Xây dựng hệ thống quản lý nhà xe, tuyến đường, và phương ti�
 - [ ] Seat layout builder
 
 ### Deliverables
-- ✅ Nhà xe có thể đăng ký và được duyệt
-- ✅ Quản lý tuyến đường hoàn chỉnh
-- ✅ Quản lý xe và sơ đồ ghế
-- ✅ Quản lý nhân viên
+- Nhà xe có thể đăng ký và được duyệt
+- Quản lý tuyến đường hoàn chỉnh
+- Quản lý xe và sơ đồ ghế
+- Quản lý nhân viên
 
 ### Dependencies
 - Phase 1 (Authentication & Infrastructure)
@@ -266,11 +266,11 @@ Xây dựng hệ thống tìm kiếm, đặt vé và thanh toán - core function
 - [ ] Temporary session management
 
 ### Deliverables
-- ✅ Nhà xe tạo được lịch trình chuyến xe
-- ✅ Khách hàng tìm kiếm được chuyến xe
-- ✅ Chọn ghế real-time
-- ✅ Đặt vé và thanh toán thành công
-- ✅ Guest booking hoạt động
+- Nhà xe tạo được lịch trình chuyến xe
+- Khách hàng tìm kiếm được chuyến xe
+- Chọn ghế real-time
+- Đặt vé và thanh toán thành công
+- Guest booking hoạt động
 
 ### Dependencies
 - Phase 1 (Authentication)
@@ -347,11 +347,11 @@ Quản lý vé điện tử, mã QR, và hệ thống soát vé.
   - Trip status update
 
 ### Deliverables
-- ✅ Vé điện tử PDF với QR code
-- ✅ Email/SMS notification hoạt động
-- ✅ Khách hàng quản lý vé (xem, hủy, đổi)
-- ✅ Trip Manager quét QR và soát vé
-- ✅ Passenger list real-time
+- Vé điện tử PDF với QR code
+- Email/SMS notification hoạt động
+- Khách hàng quản lý vé (xem, hủy, đổi)
+- Trip Manager quét QR và soát vé
+- Passenger list real-time
 
 ### Dependencies
 - Phase 3 (Booking System)
@@ -409,10 +409,10 @@ Hoàn thiện hệ thống quản trị cho nhà xe với dashboard, báo cáo, 
 - [ ] Trip management UI
 
 ### Deliverables
-- ✅ Operator dashboard hoàn chỉnh
-- ✅ Quản lý voucher & pricing
-- ✅ Báo cáo chi tiết
-- ✅ Export Excel/PDF
+- Operator dashboard hoàn chỉnh
+- Quản lý voucher & pricing
+- Báo cáo chi tiết
+- Export Excel/PDF
 
 ### Dependencies
 - Phase 4 (Ticket Management)
@@ -479,11 +479,11 @@ Xây dựng hệ thống quản trị tổng thể cho admin hệ thống.
 - [ ] System reports & analytics
 
 ### Deliverables
-- ✅ Admin có thể quản lý toàn bộ users
-- ✅ Duyệt và quản lý nhà xe
-- ✅ Quản lý nội dung website
-- ✅ Hệ thống support tickets
-- ✅ Báo cáo tổng hợp
+- Admin có thể quản lý toàn bộ users
+- Duyệt và quản lý nhà xe
+- Quản lý nội dung website
+- Hệ thống support tickets
+- Báo cáo tổng hợp
 
 ### Dependencies
 - Phase 5 (Operator Admin)
@@ -579,13 +579,13 @@ Bổ sung các tính năng nâng cao và hoàn thiện trải nghiệm người 
 - [ ] Uptime monitoring
 
 ### Deliverables
-- ✅ Rating & review system
-- ✅ Loyalty program hoàn chỉnh
-- ✅ Email/SMS notifications đầy đủ
-- ✅ Performance tối ưu
-- ✅ Test coverage ≥ 70%
-- ✅ Documentation đầy đủ
-- ✅ Production deployment
+- Rating & review system
+- Loyalty program hoàn chỉnh
+- Email/SMS notifications đầy đủ
+- Performance tối ưu
+- Test coverage ≥ 70%
+- Documentation đầy đủ
+- Production deployment
 
 ### Dependencies
 - All previous phases
@@ -608,7 +608,7 @@ Bổ sung các tính năng nâng cao và hoàn thiện trải nghiệm người 
 ### Milestone Quan Trọng
 1. **End of Phase 1:** Authentication hoạt động ✅
 2. **End of Phase 2:** Nhà xe có thể quản lý tuyến và xe ✅
-3. **End of Phase 3:** Khách hàng đặt vé và thanh toán được ✅ (MVP)
+3. **End of Phase 3:** Khách hàng đặt vé và thanh toán được (MVP)
 4. **End of Phase 4:** Hệ thống vé điện tử hoàn chỉnh ✅
 5. **End of Phase 5:** Operator dashboard đầy đủ ✅
 6. **End of Phase 6:** System admin hoàn chỉnh ✅

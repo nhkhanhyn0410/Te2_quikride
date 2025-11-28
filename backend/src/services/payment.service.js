@@ -168,14 +168,14 @@ class PaymentService {
       const TicketServiceClass = getTicketService();
       TicketServiceClass.generateTicket(booking._id)
         .then((ticket) => {
-          console.log('✅ Ticket generated for cash booking:', booking.bookingCode);
+          console.log('Ticket generated for cash booking:', booking.bookingCode);
           return TicketServiceClass.sendTicketNotifications(ticket._id);
         })
         .then((notificationResult) => {
-          console.log('✅ Ticket notifications sent:', notificationResult);
+          console.log('Ticket notifications sent:', notificationResult);
         })
         .catch((error) => {
-          console.error('❌ Ticket generation failed:', error);
+          console.error(' Ticket generation failed:', error);
         });
     }
 
@@ -204,7 +204,7 @@ class PaymentService {
     console.log('🔐 VNPay signature verification result:', result);
 
     if (!result.success) {
-      console.error('❌ VNPay callback failed:', result);
+      console.error(' VNPay callback failed:', result);
       return {
         success: false,
         message: result.message,
@@ -240,7 +240,7 @@ class PaymentService {
     // Verify amount
     console.log('💰 Amount verification:', { vnpayAmount: amount, paymentAmount: payment.amount });
     if (amount !== payment.amount) {
-      console.error('❌ Amount mismatch!');
+      console.error(' Amount mismatch!');
       payment.markAsFailed(
         `Số tiền không khớp: ${amount} !== ${payment.amount}`,
         'AMOUNT_MISMATCH',
@@ -256,7 +256,7 @@ class PaymentService {
     }
 
     try {
-      console.log('✅ Processing successful payment...');
+      console.log('Processing successful payment...');
 
       // Mark payment as completed
       payment.markAsCompleted(transactionId, {
@@ -266,7 +266,7 @@ class PaymentService {
         payDate,
       });
       await payment.save();
-      console.log('✅ Payment marked as completed');
+      console.log('Payment marked as completed');
 
       // Update booking payment status
       const booking = await Booking.findById(payment.bookingId);
@@ -307,7 +307,7 @@ class PaymentService {
             // Update available seats count
             trip.availableSeats = Math.max(0, trip.totalSeats - trip.bookedSeats.length);
             await trip.save();
-            console.log('✅ Trip seats updated:', {
+            console.log('Trip seats updated:', {
               bookedSeats: trip.bookedSeats.length,
               availableSeats: trip.availableSeats,
             });
@@ -315,13 +315,13 @@ class PaymentService {
             // Release Redis locks (best effort - sessionId unknown in callback)
             try {
               await SeatLockService.releaseSeats(booking.tripId, seatNumbers);
-              console.log('✅ Redis seat locks released');
+              console.log('Redis seat locks released');
             } catch (lockError) {
               console.warn('⚠️  Could not release Redis locks (they will expire):', lockError.message);
               // Don't fail payment if lock release fails - they will auto-expire
             }
           } else {
-            console.error('❌ Trip not found for booking:', booking.tripId);
+            console.error(' Trip not found for booking:', booking.tripId);
           }
 
           // Confirm booking (updates status to confirmed, isHeld to false)
@@ -329,21 +329,21 @@ class PaymentService {
         }
 
         await booking.save();
-        console.log('✅ Booking updated successfully');
+        console.log('Booking updated successfully');
 
         // Generate digital ticket in background (UC-7)
         const TicketServiceClass = getTicketService();
         TicketServiceClass.generateTicket(booking._id)
           .then((ticket) => {
-            console.log('✅ Ticket generated for booking:', booking.bookingCode);
+            console.log('Ticket generated for booking:', booking.bookingCode);
             // Send ticket notifications in background
             return TicketServiceClass.sendTicketNotifications(ticket._id);
           })
           .then((notificationResult) => {
-            console.log('✅ Ticket notifications sent:', notificationResult);
+            console.log('Ticket notifications sent:', notificationResult);
           })
           .catch((error) => {
-            console.error('❌ Ticket generation/notification failed:', error);
+            console.error(' Ticket generation/notification failed:', error);
             // Don't fail the payment if ticket generation fails
             // Admin can retry ticket generation manually
           });
@@ -357,7 +357,7 @@ class PaymentService {
         booking,
       };
     } catch (error) {
-      console.error('❌ Error processing VNPay callback:', error);
+      console.error(' Error processing VNPay callback:', error);
       payment.markAsFailed(error.message, 'PROCESSING_ERROR', result.rawData);
       await payment.save();
 

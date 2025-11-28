@@ -70,7 +70,7 @@ class ReviewService {
       // 7. Populate review data for response
       await review.populate('userId', 'fullName avatar');
 
-      console.log('✅ Review created successfully:', review._id);
+      console.log('Review created successfully:', review._id);
 
       return {
         success: true,
@@ -78,7 +78,7 @@ class ReviewService {
         message: 'Đánh giá của bạn đã được ghi nhận. Cảm ơn bạn!',
       };
     } catch (error) {
-      console.error('❌ Error creating review:', error);
+      console.error(' Error creating review:', error);
       throw error;
     }
   }
@@ -97,9 +97,9 @@ class ReviewService {
         totalReviews: ratingStats.totalReviews,
       });
 
-      console.log(`✅ Updated operator rating: ${ratingStats.averageRating} (${ratingStats.totalReviews} reviews)`);
+      console.log(`Updated operator rating: ${ratingStats.averageRating} (${ratingStats.totalReviews} reviews)`);
     } catch (error) {
-      console.error('❌ Error updating operator rating:', error);
+      console.error(' Error updating operator rating:', error);
       // Don't throw - this is a secondary operation
     }
   }
@@ -118,7 +118,7 @@ class ReviewService {
         ...result,
       };
     } catch (error) {
-      console.error('❌ Error getting trip reviews:', error);
+      console.error(' Error getting trip reviews:', error);
       throw error;
     }
   }
@@ -167,7 +167,7 @@ class ReviewService {
         },
       };
     } catch (error) {
-      console.error('❌ Error getting operator reviews:', error);
+      console.error(' Error getting operator reviews:', error);
       throw error;
     }
   }
@@ -203,7 +203,7 @@ class ReviewService {
         },
       };
     } catch (error) {
-      console.error('❌ Error getting user reviews:', error);
+      console.error(' Error getting user reviews:', error);
       throw error;
     }
   }
@@ -241,7 +241,7 @@ class ReviewService {
         );
       }
 
-      console.log('✅ Operator response added successfully');
+      console.log('Operator response added successfully');
 
       return {
         success: true,
@@ -249,7 +249,7 @@ class ReviewService {
         message: 'Phản hồi của bạn đã được gửi',
       };
     } catch (error) {
-      console.error('❌ Error adding operator response:', error);
+      console.error(' Error adding operator response:', error);
       throw error;
     }
   }
@@ -299,7 +299,7 @@ class ReviewService {
         booking,
       };
     } catch (error) {
-      console.error('❌ Error checking review eligibility:', error);
+      console.error(' Error checking review eligibility:', error);
       throw error;
     }
   }
@@ -344,11 +344,11 @@ class ReviewService {
         emailContent
       );
 
-      console.log('✅ Review invitation sent:', user.email);
+      console.log('Review invitation sent:', user.email);
 
       return result;
     } catch (error) {
-      console.error('❌ Error sending review invitation:', error);
+      console.error(' Error sending review invitation:', error);
       throw error;
     }
   }
@@ -587,7 +587,7 @@ class ReviewService {
         message: 'Đánh giá đã được báo cáo. Chúng tôi sẽ xem xét.',
       };
     } catch (error) {
-      console.error('❌ Error reporting review:', error);
+      console.error(' Error reporting review:', error);
       throw error;
     }
   }

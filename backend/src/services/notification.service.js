@@ -65,13 +65,13 @@ class NotificationService {
 
       const info = await this.emailTransporter.sendMail(mailOptions);
 
-      console.log('✅ Email sent successfully to:', to);
+      console.log('Email sent successfully to:', to);
       return {
         success: true,
         messageId: info.messageId,
       };
     } catch (error) {
-      console.error('❌ Email send error:', error.message);
+      console.error(' Email send error:', error.message);
       return {
         success: false,
         error: error.message,
@@ -100,7 +100,7 @@ class NotificationService {
       const result = await this.smsService.sendSMS(phone, message);
       return result;
     } catch (error) {
-      console.error('❌ SMS send error:', error.message);
+      console.error(' SMS send error:', error.message);
       return {
         success: false,
         error: error.message,
@@ -180,13 +180,13 @@ class NotificationService {
         await this.delay(100);
       }
 
-      console.log('✅ Trip status change notifications sent:', results);
+      console.log('Trip status change notifications sent:', results);
       return {
         success: true,
         results,
       };
     } catch (error) {
-      console.error('❌ Error notifying passengers:', error);
+      console.error(' Error notifying passengers:', error);
       return {
         success: false,
         error: error.message,
@@ -233,13 +233,13 @@ class NotificationService {
         statusMessage = 'Chuyến xe của bạn đã bắt đầu hành trình';
         break;
       case 'completed':
-        emailSubject = `✅ Chuyến xe đã hoàn thành - ${routeName}`;
+        emailSubject = `Chuyến xe đã hoàn thành - ${routeName}`;
         statusIcon = '✅';
         statusMessage = 'Chuyến xe của bạn đã đến điểm đến';
         break;
       case 'cancelled':
-        emailSubject = `❌ Chuyến xe đã bị hủy - ${routeName}`;
-        statusIcon = '❌';
+        emailSubject = ` Chuyến xe đã bị hủy - ${routeName}`;
+        statusIcon = '';
         statusMessage =
           'Chuyến xe của bạn đã bị hủy. Vui lòng liên hệ nhà xe để được hỗ trợ hoàn tiền.';
         break;
@@ -470,14 +470,14 @@ class NotificationService {
   async testEmailConfiguration() {
     try {
       if (!this.emailTransporter) {
-        console.error('❌ Email transporter not configured');
+        console.error(' Email transporter not configured');
         return false;
       }
       await this.emailTransporter.verify();
-      console.log('✅ Email configuration is valid');
+      console.log('Email configuration is valid');
       return true;
     } catch (error) {
-      console.error('❌ Email configuration error:', error.message);
+      console.error(' Email configuration error:', error.message);
       return false;
     }
   }

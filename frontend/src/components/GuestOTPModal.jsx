@@ -188,7 +188,7 @@ const GuestOTPModal = ({ open, onCancel, onSuccess }) => {
         <Form form={form} layout="vertical" onFinish={handleVerifyOTP}>
           <div className="mb-4 bg-green-50 p-4 rounded">
             <Text className="text-sm text-green-800">
-              ✅ Mã OTP đã được gửi đến <strong>{identifier}</strong>
+              Mã OTP đã được gửi đến <strong>{identifier}</strong>
             </Text>
           </div>
 
