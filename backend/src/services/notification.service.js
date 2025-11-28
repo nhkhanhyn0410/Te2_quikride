@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const smsService = require('./sms.service');
+const logger = require('../utils/logger');
 
 /**
  * Notification Service

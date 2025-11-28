@@ -2,6 +2,7 @@ const Voucher = require('../models/Voucher');
 const Booking = require('../models/Booking');
 const Trip = require('../models/Trip');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 /**
  * Voucher Service

@@ -4,6 +4,7 @@ const Trip = require('../models/Trip');
 const vnpayService = require('./vnpay.service');
 const SeatLockService = require('./seatLock.service');
 const moment = require('moment');
+const logger = require('../utils/logger');
 
 // Lazy-load TicketService to avoid circular dependency
 let TicketService = null;

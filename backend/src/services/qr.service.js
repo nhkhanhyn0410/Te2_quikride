@@ -1,5 +1,6 @@
 const QRCode = require('qrcode');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 /**
  * QR Code Service

@@ -8,6 +8,7 @@ const Trip = require('../models/Trip');
 const Ticket = require('../models/Ticket');
 const Payment = require('../models/Payment');
 const dayjs = require('dayjs');
+const logger = require('../utils/logger');
 
 class DashboardService {
   /**

@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const moment = require('moment-timezone');
 const QRService = require('./qr.service');
+const logger = require('../utils/logger');
 
 /**
  * PDF Service

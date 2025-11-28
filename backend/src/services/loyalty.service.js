@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Booking = require('../models/Booking');
 const Voucher = require('../models/Voucher');
 const notificationService = require('./notification.service');
+const logger = require('../utils/logger');
 
 /**
  * Loyalty Service

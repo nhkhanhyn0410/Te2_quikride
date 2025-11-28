@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const querystring = require('querystring');
 const moment = require('moment');
+const logger = require('../utils/logger');
 
 /**
  * VNPay Service

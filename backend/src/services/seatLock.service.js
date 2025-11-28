@@ -1,4 +1,5 @@
 const { getRedisClient } = require('../config/redis');
+const logger = require('../utils/logger');
 
 /**
  * Seat Lock Service

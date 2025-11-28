@@ -1,4 +1,5 @@
 const moment = require('moment-timezone');
+const logger = require('../utils/logger');
 
 /**
  * Cancellation Service

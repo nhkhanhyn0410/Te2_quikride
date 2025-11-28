@@ -6,6 +6,7 @@ const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const moment = require('moment-timezone');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 /**
  * Revenue Report Service

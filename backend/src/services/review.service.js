@@ -3,6 +3,7 @@ const Booking = require('../models/Booking');
 const BusOperator = require('../models/BusOperator');
 const User = require('../models/User');
 const notificationService = require('./notification.service');
+const logger = require('../utils/logger');
 
 /**
  * Review Service

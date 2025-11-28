@@ -1,5 +1,6 @@
 const { getRedisClient } = require('../config/redis');
 const Trip = require('../models/Trip');
+const logger = require('../utils/logger');
 
 // Import WebSocket service (lazy loaded to avoid circular dependency)
 let websocketService;

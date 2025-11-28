@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { getRedisClient } = require('../config/redis');
+const logger = require('../utils/logger');
 
 /**
  * Guest Session Service

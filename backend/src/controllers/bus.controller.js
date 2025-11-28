@@ -1,4 +1,5 @@
 const BusService = require('../services/bus.service');
+const logger = require('../utils/logger');
 const {
   listAllTemplates,
   getTemplatesByBusType,
