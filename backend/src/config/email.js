@@ -257,7 +257,7 @@ const emailTemplates = {
 
           <!-- Important Notes -->
           <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid #fbbf24; margin: 20px 0;">
-            <h4 style="color: #92400e; margin-top: 0; font-size: 14px;">⚠️ LƯU Ý QUAN TRỌNG:</h4>
+            <h4 style="color: #92400e; margin-top: 0; font-size: 14px;">LƯU Ý QUAN TRỌNG:</h4>
             <ul style="color: #78350f; font-size: 13px; margin: 10px 0; padding-left: 20px;">
               <li style="margin: 5px 0;">Vui lòng có mặt trước 15 phút so với giờ khởi hành</li>
               <li style="margin: 5px 0;">Xuất trình mã QR này khi lên xe</li>
@@ -310,7 +310,7 @@ const emailTemplates = {
           </p>
         </div>
 
-        <p style="color: #dc2626; font-weight: bold;">⚠️ Vui lòng có mặt trước 15 phút!</p>
+        <p style="color: #dc2626; font-weight: bold;">Vui lòng có mặt trước 15 phút!</p>
 
         <a href="${reminderData.ticketUrl}" style="display: inline-block; background: #0ea5e9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 20px;">
           Xem vé của tôi
@@ -419,7 +419,7 @@ const emailTemplates = {
           ` : `
           <!-- No Refund Notice -->
           <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <h4 style="color: #92400e; margin-top: 0; font-size: 14px;">⚠️ LƯU Ý:</h4>
+            <h4 style="color: #92400e; margin-top: 0; font-size: 14px;">LƯU Ý:</h4>
             <p style="color: #78350f; font-size: 13px; margin: 10px 0;">
               Theo chính sách hủy vé, bạn không được hoàn tiền do hủy vé quá gần giờ khởi hành.
             </p>
@@ -578,7 +578,7 @@ const emailTemplates = {
 
           <!-- Important Notes -->
           <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border-left: 4px solid #fbbf24; margin: 20px 0;">
-            <h4 style="color: #92400e; margin-top: 0; font-size: 14px;">⚠️ LƯU Ý QUAN TRỌNG:</h4>
+            <h4 style="color: #92400e; margin-top: 0; font-size: 14px;">LƯU Ý QUAN TRỌNG:</h4>
             <ul style="color: #78350f; font-size: 13px; margin: 10px 0; padding-left: 20px;">
               <li style="margin: 5px 0;">Vui lòng sử dụng <strong>mã vé mới</strong> khi lên xe</li>
               <li style="margin: 5px 0;">Có mặt trước 15 phút so với giờ khởi hành</li>

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const logger = require('./utils/logger');
 
 const connectDB = async () => {
   try {
@@ -11,15 +12,15 @@ const connectDB = async () => {
       useUnifiedTopology: true,
     });
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    logger.success(`MongoDB Đã kết nối: ${conn.connection.host}`);
 
     // Connection events
     mongoose.connection.on('error', (err) => {
-      console.error(' MongoDB connection error:', err);
+      logger.error('Lỗi khi kết nối MongoDB:', err);
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.log('⚠️  MongoDB disconnected');
+      console.log('MongoDB disconnected');
     });
 
     // Graceful shutdown

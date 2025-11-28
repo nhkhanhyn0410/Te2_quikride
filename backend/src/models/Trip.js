@@ -592,7 +592,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       // Validate: cannot go backward (unless correcting a mistake)
       if (requestedStopIndex < oldStopIndex) {
         // Allow if correcting: was in_transit but marking previous stop
-        console.warn(`⚠️ Moving backward from stop ${oldStopIndex} to ${requestedStopIndex}`);
+        console.warn(`Moving backward from stop ${oldStopIndex} to ${requestedStopIndex}`);
       }
 
       // Validate: cannot skip stops (must stop at each stop sequentially)

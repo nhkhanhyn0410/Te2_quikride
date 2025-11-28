@@ -258,7 +258,7 @@ class SchedulerService {
 
             <div class="warning">
               <p style="margin: 0; font-weight: bold;">
-                ⚠️ Lưu ý quan trọng:
+                Lưu ý quan trọng:
               </p>
               <ul style="margin: 10px 0 0 0;">
                 <li>Vui lòng có mặt trước giờ khởi hành 15 phút</li>

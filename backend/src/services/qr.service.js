@@ -17,7 +17,7 @@ class QRService {
     } else {
       // Generate random 32 bytes if not set
       this.secretKey = crypto.randomBytes(32);
-      console.warn('⚠️  QR_ENCRYPTION_KEY not set, using random key. This will break QR verification after restart!');
+      console.warn('QR_ENCRYPTION_KEY not set, using random key. This will break QR verification after restart!');
     }
 
     // Verify key length

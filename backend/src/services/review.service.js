@@ -328,7 +328,7 @@ class ReviewService {
       // Check if already reviewed
       const existingReview = await Review.findOne({ bookingId });
       if (existingReview) {
-        console.log('⚠️ User already reviewed this booking');
+        console.log('User already reviewed this booking');
         return { success: true, skipped: true };
       }
 
@@ -579,7 +579,7 @@ class ReviewService {
         throw new Error('Review không tồn tại');
       }
 
-      console.log('⚠️ Review reported:', reviewId);
+      console.log('Review reported:', reviewId);
 
       return {
         success: true,

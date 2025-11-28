@@ -317,7 +317,7 @@ class PaymentService {
               await SeatLockService.releaseSeats(booking.tripId, seatNumbers);
               console.log('Redis seat locks released');
             } catch (lockError) {
-              console.warn('⚠️  Could not release Redis locks (they will expire):', lockError.message);
+              console.warn('Could not release Redis locks (they will expire):', lockError.message);
               // Don't fail payment if lock release fails - they will auto-expire
             }
           } else {

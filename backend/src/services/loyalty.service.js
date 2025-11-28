@@ -59,7 +59,7 @@ class LoyaltyService {
       );
 
       if (alreadyAwarded) {
-        console.log('⚠️ Points already awarded for this booking');
+        console.log('Points already awarded for this booking');
         return {
           success: true,
           alreadyAwarded: true,

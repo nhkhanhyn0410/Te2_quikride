@@ -356,7 +356,7 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
                 <Radio value={2}>2 Tầng</Radio>
               </Radio.Group>
               <div className="text-xs text-gray-500 mt-1">
-                {floors === 2 && '⚠️ Xe 2 tầng sẽ có thêm dấu phân cách giữa các tầng'}
+                {floors === 2 && 'Xe 2 tầng sẽ có thêm dấu phân cách giữa các tầng'}
               </div>
             </div>
           )}
@@ -374,7 +374,7 @@ const SeatLayoutBuilder = ({ busType, initialLayout, onSave }) => {
 
           {!busType && (
             <div className="text-amber-600 text-sm p-3 bg-amber-50 rounded">
-              ⚠️ Vui lòng chọn loại xe trước khi tạo sơ đồ
+              Vui lòng chọn loại xe trước khi tạo sơ đồ
             </div>
           )}
 

@@ -33,7 +33,7 @@ class TicketService {
       // Check if ticket already exists
       const existingTicket = await Ticket.findOne({ bookingId });
       if (existingTicket) {
-        logger.warn('⚠️ Ticket already exists for booking: ' + bookingId);
+        logger.warn('Ticket already exists for booking: ' + bookingId);
         return existingTicket;
       }
 

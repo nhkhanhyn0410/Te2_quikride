@@ -19,7 +19,7 @@ class NotificationService {
         },
       });
     } catch (error) {
-      console.warn('⚠️ Failed to create email transporter:', error.message);
+      console.warn('Failed to create email transporter:', error.message);
       this.emailTransporter = null;
     }
 
@@ -47,12 +47,12 @@ class NotificationService {
       }
 
       if (!this.emailTransporter) {
-        console.log('⚠️ Email transporter not available');
+        console.log('Email transporter not available');
         return { success: false, error: 'Email transporter not configured' };
       }
 
       if (!to) {
-        console.log('⚠️ No recipient email provided');
+        console.log('No recipient email provided');
         return { success: false, error: 'No recipient email' };
       }
 
@@ -93,7 +93,7 @@ class NotificationService {
       }
 
       if (!phone) {
-        console.log('⚠️ No phone number provided');
+        console.log('No phone number provided');
         return { success: false, error: 'No phone number' };
       }
 
@@ -368,7 +368,7 @@ class NotificationService {
             ${newStatus === 'cancelled'
         ? `
               <p style="color: #dc2626; font-weight: bold;">
-                ⚠️ Chuyến xe đã bị hủy. Vui lòng liên hệ nhà xe để được hỗ trợ hoàn tiền.
+                Chuyến xe đã bị hủy. Vui lòng liên hệ nhà xe để được hỗ trợ hoàn tiền.
               </p>
             `
         : ''

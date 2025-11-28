@@ -443,7 +443,7 @@ const TripManagerDashboard = () => {
         </div>
         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
           <p className="text-sm text-gray-700">
-            ⚠️ Khi hủy chuyến, tất cả hành khách sẽ nhận được thông báo qua email và SMS.
+            Khi hủy chuyến, tất cả hành khách sẽ nhận được thông báo qua email và SMS.
           </p>
         </div>
         <Form form={form} layout="vertical">
