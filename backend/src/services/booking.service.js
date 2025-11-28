@@ -3,6 +3,7 @@ const Trip = require('../models/Trip');
 const SeatLockService = require('./seatLock.service');
 const VoucherService = require('./voucher.service');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 // Lazy-load PaymentService to avoid circular dependency
 let PaymentService = null;

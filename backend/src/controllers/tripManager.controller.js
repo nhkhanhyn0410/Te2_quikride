@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
+const logger = require('../utils/logger');
 
 /**
  * Trip Manager Controller

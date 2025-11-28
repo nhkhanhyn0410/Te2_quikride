@@ -1,4 +1,5 @@
 const TripService = require('../services/trip.service');
+const logger = require('../utils/logger');
 
 /**
  * Trip Controller

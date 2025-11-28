@@ -1,4 +1,5 @@
 const VoucherService = require('../services/voucher.service');
+const logger = require('../utils/logger');
 
 /**
  * @route   POST /api/v1/vouchers/validate

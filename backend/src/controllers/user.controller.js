@@ -1,5 +1,6 @@
 const UserService = require('../services/user.service');
 const loyaltyService = require('../services/loyalty.service');
+const logger = require('../utils/logger');
 
 /**
  * User Controller

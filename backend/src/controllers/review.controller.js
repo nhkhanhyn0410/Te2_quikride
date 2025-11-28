@@ -1,4 +1,5 @@
 const reviewService = require('../services/review.service');
+const logger = require('../utils/logger');
 
 /**
  * Review Controller

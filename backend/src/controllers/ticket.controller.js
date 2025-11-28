@@ -1,5 +1,6 @@
 const TicketService = require('../services/ticket.service');
 const { validationResult } = require('express-validator');
+const logger = require('../utils/logger');
 
 /**
  * Ticket Controller

@@ -1,4 +1,5 @@
 const RouteService = require('../services/route.service');
+const logger = require('../utils/logger');
 
 /**
  * Route Controller

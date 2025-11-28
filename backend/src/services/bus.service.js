@@ -1,5 +1,6 @@
 const Bus = require('../models/Bus');
 const BusOperator = require('../models/BusOperator');
+const logger = require('../utils/logger');
 
 /**
  * Bus Service
