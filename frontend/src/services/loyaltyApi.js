@@ -118,7 +118,7 @@ export const getTransactionIcon = (type) => {
   const icons = {
     earn: '💰',
     redeem: '🎁',
-    expire: '⏰',
+    expire: '',
   };
   return icons[type] || '📝';
 };

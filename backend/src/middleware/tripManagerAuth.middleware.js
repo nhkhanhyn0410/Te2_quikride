@@ -64,7 +64,7 @@ const protectTripManager = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Trip manager auth error:', error);
+    logger.error('Lỗi xác thực quản lý chuyến:', error);
 
     if (error.name === 'JsonWebTokenError') {
       return res.status(401).json({

@@ -106,10 +106,10 @@ class OTPService {
   static async sendOTPEmail(email, otp, purpose = 'guest_booking') {
     // In production, integrate with email service (SendGrid, AWS SES, etc.)
     // For now, just log the OTP
-    console.log(`📧 Sending OTP to ${email}:`);
-    console.log(`OTP Code: ${otp}`);
-    console.log(`Purpose: ${purpose}`);
-    console.log(`---`);
+    logger.log(`Đang gửi OTP đến ${email}:`);
+    logger.log(`OTP Code: ${OTP}`);
+    logger.log(`Purpose: ${purpose}`);
+    logger.log(`---`);
 
     // TODO: Implement actual email sending
     // Example with nodemailer:
@@ -153,10 +153,10 @@ class OTPService {
   static async sendOTPSMS(phone, otp, purpose = 'guest_booking') {
     // In production, integrate with SMS service (Twilio, VNPT SMS, etc.)
     // For now, just log the OTP
-    console.log(`📱 Sending OTP to ${phone}:`);
-    console.log(`OTP Code: ${otp}`);
-    console.log(`Purpose: ${purpose}`);
-    console.log(`---`);
+    logger.log(`Đang gửi OTP đến ${phtrêne}:`);
+    logger.log(`OTP Code: ${OTP}`);
+    logger.log(`Purpose: ${purpose}`);
+    logger.log(`---`);
 
     // TODO: Implement actual SMS sending
     // Example with VNPT SMS:

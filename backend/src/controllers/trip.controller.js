@@ -44,7 +44,7 @@ exports.create = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Create trip error:', error);
+    logger.error('Lỗi tạo chuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tạo chuyến xe thất bại',
@@ -93,7 +93,7 @@ exports.createRecurring = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Create recurring trips error:', error);
+    logger.error('Lỗi tạo chuyến lặp lại:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tạo chuyến xe định kỳ thất bại',
@@ -148,7 +148,7 @@ exports.getMyTrips = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get trips error:', error);
+    logger.error('Lỗi lấy chuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy danh sách chuyến thất bại',
@@ -175,7 +175,7 @@ exports.getById = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get trip error:', error);
+    logger.error('Lỗi lấy chuyến:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy chuyến xe',
@@ -204,7 +204,7 @@ exports.update = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Update trip error:', error);
+    logger.error('Lỗi cập nhật chuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Cập nhật chuyến xe thất bại',
@@ -229,7 +229,7 @@ exports.delete = async (req, res) => {
       message: 'Xóa chuyến xe thành công',
     });
   } catch (error) {
-    console.error('Delete trip error:', error);
+    logger.error('Lỗi xóa chuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xóa chuyến xe thất bại',
@@ -265,7 +265,7 @@ exports.cancel = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Cancel trip error:', error);
+    logger.error('Lỗi hủy chuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Hủy chuyến xe thất bại',
@@ -295,7 +295,7 @@ exports.getStatistics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get trip statistics error:', error);
+    logger.error('Lỗi lấy thống kê chuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy thống kê chuyến thất bại',
@@ -374,7 +374,7 @@ exports.search = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Search trips error:', error);
+    logger.error('Lỗi tìm kiếm chuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tìm kiếm chuyến thất bại',
@@ -400,7 +400,7 @@ exports.getPublicTripDetail = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get public trip detail error:', error);
+    logger.error('Lỗi lấy chi tiết chuyến công khai:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy chuyến xe',
@@ -427,7 +427,7 @@ exports.configureDynamicPricing = async (req, res) => {
       message: 'Cấu hình giá động thành công',
     });
   } catch (error) {
-    console.error('Configure dynamic pricing error:', error);
+    logger.error('Lỗi cấu hình giá động:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể cấu hình giá động',
@@ -452,7 +452,7 @@ exports.getDynamicPrice = async (req, res) => {
       data: priceInfo,
     });
   } catch (error) {
-    console.error('Get dynamic price error:', error);
+    logger.error('Lỗi lấy giá động:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể tính giá động',

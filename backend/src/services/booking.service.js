@@ -26,11 +26,11 @@ class BookingService {
   static async holdSeats(holdData) {
     const { tripId, seats, contactInfo, customerId, pickupPoint, dropoffPoint, voucherCode } = holdData;
 
-    console.log('=== HOLD SEATS ===');
-    console.log('Customer ID:', customerId);
-    console.log('Is Guest Booking:', !customerId);
-    console.log('Trip ID:', tripId);
-    console.log('Seats:', seats?.length);
+    logger.log('=== HOLD SEATS ===');
+    logger.log('Khách hàng ID:', customerId);
+    logger.log('Is Guest Đặt chỗ:', !customerId);
+    logger.log('Chuyến ID:', tripId);
+    logger.log('Ghế:', seats?.length);
 
     // Validate trip exists and is bookable
     const trip = await Trip.findById(tripId)
@@ -103,7 +103,7 @@ class BookingService {
         voucherId = voucherValidation.voucher.id;
       } catch (error) {
         // Don't fail the whole booking if voucher is invalid, just ignore it
-        console.log('Voucher validation failed:', error.message);
+        logger.log('Xác minh Voucher thất bại:', error.message);
       }
     }
 
@@ -202,12 +202,12 @@ class BookingService {
     booking.confirm();
     await booking.save();
 
-    // Increment voucher usage if voucher was applied
+    // Tăng mức sử dụng voucher nếu áp dụng voucher
     if (booking.voucherId) {
       try {
         await VoucherService.applyToBooking(booking.voucherId);
       } catch (error) {
-        console.error('Failed to increment voucher usage:', error.message);
+        logger.error('Không thể truy vấn voucher đã sử dụng:', error.message);
       }
     }
 
@@ -292,7 +292,7 @@ class BookingService {
       try {
         await VoucherService.releaseFromBooking(booking.voucherId);
       } catch (error) {
-        console.error('Failed to release voucher usage:', error.message);
+        logger.error('Không thể sử dụng voucher:', error.message);
       }
     }
 
@@ -309,12 +309,12 @@ class BookingService {
         );
 
         if (refundResult.success) {
-          console.log('Auto-refund successful for booking:', bookingId);
+          logger.log('Hoàn tiền successful cho đặt chỗ:', bookingId);
         } else {
-          console.error('Auto-refund failed for booking:', bookingId);
+          logger.error('Hoàn tiền failed cho đặt chỗ:', bookingId);
         }
       } catch (error) {
-        console.error('Auto-refund error:', error.message);
+        logger.error('Hoàn tiền lỗi:', error.message);
         // Don't fail the cancellation if refund fails
       }
     }

@@ -15,7 +15,7 @@ const sanitizeData = () => {
   return mongoSanitize({
     replaceWith: '_',
     onSanitize: ({ req, key }) => {
-      console.warn(`[Security] Attempted NoSQL injection detected: ${key}`);
+      logger.warn(`[Bảo mật] Phát hiện cố gắng tiêm NoSQL: ${key}`);
     },
   });
 };
@@ -107,7 +107,7 @@ const sanitizeRequest = (req, res, next) => {
  * Log security events
  */
 const logSecurityEvent = (eventType, details, req) => {
-  console.warn('[Security Event]', {
+  logger.warn('[Sự kiện bảo mật]', {
     type: eventType,
     timestamp: new Date().toISOString(),
     ip: req.ip,

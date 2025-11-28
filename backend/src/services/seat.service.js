@@ -56,12 +56,12 @@ class SeatService {
         const ws = getWebSocketService();
         await ws.broadcastSeatAction(tripId, seats, 'locked');
       } catch (error) {
-        console.error('Error broadcasting seat lock:', error);
+        logger.error('Lỗi phát sóng khóa ghế:', error);
       }
 
       return true;
     } catch (error) {
-      console.error('Error locking seats:', error);
+      logger.error('Lỗi khóa ghế:', error);
       throw error;
     }
   }
@@ -95,12 +95,12 @@ class SeatService {
         const ws = getWebSocketService();
         await ws.broadcastSeatAction(tripId, seats, 'unlocked');
       } catch (error) {
-        console.error('Error broadcasting seat unlock:', error);
+        logger.error('Lỗi phát sóng mở khóa chỗ ngồi:', error);
       }
 
       return true;
     } catch (error) {
-      console.error('Error unlocking seats:', error);
+      logger.error('Lỗi mở khóa ghế:', error);
       throw error;
     }
   }
@@ -133,12 +133,12 @@ class SeatService {
         const ws = getWebSocketService();
         await ws.broadcastSeatAction(tripId, seats, 'booked');
       } catch (error) {
-        console.error('Error broadcasting seat confirmation:', error);
+        logger.error('Lỗi phát sóng xác nhận chỗ ngồi:', error);
       }
 
       return true;
     } catch (error) {
-      console.error('Error confirming seats:', error);
+      logger.error('Lỗi xác nhận chỗ ngồi:', error);
       throw error;
     }
   }
@@ -169,7 +169,7 @@ class SeatService {
 
       return !trip.bookedSeats.includes(seat);
     } catch (error) {
-      console.error('Error checking seat availability:', error);
+      logger.error('Lỗi kiểm tra chỗ trống:', error);
       throw error;
     }
   }
@@ -216,7 +216,7 @@ class SeatService {
 
       return seatStatus;
     } catch (error) {
-      console.error('Error getting trip seat status:', error);
+      logger.error('Lỗi nhận trạng thái chỗ ngồi trong chuyến đi:', error);
       throw error;
     }
   }
@@ -273,7 +273,7 @@ class SeatService {
         EX: 300,
       });
     } catch (error) {
-      console.error('Error updating trip seat availability:', error);
+      logger.error('Lỗi cập nhật tình trạng chỗ trống của chuyến đi:', error);
     }
   }
 
@@ -302,7 +302,7 @@ class SeatService {
 
       return count;
     } catch (error) {
-      console.error('Error getting trip available seat count:', error);
+      logger.error('Lỗi khi nhận số ghế còn trống của chuyến đi:', error);
       // Fallback to MongoDB
       const trip = await Trip.findById(tripId);
       return trip ? trip.availableSeats : 0;
@@ -332,7 +332,7 @@ class SeatService {
 
       return true;
     } catch (error) {
-      console.error('Error extending seat lock:', error);
+      logger.error('Lỗi mở rộng khóa ghế:', error);
       throw error;
     }
   }
@@ -358,7 +358,7 @@ class SeatService {
 
       return result;
     } catch (error) {
-      console.error('Error getting seat lock remaining time:', error);
+      logger.error('Lỗi khóa ghế trong thời gian còn lại:', error);
       return {};
     }
   }
@@ -387,7 +387,7 @@ class SeatService {
 
       return cleanedCount;
     } catch (error) {
-      console.error('Error cleaning up expired locks:', error);
+      logger.error('Lỗi dọn dẹp ổ khóa hết hạn:', error);
       return cleanedCount;
     }
   }
@@ -408,7 +408,7 @@ class SeatService {
 
       return locked === userId;
     } catch (error) {
-      console.error('Error checking seat lock ownership:', error);
+      logger.error('Lỗi kiểm tra quyền sở hữu khóa ghế:', error);
       return false;
     }
   }
@@ -454,7 +454,7 @@ class SeatService {
 
       return result;
     } catch (error) {
-      console.error('Error batch checking seats:', error);
+      logger.error('Lỗi kiểm tra hàng loạt chỗ ngồi:', error);
       throw error;
     }
   }

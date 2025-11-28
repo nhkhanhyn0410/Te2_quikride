@@ -16,7 +16,7 @@ class AppError extends Error {
 
 // Handle different types of errors
 const handleCastErrorDB = (err) => {
-  const message = `Invalid ${err.path}: ${err.value}`;
+  const message = `Không hợp lệ ${err.path}: ${err.value}`;
   return new AppError(message, 400);
 };
 
@@ -59,7 +59,7 @@ const sendErrorProd = (err, res) => {
   // Programming or other unknown error: don't leak error details
   else {
     // Log error
-    console.error(' ERROR:', err);
+    logger.error(' LỖI:', err);
 
     // Send generic message
     res.status(500).json({

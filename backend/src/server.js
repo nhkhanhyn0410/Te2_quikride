@@ -134,7 +134,7 @@ app.use('/api/', limiter);
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'success',
-    message: 'API is running',
+    message: 'API đang chạy',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
   });
@@ -173,7 +173,7 @@ app.use(`/api/${API_VERSION}/reviews`, reviewRoutes);
 app.use('*', (req, res) => {
   res.status(404).json({
     status: 'error',
-    message: 'Route not found',
+    message: 'Không tìm thấy route',
     path: req.originalUrl,
   });
 });
@@ -194,14 +194,14 @@ schedulerService.initialize();
 // Start server
 server.listen(PORT, () => {
   logger.start(`=====================================================================`)
-  logger.success(`Server đang chạy ở chế độ ${process.env.NODE_ENV} trên port ${PORT}`);
+  logger.success(`Máy chủ đang chạy ở chế độ ${process.env.NODE_ENV} trên port ${PORT}`);
   logger.success(`Health check: http://localhost:${PORT}/health`);
   logger.success(`API endpoint: http://localhost:${PORT}/api/${API_VERSION}`);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  logger.error(' UNHANDLED REJECTION! Shutting down...');
+  logger.error(' LỖI KHÔNG ĐƯỢC XỬ LÝ! Đang tắt...');
   logger.error(err.name, err.message);
   server.close(() => {
     process.exit(1);
@@ -210,9 +210,8 @@ process.on('unhandledRejection', (err) => {
 
 // Handle SIGTERM
 process.on('SIGTERM', () => {
-  logger.log('SIGTERM RECEIVED. Shutting down gracefully');
   server.close(() => {
-    logger.log('Process terminated!');
+    logger.log('Tiến trình đã kết thúc!');
   });
 });
 

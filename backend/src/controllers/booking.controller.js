@@ -1,4 +1,5 @@
 const BookingService = require('../services/booking.service');
+const logger = require('../utils/logger');
 
 /**
  * @route   POST /api/v1/bookings/hold-seats
@@ -57,7 +58,7 @@ exports.holdSeats = async (req, res) => {
       message: 'Giữ ghế thành công. Vui lòng hoàn tất thanh toán trong 15 phút.',
     });
   } catch (error) {
-    console.error('Hold seats error:', error);
+    logger.error('Lỗi giữ ghế:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể giữ ghế. Vui lòng thử lại.',
@@ -90,7 +91,7 @@ exports.confirmBooking = async (req, res) => {
       message: 'Xác nhận booking thành công',
     });
   } catch (error) {
-    console.error('Confirm booking error:', error);
+    logger.error('Lỗi xác nhận đặt chỗ:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể xác nhận booking',
@@ -133,7 +134,7 @@ exports.cancelBooking = async (req, res) => {
       message: 'Hủy booking thành công',
     });
   } catch (error) {
-    console.error('Cancel booking error:', error);
+    logger.error('Lỗi hủy đặt chỗ:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể hủy booking',
@@ -189,7 +190,7 @@ exports.cancelBookingGuest = async (req, res) => {
       message: 'Hủy vé thành công. Tiền sẽ được hoàn lại trong 3-7 ngày làm việc.',
     });
   } catch (error) {
-    console.error('Cancel booking guest error:', error);
+    logger.error('Lỗi hủy đặt chỗ khách:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể hủy vé',
@@ -226,7 +227,7 @@ exports.extendHold = async (req, res) => {
       message: 'Gia hạn giữ ghế thành công',
     });
   } catch (error) {
-    console.error('Extend hold error:', error);
+    logger.error('Lỗi gia hạn giữ chỗ:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể gia hạn',
@@ -259,7 +260,7 @@ exports.releaseHold = async (req, res) => {
       message: 'Hủy giữ ghế thành công',
     });
   } catch (error) {
-    console.error('Release hold error:', error);
+    logger.error('Lỗi phát hành giữ chỗ:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể hủy giữ ghế',
@@ -284,7 +285,7 @@ exports.getBookingById = async (req, res) => {
       data: { booking },
     });
   } catch (error) {
-    console.error('Get booking error:', error);
+    logger.error('Lỗi lấy đặt chỗ:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy booking',
@@ -316,7 +317,7 @@ exports.getBookingByCode = async (req, res) => {
       data: { booking },
     });
   } catch (error) {
-    console.error('Get booking by code error:', error);
+    logger.error('Lỗi lấy đặt chỗ theo mã:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy booking',
@@ -340,7 +341,7 @@ exports.getAvailableSeats = async (req, res) => {
       data: seatsInfo,
     });
   } catch (error) {
-    console.error('Get available seats error:', error);
+    logger.error('Lỗi lấy ghế trống:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể lấy thông tin ghế',
@@ -372,7 +373,7 @@ exports.getMyBookings = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get my bookings error:', error);
+    logger.error('Lỗi lấy đặt chỗ của tôi:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể lấy danh sách booking',
@@ -405,7 +406,7 @@ exports.getOperatorBookings = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get operator bookings error:', error);
+    logger.error('Lỗi lấy đặt chỗ nhà điều hành:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể lấy danh sách booking',
@@ -433,7 +434,7 @@ exports.getStatistics = async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    console.error('Get statistics error:', error);
+    logger.error('Lỗi lấy thống kê:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể lấy thống kê',
@@ -463,7 +464,7 @@ exports.updatePayment = async (req, res) => {
       message: 'Cập nhật thanh toán thành công',
     });
   } catch (error) {
-    console.error('Update payment error:', error);
+    logger.error('Lỗi cập nhật thanh đếnán:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể cập nhật thanh toán',

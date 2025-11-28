@@ -1,6 +1,7 @@
 const Complaint = require('../models/Complaint');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
+const logger = require('../utils/logger');
 
 /**
  * @route   POST /api/complaints
@@ -70,7 +71,7 @@ exports.createComplaint = async (req, res) => {
       data: complaint,
     });
   } catch (error) {
-    console.error('Create complaint error:', error);
+    logger.error('Lỗi tạo khiếu nại:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi tạo khiếu nại',
@@ -121,7 +122,7 @@ exports.getMyComplaints = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get my complaints error:', error);
+    logger.error('Lỗi lấy khiếu nại của tôi:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy danh sách khiếu nại',
@@ -176,7 +177,7 @@ exports.getComplaintById = async (req, res) => {
       data: complaint,
     });
   } catch (error) {
-    console.error('Get complaint error:', error);
+    logger.error('Lỗi lấy khiếu nại:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy thông tin khiếu nại',
@@ -238,7 +239,7 @@ exports.addNote = async (req, res) => {
       data: updatedComplaint,
     });
   } catch (error) {
-    console.error('Add note error:', error);
+    logger.error('Lỗi thêm ghi chú:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi thêm ghi chú',
@@ -288,7 +289,7 @@ exports.addSatisfactionRating = async (req, res) => {
       data: complaint,
     });
   } catch (error) {
-    console.error('Add satisfaction rating error:', error);
+    logger.error('Lỗi thêm đánh giá hài lòng:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lỗi khi thêm đánh giá',
@@ -374,7 +375,7 @@ exports.getAllComplaints = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get all complaints error:', error);
+    logger.error('Lỗi lấy tất cả khiếu nại:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy danh sách khiếu nại',
@@ -429,7 +430,7 @@ exports.assignComplaint = async (req, res) => {
       data: updatedComplaint,
     });
   } catch (error) {
-    console.error('Assign complaint error:', error);
+    logger.error('Lỗi chỉ định khiếu nại:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi phân công khiếu nại',
@@ -477,7 +478,7 @@ exports.updateComplaintStatus = async (req, res) => {
       data: updatedComplaint,
     });
   } catch (error) {
-    console.error('Update status error:', error);
+    logger.error('Lỗi cập nhật trạng thái:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi cập nhật trạng thái',
@@ -521,7 +522,7 @@ exports.updateComplaintPriority = async (req, res) => {
       data: complaint,
     });
   } catch (error) {
-    console.error('Update priority error:', error);
+    logger.error('Lỗi cập nhật mức độ ưu tiên:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi cập nhật độ ưu tiên',
@@ -568,7 +569,7 @@ exports.resolveComplaint = async (req, res) => {
       data: updatedComplaint,
     });
   } catch (error) {
-    console.error('Resolve complaint error:', error);
+    logger.error('Lỗi giải quyết khiếu nại:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi giải quyết khiếu nại',
@@ -615,7 +616,7 @@ exports.getComplaintStatistics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get complaint statistics error:', error);
+    logger.error('Lỗi lấy thống kê khiếu nại:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy thống kê khiếu nại',

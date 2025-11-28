@@ -17,12 +17,12 @@ class QRService {
     } else {
       // Generate random 32 bytes if not set
       this.secretKey = crypto.randomBytes(32);
-      console.warn('QR_ENCRYPTION_KEY not set, using random key. This will break QR verification after restart!');
+      logger.warn('QR_ENCRYPTION_KEY không được đặt, sử dụng khóa ngẫu nhiên. Điều này sẽ phá vỡ xác minh QR sau khi khởi động lại!');
     }
 
     // Verify key length
     if (this.secretKey.length !== 32) {
-      throw new Error(`QR_ENCRYPTION_KEY must be 32 bytes (64 hex characters), got ${this.secretKey.length} bytes`);
+      throw new Error(`QR_ENCRYPTION_KEY phải là 32 byte (64 ký tự hex), got ${this.secretKey.length} bytes`);
     }
   }
 
@@ -46,7 +46,7 @@ class QRService {
       // Return encrypted data with IV (needed for decryption)
       const result = `${iv.toString('hex')}:${encrypted.toString('hex')}`;
 
-      console.log('🔐 QR encryption:', {
+      logger.log('QR mã hóa:', {
         dataLength: text.length,
         encryptedLength: result.length,
         ivLength: iv.length
@@ -54,8 +54,8 @@ class QRService {
 
       return result;
     } catch (error) {
-      console.error(' Encryption error:', error);
-      throw new Error('Failed to encrypt QR data');
+      logger.error('Lỗi mã hóa:', error);
+      throw new Error('Không thể mã hóa dữ liệu QR');
     }
   }
 
@@ -66,7 +66,7 @@ class QRService {
    */
   decrypt(encryptedText) {
     try {
-      console.log('🔓 Attempting to decrypt QR data:', {
+      logger.log('Đang cố gắng giải mã dữ liệu QR:', {
         length: encryptedText.length,
         preview: encryptedText.substring(0, 50) + '...',
       });
@@ -82,7 +82,7 @@ class QRService {
       const iv = Buffer.from(parts.shift(), 'hex');
       const encryptedData = Buffer.from(parts.join(':'), 'hex');
 
-      console.log('🔑 Decryption parameters:', {
+      logger.log('Thông số giải mã:', {
         ivLength: iv.length,
         dataLength: encryptedData.length,
       });
@@ -98,7 +98,7 @@ class QRService {
 
       const result = JSON.parse(decrypted.toString());
 
-      console.log('QR decrypted successfully:', {
+      logger.log('Đã giải mã QR thành công:', {
         ticketCode: result.ticketCode,
         bookingId: result.bookingId,
         version: result.version,
@@ -106,8 +106,8 @@ class QRService {
 
       return result;
     } catch (error) {
-      console.error(' Decryption error:', error);
-      console.error('QR text that failed:', encryptedText);
+      logger.error('Lỗi giải mã:', error);
+      logger.error('Văn bản QR không thành công:', encryptedText);
       throw new Error('QR code không hợp lệ hoặc bị hỏng: ' + error.message);
     }
   }
@@ -157,7 +157,7 @@ class QRService {
         },
       });
 
-      console.log('📱 QR code generated:', {
+      logger.log('Mã QR được tạo:', {
         dataLength: encryptedData.length,
         imageSize: '300x300',
         errorCorrection: 'M'
@@ -169,7 +169,7 @@ class QRService {
         rawData: qrData, // Original data (don't expose to client)
       };
     } catch (error) {
-      console.error(' QR generation error:', error);
+      logger.error('Lỗi tạo QR:', error);
       throw new Error('Failed to generate QR code');
     }
   }
@@ -267,8 +267,8 @@ class QRService {
 
       return buffer;
     } catch (error) {
-      console.error(' QR buffer generation error:', error);
-      throw new Error('Failed to generate QR buffer');
+      logger.error('Lỗi tạo bộ đệm QR:', error);
+      throw new Error('Không tạo được bộ đệm QR');
     }
   }
 

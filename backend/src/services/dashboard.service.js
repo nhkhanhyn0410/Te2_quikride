@@ -344,7 +344,7 @@ class DashboardService {
    * Get trend data for charts (revenue and bookings)
    */
   static async getTrendData(operatorId, period) {
-    console.log('📊 Getting trend data for:', {
+    logger.log('Lấy dữ liệu xu hướng cho:', {
       operatorId,
       operatorIdType: typeof operatorId,
       period
@@ -394,7 +394,7 @@ class DashboardService {
       },
     ]);
 
-    console.log('📈 Trend data results:', {
+    logger.log('Kết quả dữ liệu xu hướng:', {
       bookingTrendsCount: bookingTrends.length,
       sample: bookingTrends[0]
     });

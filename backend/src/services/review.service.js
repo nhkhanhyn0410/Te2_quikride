@@ -70,7 +70,7 @@ class ReviewService {
       // 7. Populate review data for response
       await review.populate('userId', 'fullName avatar');
 
-      console.log('Review created successfully:', review._id);
+      logger.log('Đánh giá được tạo thành công:', review._id);
 
       return {
         success: true,
@@ -78,7 +78,7 @@ class ReviewService {
         message: 'Đánh giá của bạn đã được ghi nhận. Cảm ơn bạn!',
       };
     } catch (error) {
-      console.error(' Error creating review:', error);
+      logger.error('Lỗi khi tạo đánh giá:', error);
       throw error;
     }
   }
@@ -97,9 +97,9 @@ class ReviewService {
         totalReviews: ratingStats.totalReviews,
       });
 
-      console.log(`Updated operator rating: ${ratingStats.averageRating} (${ratingStats.totalReviews} reviews)`);
+      logger.log(`Đánh giá nhà xe được cập nhật:${ratingStats.averageRating} (${ratingStats.totalReviews})`);
     } catch (error) {
-      console.error(' Error updating operator rating:', error);
+      logger.error('Lỗi cập nhật đánh giá của nhà xe:', error);
       // Don't throw - this is a secondary operation
     }
   }
@@ -118,7 +118,7 @@ class ReviewService {
         ...result,
       };
     } catch (error) {
-      console.error(' Error getting trip reviews:', error);
+      logger.error('Lỗi khi nhận đánh giá chuyến đi:', error);
       throw error;
     }
   }
@@ -167,7 +167,7 @@ class ReviewService {
         },
       };
     } catch (error) {
-      console.error(' Error getting operator reviews:', error);
+      logger.error('Lỗi nhận đánh giá của nhà xe:', error);
       throw error;
     }
   }
@@ -203,7 +203,7 @@ class ReviewService {
         },
       };
     } catch (error) {
-      console.error(' Error getting user reviews:', error);
+      logger.error('Lỗi nhận đánh giá của người dùng:', error);
       throw error;
     }
   }
@@ -241,7 +241,7 @@ class ReviewService {
         );
       }
 
-      console.log('Operator response added successfully');
+      logger.log('Đã thêm phản hồi của nhà xe thành công');
 
       return {
         success: true,
@@ -249,7 +249,7 @@ class ReviewService {
         message: 'Phản hồi của bạn đã được gửi',
       };
     } catch (error) {
-      console.error(' Error adding operator response:', error);
+      logger.error(' Error adding operator response:', error);
       throw error;
     }
   }
@@ -299,7 +299,7 @@ class ReviewService {
         booking,
       };
     } catch (error) {
-      console.error(' Error checking review eligibility:', error);
+      logger.error('Lỗi kiểm tra tính đủ điều kiện đánh giá:', error);
       throw error;
     }
   }
@@ -328,7 +328,7 @@ class ReviewService {
       // Check if already reviewed
       const existingReview = await Review.findOne({ bookingId });
       if (existingReview) {
-        console.log('User already reviewed this booking');
+        logger.log('Người dùng đã đánh giá lượt đặt chỗ này');
         return { success: true, skipped: true };
       }
 
@@ -340,15 +340,15 @@ class ReviewService {
 
       const result = await notificationService.sendEmail(
         user.email,
-        '⭐ Đánh giá chuyến đi của bạn - Vé xe nhanh',
+        'Đánh giá chuyến đi của bạn - Vé xe nhanh',
         emailContent
       );
 
-      console.log('Review invitation sent:', user.email);
+      logger.log('Xem lại lời mời đã gửi:', user.email);
 
       return result;
     } catch (error) {
-      console.error(' Error sending review invitation:', error);
+      logger.error('Lỗi gửi lời mời đánh giá:', error);
       throw error;
     }
   }
@@ -579,7 +579,7 @@ class ReviewService {
         throw new Error('Review không tồn tại');
       }
 
-      console.log('Review reported:', reviewId);
+      logger.log('Đã báo cáo đánh giá:', reviewId);
 
       return {
         success: true,
@@ -587,7 +587,7 @@ class ReviewService {
         message: 'Đánh giá đã được báo cáo. Chúng tôi sẽ xem xét.',
       };
     } catch (error) {
-      console.error(' Error reporting review:', error);
+      logger.error('Lỗi báo cáo đánh giá:', error);
       throw error;
     }
   }

@@ -149,7 +149,7 @@ const authenticate = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Authentication error:', error);
+    logger.error('Lỗi xác thực:', error);
     return res.status(500).json({
       status: 'error',
       message: 'Lỗi xác thực',
@@ -225,7 +225,7 @@ const optionalAuth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Optional auth error:', error);
+    logger.error('Lỗi xác thực tùy chọn:', error);
     req.user = null;
     next();
   }

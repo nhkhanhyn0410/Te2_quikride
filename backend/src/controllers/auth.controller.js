@@ -1,4 +1,5 @@
 const AuthService = require('../services/auth.service');
+const logger = require('../utils/logger');
 
 /**
  * Auth Controller
@@ -44,7 +45,7 @@ exports.register = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Register error:', error);
+    logger.error('Lỗi đăng ký:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Đăng ký thất bại',
@@ -82,7 +83,7 @@ exports.login = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Lỗi đăng nhập:', error);
     res.status(401).json({
       status: 'error',
       message: error.message || 'Đăng nhập thất bại',
@@ -117,7 +118,7 @@ exports.refreshToken = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Refresh token error:', error);
+    logger.error('Lỗi làm mới đếnken:', error);
     res.status(401).json({
       status: 'error',
       message: error.message || 'Làm mới token thất bại',
@@ -152,7 +153,7 @@ exports.forgotPassword = async (req, res, next) => {
       }),
     });
   } catch (error) {
-    console.error('Forgot password error:', error);
+    logger.error('Lỗi quên mật khẩu:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xử lý quên mật khẩu thất bại',
@@ -190,7 +191,7 @@ exports.resetPassword = async (req, res, next) => {
       message: 'Đặt lại mật khẩu thành công',
     });
   } catch (error) {
-    console.error('Reset password error:', error);
+    logger.error('Lỗi đặt lại mật khẩu:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Đặt lại mật khẩu thất bại',
@@ -228,7 +229,7 @@ exports.verifyEmail = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Verify email error:', error);
+    logger.error('Lỗi xác mtrtrêngh email:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xác thực email thất bại',
@@ -256,7 +257,7 @@ exports.sendPhoneOTP = async (req, res, next) => {
       }),
     });
   } catch (error) {
-    console.error('Send phone OTP error:', error);
+    logger.error('Lỗi gửi OTP điện thoại:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Gửi OTP thất bại',
@@ -288,7 +289,7 @@ exports.verifyPhone = async (req, res, next) => {
       message: 'Xác thực số điện thoại thành công',
     });
   } catch (error) {
-    console.error('Verify phone error:', error);
+    logger.error('Lỗi xác mtrtrêngh điện thoại:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xác thực số điện thoại thất bại',
@@ -312,7 +313,7 @@ exports.getMe = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get me error:', error);
+    logger.error('Lỗi lấy thông ttrtrêng:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi server',
@@ -336,7 +337,7 @@ exports.logout = async (req, res, next) => {
       message: 'Đăng xuất thành công',
     });
   } catch (error) {
-    console.error('Logout error:', error);
+    logger.error('Lỗi đăng xuất:', error);
     res.status(500).json({
       status: 'error',
       message: 'Đăng xuất thất bại',
@@ -383,7 +384,7 @@ exports.googleOAuth = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Google OAuth error:', error);
+    logger.error('Lỗi Google OAuth:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Đăng nhập Google thất bại',
@@ -430,7 +431,7 @@ exports.facebookOAuth = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Facebook OAuth error:', error);
+    logger.error('Lỗi Facebook OAuth:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Đăng nhập Facebook thất bại',

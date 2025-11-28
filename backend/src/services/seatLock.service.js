@@ -79,7 +79,7 @@ class SeatLockService {
         expiresAt: new Date(Date.now() + duration * 1000),
       };
     } catch (error) {
-      console.error('Error locking seats:', error);
+      logger.error('Lỗi khóa ghế:', error);
       throw new Error('Không thể khóa ghế. Vui lòng thử lại.');
     }
   }
@@ -132,7 +132,7 @@ class SeatLockService {
         failed,
       };
     } catch (error) {
-      console.error('Error releasing seats:', error);
+      logger.error('Lỗi nhả ghế:', error);
       throw new Error('Không thể mở khóa ghế. Vui lòng thử lại.');
     }
   }
@@ -163,7 +163,7 @@ class SeatLockService {
 
       return results;
     } catch (error) {
-      console.error('Error checking seats:', error);
+      logger.error('Lỗi kiểm tra chỗ ngồi:', error);
       throw new Error('Không thể kiểm tra trạng thái ghế.');
     }
   }
@@ -181,7 +181,7 @@ class SeatLockService {
       const lockedSeats = await redis.sMembers(tripLocksKey);
       return lockedSeats || [];
     } catch (error) {
-      console.error('Error getting locked seats:', error);
+      logger.error('Lỗi bị khóa ghế:', error);
       return [];
     }
   }
@@ -229,7 +229,7 @@ class SeatLockService {
         expiresAt: new Date(Date.now() + duration * 1000),
       };
     } catch (error) {
-      console.error('Error extending lock:', error);
+      logger.error('Lỗi mở rộng khóa:', error);
       throw new Error('Không thể gia hạn khóa ghế.');
     }
   }
@@ -260,7 +260,7 @@ class SeatLockService {
 
       return cleaned;
     } catch (error) {
-      console.error('Error cleaning up locks:', error);
+      logger.error('Lỗi khi dọn dẹp ổ khóa:', error);
       return 0;
     }
   }
@@ -289,7 +289,7 @@ class SeatLockService {
 
       return userSeats;
     } catch (error) {
-      console.error('Error getting user locks:', error);
+      logger.error('Lỗi nhận khóa người dùng:', error);
       return [];
     }
   }
@@ -314,7 +314,7 @@ class SeatLockService {
 
       return await this.releaseSeats(tripId, userSeats, userId);
     } catch (error) {
-      console.error('Error releasing all user locks:', error);
+      logger.error('Lỗi giải phóng tất cả các khóa người dùng:', error);
       throw new Error('Không thể mở khóa tất cả ghế.');
     }
   }

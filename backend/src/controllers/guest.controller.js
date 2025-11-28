@@ -1,5 +1,6 @@
 const OTPService = require('../services/otp.service');
 const GuestSessionService = require('../services/guestSession.service');
+const logger = require('../utils/logger');
 
 /**
  * Guest Controller
@@ -41,7 +42,7 @@ class GuestController {
         },
       });
     } catch (error) {
-      console.error('Request OTP error:', error);
+      logger.error('Lỗi yêu cầu OTP:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể gửi mã OTP',
@@ -102,7 +103,7 @@ class GuestController {
         },
       });
     } catch (error) {
-      console.error('Verify OTP error:', error);
+      logger.error('Lỗi xác mtrtrêngh OTP:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể xác thực OTP',
@@ -139,7 +140,7 @@ class GuestController {
         data: sessionData,
       });
     } catch (error) {
-      console.error('Get session error:', error);
+      logger.error('Lỗi lấy phiên:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể lấy thông tin session',
@@ -173,7 +174,7 @@ class GuestController {
         },
       });
     } catch (error) {
-      console.error('Extend session error:', error);
+      logger.error('Lỗi gia hạn phiên:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể gia hạn session',
@@ -210,7 +211,7 @@ class GuestController {
         data: result.sessionData,
       });
     } catch (error) {
-      console.error('Update session error:', error);
+      logger.error('Lỗi cập nhật phiên:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể cập nhật session',
@@ -240,7 +241,7 @@ class GuestController {
         message: 'Đăng xuất thành công',
       });
     } catch (error) {
-      console.error('Delete session error:', error);
+      logger.error('Lỗi xóa phiên:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể đăng xuất',
@@ -263,7 +264,7 @@ class GuestController {
         data: result,
       });
     } catch (error) {
-      console.error('Check OTP status error:', error);
+      logger.error('Lỗi kiểm tra trạng thái OTP:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể kiểm tra trạng thái OTP',

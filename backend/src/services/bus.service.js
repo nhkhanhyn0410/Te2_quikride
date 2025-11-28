@@ -69,9 +69,9 @@ class BusService {
       if (layout) {
         const originalSeats = busData.seatLayout.totalSeats;
         const recalculatedSeats = this.calculateTotalSeats(layout);
-        console.log('🔍 CREATE BUS - Original totalSeats:', originalSeats);
-        console.log('🔍 CREATE BUS - Recalculated totalSeats:', recalculatedSeats);
-        console.log('🔍 CREATE BUS - Layout dimensions:', layout.length, 'x', layout[0]?.length);
+        logger.log('CREATE BUS - Original totalSeats:', originalSeats);
+        logger.log('CREATE BUS - Recalculated totalSeats:', recalculatedSeats);
+        logger.log('CREATE BUS - Layout dimensions:', layout.length, 'x', layout[0]?.length);
         busData.seatLayout.totalSeats = recalculatedSeats;
       }
 
@@ -224,13 +224,13 @@ class BusService {
         // Recalculate totalSeats from layout to ensure accuracy
         const originalSeats = updateData.seatLayout.totalSeats;
         const recalculatedSeats = this.calculateTotalSeats(layout);
-        console.log('🔍 UPDATE BUS - Bus ID:', busId);
-        console.log('🔍 UPDATE BUS - Original totalSeats:', originalSeats);
-        console.log('🔍 UPDATE BUS - Recalculated totalSeats:', recalculatedSeats);
-        console.log('🔍 UPDATE BUS - Layout dimensions:', layout.length, 'x', layout[0]?.length);
+        logger.log('UPDATE BUS - Bus ID:', busId);
+        logger.log('UPDATE BUS - Original totalSeats:', originalSeats);
+        logger.log('UPDATE BUS - Recalculated totalSeats:', recalculatedSeats);
+        logger.log('UPDATE BUS - Layout dimensions:', layout.length, 'x', layout[0]?.length);
 
         // Sample first few rows to see what's in the layout
-        console.log('🔍 UPDATE BUS - First 3 rows of layout:', JSON.stringify(layout.slice(0, 3)));
+        logger.log('UPDATE BUS - First 3 rows of layout:', JSON.stringify(layout.slice(0, 3)));
 
         updateData.seatLayout.totalSeats = recalculatedSeats;
 
@@ -278,8 +278,8 @@ class BusService {
     Object.assign(bus, updateData);
     await bus.save();
 
-    console.log('UPDATE BUS - Saved totalSeats:', bus.seatLayout.totalSeats);
-    console.log('UPDATE BUS - Bus object saved successfully');
+    logger.log('UPDATE BUS - Saved totalSeats:', bus.seatLayout.totalSeats);
+    logger.log('UPDATE BUS - Bus object saved successfully');
 
     return bus;
   }

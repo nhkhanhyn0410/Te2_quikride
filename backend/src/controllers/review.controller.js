@@ -27,7 +27,7 @@ class ReviewController {
 
       res.status(201).json(result);
     } catch (error) {
-      console.error(' Error in createReview:', error);
+      logger.error(' Lỗi trtrêng tạo đánh giá:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể tạo đánh giá',
@@ -52,7 +52,7 @@ class ReviewController {
 
       res.status(200).json(result);
     } catch (error) {
-      console.error(' Error in getTripReviews:', error);
+      logger.error(' Lỗi trtrêng lấy đánh giá chuyến:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể lấy danh sách đánh giá',
@@ -78,7 +78,7 @@ class ReviewController {
 
       res.status(200).json(result);
     } catch (error) {
-      console.error(' Error in getOperatorReviews:', error);
+      logger.error(' Lỗi trtrêng lấy đánh giá nhà điều hành:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể lấy danh sách đánh giá',
@@ -102,7 +102,7 @@ class ReviewController {
 
       res.status(200).json(result);
     } catch (error) {
-      console.error(' Error in getMyReviews:', error);
+      logger.error(' Lỗi trtrêng lấy đánh giá của tôi:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể lấy danh sách đánh giá',
@@ -123,7 +123,7 @@ class ReviewController {
 
       res.status(200).json(result);
     } catch (error) {
-      console.error(' Error in canReview:', error);
+      logger.error(' Lỗi trtrêng kiểm tra có thể đánh giá:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể kiểm tra',
@@ -152,7 +152,7 @@ class ReviewController {
 
       res.status(200).json(result);
     } catch (error) {
-      console.error(' Error in addOperatorResponse:', error);
+      logger.error(' Lỗi trtrêng thêm phản hồi nhà điều hành:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể thêm phản hồi',
@@ -180,7 +180,7 @@ class ReviewController {
 
       res.status(200).json(result);
     } catch (error) {
-      console.error(' Error in reportReview:', error);
+      logger.error(' Lỗi trtrêng báo cáo đánh giá:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể báo cáo đánh giá',
@@ -205,7 +205,7 @@ class ReviewController {
         ...result,
       });
     } catch (error) {
-      console.error(' Error in sendReviewInvitation:', error);
+      logger.error(' Lỗi trtrêng gửi lời mời đánh giá:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể gửi email mời đánh giá',

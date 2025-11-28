@@ -1,6 +1,7 @@
 const Banner = require('../models/Banner');
 const Blog = require('../models/Blog');
 const FAQ = require('../models/FAQ');
+const logger = require('../utils/logger');
 
 // ============= BANNER ADMIN FUNCTIONS =============
 
@@ -42,7 +43,7 @@ exports.getAllBanners = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get all banners error:', error);
+    logger.error('Lỗi lấy tất cả banner:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy danh sách banner',
@@ -101,7 +102,7 @@ exports.createBanner = async (req, res) => {
       data: banner,
     });
   } catch (error) {
-    console.error('Create banner error:', error);
+    logger.error('Lỗi tạo banner:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi tạo banner',
@@ -154,7 +155,7 @@ exports.updateBanner = async (req, res) => {
       data: banner,
     });
   } catch (error) {
-    console.error('Update banner error:', error);
+    logger.error('Lỗi cập nhật banner:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi cập nhật banner',
@@ -186,7 +187,7 @@ exports.deleteBanner = async (req, res) => {
       message: 'Xóa banner thành công',
     });
   } catch (error) {
-    console.error('Delete banner error:', error);
+    logger.error('Lỗi xóa banner:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi xóa banner',
@@ -256,7 +257,7 @@ exports.getAllBlogs = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get all blogs error:', error);
+    logger.error('Lỗi lấy tất cả blog:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy danh sách bài viết',
@@ -289,7 +290,7 @@ exports.getBlogById = async (req, res) => {
       data: blog,
     });
   } catch (error) {
-    console.error('Get blog error:', error);
+    logger.error('Lỗi lấy blog:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy bài viết',
@@ -354,7 +355,7 @@ exports.createBlog = async (req, res) => {
       data: populatedBlog,
     });
   } catch (error) {
-    console.error('Create blog error:', error);
+    logger.error('Lỗi tạo blog:', error);
 
     if (error.code === 11000) {
       return res.status(400).json({
@@ -420,7 +421,7 @@ exports.updateBlog = async (req, res) => {
       data: updatedBlog,
     });
   } catch (error) {
-    console.error('Update blog error:', error);
+    logger.error('Lỗi cập nhật blog:', error);
 
     if (error.code === 11000) {
       return res.status(400).json({
@@ -460,7 +461,7 @@ exports.deleteBlog = async (req, res) => {
       message: 'Xóa bài viết thành công',
     });
   } catch (error) {
-    console.error('Delete blog error:', error);
+    logger.error('Lỗi xóa blog:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi xóa bài viết',
@@ -523,7 +524,7 @@ exports.getAllFAQs = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get all FAQs error:', error);
+    logger.error('Lỗi lấy tất cả FAQ:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy danh sách FAQ',
@@ -565,7 +566,7 @@ exports.createFAQ = async (req, res) => {
       data: faq,
     });
   } catch (error) {
-    console.error('Create FAQ error:', error);
+    logger.error('Lỗi tạo FAQ:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi tạo FAQ',
@@ -606,7 +607,7 @@ exports.updateFAQ = async (req, res) => {
       data: faq,
     });
   } catch (error) {
-    console.error('Update FAQ error:', error);
+    logger.error('Lỗi cập nhật FAQ:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi cập nhật FAQ',
@@ -638,7 +639,7 @@ exports.deleteFAQ = async (req, res) => {
       message: 'Xóa FAQ thành công',
     });
   } catch (error) {
-    console.error('Delete FAQ error:', error);
+    logger.error('Lỗi xóa FAQ:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi xóa FAQ',
@@ -721,7 +722,7 @@ exports.getContentStatistics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get content statistics error:', error);
+    logger.error('Lỗi lấy thống kê nội dung:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy thống kê nội dung',

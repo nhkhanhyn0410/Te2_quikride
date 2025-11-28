@@ -51,7 +51,7 @@ exports.getAllOperators = async (req, res, next) => {
       },
     });
   } catch (error) {
-    logger.error('Get operators error:', error);
+    logger.error('Lỗi lấy nhà xe:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy danh sách nhà xe thất bại',
@@ -77,7 +77,7 @@ exports.getOperatorById = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get operator error:', error);
+    logger.error('Lỗi lấy nhà điều hành:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy nhà xe',
@@ -105,7 +105,7 @@ exports.approveOperator = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Approve operator error:', error);
+    logger.error('Lỗi phê duyệt nhà xe:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Duyệt nhà xe thất bại',
@@ -141,7 +141,7 @@ exports.rejectOperator = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Reject operator error:', error);
+    logger.error('Lỗi từ chối nhà xe:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Từ chối nhà xe thất bại',
@@ -176,7 +176,7 @@ exports.suspendOperator = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Suspend operator error:', error);
+    logger.error('Lỗi tạm ngưng nhà xe:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tạm ngưng nhà xe thất bại',
@@ -203,7 +203,7 @@ exports.resumeOperator = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Resume operator error:', error);
+    logger.error('Lỗi kích hoạt lại nhà xe:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Khôi phục nhà xe thất bại',
@@ -326,7 +326,7 @@ exports.getUsers = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get users error:', error);
+    logger.error('Lỗi lấy người dùng:', error);
     res.status(500).json({
       success: false,
       message: 'Không thể tải danh sách người dùng',
@@ -417,7 +417,7 @@ exports.getUserById = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get user by ID error:', error);
+    logger.error('Lỗi lấy người dùng theo ID:', error);
     res.status(500).json({
       success: false,
       message: 'Không thể tải thông tin người dùng',
@@ -491,7 +491,7 @@ exports.blockUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Block user error:', error);
+    logger.error('Lỗi khóa người dùng:', error);
     res.status(500).json({
       success: false,
       message: 'Không thể khóa tài khoản',
@@ -546,7 +546,7 @@ exports.unblockUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Unblock user error:', error);
+    logger.error('Lỗi mở khóa người dùng:', error);
     res.status(500).json({
       success: false,
       message: 'Không thể mở khóa tài khoản',
@@ -621,7 +621,7 @@ exports.resetUserPassword = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Reset user password error:', error);
+    logger.error('Lỗi đặt lại mật khẩu người dùng:', error);
     res.status(500).json({
       success: false,
       message: 'Không thể đặt lại mật khẩu',
@@ -723,7 +723,7 @@ exports.getUserStatistics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get user statistics error:', error);
+    logger.error('Lỗi lấy thống kê người dùng:', error);
     res.status(500).json({
       success: false,
       message: 'Không thể tải thống kê người dùng',
@@ -1016,7 +1016,7 @@ exports.getSystemOverview = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get system overview error:', error);
+    logger.error('Lỗi tổng quan hệ thống:', error);
     res.status(500).json({
       success: false,
       message: 'Không thể tải báo cáo tổng quan',

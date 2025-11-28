@@ -24,7 +24,7 @@ exports.getProfile = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get profile error:', error);
+    logger.error('Lỗi lấy hồ sơ:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy thông tin profile thất bại',
@@ -60,7 +60,7 @@ exports.updateProfile = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    logger.error('Lỗi cập nhật hồ sơ:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Cập nhật profile thất bại',
@@ -98,7 +98,7 @@ exports.uploadAvatar = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Upload avatar error:', error);
+    logger.error('Lỗi tải ảnh đại diện:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Upload avatar thất bại',
@@ -125,7 +125,7 @@ exports.deleteAvatar = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Delete avatar error:', error);
+    logger.error('Lỗi xóa ảnh đại diện:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xóa avatar thất bại',
@@ -164,7 +164,7 @@ exports.changePassword = async (req, res, next) => {
       message: 'Thay đổi mật khẩu thành công',
     });
   } catch (error) {
-    console.error('Change password error:', error);
+    logger.error('Lỗi đổi mật khẩu:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Thay đổi mật khẩu thất bại',
@@ -200,7 +200,7 @@ exports.addSavedPassenger = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Add saved passenger error:', error);
+    logger.error('Lỗi thêm hành khách đã lưu:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Thêm hành khách thất bại',
@@ -235,7 +235,7 @@ exports.removeSavedPassenger = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Remove saved passenger error:', error);
+    logger.error('Remove đã lưu passenger lỗi:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xóa hành khách thất bại',
@@ -263,7 +263,7 @@ exports.getPointsHistory = async (req, res, next) => {
       data: result,
     });
   } catch (error) {
-    console.error('Get points history error:', error);
+    logger.error('Get điểm hisđếnry lỗi:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy lịch sử điểm thất bại',
@@ -289,7 +289,7 @@ exports.getLoyaltyHistory = async (req, res, next) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.error('Get loyalty history error:', error);
+    logger.error('Get tích điểm hisđếnry lỗi:', error);
     res.status(400).json({
       success: false,
       message: error.message || 'Lấy lịch sử loyalty thất bại',
@@ -310,7 +310,7 @@ exports.getLoyaltyOverview = async (req, res, next) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.error('Get loyalty overview error:', error);
+    logger.error('Get tích điểm tổng quan lỗi:', error);
     res.status(400).json({
       success: false,
       message: error.message || 'Lấy thông tin loyalty thất bại',
@@ -339,7 +339,7 @@ exports.redeemPoints = async (req, res, next) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.error('Redeem points error:', error);
+    logger.error('Redeem điểm lỗi:', error);
     res.status(400).json({
       success: false,
       message: error.message || 'Đổi điểm thất bại',

@@ -781,7 +781,7 @@ const TripsPage = () => {
                           setSortOrder('asc');
                         }}
                       >
-                        <span className="text-lg">⏰</span>
+                        <span className="text-lg"></span>
                         <span className="text-xs font-medium">Sớm nhất</span>
                       </Button>
                       <Button
@@ -918,7 +918,7 @@ const TripsPage = () => {
                       className="w-full"
                       size="large"
                     >
-                      <Option value="time">⏰ Thời gian khởi hành</Option>
+                      <Option value="time">Thời gian khởi hành</Option>
                       <Option value="price">💰 Giá vé</Option>
                       <Option value="rating">⭐ Đánh giá nhà xe</Option>
                     </Select>

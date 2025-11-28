@@ -24,8 +24,8 @@ class LoyaltyService {
 
     const totalPoints = Math.floor(basePoints * multiplier);
 
-    console.log(
-      `💰 Calculated ${totalPoints} points (base: ${basePoints}, multiplier: ${multiplier})`
+    logger.log(
+      `Calculated ${totalPoints} points (base: ${basePoints}, multiplier: ${multiplier})`
     );
 
     return totalPoints;
@@ -59,7 +59,7 @@ class LoyaltyService {
       );
 
       if (alreadyAwarded) {
-        console.log('Points already awarded for this booking');
+        logger.log('Điểm đã được thưởng cho chuyến đi này');
         return {
           success: true,
           alreadyAwarded: true,
@@ -74,13 +74,13 @@ class LoyaltyService {
       user.addPoints(`Hoàn thành chuyến đi - Booking ${booking.bookingCode}`, pointsToAward, booking.tripId);
       await user.save();
 
-      console.log(`Awarded ${pointsToAward} points to user ${userId}`);
+      logger.log(`Awarded ${pointsToAward} points to user ${userId}`);
 
       // Send notification
       if (user.email) {
         await notificationService.sendEmail(
           user.email,
-          '🎁 Bạn đã nhận được điểm thưởng!',
+          'Bạn đã nhận được điểm thưởng!',
           this.generatePointsAwardedEmail(user.fullName, pointsToAward, user.totalPoints)
         );
       }
@@ -93,7 +93,7 @@ class LoyaltyService {
         message: `Bạn đã nhận được ${pointsToAward} điểm!`,
       };
     } catch (error) {
-      console.error(' Error awarding points:', error);
+      logger.error('Lỗi cộng điểm:', error);
       throw error;
     }
   }
@@ -125,7 +125,7 @@ class LoyaltyService {
       user.redeemPoints(points, `Đổi ${points} điểm lấy giảm giá ${discountAmount.toLocaleString('vi-VN')} VND`);
       await user.save();
 
-      console.log(`Redeemed ${points} points for user ${userId}`);
+      logger.log(`Redeemed ${points} points for user ${userId}`);
 
       return {
         success: true,
@@ -135,7 +135,7 @@ class LoyaltyService {
         message: `Đã đổi ${points} điểm lấy giảm giá ${discountAmount.toLocaleString('vi-VN')} VND`,
       };
     } catch (error) {
-      console.error(' Error redeeming points:', error);
+      logger.error('Lỗi đổi điểm:', error);
       throw error;
     }
   }
@@ -206,7 +206,7 @@ class LoyaltyService {
         },
       };
     } catch (error) {
-      console.error(' Error getting loyalty history:', error);
+      logger.error('Lỗi lấy lịch sử khách hàng thân thiết:', error);
       throw error;
     }
   }
@@ -272,7 +272,7 @@ class LoyaltyService {
         redemptionValue: user.totalPoints * 1000, // 1 point = 1,000 VND
       };
     } catch (error) {
-      console.error(' Error getting loyalty overview:', error);
+      logger.error('Lỗi nhận tổng quan về mức độ trung thành:', error);
       throw error;
     }
   }
@@ -319,7 +319,7 @@ class LoyaltyService {
    */
   async cleanupExpiredPoints() {
     try {
-      console.log('🧹 Starting expired points cleanup...');
+      logger.log('Bắt đầu dọn dẹp điểm hết hạn...');
 
       const users = await User.find({
         'pointsHistory.expiresAt': { $lt: new Date() },
@@ -340,14 +340,14 @@ class LoyaltyService {
           if (user.email) {
             await notificationService.sendEmail(
               user.email,
-              '⏰ Thông báo: Điểm thưởng đã hết hạn',
+              'Thông báo: Điểm thưởng đã hết hạn',
               this.generatePointsExpiredEmail(user.fullName, expiredPoints, user.totalPoints)
             );
           }
         }
       }
 
-      console.log(
+      logger.log(
         `Cleanup completed: ${totalUsersAffected} users, ${totalPointsRemoved} points removed`
       );
 
@@ -357,7 +357,7 @@ class LoyaltyService {
         pointsRemoved: totalPointsRemoved,
       };
     } catch (error) {
-      console.error(' Error cleaning up expired points:', error);
+      logger.error('Lỗi dọn dẹp điểm đã hết hạn:', error);
       throw error;
     }
   }
@@ -516,7 +516,7 @@ class LoyaltyService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>⏰ Vé xe nhanh</h1>
+            <h1>Vé xe nhanh</h1>
             <p>Thông báo hết hạn điểm thưởng</p>
           </div>
 

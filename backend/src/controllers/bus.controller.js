@@ -6,6 +6,7 @@ const {
   buildCustomTemplate,
 } = require('../utils/seatLayoutTemplates');
 const { validateSeatLayoutForBusType } = require('../utils/seatLayout');
+const logger = require('../utils/logger');
 
 /**
  * Bus Controller
@@ -51,7 +52,7 @@ exports.create = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Create bus error:', error);
+    logger.error('Lỗi tạo xe xe bus:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tạo xe thất bại',
@@ -92,7 +93,7 @@ exports.getMyBuses = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get buses error:', error);
+    logger.error('Lỗi lấy xe xe bus:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy danh sách xe thất bại',
@@ -119,7 +120,7 @@ exports.getById = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get bus error:', error);
+    logger.error('Lỗi lấy xe xe bus:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy xe',
@@ -148,7 +149,7 @@ exports.update = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Update bus error:', error);
+    logger.error('Lỗi cập nhật xe xe bus:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Cập nhật xe thất bại',
@@ -173,7 +174,7 @@ exports.delete = async (req, res, next) => {
       message: 'Xóa xe thành công',
     });
   } catch (error) {
-    console.error('Delete bus error:', error);
+    logger.error('Lỗi xóa xe xe bus:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xóa xe thất bại',
@@ -209,7 +210,7 @@ exports.changeStatus = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Change bus status error:', error);
+    logger.error('Lỗi thay đổi trạng thái xe xe bus:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Thay đổi trạng thái xe thất bại',
@@ -235,7 +236,7 @@ exports.getStatistics = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get bus statistics error:', error);
+    logger.error('Lỗi lấy thống kê xe xe bus:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy thống kê xe thất bại',
@@ -277,7 +278,7 @@ exports.search = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Search buses error:', error);
+    logger.error('Lỗi tìm kiếm xe xe bus:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tìm kiếm xe thất bại',
@@ -302,7 +303,7 @@ exports.getAllSeatLayoutTemplates = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get seat layout templates error:', error);
+    logger.error('Lỗi lấy mẫu bố cục ghế:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy danh sách templates thất bại',
@@ -337,7 +338,7 @@ exports.getTemplatesByType = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get templates by type error:', error);
+    logger.error('Lỗi lấy mẫu theo loại:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy templates thất bại',
@@ -370,7 +371,7 @@ exports.getSpecificTemplate = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get specific template error:', error);
+    logger.error('Lỗi lấy mẫu cụ thể:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy template thất bại',
@@ -412,7 +413,7 @@ exports.buildSeatLayout = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Build seat layout error:', error);
+    logger.error('Lỗi xây dựng bố cục ghế:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tạo sơ đồ ghế thất bại',
@@ -446,7 +447,7 @@ exports.validateSeatLayout = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Validate seat layout error:', error);
+    logger.error('Lỗi xác thực bố cục ghế:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Validate sơ đồ ghế thất bại',

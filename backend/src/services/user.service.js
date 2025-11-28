@@ -82,7 +82,7 @@ class UserService {
         const publicId = publicIdWithExtension.split('.')[0];
         await deleteImage(publicId);
       } catch (error) {
-        logger.error('Error deleting old avatar: ' + error.message);
+        logger.error('Error đang xóa old avtạiar: ' + error.message);
         // Continue even if delete fails
       }
     }
@@ -124,7 +124,7 @@ class UserService {
       const publicId = publicIdWithExtension.split('.')[0];
       await deleteImage(publicId);
     } catch (error) {
-      logger.error('Error deleting avatar from Cloudinary: ' + error.message);
+      logger.error('Error đang xóa avtạiar từ Cloudtrtrêngary: ' + error.message);
     }
 
     // Xóa avatar URL khỏi database

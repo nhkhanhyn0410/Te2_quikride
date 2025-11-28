@@ -19,7 +19,7 @@ class NotificationService {
         },
       });
     } catch (error) {
-      console.warn('Failed to create email transporter:', error.message);
+      logger.warn('Không thể tạo email vận chuyển:', error.message);
       this.emailTransporter = null;
     }
 
@@ -42,17 +42,17 @@ class NotificationService {
   async sendEmail(to, subject, html) {
     try {
       if (!this.emailEnabled) {
-        console.log('📧 Email disabled, skipping:', to);
+        logger.log('Email disabled, bỏ qua:', to);
         return { success: true, skipped: true, reason: 'Email disabled' };
       }
 
       if (!this.emailTransporter) {
-        console.log('Email transporter not available');
+        logger.log('Email bộ vận chuyển không khả dụng');
         return { success: false, error: 'Email transporter not configured' };
       }
 
       if (!to) {
-        console.log('No recipient email provided');
+        logger.log('No người nhận email provided');
         return { success: false, error: 'No recipient email' };
       }
 
@@ -65,13 +65,13 @@ class NotificationService {
 
       const info = await this.emailTransporter.sendMail(mailOptions);
 
-      console.log('Email sent successfully to:', to);
+      logger.log('Email đã gửi thành công đến:', to);
       return {
         success: true,
         messageId: info.messageId,
       };
     } catch (error) {
-      console.error(' Email send error:', error.message);
+      logger.error(' Email gửi lỗi:', error.message);
       return {
         success: false,
         error: error.message,
@@ -88,19 +88,19 @@ class NotificationService {
   async sendSMS(phone, message) {
     try {
       if (!this.smsEnabled) {
-        console.log('📱 SMS disabled, skipping:', phone);
+        logger.log('SMS disabled, bỏ qua:', phone);
         return { success: true, skipped: true, reason: 'SMS disabled' };
       }
 
       if (!phone) {
-        console.log('No phone number provided');
+        logger.log('No phtrêne number provided');
         return { success: false, error: 'No phone number' };
       }
 
       const result = await this.smsService.sendSMS(phone, message);
       return result;
     } catch (error) {
-      console.error(' SMS send error:', error.message);
+      logger.error('SMS send lỗi:', error.message);
       return {
         success: false,
         error: error.message,
@@ -128,7 +128,7 @@ class NotificationService {
         .lean();
 
       if (bookings.length === 0) {
-        console.log('ℹ️ No bookings to notify for trip:', trip._id);
+        logger.log('No đặt chỗ đến notify cho chuyến:', trip._id);
         return {
           success: true,
           notified: 0,
@@ -180,13 +180,13 @@ class NotificationService {
         await this.delay(100);
       }
 
-      console.log('Trip status change notifications sent:', results);
+      logger.log('Chuyến trạng thái change thông báo đã gửi:', results);
       return {
         success: true,
         results,
       };
     } catch (error) {
-      console.error(' Error notifying passengers:', error);
+      logger.error('Error notifytrtrêngg passengers:', error);
       return {
         success: false,
         error: error.message,
@@ -438,7 +438,7 @@ class NotificationService {
   async notifyBookingConfirmation(booking, trip) {
     // Implementation for booking confirmation
     // This can be called from booking service
-    console.log('📧 Booking confirmation notification:', booking.bookingCode);
+    logger.log('Đặt chỗ ctrênfirmtạiitrên thông báo:', booking.bookingCode);
     return { success: true };
   }
 
@@ -450,7 +450,7 @@ class NotificationService {
    */
   async notifyCancellation(booking, trip) {
     // Implementation for cancellation notification
-    console.log('📧 Cancellation notification:', booking.bookingCode);
+    logger.log('Hủy thông báo:', booking.bookingCode);
     return { success: true };
   }
 
@@ -470,14 +470,14 @@ class NotificationService {
   async testEmailConfiguration() {
     try {
       if (!this.emailTransporter) {
-        console.error(' Email transporter not configured');
+        logger.error(' Email bộ vận chuyển không config');
         return false;
       }
       await this.emailTransporter.verify();
-      console.log('Email configuration is valid');
+      logger.log('Email cấu hình is valid');
       return true;
     } catch (error) {
-      console.error(' Email configuration error:', error.message);
+      logger.error(' Email cấu hình lỗi:', error.message);
       return false;
     }
   }

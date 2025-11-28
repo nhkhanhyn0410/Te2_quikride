@@ -97,7 +97,7 @@ const validateOrigin = (req, res, next) => {
     );
 
     if (!isAllowed && process.env.NODE_ENV === 'production') {
-      console.warn('[Security] Request from unauthorized origin:', origin);
+      logger.warn('[Bảo mật] Yêu cầu từ nguồn không được phép:', origin);
       return res.status(403).json({
         status: 'error',
         message: 'Yêu cầu từ nguồn không được phép',

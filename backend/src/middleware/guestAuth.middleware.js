@@ -35,7 +35,7 @@ const guestAuth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Guest auth error:', error);
+    logger.error('Lỗi xác thực khách:', error);
     return res.status(401).json({
       status: 'error',
       message: 'Xác thực guest thất bại',
@@ -71,7 +71,7 @@ const optionalGuestAuth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Optional guest auth error:', error);
+    logger.error('Lỗi xác thực khách tùy chọn:', error);
     next();
   }
 };

@@ -81,7 +81,7 @@ class GuestSessionService {
       const sessionData = JSON.parse(sessionDataStr);
       return sessionData;
     } catch (error) {
-      console.error('Error parsing guest session data:', error);
+      logger.error('Lỗi xác minh guest phiên dữ liệu:', error);
       return null;
     }
   }

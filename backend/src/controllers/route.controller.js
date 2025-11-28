@@ -57,7 +57,7 @@ exports.create = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Create route error:', error);
+    logger.error('Lỗi tạo tuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tạo tuyến đường thất bại',
@@ -97,7 +97,7 @@ exports.getMyRoutes = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get routes error:', error);
+    logger.error('Lỗi lấy tuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy danh sách tuyến đường thất bại',
@@ -124,7 +124,7 @@ exports.getById = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get route error:', error);
+    logger.error('Lỗi lấy tuyến:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy tuyến đường',
@@ -153,7 +153,7 @@ exports.update = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Update route error:', error);
+    logger.error('Lỗi cập nhật tuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Cập nhật tuyến đường thất bại',
@@ -178,7 +178,7 @@ exports.delete = async (req, res, next) => {
       message: 'Xóa tuyến đường thành công',
     });
   } catch (error) {
-    console.error('Delete route error:', error);
+    logger.error('Lỗi xóa tuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xóa tuyến đường thất bại',
@@ -214,7 +214,7 @@ exports.toggleActive = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Toggle route active error:', error);
+    logger.error('Lỗi bật/tắt tuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Thay đổi trạng thái tuyến đường thất bại',
@@ -250,7 +250,7 @@ exports.addPickupPoint = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Add pickup point error:', error);
+    logger.error('Lỗi thêm điểm đón:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Thêm điểm đón thất bại',
@@ -278,7 +278,7 @@ exports.removePickupPoint = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Remove pickup point error:', error);
+    logger.error('Lỗi xóa điểm đón:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xóa điểm đón thất bại',
@@ -314,7 +314,7 @@ exports.addDropoffPoint = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Add dropoff point error:', error);
+    logger.error('Lỗi thêm điểm trả:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Thêm điểm trả thất bại',
@@ -342,7 +342,7 @@ exports.removeDropoffPoint = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Remove dropoff point error:', error);
+    logger.error('Lỗi xóa điểm trả:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Xóa điểm trả thất bại',
@@ -382,7 +382,7 @@ exports.search = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Search routes error:', error);
+    logger.error('Lỗi tìm kiếm tuyến:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Tìm kiếm tuyến đường thất bại',

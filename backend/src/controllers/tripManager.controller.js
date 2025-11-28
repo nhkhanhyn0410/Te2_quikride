@@ -91,7 +91,7 @@ class TripManagerController {
         },
       });
     } catch (error) {
-      console.error('Trip manager login error:', error);
+      logger.error('Lỗi đăng nhập quản lý chuyến:', error);
       res.status(500).json({
         success: false,
         message: 'Lỗi đăng nhập',
@@ -118,7 +118,7 @@ class TripManagerController {
         data: { tripManager },
       });
     } catch (error) {
-      console.error('Get trip manager error:', error);
+      logger.error('Lỗi lấy quản lý chuyến:', error);
       res.status(500).json({
         success: false,
         message: 'Lỗi lấy thông tin',
@@ -205,7 +205,7 @@ class TripManagerController {
         },
       });
     } catch (error) {
-      console.error('Get assigned trips error:', error);
+      logger.error('Lỗi lấy chuyến được giao:', error);
       res.status(500).json({
         success: false,
         message: 'Lỗi lấy danh sách chuyến',
@@ -296,7 +296,7 @@ class TripManagerController {
         },
       });
     } catch (error) {
-      console.error('Get trip details error:', error);
+      logger.error('Lỗi lấy chi tiết chuyến:', error);
       res.status(500).json({
         success: false,
         message: 'Lỗi lấy chi tiết chuyến',
@@ -339,7 +339,7 @@ class TripManagerController {
         data: { trip },
       });
     } catch (error) {
-      console.error('Start trip error:', error);
+      logger.error('Lỗi bắt đầu chuyến:', error);
       res.status(500).json({
         success: false,
         message: 'Lỗi bắt đầu chuyến',
@@ -382,7 +382,7 @@ class TripManagerController {
         data: { trip },
       });
     } catch (error) {
-      console.error('Complete trip error:', error);
+      logger.error('Lỗi hoàn thành chuyến:', error);
       res.status(500).json({
         success: false,
         message: 'Lỗi hoàn thành chuyến',
@@ -483,7 +483,7 @@ class TripManagerController {
         },
       });
     } catch (error) {
-      console.error('Update trip status error:', error);
+      logger.error('Lỗi cập nhật trạng thái chuyến:', error);
 
       // Handle specific error messages
       if (error.message.includes('Trạng thái không hợp lệ')) {
@@ -587,7 +587,7 @@ class TripManagerController {
         },
       });
     } catch (error) {
-      console.error('Get journey details error:', error);
+      logger.error('Lỗi lấy chi tiết hành trình:', error);
       res.status(500).json({
         success: false,
         message: 'Lỗi lấy thông tin hành trình',
@@ -606,7 +606,7 @@ class TripManagerController {
       const { tripId } = req.params;
       const { status, stopIndex, location, notes } = req.body;
 
-      console.log('🚌 Journey Status Update Request:', {
+      logger.log('🚌 Hành trình Trạng thái Upngày Yêu cầu:', {
         tripId,
         status,
         stopIndex,
@@ -618,7 +618,7 @@ class TripManagerController {
 
       // Validate input
       if (!status) {
-        console.error(' Missing status in journey update');
+        logger.error(' Misstrtrêngg trạng thái trtrêng hành trình upngày');
         return res.status(400).json({
           success: false,
           message: 'Trạng thái hành trình là bắt buộc',
@@ -627,7 +627,7 @@ class TripManagerController {
 
       const validJourneyStatuses = ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'];
       if (!validJourneyStatuses.includes(status)) {
-        console.error(' Invalid journey status:', status);
+        logger.error(' Trtrêngvalid hành trình trạng thái:', status);
         return res.status(400).json({
           success: false,
           message: `Trạng thái không hợp lệ. Chỉ chấp nhận: ${validJourneyStatuses.join(', ')}`,
@@ -640,14 +640,14 @@ class TripManagerController {
       const trip = await Trip.findById(tripId);
 
       if (!trip) {
-        console.error(' Trip not found:', tripId);
+        logger.error(' Chuyến không tìm thấy:', tripId);
         return res.status(404).json({
           success: false,
           message: 'Không tìm thấy chuyến xe',
         });
       }
 
-      console.log('📋 Current trip journey state:', {
+      logger.log('📋 Current chuyến hành trình sttạie:', {
         currentStatus: trip.journey?.currentStatus || 'none',
         currentStopIndex: trip.journey?.currentStopIndex ?? -1,
         stoppedAt: trip.journey?.stoppedAt || [],
@@ -687,7 +687,7 @@ class TripManagerController {
           message = 'Trạng thái hành trình đã được cập nhật';
       }
 
-      console.log('Journey status updated successfully:', {
+      logger.log('Hành trình trạng thái đã cập nhật thành công:', {
         oldStatus: result.oldStatus,
         newStatus: result.newStatus,
         oldStopIndex: result.oldStopIndex,
@@ -734,8 +734,8 @@ class TripManagerController {
         },
       });
     } catch (error) {
-      console.error(' Update journey status error:', error);
-      console.error('Error stack:', error.stack);
+      logger.error(' Lỗi cập nhật trạng thái hành trình:', error);
+      logger.error('Error stack:', error.stack);
 
       // Handle specific error messages
       if (error.message.includes('Trạng thái hành trình không hợp lệ')) {

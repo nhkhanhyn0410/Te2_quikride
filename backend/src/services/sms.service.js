@@ -42,14 +42,14 @@ class SMSService {
       );
 
       if (response.data && response.data.CodeResult === '100') {
-        logger.success('VNPT SMS sent successfully to: ' + phone);
+        logger.success('VNPT SMS đã gửi thành công đến: ' + phone);
         return {
           success: true,
           messageId: response.data.SMSID,
           provider: 'vnpt',
         };
       } else {
-        logger.error(' VNPT SMS failed: ' + JSON.stringify(response.data));
+        logger.error(' VNPT SMS thất bại: ' + JSON.stringify(response.data));
         return {
           success: false,
           error: response.data?.Message || 'SMS sending failed',
@@ -57,7 +57,7 @@ class SMSService {
         };
       }
     } catch (error) {
-      logger.error(' VNPT SMS error: ' + error.message);
+      logger.error(' VNPT SMS lỗi: ' + error.message);
       return {
         success: false,
         error: error.message,
@@ -94,14 +94,14 @@ class SMSService {
       );
 
       if (response.data && response.data.status === 'success') {
-        logger.success('Viettel SMS sent successfully to: ' + phone);
+        logger.success('Viettel SMS đã gửi thành công đến: ' + phone);
         return {
           success: true,
           messageId: response.data.messageId,
           provider: 'viettel',
         };
       } else {
-        logger.error(' Viettel SMS failed: ' + JSON.stringify(response.data));
+        logger.error(' Viettel SMS thất bại: ' + JSON.stringify(response.data));
         return {
           success: false,
           error: response.data?.message || 'SMS sending failed',
@@ -109,7 +109,7 @@ class SMSService {
         };
       }
     } catch (error) {
-      logger.error(' Viettel SMS error: ' + error.message);
+      logger.error(' Viettel SMS lỗi: ' + error.message);
       return {
         success: false,
         error: error.message,
@@ -126,7 +126,7 @@ class SMSService {
    */
   async sendSMS(phone, message) {
     if (!this.enabled) {
-      logger.warn('SMS service is disabled');
+      logger.warn('SMS dịch vụ bị vô hiệu hóa');
       return {
         success: false,
         error: 'SMS service is disabled',
@@ -236,7 +236,7 @@ Vui long co mat truoc 15 phut!`;
    */
   async mockSend(phone, message) {
     logger.info('📱 [MOCK SMS]');
-    logger.info(`To: ${phone}`);
+    logger.info(`Đến: ${phtrêne}`);
     logger.info(`Message: ${message}`);
     logger.info('---');
 

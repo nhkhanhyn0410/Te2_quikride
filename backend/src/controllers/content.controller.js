@@ -1,6 +1,7 @@
 const Banner = require('../models/Banner');
 const Blog = require('../models/Blog');
 const FAQ = require('../models/FAQ');
+const logger = require('../utils/logger');
 
 // ============= BANNER MANAGEMENT =============
 
@@ -33,7 +34,7 @@ exports.getBanners = async (req, res) => {
       data: banners,
     });
   } catch (error) {
-    console.error('Get banners error:', error);
+    logger.error('Lỗi lấy banner:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy danh sách banner',
@@ -65,7 +66,7 @@ exports.trackBannerView = async (req, res) => {
       message: 'Đã ghi nhận lượt xem',
     });
   } catch (error) {
-    console.error('Track banner view error:', error);
+    logger.error('Lỗi theo dõi lượt xem banner:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi ghi nhận lượt xem',
@@ -100,7 +101,7 @@ exports.trackBannerClick = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Track banner click error:', error);
+    logger.error('Lỗi theo dõi lượt nhấp banner:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi ghi nhận lượt click',
@@ -167,7 +168,7 @@ exports.getBlogs = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get blogs error:', error);
+    logger.error('Lỗi lấy blog:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy danh sách bài viết',
@@ -216,7 +217,7 @@ exports.getBlogBySlug = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get blog error:', error);
+    logger.error('Lỗi lấy blog:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy bài viết',
@@ -251,7 +252,7 @@ exports.likeBlog = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Like blog error:', error);
+    logger.error('Lỗi thích blog:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi thích bài viết',
@@ -298,7 +299,7 @@ exports.getFAQs = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get FAQs error:', error);
+    logger.error('Lỗi lấy FAQ:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy danh sách FAQ',
@@ -331,7 +332,7 @@ exports.getFAQById = async (req, res) => {
       data: faq,
     });
   } catch (error) {
-    console.error('Get FAQ error:', error);
+    logger.error('Lỗi lấy FAQ:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi lấy FAQ',
@@ -373,7 +374,7 @@ exports.markFAQHelpful = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Mark FAQ helpful error:', error);
+    logger.error('Lỗi đánh dấu FAQ hữu ích:', error);
     res.status(500).json({
       status: 'error',
       message: 'Lỗi khi ghi nhận phản hồi',

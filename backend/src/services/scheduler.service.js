@@ -20,7 +20,7 @@ class SchedulerService {
    * Initialize all scheduled jobs
    */
   initialize() {
-    console.log('🕐 Initializing scheduler service...');
+    logger.log('Đang khởi tạo dịch vụ lập lịch...');
 
     // Send trip reminders every hour
     this.jobs.tripReminders = cron.schedule('0 * * * *', async () => {
@@ -42,7 +42,7 @@ class SchedulerService {
       await this.cleanupExpiredSeatLocks();
     });
 
-    console.log('Scheduler service initialized');
+    logger.log('Đã khởi tạo dịch vụ lập lịch biểu');
   }
 
   /**
@@ -50,7 +50,7 @@ class SchedulerService {
    */
   async sendTripReminders() {
     try {
-      console.log('📅 Checking for trip reminders...');
+      logger.log('Đang kiểm tra lời nhắc chuyến đi...');
 
       const now = new Date();
       const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -88,11 +88,11 @@ class SchedulerService {
         await this.sendTripRemindersForTrip(trip, '2h');
       }
 
-      console.log(
+      logger.log(
         `Sent reminders for ${trips24h.length} trips (24h) and ${trips2h.length} trips (2h)`
       );
     } catch (error) {
-      console.error(' Error sending trip reminders:', error);
+      logger.error('Lỗi gửi lời nhắc chuyến đi:', error);
     }
   }
 
@@ -165,9 +165,9 @@ class SchedulerService {
         await this.delay(100);
       }
 
-      console.log(`Sent ${timeframe} reminders for trip ${trip._id}`);
+      logger.log(`Sent ${timeframe} reminders for trip ${trip._id}`);
     } catch (error) {
-      console.error(` Error sending ${timeframe} reminders for trip:`, error);
+      logger.error(`Error sending ${timeframe} reminders for trip:`, error);
     }
   }
 
@@ -283,7 +283,7 @@ class SchedulerService {
    */
   async sendReviewInvitations() {
     try {
-      console.log('📧 Checking for review invitations...');
+      logger.log('Đang kiểm tra lời mời đánh giá...');
 
       // Find bookings completed in the last 24 hours that haven't been reviewed
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -312,7 +312,7 @@ class SchedulerService {
             skipped++;
           }
         } catch (error) {
-          console.error(`Error sending review invitation for booking ${booking._id}:`, error.message);
+          logger.error(`Lỗi gửi lời mời đánh giá để đặt chỗ ${booking._id}:`, error.message);
           skipped++;
         }
 
@@ -320,9 +320,9 @@ class SchedulerService {
         await this.delay(200);
       }
 
-      console.log(`Sent ${sent} review invitations (${skipped} skipped)`);
+      logger.log(`Sent ${sent} review invitations (${skipped} skipped)`);
     } catch (error) {
-      console.error(' Error sending review invitations:', error);
+      logger.error(' Lỗi gửi lời mời đánh giá:', error);
     }
   }
 
@@ -331,15 +331,15 @@ class SchedulerService {
    */
   async cleanupExpiredPoints() {
     try {
-      console.log('🧹 Cleaning up expired loyalty points...');
+      logger.log('Dọn dẹp điểm trung thành đã hết hạn...');
 
       const result = await loyaltyService.cleanupExpiredPoints();
 
-      console.log(
+      logger.log(
         `Expired points cleanup: ${result.usersAffected} users, ${result.pointsRemoved} points removed`
       );
     } catch (error) {
-      console.error(' Error cleaning up expired points:', error);
+      logger.error('Lỗi dọn dẹp điểm đã hết hạn:', error);
     }
   }
 
@@ -350,9 +350,9 @@ class SchedulerService {
     try {
       // This would be implemented in seat lock service
       // For now, just log
-      console.log('🧹 Cleaning up expired seat locks...');
+      logger.log('Dọn dẹp ổ khóa ghế hết hạn...');
     } catch (error) {
-      console.error(' Error cleaning up seat locks:', error);
+      logger.error('Lỗi vệ sinh ổ khóa ghế:', error);
     }
   }
 
@@ -369,22 +369,22 @@ class SchedulerService {
    * Stop all scheduled jobs
    */
   stopAll() {
-    console.log('🛑 Stopping all scheduled jobs...');
+    logger.log('Dừng tất cả các công việc theo lịch trình...');
     Object.values(this.jobs).forEach((job) => {
       if (job) job.stop();
     });
-    console.log('All jobs stopped');
+    logger.log('Tất cả công việc đã dừng lại');
   }
 
   /**
    * Start all scheduled jobs
    */
   startAll() {
-    console.log('▶️ Starting all scheduled jobs...');
+    logger.log('Bắt đầu tất cả các công việc đã lên lịch...');
     Object.values(this.jobs).forEach((job) => {
       if (job) job.start();
     });
-    console.log('All jobs started');
+    logger.log('Mọi công việc bắt đầu');
   }
 }
 

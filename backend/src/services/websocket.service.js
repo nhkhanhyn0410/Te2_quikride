@@ -29,7 +29,7 @@ class WebSocketService {
 
     this.setupEventHandlers();
 
-    logger.success('WebSocket Server Initialized');
+    logger.success('WebSocket Máy chủ Đã khởi tạo');
   }
 
   /**
@@ -37,7 +37,7 @@ class WebSocketService {
    */
   setupEventHandlers() {
     this.io.on('connection', (socket) => {
-      logger.info(`🔌 Client connected: ${socket.id}`);
+      logger.info(`🔌 Máy khách đã kết nối: ${socket.id}`);
 
       // Handle authentication (optional)
       socket.on('authenticate', async (data) => {
@@ -47,10 +47,10 @@ class WebSocketService {
             const decoded = AuthService.verifyToken(token);
             socket.userId = decoded.userId;
             socket.authenticated = true;
-            logger.success(`Socket ${socket.id} authenticated as user ${socket.userId}`);
+            logger.success(`Socket ${socket.id} authentictạied as người dùng ${socket.người dùngId}`);
           }
         } catch (error) {
-          logger.error('Socket authentication error: ' + error.message);
+          logger.error('Socket xác thực lỗi: ' + error.message);
           socket.authenticated = false;
         }
       });
@@ -74,7 +74,7 @@ class WebSocketService {
           }
           this.connectedClients.get(tripId).add(socket.id);
 
-          logger.info(`📍 Socket ${socket.id} joined trip ${tripId}`);
+          logger.info(`📍 Socket ${socket.id} jotrtrênged chuyến ${chuyếnId}`);
 
           // Send initial seat status
           const seatStatus = await SeatService.getTripSeatStatus(tripId);
@@ -87,7 +87,7 @@ class WebSocketService {
             timestamp: new Date(),
           });
         } catch (error) {
-          logger.error('Error joining trip: ' + error.message);
+          logger.error('Error jotrtrêngtrtrêngg chuyến: ' + error.message);
           socket.emit('error', { message: error.message });
         }
       });
@@ -108,10 +108,10 @@ class WebSocketService {
               }
             }
 
-            logger.info(`📍 Socket ${socket.id} left trip ${tripId}`);
+            logger.info(`📍 Socket ${socket.id} left chuyến ${chuyếnId}`);
           }
         } catch (error) {
-          logger.error('Error leaving trip: ' + error.message);
+          logger.error('Error leavtrtrêngg chuyến: ' + error.message);
         }
       });
 
@@ -134,14 +134,14 @@ class WebSocketService {
             timestamp: new Date(),
           });
         } catch (error) {
-          logger.error('Error requesting seat status: ' + error.message);
+          logger.error('Error yêu cầutrtrêngg ghế trạng thái: ' + error.message);
           socket.emit('error', { message: error.message });
         }
       });
 
       // Handle disconnect
       socket.on('disconnect', () => {
-        logger.info(`🔌 Client disconnected: ${socket.id}`);
+        logger.info(`🔌 Máy khách đã ngắt kết nối: ${socket.id}`);
 
         // Remove from all trip rooms
         if (socket.currentTripId) {
@@ -156,7 +156,7 @@ class WebSocketService {
 
       // Handle errors
       socket.on('error', (error) => {
-        logger.error('Socket error: ' + error.message);
+        logger.error('Socket lỗi: ' + error.message);
       });
     });
   }
@@ -168,7 +168,7 @@ class WebSocketService {
   async broadcastSeatUpdate(tripId) {
     try {
       if (!this.io) {
-        logger.warn('WebSocket server not initialized');
+        logger.warn('WebSocket máy chủ not đã khởi tạo');
         return;
       }
 
@@ -183,9 +183,9 @@ class WebSocketService {
         timestamp: new Date(),
       });
 
-      logger.info(`📢 Broadcasted seat update for trip ${tripId} to ${this.connectedClients.get(tripId)?.size || 0} clients`);
+      logger.info(`📢 Đã phát sóng ghế upngày cho chuyến ${chuyếnId} đến ${this.đã kết nốiMáy kháchs.get(chuyếnId)?.size || 0} máy kháchs`);
     } catch (error) {
-      logger.error('Error broadcasting seat update: ' + error.message);
+      logger.error('Error đang phát sóng ghế upngày: ' + error.message);
     }
   }
 
@@ -198,7 +198,7 @@ class WebSocketService {
   async broadcastSeatAction(tripId, seats, action) {
     try {
       if (!this.io) {
-        logger.warn('WebSocket server not initialized');
+        logger.warn('WebSocket máy chủ not đã khởi tạo');
         return;
       }
 
@@ -212,7 +212,7 @@ class WebSocketService {
       // Also send full seat status
       await this.broadcastSeatUpdate(tripId);
     } catch (error) {
-      logger.error('Error broadcasting seat action: ' + error.message);
+      logger.error('Error đang phát sóng ghế actitrên: ' + error.message);
     }
   }
 

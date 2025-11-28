@@ -503,7 +503,7 @@ class TripService {
       sortOrder = 'asc',
     } = searchCriteria;
 
-    logger.debug('🔍 Search criteria: ' + JSON.stringify({ fromCity, toCity, date, passengers }));
+    logger.debug('🔍 Search tiêu chí: ' + JSON.stringify({ fromCity, toCity, date, passengers }));
 
     // Build query
     const query = {
@@ -523,7 +523,7 @@ class TripService {
         $gte: startOfDay,
         $lte: endOfDay,
       };
-      logger.debug('📅 Date range: ' + JSON.stringify({ startOfDay, endOfDay }));
+      logger.debug('📅 Ngày phạm vi: ' + JSON.stringify({ startOfDay, endOfDay }));
     } else {
       // If no date specified (browse all mode), show trips from last 7 days to future
       // This helps with demo/testing and allows users to see recent trips
@@ -533,7 +533,7 @@ class TripService {
       query.departureTime = {
         $gte: sevenDaysAgo, // Include trips from last 7 days
       };
-      logger.debug('📅 Browse mode: showing trips from last 7 days to future ' + JSON.stringify({ sevenDaysAgo }));
+      logger.debug('📅 Browse chế độ: showtrtrêngg chuyến từ last 7 days đến future ' + JSON.stringify({ sevenDaysAgo }));
     }
 
     // Price range filter
@@ -571,9 +571,9 @@ class TripService {
       .sort(sortCriteria)
       .lean();
 
-    logger.debug(`🚌 Found ${trips.length} trips from database`);
+    logger.debug(`🚌 Found ${chuyến.length} chuyến từ cơ sở dữ liệu`);
     if (trips.length > 0) {
-      logger.debug('Sample trip routes: ' + JSON.stringify(trips.slice(0, 2).map(t => ({
+      logger.debug('Mẫu chuyến tuyến: ' + JSON.stringify(trips.slice(0, 2).map(t => ({
         from: t.routeId?.origin?.city,
         to: t.routeId?.destination?.city,
         departure: t.departureTime
@@ -598,7 +598,7 @@ class TripService {
           return fromMatch && toMatch;
         }
       );
-      logger.debug(`🏙️  After city filter (${fromCity} → ${toCity}): ${trips.length} trips`);
+      logger.debug(`🏙️  Sau city bộ lọc (${từCity} → ${đếnCity}): ${chuyến.length} chuyến`);
     } else if (fromCity) {
       trips = trips.filter(
         (trip) => {
@@ -608,7 +608,7 @@ class TripService {
             trip.routeId.origin.city?.toLowerCase().includes(fromCity.toLowerCase());
         }
       );
-      logger.debug(`🏙️  After fromCity filter (${fromCity}): ${trips.length} trips`);
+      logger.debug(`🏙️  Sau từCity bộ lọc (${từCity}): ${chuyến.length} chuyến`);
     } else if (toCity) {
       trips = trips.filter(
         (trip) => {
@@ -618,7 +618,7 @@ class TripService {
             trip.routeId.destination.city?.toLowerCase().includes(toCity.toLowerCase());
         }
       );
-      logger.debug(`🏙️  After toCity filter (${toCity}): ${trips.length} trips`);
+      logger.debug(`🏙️  Sau đếnCity bộ lọc (${đếnCity}): ${chuyến.length} chuyến`);
     }
 
     // Filter by bus type (after populate)
@@ -656,7 +656,7 @@ class TripService {
       });
     }
 
-    logger.debug(`Returning ${trips.length} trips after all filters`);
+    logger.debug(`Đang trả về ${chuyến.length} chuyến sau tất cả bộ lọc`);
     return trips;
   }
 

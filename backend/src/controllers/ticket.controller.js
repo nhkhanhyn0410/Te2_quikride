@@ -26,7 +26,7 @@ class TicketController {
 
       // Send notifications in background
       TicketService.sendTicketNotifications(ticket._id).catch((error) => {
-        console.error('Notification error:', error);
+        logger.error('Lỗi thông báo:', error);
       });
 
       res.status(201).json({
@@ -37,7 +37,7 @@ class TicketController {
         },
       });
     } catch (error) {
-      console.error('Generate ticket error:', error);
+      logger.error('Lỗi tạo vé:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Lỗi tạo vé điện tử',
@@ -63,7 +63,7 @@ class TicketController {
         },
       });
     } catch (error) {
-      console.error('Get ticket error:', error);
+      logger.error('Lỗi lấy vé:', error);
       res.status(404).json({
         success: false,
         message: error.message || 'Không tìm thấy vé',
@@ -88,7 +88,7 @@ class TicketController {
         },
       });
     } catch (error) {
-      console.error('Get ticket by booking error:', error);
+      logger.error('Lỗi lấy vé theo đặt chỗ:', error);
       res.status(404).json({
         success: false,
         message: error.message || 'Không tìm thấy vé',
@@ -124,7 +124,7 @@ class TicketController {
         },
       });
     } catch (error) {
-      console.error('Request OTP error:', error);
+      logger.error('Lỗi yêu cầu OTP:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Không thể gửi OTP',
@@ -158,7 +158,7 @@ class TicketController {
         data: result, // Can be { ticket } or { tickets: [] }
       });
     } catch (error) {
-      console.error('Verify OTP error:', error);
+      logger.error('Lỗi xác mtrtrêngh OTP:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Xác thực OTP thất bại',
@@ -191,7 +191,7 @@ class TicketController {
         },
       });
     } catch (error) {
-      console.error('Lookup ticket error:', error);
+      logger.error('Lỗi tra cứu vé:', error);
       res.status(404).json({
         success: false,
         message: error.message || 'Không tìm thấy vé',
@@ -232,7 +232,7 @@ class TicketController {
         data: result,
       });
     } catch (error) {
-      console.error('Get customer tickets error:', error);
+      logger.error('Lỗi lấy vé khách hàng:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Lỗi lấy danh sách vé',
@@ -281,7 +281,7 @@ class TicketController {
         },
       });
     } catch (error) {
-      console.error('Get trip passengers error:', error);
+      logger.error('Lỗi lấy hành khách chuyến:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Lỗi lấy danh sách hành khách',
@@ -325,13 +325,13 @@ class TicketController {
           message: result.error,
           data: result.ticket
             ? {
-                ticket: result.ticket,
-              }
+              ticket: result.ticket,
+            }
             : null,
         });
       }
     } catch (error) {
-      console.error('Verify QR error:', error);
+      logger.error('Lỗi xác mtrtrêngh QR:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Lỗi xác thực QR code',
@@ -380,7 +380,7 @@ class TicketController {
         },
       });
     } catch (error) {
-      console.error('Cancel ticket error:', error);
+      logger.error('Lỗi hủy vé:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Lỗi hủy vé',
@@ -451,7 +451,7 @@ class TicketController {
         });
       }
     } catch (error) {
-      console.error('Change ticket error:', error);
+      logger.error('Lỗi đổi vé:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Lỗi đổi vé',
@@ -480,7 +480,7 @@ class TicketController {
       // Redirect to PDF URL (Cloudinary)
       res.redirect(ticket.pdfUrl);
     } catch (error) {
-      console.error('Download ticket error:', error);
+      logger.error('Lỗi tải vé:', error);
       res.status(404).json({
         success: false,
         message: error.message || 'Không tìm thấy vé',
@@ -510,7 +510,7 @@ class TicketController {
         },
       });
     } catch (error) {
-      console.error('Resend ticket error:', error);
+      logger.error('Lỗi gửi lại vé:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Lỗi gửi lại vé',
@@ -538,7 +538,7 @@ class TicketController {
         },
       });
     } catch (error) {
-      console.error('Get ticket stats error:', error);
+      logger.error('Lỗi lấy thống kê vé:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Lỗi lấy thống kê vé',

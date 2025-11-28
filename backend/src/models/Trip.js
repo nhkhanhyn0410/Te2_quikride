@@ -503,10 +503,10 @@ TripSchema.methods.updateStatus = async function (newStatus, options = {}) {
     await this.populate('routeId');
 
     NotificationService.notifyTripStatusChange(this, oldStatus, newStatus).catch((error) => {
-      console.error('Error sending notifications:', error);
+      logger.error('Lỗi gửi thông báo:', error);
     });
   } catch (error) {
-    console.error('Error in notification service:', error);
+    logger.error('Lỗi trong notification service:', error);
     // Don't throw error - status update should succeed even if notifications fail
   }
 
@@ -528,11 +528,11 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
   const { status, stopIndex, location, notes, updatedBy } = data;
 
   // Log journey update for debugging
-  console.log('📍 Journey Update Request:', {
+  logger.log('Yêu cầu cập nhật hành trình:', {
     tripId: this._id,
     requestedStatus: status,
     requestedStopIndex: stopIndex,
-    currentStatus: this.journey?.currentStatus || 'none',
+    currentStatus: this.journey?.currentStatus || 'không có',
     currentStopIndex: this.journey?.currentStopIndex ?? -1,
     location,
     notes,
@@ -541,16 +541,16 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
   // Validate status
   const validJourneyStatuses = ['preparing', 'checking_tickets', 'in_transit', 'at_stop', 'completed', 'cancelled'];
   if (!validJourneyStatuses.includes(status)) {
-    console.error(' Invalid journey status:', status);
+    logger.error('Trạng thái hành trình không hợp lệ:', status);
     throw new Error(`Trạng thái hành trình không hợp lệ: ${status}`);
   }
 
   // Initialize journey if not exists
   if (!this.journey) {
-    console.log('🆕 Initializing journey for trip:', this._id);
+    logger.log('Đang khởi tạo hành trình cho chuyến đi:', this._id);
     this.journey = {
       currentStopIndex: -1, // -1 means at origin (before any stops)
-      currentStatus: 'preparing',
+      currentStatus: 'chuẩn bị',
       statusHistory: [],
       stoppedAt: [], // Track which stops have been visited
     };
@@ -572,14 +572,14 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
     case 'at_stop':
       // REQUIRED: stopIndex must be provided when at_stop
       if (stopIndex === undefined || stopIndex === null) {
-        console.error(' Missing stopIndex for at_stop status');
+        logger.error(' Mất stopIndex for at_stop status');
         throw new Error('Vui lòng chọn điểm dừng khi cập nhật trạng thái "Tại điểm dừng"');
       }
 
       // Convert from 1-based (UI) to 0-based (internal)
       const requestedStopIndex = stopIndex - 1;
 
-      console.log('🚏 Processing at_stop:', {
+      logger.log('Xử lý at_stop:', {
         uiStopIndex: stopIndex,
         internalStopIndex: requestedStopIndex,
         oldStopIndex,
@@ -589,7 +589,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       // Validate: cannot go backward (unless correcting a mistake)
       if (requestedStopIndex < oldStopIndex) {
         // Allow if correcting: was in_transit but marking previous stop
-        console.warn(`Moving backward from stop ${oldStopIndex} to ${requestedStopIndex}`);
+        logger.warn(`Di chuyển lùi từ điểm dừng ${oldStopIndex} to ${requestedStopIndex}`);
       }
 
       // Validate: cannot skip stops (must stop at each stop sequentially)
@@ -601,7 +601,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       const isCorrectingAtStop = oldStatus === 'at_stop';
 
       if (requestedStopIndex > expectedNextStop && !isMovingFromOrigin && !isCorrectingAtStop) {
-        console.error(' Cannot skip stops:', {
+        logger.error(' Không thể bỏ qua điểm dừng:', {
           requestedStopIndex,
           expectedNextStop,
           oldStopIndex,
@@ -619,39 +619,30 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       if (!this.journey.stoppedAt.includes(newStopIndex)) {
         this.journey.stoppedAt.push(newStopIndex);
         this.journey.stoppedAt.sort((a, b) => a - b); // Keep sorted
-        console.log('Marked stop as visited:', newStopIndex, 'Total visited:', this.journey.stoppedAt);
+        logger.log('Điểm dừng được đánh dấu là đã ghé thăm:', newStopIndex, 'Total visited:', this.journey.stoppedAt);
       }
       break;
 
     case 'in_transit':
-      // When leaving a stop and going in transit:
-      // - If coming from 'at_stop', keep current stop index (heading to next)
-      // - If already in_transit, keep current index
       if (oldStatus === 'at_stop') {
-        // We're leaving the current stop, heading to next stop
-        // Keep stopIndex as is (it represents "heading towards stop X+1")
         newStopIndex = oldStopIndex;
       } else {
-        // Already in transit or coming from preparing/checking_tickets
         newStopIndex = oldStopIndex;
       }
       break;
 
     case 'completed':
-      // When completing trip, set to last stop or beyond
       const route = await this.populate('routeId');
       const totalStops = route?.routeId?.stops?.length || 0;
-      newStopIndex = totalStops - 1; // Last stop index
+      newStopIndex = totalStops - 1;
       break;
 
     case 'preparing':
     case 'checking_tickets':
-      // At origin, before any stops
       newStopIndex = -1;
       break;
 
     case 'cancelled':
-      // Keep current stop
       newStopIndex = oldStopIndex;
       break;
 
@@ -659,7 +650,6 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       newStopIndex = oldStopIndex;
   }
 
-  // Create status history entry
   const historyEntry = {
     status,
     stopIndex: newStopIndex,
@@ -669,11 +659,11 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
     updatedBy,
   };
 
-  // Update journey state
+
   this.journey.currentStatus = status;
   this.journey.currentStopIndex = newStopIndex;
 
-  // Update actual times
+
   if (status === 'in_transit' && !this.journey.actualDepartureTime) {
     this.journey.actualDepartureTime = new Date();
   }
@@ -682,11 +672,10 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
     if (!this.journey.actualArrivalTime) {
       this.journey.actualArrivalTime = new Date();
     }
-    // Update main trip status to completed
+
     this.status = 'completed';
   }
 
-  // Add to history
   this.journey.statusHistory.push(historyEntry);
 
   // Mark journey as modified for Mongoose
@@ -694,7 +683,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
 
   await this.save();
 
-  console.log('Journey updated successfully:', {
+  logger.log('Journey updated successfully:', {
     tripId: this._id,
     oldStatus,
     newStatus: this.journey.currentStatus,

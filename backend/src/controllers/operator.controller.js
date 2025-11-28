@@ -1,5 +1,6 @@
 const OperatorService = require('../services/operator.service');
 const DashboardService = require('../services/dashboard.service');
+const logger = require('../utils/logger');
 
 /**
  * Operator Controller
@@ -27,7 +28,7 @@ exports.getDashboardStats = async (req, res, next) => {
       data: stats,
     });
   } catch (error) {
-    console.error('Get dashboard stats error:', error);
+    logger.error('Lỗi lấy thống kê dashboard:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Không thể tải thống kê dashboard',
@@ -87,7 +88,7 @@ exports.register = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Operator register error:', error);
+    logger.error('Lỗi đăng ký nhà điều hành:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Đăng ký nhà xe thất bại',
@@ -125,7 +126,7 @@ exports.login = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Operator login error:', error);
+    logger.error('Lỗi đăng nhập nhà điều hành:', error);
     res.status(401).json({
       status: 'error',
       message: error.message || 'Đăng nhập thất bại',
@@ -151,7 +152,7 @@ exports.getMe = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get operator error:', error);
+    logger.error('Lỗi lấy nhà điều hành:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy nhà xe',
@@ -179,7 +180,7 @@ exports.updateMe = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Update operator error:', error);
+    logger.error('Lỗi cập nhật nhà điều hành:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Cập nhật thông tin thất bại',
@@ -205,7 +206,7 @@ exports.getById = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get operator error:', error);
+    logger.error('Lỗi lấy nhà điều hành:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy nhà xe',
@@ -255,7 +256,7 @@ exports.getAll = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get operators error:', error);
+    logger.error('Lỗi lấy nhà điều hành:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Lấy danh sách nhà xe thất bại',

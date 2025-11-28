@@ -314,16 +314,16 @@ class PDFService {
         doc.end();
 
         stream.on('finish', () => {
-          console.log('PDF ticket generated successfully:', outputPath);
+          logger.log('PDF vé đã tạo thành công:', outputPath);
           resolve(outputPath);
         });
 
         stream.on('error', (error) => {
-          console.error(' PDF generation error:', error);
+          logger.error('Tạo PDF lỗi:', error);
           reject(error);
         });
       } catch (error) {
-        console.error(' PDF generation error:', error);
+        logger.error('Tạo PDF lỗi:', error);
         reject(error);
       }
     });
@@ -401,10 +401,10 @@ class PDFService {
     try {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
-        console.log('PDF deleted:', filePath);
+        logger.log('PDF đã xóa:', filePath);
       }
     } catch (error) {
-      console.error(' PDF deletion error:', error);
+      logger.error('PDF lỗi:', error);
     }
   }
 }

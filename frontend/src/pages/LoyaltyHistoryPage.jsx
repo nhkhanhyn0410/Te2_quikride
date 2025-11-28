@@ -252,7 +252,7 @@ const LoyaltyHistoryPage = () => {
             >
               <Option value="earn">💰 Tích điểm</Option>
               <Option value="redeem">🎁 Đổi điểm</Option>
-              <Option value="expire">⏰ Hết hạn</Option>
+              <Option value="expire">Hết hạn</Option>
             </Select>
           </Space>
         </Card>

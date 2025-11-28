@@ -158,18 +158,18 @@ BusSchema.pre('save', function (next) {
       for (const seat of row) {
         // Count only actual seats (not empty, not aisle, not driver, not floor marker)
         if (seat &&
-            seat !== '' &&
-            seat !== 'DRIVER' &&
-            seat !== 'FLOOR_2' &&
-            seat !== '🚗' &&
-            seat.toUpperCase() !== 'AISLE' &&
-            !seat.toLowerCase().includes('aisle')) {
+          seat !== '' &&
+          seat !== 'DRIVER' &&
+          seat !== 'FLOOR_2' &&
+          seat !== 'BUS' &&
+          seat.toUpperCase() !== 'AISLE' &&
+          !seat.toLowerCase().includes('aisle')) {
           totalSeats++;
         }
       }
     }
     this.seatLayout.totalSeats = totalSeats;
-    console.log('💾 PRE-SAVE MIDDLEWARE - Calculated totalSeats:', totalSeats);
+    logger.log('MIDDLEWARE TRƯỚC KHI LƯU - Tổng số ghế được tính:', totalSeats);
   }
   next();
 });

@@ -118,7 +118,7 @@ class ReportService {
 
       return report;
     } catch (error) {
-      console.error('Get revenue report error:', error);
+      logger.error('Nhận lỗi báo cáo doanh thu:', error);
       throw new Error('Không thể tạo báo cáo doanh thu');
     }
   }
@@ -216,7 +216,7 @@ class ReportService {
 
       return payments;
     } catch (error) {
-      console.error('Get revenue by payment method error:', error);
+      logger.error('Nhận doanh thu do lỗi phương thức thanh toán:', error);
       return [];
     }
   }
@@ -367,7 +367,7 @@ class ReportService {
         cancellationsByRoute,
       };
     } catch (error) {
-      console.error('Get cancellation report error:', error);
+      logger.error('Nhận lỗi báo cáo hủy:', error);
       return {
         totalBookings: 0,
         totalCancelled: 0,
@@ -470,7 +470,7 @@ class ReportService {
 
       return statsMap;
     } catch (error) {
-      console.error('Get cancellation stats by route error:', error);
+      logger.error('Nhận số liệu thống kê hủy theo lỗi tuyến đường:', error);
       return new Map();
     }
   }
@@ -540,7 +540,7 @@ class ReportService {
         },
       };
     } catch (error) {
-      console.error('Get growth metrics error:', error);
+      logger.error('Nhận lỗi số liệu tăng trưởng:', error);
       return {
         current: { revenue: 0, bookings: 0 },
         previous: { revenue: 0, bookings: 0 },
@@ -671,7 +671,7 @@ class ReportService {
       const buffer = await workbook.xlsx.writeBuffer();
       return buffer;
     } catch (error) {
-      console.error('Export to Excel error:', error);
+      logger.error('Lỗi xuất sang Excel:', error);
       throw new Error('Không thể xuất báo cáo Excel');
     }
   }
@@ -778,7 +778,7 @@ class ReportService {
 
         doc.end();
       } catch (error) {
-        console.error('Export to PDF error:', error);
+        logger.error('Lỗi xuất sang PDF:', error);
         reject(new Error('Không thể xuất báo cáo PDF'));
       }
     });

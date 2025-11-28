@@ -1,4 +1,5 @@
 const ReportService = require('../services/report.service');
+const logger = require('../utils/logger');
 
 /**
  * Report Controller
@@ -65,7 +66,7 @@ exports.getRevenueReport = async (req, res, next) => {
       data: reportData,
     });
   } catch (error) {
-    console.error('Get revenue report error:', error);
+    logger.error('Lỗi lấy báo cáo doanh thu:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Không thể tạo báo cáo doanh thu',
@@ -100,7 +101,7 @@ exports.getRevenueSummary = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get revenue summary error:', error);
+    logger.error('Lỗi lấy tóm tắt doanh thu:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Không thể tải tóm tắt doanh thu',
@@ -132,7 +133,7 @@ exports.getRevenueByRoute = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get revenue by route error:', error);
+    logger.error('Lỗi lấy doanh thu theo tuyến:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Không thể tải doanh thu theo tuyến',
@@ -170,7 +171,7 @@ exports.getRevenueTrend = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get revenue trend error:', error);
+    logger.error('Lỗi lấy xu hướng doanh thu:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Không thể tải xu hướng doanh thu',
@@ -201,7 +202,7 @@ exports.getCancellationReport = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get cancellation report error:', error);
+    logger.error('Lỗi lấy báo cáo hủy:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Không thể tải báo cáo hủy vé',
@@ -232,7 +233,7 @@ exports.getGrowthMetrics = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.error('Get growth metrics error:', error);
+    logger.error('Lỗi lấy số liệu tăng trưởng:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Không thể tải chỉ số tăng trưởng',

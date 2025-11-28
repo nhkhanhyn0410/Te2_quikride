@@ -33,7 +33,7 @@ class TicketService {
       // Check if ticket already exists
       const existingTicket = await Ticket.findOne({ bookingId });
       if (existingTicket) {
-        logger.warn('Ticket already exists for booking: ' + bookingId);
+        logger.warn('Vé đã tồn tại cho đặt chỗ: ' + bookingId);
         return existingTicket;
       }
 
@@ -94,9 +94,9 @@ class TicketService {
 
       // Create ticket document
       logger.debug('=== CREATING TICKET ===');
-      logger.debug('Booking ID: ' + booking._id);
-      logger.debug('Booking customerId (raw): ' + booking.customerId);
-      logger.debug('Booking customerId type: ' + typeof booking.customerId);
+      logger.debug('Đặt chỗ ID: ' + booking._id);
+      logger.debug('Đặt chỗ khách hàngId (raw): ' + booking.customerId);
+      logger.debug('Đặt chỗ khách hàngId type: ' + typeof booking.customerId);
 
       // Handle both populated (object) and non-populated (ObjectId) customerId
       let ticketCustomerId = null;
@@ -109,8 +109,8 @@ class TicketService {
           ticketCustomerId = booking.customerId;
         }
       }
-      logger.debug('Ticket customerId: ' + ticketCustomerId);
-      logger.debug('Is Guest Booking: ' + !ticketCustomerId);
+      logger.debug('Vé khách hàngId: ' + ticketCustomerId);
+      logger.debug('Is Guest Đặt chỗ: ' + !ticketCustomerId);
 
       const ticket = await Ticket.create({
         ticketCode,
@@ -154,10 +154,10 @@ class TicketService {
         status: 'valid',
       });
 
-      logger.success('Ticket with QR code generated successfully: ' + ticketCode);
+      logger.success('Vé với QR code đã tạo thành công: ' + ticketCode);
       return ticket;
     } catch (error) {
-      logger.error(' Ticket generation error: ' + error.message);
+      logger.error(' Vé genertạiitrên lỗi: ' + error.message);
       throw error;
     }
   }
@@ -191,7 +191,7 @@ class TicketService {
       const isDemoMode = process.env.DEMO_MODE === 'true';
 
       if (isDemoMode) {
-        logger.info('📝 Demo mode: Simulating email and SMS notifications');
+        logger.info('📝 Demo chế độ: Simultạitrtrêngg email and SMS thông báo');
         results.email.sent = true;
         results.email.demo = true;
         results.sms.sent = true;
@@ -201,8 +201,8 @@ class TicketService {
         ticket.markSmsSent();
         await ticket.save();
 
-        logger.success('[DEMO] Email would be sent to: ' + contactEmail);
-        logger.success('[DEMO] SMS would be sent to: ' + contactPhone);
+        logger.success('[DEMO] Email would be đã gửi đến: ' + contactEmail);
+        logger.success('[DEMO] SMS would be đã gửi đến: ' + contactPhone);
 
         return results;
       }
@@ -242,9 +242,9 @@ class TicketService {
 
           ticket.markEmailSent();
           results.email.sent = true;
-          logger.success('Ticket email sent to: ' + contactEmail);
+          logger.success('Vé email đã gửi đến: ' + contactEmail);
         } catch (error) {
-          logger.error(' Email sending failed: ' + error.message);
+          logger.error(' Email đang gửi thất bại: ' + error.message);
           results.email.error = error.message;
         }
       }
@@ -267,12 +267,12 @@ class TicketService {
           if (smsResult.success) {
             ticket.markSmsSent();
             results.sms.sent = true;
-            logger.success('Ticket SMS sent to: ' + contactPhone);
+            logger.success('Vé SMS đã gửi đến: ' + contactPhone);
           } else {
             results.sms.error = smsResult.error;
           }
         } catch (error) {
-          logger.error(' SMS sending failed: ' + error.message);
+          logger.error(' SMS đang gửi thất bại: ' + error.message);
           results.sms.error = error.message;
         }
       }
@@ -281,7 +281,7 @@ class TicketService {
 
       return results;
     } catch (error) {
-      logger.error(' Notification sending error: ' + error.message);
+      logger.error(' Thông báo đang gửi lỗi: ' + error.message);
       // Return partial results instead of throwing to not fail the booking
       return {
         email: { sent: false, error: error.message },
@@ -378,13 +378,13 @@ class TicketService {
     const redis = await redisClient;
     await redis.setEx(otpKey, 300, otp); // 5 minutes
 
-    logger.info(`🔐 OTP for ${ticketCode ? 'ticket ' + ticketCode : 'phone ' + phone}: ${otp} (Demo: use 123456)`);
+    logger.info(`🔐 OTP cho ${véCode ? 'vé ' + véCode : 'phtrêne ' + phtrêne}: ${OTP} (Demo: use 123456)`);
 
     // Send OTP via SMS
     try {
       await SMSService.sendOTP(phone, otp);
     } catch (error) {
-      logger.error('Failed to send OTP SMS: ' + error.message);
+      logger.error('Không thể send OTP SMS: ' + error.message);
       // Continue anyway - for development, OTP is logged
     }
 
@@ -412,7 +412,7 @@ class TicketService {
             `,
           });
         } catch (error) {
-          logger.error('Failed to send OTP email: ' + error.message);
+          logger.error('Không thể send OTP email: ' + error.message);
         }
       }
     }
@@ -458,7 +458,7 @@ class TicketService {
       // Delete OTP after successful verification
       await redis.del(otpKey);
     } else {
-      logger.warn('Demo OTP (123456) accepted for testing');
+      logger.warn('Demo OTP (123456) accepted cho kiểm trtạirtrêngg');
     }
 
     // Return based on lookup type
@@ -563,9 +563,9 @@ class TicketService {
    */
   static async getCustomerTickets(customerId, filters = {}) {
     logger.debug('=== GET CUSTOMER TICKETS ===');
-    logger.debug('Customer ID: ' + customerId);
-    logger.debug('Customer ID type: ' + typeof customerId);
-    logger.debug('Filters: ' + JSON.stringify(filters));
+    logger.debug('Khách hàng ID: ' + customerId);
+    logger.debug('Khách hàng ID type: ' + typeof customerId);
+    logger.debug('Bộ lọc: ' + JSON.stringify(filters));
 
     const query = { customerId };
     const now = new Date();
@@ -629,7 +629,7 @@ class TicketService {
     const skip = (page - 1) * limit;
 
     // Get tickets
-    logger.debug('Final query: ' + JSON.stringify(query, null, 2));
+    logger.debug('Ftrtrêngal truy vấn: ' + JSON.stringify(query, null, 2));
     const tickets = await Ticket.find(query)
       .populate('tripId')
       .populate('operatorId', 'companyName phone email logo')
@@ -638,15 +638,15 @@ class TicketService {
       .skip(skip)
       .limit(limit);
 
-    logger.debug('Found tickets: ' + tickets.length);
+    logger.debug('Found vé: ' + tickets.length);
     if (tickets.length > 0) {
       const firstTicket = tickets[0];
-      logger.debug('First ticket customerId: ' + firstTicket.customerId);
-      logger.debug('First ticket code: ' + firstTicket.ticketCode);
-      logger.debug('First ticket tripId: ' + (firstTicket.tripId ? 'populated' : 'NULL'));
-      logger.debug('First ticket operatorId: ' + (firstTicket.operatorId ? 'populated' : 'NULL'));
-      logger.debug('First ticket bookingId: ' + (firstTicket.bookingId ? 'populated' : 'NULL'));
-      logger.debug('First ticket structure (no QR): ' + JSON.stringify({
+      logger.debug('First vé khách hàngId: ' + firstTicket.customerId);
+      logger.debug('First vé code: ' + firstTicket.ticketCode);
+      logger.debug('First vé chuyếnId: ' + (firstTicket.tripId ? 'populated' : 'NULL'));
+      logger.debug('First vé nhà điều hànhId: ' + (firstTicket.operatorId ? 'populated' : 'NULL'));
+      logger.debug('First vé đặt chỗId: ' + (firstTicket.bookingId ? 'populated' : 'NULL'));
+      logger.debug('First vé cấu trúc (no QR): ' + JSON.stringify({
         _id: firstTicket._id,
         ticketCode: firstTicket.ticketCode,
         customerId: firstTicket.customerId,
@@ -664,7 +664,7 @@ class TicketService {
 
     // Get total count
     const total = await Ticket.countDocuments(query);
-    logger.debug('Total matching tickets: ' + total);
+    logger.debug('Tổng khớptrtrêngg vé: ' + total);
 
     // Calculate stats
     const stats = {
@@ -698,7 +698,7 @@ class TicketService {
       stats,
     };
 
-    logger.debug('Returning result: ' + JSON.stringify({
+    logger.debug('Đang trả về kết quả: ' + JSON.stringify({
       ticketCount: tickets.length,
       pagination: result.pagination,
       stats: result.stats
@@ -814,7 +814,7 @@ class TicketService {
         passengers: ticket.passengers,
       };
     } catch (error) {
-      logger.error(' QR verification error: ' + error.message);
+      logger.error(' QR xác mtrtrêngh lỗi: ' + error.message);
       return {
         success: false,
         error: error.message || 'Lỗi xác thực QR code',
@@ -883,9 +883,9 @@ class TicketService {
         subject: emailTemplate.subject,
         html: emailTemplate.html,
       });
-      logger.success('Cancellation email sent to: ' + booking.contactInfo.email);
+      logger.success('Hủy email đã gửi đến: ' + booking.contactInfo.email);
     } catch (error) {
-      logger.error(' Failed to send cancellation email: ' + error.message);
+      logger.error(' Không thể send hủy email: ' + error.message);
       // Don't fail the cancellation if email fails
     }
 
@@ -896,9 +896,9 @@ ${refundInfo.refundAmount > 0 ? `So tien hoan: ${refundInfo.refundAmount.toLocal
 ${refundInfo.appliedRule}`;
 
       await SMSService.sendSMS(booking.contactInfo.phone, message);
-      logger.success('Cancellation SMS sent to: ' + booking.contactInfo.phone);
+      logger.success('Hủy SMS đã gửi đến: ' + booking.contactInfo.phone);
     } catch (error) {
-      logger.error(' Failed to send cancellation SMS: ' + error.message);
+      logger.error(' Không thể send hủy SMS: ' + error.message);
       // Don't fail the cancellation if SMS fails
     }
 
@@ -1057,7 +1057,7 @@ ${refundInfo.appliedRule}`;
             });
           }
         } catch (error) {
-          logger.error('Refund for ticket change failed: ' + error.message);
+          logger.error('Hoàn tiền cho vé change thất bại: ' + error.message);
           // Don't fail the change if refund fails
         }
       }
@@ -1154,9 +1154,9 @@ ${refundInfo.appliedRule}`;
           html: emailTemplate.html,
         });
 
-        logger.success('Ticket change email sent to: ' + oldBooking.contactInfo.email);
+        logger.success('Vé change email đã gửi đến: ' + oldBooking.contactInfo.email);
       } catch (error) {
-        logger.error(' Failed to send ticket change email: ' + error.message);
+        logger.error(' Không thể send vé change email: ' + error.message);
       }
 
       // Send SMS notification
@@ -1168,9 +1168,9 @@ Gio di: ${moment(newTrip.departureTime).tz('Asia/Ho_Chi_Minh').format('HH:mm DD/
 ${priceDifference !== 0 ? `Chenh lech: ${priceDifference > 0 ? '+' : ''}${priceDifference.toLocaleString('vi-VN')} VND` : ''}`;
 
         await SMSService.sendSMS(oldBooking.contactInfo.phone, message);
-        logger.success('Ticket change SMS sent to: ' + oldBooking.contactInfo.phone);
+        logger.success('Vé change SMS đã gửi đến: ' + oldBooking.contactInfo.phone);
       } catch (error) {
-        logger.error(' Failed to send ticket change SMS: ' + error.message);
+        logger.error(' Không thể send vé change SMS: ' + error.message);
       }
 
       return {

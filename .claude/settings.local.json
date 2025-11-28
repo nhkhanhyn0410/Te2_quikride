@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node translate-logs.js:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -30,7 +30,7 @@ exports.validateVoucher = async (req, res) => {
       message: 'Voucher hợp lệ',
     });
   } catch (error) {
-    console.error('Validate voucher error:', error);
+    logger.error('Lỗi xác thực voucher:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Voucher không hợp lệ',
@@ -60,7 +60,7 @@ exports.getPublicVouchers = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get public vouchers error:', error);
+    logger.error('Lỗi lấy voucher công khai:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể lấy danh sách voucher',
@@ -86,7 +86,7 @@ exports.createVoucher = async (req, res) => {
       message: 'Tạo voucher thành công',
     });
   } catch (error) {
-    console.error('Create voucher error:', error);
+    logger.error('Lỗi tạo voucher:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể tạo voucher',
@@ -113,7 +113,7 @@ exports.getOperatorVouchers = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get operator vouchers error:', error);
+    logger.error('Lỗi lấy voucher nhà điều hành:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể lấy danh sách voucher',
@@ -145,7 +145,7 @@ exports.getVoucherById = async (req, res) => {
       data: { voucher },
     });
   } catch (error) {
-    console.error('Get voucher error:', error);
+    logger.error('Lỗi lấy voucher:', error);
     res.status(404).json({
       status: 'error',
       message: error.message || 'Không tìm thấy voucher',
@@ -179,7 +179,7 @@ exports.updateVoucher = async (req, res) => {
       message: 'Cập nhật voucher thành công',
     });
   } catch (error) {
-    console.error('Update voucher error:', error);
+    logger.error('Lỗi cập nhật voucher:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể cập nhật voucher',
@@ -212,7 +212,7 @@ exports.deleteVoucher = async (req, res) => {
       message: 'Xóa voucher thành công',
     });
   } catch (error) {
-    console.error('Delete voucher error:', error);
+    logger.error('Lỗi xóa voucher:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể xóa voucher',
@@ -246,7 +246,7 @@ exports.deactivateVoucher = async (req, res) => {
       message: 'Vô hiệu hóa voucher thành công',
     });
   } catch (error) {
-    console.error('Deactivate voucher error:', error);
+    logger.error('Lỗi vô hiệu hóa voucher:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể vô hiệu hóa voucher',
@@ -280,7 +280,7 @@ exports.activateVoucher = async (req, res) => {
       message: 'Kích hoạt voucher thành công',
     });
   } catch (error) {
-    console.error('Activate voucher error:', error);
+    logger.error('Lỗi kích hoạt voucher:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể kích hoạt voucher',
@@ -304,7 +304,7 @@ exports.getVoucherStatistics = async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    console.error('Get voucher statistics error:', error);
+    logger.error('Lỗi lấy thống kê voucher:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể lấy thống kê',
@@ -343,7 +343,7 @@ exports.getVoucherUsageReport = async (req, res) => {
       data: report,
     });
   } catch (error) {
-    console.error('Get voucher usage report error:', error);
+    logger.error('Lỗi lấy báo cáo sử dụng voucher:', error);
     res.status(400).json({
       status: 'error',
       message: error.message || 'Không thể lấy báo cáo sử dụng voucher',

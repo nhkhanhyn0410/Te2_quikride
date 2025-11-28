@@ -88,7 +88,7 @@ const sendEmail = async ({ to, subject, html, text, attachments = [], qrCodeData
           'cid:qrcode@vexenhanh'
         );
 
-        logger.log('QR code converted to inline attachment (CID)');
+        logger.log('Mã QR đã được chuyển đổi sang tệp đính kèm');
       }
     }
 
@@ -102,11 +102,11 @@ const sendEmail = async ({ to, subject, html, text, attachments = [], qrCodeData
     };
 
     const info = await transporter.sendMail(mailOptions);
-    logger.log('Email sent:', info.messageId);
+    logger.log('Email đã gửi:', info.messageId);
     return info;
   } catch (error) {
-    logger.error(' Email send error:', error);
-    throw new Error(`Failed to send email: ${error.message}`);
+    logger.error(' Lỗi gửi email:', error);
+    throw new Error(`Không thể gửi email: ${error.message}`);
   }
 };
 

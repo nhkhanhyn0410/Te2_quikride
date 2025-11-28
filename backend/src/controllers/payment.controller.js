@@ -1,4 +1,5 @@
 const PaymentService = require('../services/payment.service');
+const logger = require('../utils/logger');
 
 /**
  * Payment Controller
@@ -59,7 +60,7 @@ class PaymentController {
         },
       });
     } catch (error) {
-      console.error('Create payment error:', error);
+      logger.error('Lỗi tạo thanh đếnán:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Tạo thanh toán thất bại',
@@ -98,7 +99,7 @@ class PaymentController {
         return res.redirect(redirectUrl);
       }
     } catch (error) {
-      console.error('VNPay callback error:', error);
+      logger.error('Lỗi ctất cảback VNPay:', error);
 
       // Redirect to error page
       const returnUrl = process.env.PAYMENT_ERROR_URL || 'http://localhost:3000/payment/error';
@@ -130,19 +131,19 @@ class PaymentController {
         message: result.message,
         data: result.success
           ? {
-              payment: result.payment,
-              booking: result.booking,
-            }
+            payment: result.payment,
+            booking: result.booking,
+          }
           : null,
         error: !result.success
           ? {
-              code: result.code,
-              message: result.message,
-            }
+            code: result.code,
+            message: result.message,
+          }
           : null,
       });
     } catch (error) {
-      console.error('VNPay return error:', error);
+      logger.error('Lỗi trả về VNPay:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Xử lý callback thất bại',
@@ -165,7 +166,7 @@ class PaymentController {
         data: payment,
       });
     } catch (error) {
-      console.error('Get payment error:', error);
+      logger.error('Lỗi lấy thanh đếnán:', error);
       res.status(404).json({
         success: false,
         message: error.message || 'Không tìm thấy thanh toán',
@@ -188,7 +189,7 @@ class PaymentController {
         data: payment,
       });
     } catch (error) {
-      console.error('Get payment error:', error);
+      logger.error('Lỗi lấy thanh đếnán:', error);
       res.status(404).json({
         success: false,
         message: error.message || 'Không tìm thấy thanh toán',
@@ -211,7 +212,7 @@ class PaymentController {
         data: payments,
       });
     } catch (error) {
-      console.error('Get payments error:', error);
+      logger.error('Lỗi lấy thanh đếnán:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Lấy danh sách thanh toán thất bại',
@@ -241,7 +242,7 @@ class PaymentController {
         data: payments,
       });
     } catch (error) {
-      console.error('Get my payments error:', error);
+      logger.error('Lỗi lấy thanh đếnán của tôi:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Lấy danh sách thanh toán thất bại',
@@ -279,7 +280,7 @@ class PaymentController {
         data: payments,
       });
     } catch (error) {
-      console.error('Get operator payments error:', error);
+      logger.error('Lỗi lấy thanh đếnán nhà điều hành:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Lấy danh sách thanh toán thất bại',
@@ -336,7 +337,7 @@ class PaymentController {
         },
       });
     } catch (error) {
-      console.error('Process refund error:', error);
+      logger.error('Lỗi xử lý hoàn tiền:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Hoàn tiền thất bại',
@@ -366,7 +367,7 @@ class PaymentController {
         data: result,
       });
     } catch (error) {
-      console.error('Query transaction status error:', error);
+      logger.error('Lỗi truy vấn trạng thái giao dịch:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Truy vấn trạng thái giao dịch thất bại',
@@ -402,7 +403,7 @@ class PaymentController {
         data: stats,
       });
     } catch (error) {
-      console.error('Get payment statistics error:', error);
+      logger.error('Lỗi lấy thống kê thanh đếnán:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Lấy thống kê thanh toán thất bại',
@@ -423,7 +424,7 @@ class PaymentController {
         data: methods,
       });
     } catch (error) {
-      console.error('Get payment methods error:', error);
+      logger.error('Lỗi lấy phương thức thanh toán:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Lấy danh sách phương thức thanh toán thất bại',
@@ -444,7 +445,7 @@ class PaymentController {
         data: banks,
       });
     } catch (error) {
-      console.error('Get bank list error:', error);
+      logger.error('Lỗi lấy danh sách ngân hàng:', error);
       res.status(400).json({
         success: false,
         message: error.message || 'Lấy danh sách ngân hàng thất bại',
@@ -467,7 +468,7 @@ class PaymentController {
         data: result,
       });
     } catch (error) {
-      console.error('Handle expired payments error:', error);
+      logger.error('Lỗi xử lý thanh đếnán hết hạn:', error);
       res.status(500).json({
         success: false,
         message: error.message || 'Xử lý thanh toán hết hạn thất bại',

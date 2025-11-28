@@ -12,7 +12,7 @@ const connectRedis = async () => {
     });
 
     redisClient.on('error', (err) => {
-      logger.error(' Redis Client Error:', err);
+      logger.error(' Lỗi Redis Client:', err);
     });
 
     redisClient.on('connect' && 'ready', () => {
@@ -34,7 +34,7 @@ const connectRedis = async () => {
 
 const getRedisClient = () => {
   if (!redisClient) {
-    throw new Error('Redis client chưa khởi tạo. Call connectRedis() first.');
+    throw new Error('Redis client chưa khởi tạo. Hãy gọi connectRedis() trước.');
   }
   return redisClient;
 };
