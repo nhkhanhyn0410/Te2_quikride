@@ -193,6 +193,7 @@ schedulerService.initialize();
 
 // Start server
 server.listen(PORT, () => {
+  logger.start(`=====================================================================`)
   logger.success(`Server đang chạy ở chế độ ${process.env.NODE_ENV} trên port ${PORT}`);
   logger.success(`Health check: http://localhost:${PORT}/health`);
   logger.success(`API endpoint: http://localhost:${PORT}/api/${API_VERSION}`);
