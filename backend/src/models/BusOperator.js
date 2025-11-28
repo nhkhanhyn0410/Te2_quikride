@@ -189,9 +189,7 @@ const BusOperatorSchema = new mongoose.Schema(
   }
 );
 
-// Indexes
-BusOperatorSchema.index({ companyName: 1 });
-BusOperatorSchema.index({ email: 1 });
+// Indexes (companyName and email already have unique: true in schema, which creates indexes)
 BusOperatorSchema.index({ verificationStatus: 1 });
 BusOperatorSchema.index({ averageRating: -1 });
 BusOperatorSchema.index({ createdAt: -1 });

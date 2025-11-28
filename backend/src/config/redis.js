@@ -1,4 +1,5 @@
 const redis = require('redis');
+const logger = require('../utils/logger')
 
 let redisClient;
 
@@ -11,39 +12,29 @@ const connectRedis = async () => {
     });
 
     redisClient.on('error', (err) => {
-      console.error(' Redis Client Error:', err);
+      logger.error(' Redis Client Error:', err);
     });
 
-    redisClient.on('connect', () => {
-      console.log('Redis Connected');
+    redisClient.on('connect' && 'ready', () => {
+      logger.success('Redis Đã kết nối và sẵn sàng');
     });
 
-    redisClient.on('ready', () => {
-      console.log('Redis Ready');
-    });
 
     redisClient.on('reconnecting', () => {
-      console.log('🔄 Redis Reconnecting...');
+      logger.info('Redis Đang kết nối lại...');
     });
 
     await redisClient.connect();
 
-    // Test connection
-    await redisClient.set('test', 'Redis Connection OK');
-    const testValue = await redisClient.get('test');
-    console.log('Redis Test:', testValue);
-
     return redisClient;
   } catch (error) {
-    console.error(' Error connecting to Redis:', error.message);
-    // Don't exit process, Redis is not critical for initial setup
-    // process.exit(1);
+    logger.error('Lỗi kết nối với Redis:', error.message);
   }
 };
 
 const getRedisClient = () => {
   if (!redisClient) {
-    throw new Error('Redis client not initialized. Call connectRedis() first.');
+    throw new Error('Redis client chưa khởi tạo. Call connectRedis() first.');
   }
   return redisClient;
 };

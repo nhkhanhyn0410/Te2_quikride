@@ -213,7 +213,7 @@ const BookingSchema = new mongoose.Schema(
 );
 
 /**
- * Indexes
+ * Indexes (compound indexes only - single field indexes are defined in schema)
  */
 // Query bookings by customer
 BookingSchema.index({ customerId: 1, createdAt: -1 });
@@ -226,9 +226,6 @@ BookingSchema.index({ tripId: 1, status: 1 });
 
 // Query bookings by status and payment
 BookingSchema.index({ status: 1, paymentStatus: 1 });
-
-// Search by booking code
-BookingSchema.index({ bookingCode: 1 });
 
 /**
  * Virtual fields

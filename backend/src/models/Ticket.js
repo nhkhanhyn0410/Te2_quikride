@@ -179,9 +179,7 @@ const TicketSchema = new mongoose.Schema(
   }
 );
 
-// Indexes
-TicketSchema.index({ ticketCode: 1 });
-TicketSchema.index({ bookingId: 1 });
+// Indexes (compound indexes only - single field indexes are defined in schema)
 TicketSchema.index({ customerId: 1, status: 1 });
 TicketSchema.index({ tripId: 1, status: 1 });
 TicketSchema.index({ status: 1, createdAt: -1 });

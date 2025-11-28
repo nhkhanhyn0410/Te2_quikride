@@ -196,11 +196,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for performance
-userSchema.index({ email: 1 });
-userSchema.index({ phone: 1 });
-userSchema.index({ googleId: 1 }, { sparse: true });
-userSchema.index({ facebookId: 1 }, { sparse: true });
+// Indexes for performance (compound indexes only - single field indexes are defined in schema via unique: true)
 userSchema.index({ createdAt: -1 });
 userSchema.index({ loyaltyTier: 1, totalPoints: -1 });
 

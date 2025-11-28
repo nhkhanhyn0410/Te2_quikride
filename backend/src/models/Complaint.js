@@ -161,8 +161,7 @@ const complaintSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for performance
-complaintSchema.index({ ticketNumber: 1 });
+// Indexes for performance (ticketNumber already has unique: true in schema, which creates an index)
 complaintSchema.index({ userId: 1 });
 complaintSchema.index({ status: 1 });
 complaintSchema.index({ priority: 1 });

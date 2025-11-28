@@ -92,8 +92,7 @@ const blogSchema = new mongoose.Schema(
   }
 );
 
-// Indexes
-blogSchema.index({ slug: 1 });
+// Indexes (slug already has unique: true in schema, which creates an index)
 blogSchema.index({ status: 1, publishedAt: -1 });
 blogSchema.index({ category: 1 });
 blogSchema.index({ tags: 1 });

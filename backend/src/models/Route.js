@@ -214,11 +214,9 @@ const RouteSchema = new mongoose.Schema(
   }
 );
 
-// Indexes
-RouteSchema.index({ routeCode: 1 });
-RouteSchema.index({ operatorId: 1 });
+// Indexes (compound indexes only - single field indexes are defined in schema)
+// Note: routeCode has unique constraint in schema, operatorId and isActive have index: true
 RouteSchema.index({ 'origin.city': 1, 'destination.city': 1 });
-RouteSchema.index({ isActive: 1 });
 RouteSchema.index({ operatorId: 1, isActive: 1 });
 
 // Virtual for route description

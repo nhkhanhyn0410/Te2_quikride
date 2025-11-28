@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const logger = require('./utils/logger');
+const logger = require('../utils/logger');
 
 const connectDB = async () => {
   try {
@@ -7,10 +7,7 @@ const connectDB = async () => {
       ? process.env.MONGODB_TEST_URI
       : process.env.MONGODB_URI;
 
-    const conn = await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    const conn = await mongoose.connect(MONGODB_URI);
 
     logger.success(`MongoDB Đã kết nối: ${conn.connection.host}`);
 
@@ -20,17 +17,10 @@ const connectDB = async () => {
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
-    });
-
-    // Graceful shutdown
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      console.log('MongoDB connection closed through app termination');
-      process.exit(0);
+      console.log('MongoDB Đã ngắt kết nối');
     });
   } catch (error) {
-    console.error(' Error connecting to MongoDB:', error.message);
+    console.error('Lỗi kết nối với MongoDB:', error.message);
     process.exit(1);
   }
 };

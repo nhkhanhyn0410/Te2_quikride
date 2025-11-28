@@ -299,7 +299,7 @@ const TripSchema = new mongoose.Schema(
 );
 
 /**
- * Indexes
+ * Indexes (compound indexes only - single field indexes are defined in schema)
  */
 // Query trips by operator and date range
 TripSchema.index({ operatorId: 1, departureTime: 1 });
@@ -318,9 +318,6 @@ TripSchema.index({ status: 1, finalPrice: 1, departureTime: 1 });
 
 // Bus-based search (for filtering by bus type)
 TripSchema.index({ busId: 1, status: 1, departureTime: 1 });
-
-// Recurring trips
-TripSchema.index({ recurringGroupId: 1 });
 
 /**
  * Pre-save Middleware

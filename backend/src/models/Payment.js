@@ -179,7 +179,7 @@ const PaymentSchema = new mongoose.Schema(
 );
 
 /**
- * Indexes
+ * Indexes (compound indexes only - single field indexes are defined in schema)
  */
 // Query payments by booking
 PaymentSchema.index({ bookingId: 1, status: 1 });
@@ -189,9 +189,6 @@ PaymentSchema.index({ customerId: 1, createdAt: -1 });
 
 // Query payments by operator and status
 PaymentSchema.index({ operatorId: 1, status: 1, createdAt: -1 });
-
-// Query by transaction ID
-PaymentSchema.index({ transactionId: 1 });
 
 // Query by payment method and status
 PaymentSchema.index({ paymentMethod: 1, status: 1 });

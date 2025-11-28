@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const logger = require('../utils/logger');
 
 // Email transporter configuration
 let transporter;
@@ -87,7 +88,7 @@ const sendEmail = async ({ to, subject, html, text, attachments = [], qrCodeData
           'cid:qrcode@vexenhanh'
         );
 
-        console.log('📎 QR code converted to inline attachment (CID)');
+        logger.log('QR code converted to inline attachment (CID)');
       }
     }
 
@@ -101,10 +102,10 @@ const sendEmail = async ({ to, subject, html, text, attachments = [], qrCodeData
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent:', info.messageId);
+    logger.log('Email sent:', info.messageId);
     return info;
   } catch (error) {
-    console.error(' Email send error:', error);
+    logger.error(' Email send error:', error);
     throw new Error(`Failed to send email: ${error.message}`);
   }
 };

@@ -119,11 +119,10 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for performance
-reviewSchema.index({ bookingId: 1 }, { unique: true });
+// Indexes for performance (compound indexes only - single field indexes are defined in schema)
+// Note: bookingId unique constraint is already defined in schema field
 reviewSchema.index({ userId: 1, createdAt: -1 });
 reviewSchema.index({ operatorId: 1, isPublished: 1 });
-reviewSchema.index({ tripId: 1 });
 reviewSchema.index({ overallRating: -1, createdAt: -1 });
 
 // Virtual populate for user info
