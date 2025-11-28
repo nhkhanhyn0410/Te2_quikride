@@ -17,7 +17,7 @@ const connectDB = async () => {
     });
 
     mongoose.connection.on('disconnected', () => {
-      logger.log('MongoDB Đã ngắt kết nối');
+      logger.info('MongoDB Đã ngắt kết nối');
     });
   } catch (error) {
     logger.error('Lỗi kết nối với MongoDB:', error.message);

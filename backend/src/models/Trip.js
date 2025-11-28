@@ -528,7 +528,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
   const { status, stopIndex, location, notes, updatedBy } = data;
 
   // Log journey update for debugging
-  logger.log('Yêu cầu cập nhật hành trình:', {
+  logger.info('Yêu cầu cập nhật hành trình:', {
     tripId: this._id,
     requestedStatus: status,
     requestedStopIndex: stopIndex,
@@ -547,7 +547,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
 
   // Initialize journey if not exists
   if (!this.journey) {
-    logger.log('Đang khởi tạo hành trình cho chuyến đi:', this._id);
+    logger.info('Đang khởi tạo hành trình cho chuyến đi:', this._id);
     this.journey = {
       currentStopIndex: -1, // -1 means at origin (before any stops)
       currentStatus: 'chuẩn bị',
@@ -579,7 +579,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       // Convert from 1-based (UI) to 0-based (internal)
       const requestedStopIndex = stopIndex - 1;
 
-      logger.log('Xử lý at_stop:', {
+      logger.info('Xử lý at_stop:', {
         uiStopIndex: stopIndex,
         internalStopIndex: requestedStopIndex,
         oldStopIndex,
@@ -619,7 +619,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
       if (!this.journey.stoppedAt.includes(newStopIndex)) {
         this.journey.stoppedAt.push(newStopIndex);
         this.journey.stoppedAt.sort((a, b) => a - b); // Keep sorted
-        logger.log('Điểm dừng được đánh dấu là đã ghé thăm:', newStopIndex, 'Total visited:', this.journey.stoppedAt);
+        logger.info('Điểm dừng được đánh dấu là đã ghé thăm:', newStopIndex, 'Total visited:', this.journey.stoppedAt);
       }
       break;
 
@@ -683,7 +683,7 @@ TripSchema.methods.updateJourneyStatus = async function (data) {
 
   await this.save();
 
-  logger.log('Journey updated successfully:', {
+  logger.info('Journey updated successfully:', {
     tripId: this._id,
     oldStatus,
     newStatus: this.journey.currentStatus,

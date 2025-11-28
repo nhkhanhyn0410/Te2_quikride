@@ -220,16 +220,16 @@ userSchema.pre('save', async function (next) {
 // Instance method - So sánh password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
-    logger.log('=== so sánh mật khẩu ===');
-    logger.log('Độ dài mật khẩu ứng viên:', candidatePassword ? candidatePassword.length : 0);
-    logger.log('Hash lưu trữ tồn tại:', !!this.password);
-    logger.log('Xem trước hash lưu trữ:', this.password ? this.password.substring(0, 20) + '...' : 'KHÔNG CÓ');
+    logger.info('=== so sánh mật khẩu ===');
+    logger.info('Độ dài mật khẩu ứng viên:', candidatePassword ? candidatePassword.length : 0);
+    logger.info('Hash lưu trữ tồn tại:', !!this.password);
+    logger.info('Xem trước hash lưu trữ:', this.password ? this.password.substring(0, 20) + '...' : 'KHÔNG CÓ');
 
     const result = await bcrypt.compare(candidatePassword, this.password);
-    logger.log('Kết quả so sánh:', result);
+    logger.info('Kết quả so sánh:', result);
     return result;
   } catch (error) {
-    logger.log('LỖI khi so sánh mật khẩu:', error.message);
+    logger.info('LỖI khi so sánh mật khẩu:', error.message);
     throw new Error('Lỗi khi so sánh mật khẩu');
   }
 };
@@ -343,7 +343,7 @@ userSchema.methods.removeExpiredPoints = async function () {
     // Update loyalty tier
     this.updateLoyaltyTier();
 
-    logger.log(`Đã xóa ${expiredĐiểm} điểm hết hạn cho người dùng ${this._id}`);
+    logger.info(`Đã xóa ${expiredĐiểm} điểm hết hạn cho người dùng ${this._id}`);
   }
 
   return expiredPoints;
@@ -410,10 +410,10 @@ userSchema.methods.getTierBenefits = function () {
 
 // Static method - Tìm user bằng email hoặc phone
 userSchema.statics.findByEmailOrPhone = function (identifier) {
-  logger.log('=== tìm theo email hoặc điện thoại ===');
-  logger.log('Mã định danh gốc:', identifier);
-  logger.log('Mã định danh chữ thường:', identifier.toLowerCase());
-  logger.log('Truy vấn:', {
+  logger.info('=== tìm theo email hoặc điện thoại ===');
+  logger.info('Mã định danh gốc:', identifier);
+  logger.info('Mã định danh chữ thường:', identifier.toLowerCase());
+  logger.info('Truy vấn:', {
     $or: [{ email: identifier.toLowerCase() }, { phone: identifier }],
   });
 

@@ -81,16 +81,16 @@ class AuthService {
   static async register(userData) {
     const { email, phone, password, fullName } = userData;
 
-    logger.log('=== REGISTRATION ===');
-    logger.log('Email:', email);
-    logger.log('Số điện thoại:', phone);
-    logger.log('Mật khẩu length:', password ? password.length : 0);
-    logger.log('Full name:', fullName);
+    logger.info('=== REGISTRATION ===');
+    logger.info('Email:', email);
+    logger.info('Số điện thoại:', phone);
+    logger.info('Mật khẩu length:', password ? password.length : 0);
+    logger.info('Full name:', fullName);
 
     // Kiểm tra email hoặc phone đã tồn tại
     const existingUser = await User.findByEmailOrPhone(email || phone);
     if (existingUser) {
-      logger.log('Thông tin người dùng đã tồn tại:', existingUser.email, existingUser.phone);
+      logger.info('Thông tin người dùng đã tồn tại:', existingUser.email, existingUser.phone);
       if (existingUser.email === email.toLowerCase()) {
         throw new Error('Email đã được sử dụng');
       }
@@ -99,7 +99,7 @@ class AuthService {
       }
     }
 
-    logger.log('Đang tạo người dùng mới...');
+    logger.info('Đang tạo người dùng mới...');
     // Tạo user mới
     const user = await User.create({
       email: email.toLowerCase(),
@@ -108,8 +108,8 @@ class AuthService {
       fullName,
     });
 
-    logger.log('Người dùng đã tạo thành công với ID:', user._id);
-    logger.log('Mật khẩu was hashed:', user.password ? user.password.substring(0, 20) + '...' : 'NONE');
+    logger.info('Người dùng đã tạo thành công với ID:', user._id);
+    logger.info('Mật khẩu was hashed:', user.password ? user.password.substring(0, 20) + '...' : 'NONE');
 
     // Tạo email verification token
     const verificationToken = user.createEmailVerificationToken();
@@ -143,40 +143,40 @@ class AuthService {
    */
   static async login(identifier, password, rememberMe = false) {
     // Debug: Log login attempt
-    logger.log('=== LOGIN ===');
-    logger.log('Identifier:', identifier);
-    logger.log('Mật khẩu provided:', password ? '***' : 'NO PASSWORD');
+    logger.info('=== LOGIN ===');
+    logger.info('Identifier:', identifier);
+    logger.info('Mật khẩu provided:', password ? '***' : 'NO PASSWORD');
 
     // Tìm user và select password để so sánh
     const user = await User.findByEmailOrPhone(identifier).select('+password');
 
-    logger.log('Người dùng found:', user ? `Yes (email: ${user.email}, phone: ${user.phone})` : 'NO');
+    logger.info('Người dùng found:', user ? `Yes (email: ${user.email}, phone: ${user.phone})` : 'NO');
 
     if (!user) {
-      logger.log('LỖI: Người dùng không tìm thấy');
+      logger.info('LỖI: Người dùng không tìm thấy');
       throw new Error('Email/Số điện thoại hoặc mật khẩu không đúng');
     }
 
     // Kiểm tra account status
     if (user.isBlocked) {
-      logger.log('LỖI: Người dùng is bđã khóa');
+      logger.info('LỖI: Người dùng is bđã khóa');
       throw new Error(`Tài khoản đã bị khóa. Lý do: ${user.blockedReason || 'Không rõ'}`);
     }
 
     if (!user.isActive) {
-      logger.log('LỖI: Người dùng is not active');
+      logger.info('LỖI: Người dùng is not active');
       throw new Error('Tài khoản không hoạt động');
     }
 
-    logger.log('Người dùng mật khẩu hash exists:', !!user.password);
-    logger.log('Đang so sánh mật khẩus...');
+    logger.info('Người dùng mật khẩu hash exists:', !!user.password);
+    logger.info('Đang so sánh mật khẩus...');
 
     // So sánh password
     const isPasswordCorrect = await user.comparePassword(password);
-    logger.log('Mật khẩu khớp:', isPasswordCorrect);
+    logger.info('Mật khẩu khớp:', isPasswordCorrect);
 
     if (!isPasswordCorrect) {
-      logger.log('LỖI: Mật khẩu không khớp');
+      logger.info('LỖI: Mật khẩu không khớp');
       throw new Error('Email/Số điện thoại hoặc mật khẩu không đúng');
     }
 

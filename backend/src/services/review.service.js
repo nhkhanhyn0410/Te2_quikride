@@ -70,7 +70,7 @@ class ReviewService {
       // 7. Populate review data for response
       await review.populate('userId', 'fullName avatar');
 
-      logger.log('Đánh giá được tạo thành công:', review._id);
+      logger.info('Đánh giá được tạo thành công:', review._id);
 
       return {
         success: true,
@@ -97,7 +97,7 @@ class ReviewService {
         totalReviews: ratingStats.totalReviews,
       });
 
-      logger.log(`Đánh giá nhà xe được cập nhật:${ratingStats.averageRating} (${ratingStats.totalReviews})`);
+      logger.info(`Đánh giá nhà xe được cập nhật:${ratingStats.averageRating} (${ratingStats.totalReviews})`);
     } catch (error) {
       logger.error('Lỗi cập nhật đánh giá của nhà xe:', error);
       // Don't throw - this is a secondary operation
@@ -241,7 +241,7 @@ class ReviewService {
         );
       }
 
-      logger.log('Đã thêm phản hồi của nhà xe thành công');
+      logger.info('Đã thêm phản hồi của nhà xe thành công');
 
       return {
         success: true,
@@ -328,7 +328,7 @@ class ReviewService {
       // Check if already reviewed
       const existingReview = await Review.findOne({ bookingId });
       if (existingReview) {
-        logger.log('Người dùng đã đánh giá lượt đặt chỗ này');
+        logger.info('Người dùng đã đánh giá lượt đặt chỗ này');
         return { success: true, skipped: true };
       }
 
@@ -344,7 +344,7 @@ class ReviewService {
         emailContent
       );
 
-      logger.log('Xem lại lời mời đã gửi:', user.email);
+      logger.info('Xem lại lời mời đã gửi:', user.email);
 
       return result;
     } catch (error) {
@@ -579,7 +579,7 @@ class ReviewService {
         throw new Error('Review không tồn tại');
       }
 
-      logger.log('Đã báo cáo đánh giá:', reviewId);
+      logger.info('Đã báo cáo đánh giá:', reviewId);
 
       return {
         success: true,

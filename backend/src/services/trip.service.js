@@ -503,7 +503,7 @@ class TripService {
       sortOrder = 'asc',
     } = searchCriteria;
 
-    logger.debug('🔍 Search tiêu chí: ' + JSON.stringify({ fromCity, toCity, date, passengers }));
+    logger.debug('Search tiêu chí: ' + JSON.stringify({ fromCity, toCity, date, passengers }));
 
     // Build query
     const query = {
@@ -523,7 +523,7 @@ class TripService {
         $gte: startOfDay,
         $lte: endOfDay,
       };
-      logger.debug('📅 Ngày phạm vi: ' + JSON.stringify({ startOfDay, endOfDay }));
+      logger.debug('Ngày phạm vi: ' + JSON.stringify({ startOfDay, endOfDay }));
     } else {
       // If no date specified (browse all mode), show trips from last 7 days to future
       // This helps with demo/testing and allows users to see recent trips
@@ -533,7 +533,7 @@ class TripService {
       query.departureTime = {
         $gte: sevenDaysAgo, // Include trips from last 7 days
       };
-      logger.debug('📅 Browse chế độ: showtrtrêngg chuyến từ last 7 days đến future ' + JSON.stringify({ sevenDaysAgo }));
+      logger.debug('Browse chế độ:  ' + JSON.stringify({ sevenDaysAgo }));
     }
 
     // Price range filter

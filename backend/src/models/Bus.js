@@ -169,7 +169,7 @@ BusSchema.pre('save', function (next) {
       }
     }
     this.seatLayout.totalSeats = totalSeats;
-    logger.log('MIDDLEWARE TRƯỚC KHI LƯU - Tổng số ghế được tính:', totalSeats);
+    logger.info('MIDDLEWARE TRƯỚC KHI LƯU - Tổng số ghế được tính:', totalSeats);
   }
   next();
 });

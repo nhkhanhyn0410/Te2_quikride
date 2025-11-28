@@ -42,17 +42,17 @@ class NotificationService {
   async sendEmail(to, subject, html) {
     try {
       if (!this.emailEnabled) {
-        logger.log('Email disabled, bỏ qua:', to);
+        logger.info('Email disabled, bỏ qua:', to);
         return { success: true, skipped: true, reason: 'Email disabled' };
       }
 
       if (!this.emailTransporter) {
-        logger.log('Email bộ vận chuyển không khả dụng');
+        logger.info('Email bộ vận chuyển không khả dụng');
         return { success: false, error: 'Email transporter not configured' };
       }
 
       if (!to) {
-        logger.log('No người nhận email provided');
+        logger.info('No người nhận email provided');
         return { success: false, error: 'No recipient email' };
       }
 
@@ -65,7 +65,7 @@ class NotificationService {
 
       const info = await this.emailTransporter.sendMail(mailOptions);
 
-      logger.log('Email đã gửi thành công đến:', to);
+      logger.info('Email đã gửi thành công đến:', to);
       return {
         success: true,
         messageId: info.messageId,
@@ -88,12 +88,12 @@ class NotificationService {
   async sendSMS(phone, message) {
     try {
       if (!this.smsEnabled) {
-        logger.log('SMS disabled, bỏ qua:', phone);
+        logger.info('SMS disabled, bỏ qua:', phone);
         return { success: true, skipped: true, reason: 'SMS disabled' };
       }
 
       if (!phone) {
-        logger.log('No phtrêne number provided');
+        logger.info('No phtrêne number provided');
         return { success: false, error: 'No phone number' };
       }
 
@@ -128,7 +128,7 @@ class NotificationService {
         .lean();
 
       if (bookings.length === 0) {
-        logger.log('No đặt chỗ đến notify cho chuyến:', trip._id);
+        logger.info('No đặt chỗ đến notify cho chuyến:', trip._id);
         return {
           success: true,
           notified: 0,
@@ -180,7 +180,7 @@ class NotificationService {
         await this.delay(100);
       }
 
-      logger.log('Chuyến trạng thái change thông báo đã gửi:', results);
+      logger.info('Chuyến trạng thái change thông báo đã gửi:', results);
       return {
         success: true,
         results,
@@ -438,7 +438,7 @@ class NotificationService {
   async notifyBookingConfirmation(booking, trip) {
     // Implementation for booking confirmation
     // This can be called from booking service
-    logger.log('Đặt chỗ ctrênfirmtạiitrên thông báo:', booking.bookingCode);
+    logger.info('Đặt chỗ ctrênfirmtạiitrên thông báo:', booking.bookingCode);
     return { success: true };
   }
 
@@ -450,7 +450,7 @@ class NotificationService {
    */
   async notifyCancellation(booking, trip) {
     // Implementation for cancellation notification
-    logger.log('Hủy thông báo:', booking.bookingCode);
+    logger.info('Hủy thông báo:', booking.bookingCode);
     return { success: true };
   }
 
@@ -474,7 +474,7 @@ class NotificationService {
         return false;
       }
       await this.emailTransporter.verify();
-      logger.log('Email cấu hình is valid');
+      logger.info('Email cấu hình is valid');
       return true;
     } catch (error) {
       logger.error(' Email cấu hình lỗi:', error.message);

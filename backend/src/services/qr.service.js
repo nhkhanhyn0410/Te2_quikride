@@ -46,7 +46,7 @@ class QRService {
       // Return encrypted data with IV (needed for decryption)
       const result = `${iv.toString('hex')}:${encrypted.toString('hex')}`;
 
-      logger.log('QR mã hóa:', {
+      logger.info('QR mã hóa:', {
         dataLength: text.length,
         encryptedLength: result.length,
         ivLength: iv.length
@@ -66,7 +66,7 @@ class QRService {
    */
   decrypt(encryptedText) {
     try {
-      logger.log('Đang cố gắng giải mã dữ liệu QR:', {
+      logger.info('Đang cố gắng giải mã dữ liệu QR:', {
         length: encryptedText.length,
         preview: encryptedText.substring(0, 50) + '...',
       });
@@ -82,7 +82,7 @@ class QRService {
       const iv = Buffer.from(parts.shift(), 'hex');
       const encryptedData = Buffer.from(parts.join(':'), 'hex');
 
-      logger.log('Thông số giải mã:', {
+      logger.info('Thông số giải mã:', {
         ivLength: iv.length,
         dataLength: encryptedData.length,
       });
@@ -98,7 +98,7 @@ class QRService {
 
       const result = JSON.parse(decrypted.toString());
 
-      logger.log('Đã giải mã QR thành công:', {
+      logger.info('Đã giải mã QR thành công:', {
         ticketCode: result.ticketCode,
         bookingId: result.bookingId,
         version: result.version,
@@ -157,7 +157,7 @@ class QRService {
         },
       });
 
-      logger.log('Mã QR được tạo:', {
+      logger.info('Mã QR được tạo:', {
         dataLength: encryptedData.length,
         imageSize: '300x300',
         errorCorrection: 'M'

@@ -314,7 +314,7 @@ class PDFService {
         doc.end();
 
         stream.on('finish', () => {
-          logger.log('PDF vé đã tạo thành công:', outputPath);
+          logger.info('PDF vé đã tạo thành công:', outputPath);
           resolve(outputPath);
         });
 
@@ -401,7 +401,7 @@ class PDFService {
     try {
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
-        logger.log('PDF đã xóa:', filePath);
+        logger.info('PDF đã xóa:', filePath);
       }
     } catch (error) {
       logger.error('PDF lỗi:', error);

@@ -24,7 +24,7 @@ class LoyaltyService {
 
     const totalPoints = Math.floor(basePoints * multiplier);
 
-    logger.log(
+    logger.info(
       `Calculated ${totalPoints} points (base: ${basePoints}, multiplier: ${multiplier})`
     );
 
@@ -59,7 +59,7 @@ class LoyaltyService {
       );
 
       if (alreadyAwarded) {
-        logger.log('Điểm đã được thưởng cho chuyến đi này');
+        logger.info('Điểm đã được thưởng cho chuyến đi này');
         return {
           success: true,
           alreadyAwarded: true,
@@ -74,7 +74,7 @@ class LoyaltyService {
       user.addPoints(`Hoàn thành chuyến đi - Booking ${booking.bookingCode}`, pointsToAward, booking.tripId);
       await user.save();
 
-      logger.log(`Awarded ${pointsToAward} points to user ${userId}`);
+      logger.info(`Awarded ${pointsToAward} points to user ${userId}`);
 
       // Send notification
       if (user.email) {
@@ -125,7 +125,7 @@ class LoyaltyService {
       user.redeemPoints(points, `Đổi ${points} điểm lấy giảm giá ${discountAmount.toLocaleString('vi-VN')} VND`);
       await user.save();
 
-      logger.log(`Redeemed ${points} points for user ${userId}`);
+      logger.info(`Redeemed ${points} points for user ${userId}`);
 
       return {
         success: true,
@@ -319,7 +319,7 @@ class LoyaltyService {
    */
   async cleanupExpiredPoints() {
     try {
-      logger.log('Bắt đầu dọn dẹp điểm hết hạn...');
+      logger.info('Bắt đầu dọn dẹp điểm hết hạn...');
 
       const users = await User.find({
         'pointsHistory.expiresAt': { $lt: new Date() },
@@ -347,7 +347,7 @@ class LoyaltyService {
         }
       }
 
-      logger.log(
+      logger.info(
         `Cleanup completed: ${totalUsersAffected} users, ${totalPointsRemoved} points removed`
       );
 

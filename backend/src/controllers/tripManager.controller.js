@@ -606,7 +606,7 @@ class TripManagerController {
       const { tripId } = req.params;
       const { status, stopIndex, location, notes } = req.body;
 
-      logger.log('🚌 Hành trình Trạng thái Upngày Yêu cầu:', {
+      logger.info('Hành trình Trạng thái  Yêu cầu:', {
         tripId,
         status,
         stopIndex,
@@ -618,7 +618,7 @@ class TripManagerController {
 
       // Validate input
       if (!status) {
-        logger.error(' Misstrtrêngg trạng thái trtrêng hành trình upngày');
+        logger.error('trạng thái trtrêng hành trình ngày');
         return res.status(400).json({
           success: false,
           message: 'Trạng thái hành trình là bắt buộc',
@@ -647,7 +647,7 @@ class TripManagerController {
         });
       }
 
-      logger.log('📋 Current chuyến hành trình sttạie:', {
+      logger.info('Chuyến hành trình :', {
         currentStatus: trip.journey?.currentStatus || 'none',
         currentStopIndex: trip.journey?.currentStopIndex ?? -1,
         stoppedAt: trip.journey?.stoppedAt || [],
@@ -687,7 +687,7 @@ class TripManagerController {
           message = 'Trạng thái hành trình đã được cập nhật';
       }
 
-      logger.log('Hành trình trạng thái đã cập nhật thành công:', {
+      logger.info('Hành trình trạng thái đã cập nhật thành công:', {
         oldStatus: result.oldStatus,
         newStatus: result.newStatus,
         oldStopIndex: result.oldStopIndex,

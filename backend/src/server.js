@@ -201,7 +201,7 @@ server.listen(PORT, () => {
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-  logger.error(' LỖI KHÔNG ĐƯỢC XỬ LÝ! Đang tắt...');
+  logger.error('LỖI KHÔNG ĐƯỢC XỬ LÝ! Đang tắt...');
   logger.error(err.name, err.message);
   server.close(() => {
     process.exit(1);
@@ -211,7 +211,7 @@ process.on('unhandledRejection', (err) => {
 // Handle SIGTERM
 process.on('SIGTERM', () => {
   server.close(() => {
-    logger.log('Tiến trình đã kết thúc!');
+    logger.info('Tiến trình đã kết thúc!');
   });
 });
 

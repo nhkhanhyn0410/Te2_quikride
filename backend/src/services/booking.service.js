@@ -26,11 +26,11 @@ class BookingService {
   static async holdSeats(holdData) {
     const { tripId, seats, contactInfo, customerId, pickupPoint, dropoffPoint, voucherCode } = holdData;
 
-    logger.log('=== HOLD SEATS ===');
-    logger.log('Khách hàng ID:', customerId);
-    logger.log('Is Guest Đặt chỗ:', !customerId);
-    logger.log('Chuyến ID:', tripId);
-    logger.log('Ghế:', seats?.length);
+    logger.info('=== HOLD SEATS ===');
+    logger.info('Khách hàng ID:', customerId);
+    logger.info('Is Guest Đặt chỗ:', !customerId);
+    logger.info('Chuyến ID:', tripId);
+    logger.info('Ghế:', seats?.length);
 
     // Validate trip exists and is bookable
     const trip = await Trip.findById(tripId)
@@ -103,7 +103,7 @@ class BookingService {
         voucherId = voucherValidation.voucher.id;
       } catch (error) {
         // Don't fail the whole booking if voucher is invalid, just ignore it
-        logger.log('Xác minh Voucher thất bại:', error.message);
+        logger.info('Xác minh Voucher thất bại:', error.message);
       }
     }
 
@@ -309,7 +309,7 @@ class BookingService {
         );
 
         if (refundResult.success) {
-          logger.log('Hoàn tiền successful cho đặt chỗ:', bookingId);
+          logger.info('Hoàn tiền successful cho đặt chỗ:', bookingId);
         } else {
           logger.error('Hoàn tiền failed cho đặt chỗ:', bookingId);
         }
