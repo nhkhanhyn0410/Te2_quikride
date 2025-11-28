@@ -6,6 +6,7 @@ const notificationService = require('./notification.service');
 const smsService = require('./sms.service');
 const reviewService = require('./review.service');
 const loyaltyService = require('./loyalty.service');
+const logger = require('../utils/logger');
 
 /**
  * Scheduler Service
@@ -20,7 +21,7 @@ class SchedulerService {
    * Initialize all scheduled jobs
    */
   initialize() {
-    logger.log('Đang khởi tạo dịch vụ lập lịch...');
+    logger.info('Đang khởi tạo dịch vụ lập lịch...');
 
     // Send trip reminders every hour
     this.jobs.tripReminders = cron.schedule('0 * * * *', async () => {
@@ -42,7 +43,7 @@ class SchedulerService {
       await this.cleanupExpiredSeatLocks();
     });
 
-    logger.log('Đã khởi tạo dịch vụ lập lịch biểu');
+    logger.info('Đã khởi tạo dịch vụ lập lịch biểu');
   }
 
   /**
@@ -50,7 +51,7 @@ class SchedulerService {
    */
   async sendTripReminders() {
     try {
-      logger.log('Đang kiểm tra lời nhắc chuyến đi...');
+      logger.info('Đang kiểm tra lời nhắc chuyến đi...');
 
       const now = new Date();
       const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -88,7 +89,7 @@ class SchedulerService {
         await this.sendTripRemindersForTrip(trip, '2h');
       }
 
-      logger.log(
+      logger.info(
         `Sent reminders for ${trips24h.length} trips (24h) and ${trips2h.length} trips (2h)`
       );
     } catch (error) {
@@ -165,7 +166,7 @@ class SchedulerService {
         await this.delay(100);
       }
 
-      logger.log(`Sent ${timeframe} reminders for trip ${trip._id}`);
+      logger.info(`Sent ${timeframe} reminders for trip ${trip._id}`);
     } catch (error) {
       logger.error(`Error sending ${timeframe} reminders for trip:`, error);
     }
@@ -283,7 +284,7 @@ class SchedulerService {
    */
   async sendReviewInvitations() {
     try {
-      logger.log('Đang kiểm tra lời mời đánh giá...');
+      logger.info('Đang kiểm tra lời mời đánh giá...');
 
       // Find bookings completed in the last 24 hours that haven't been reviewed
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -320,7 +321,7 @@ class SchedulerService {
         await this.delay(200);
       }
 
-      logger.log(`Sent ${sent} review invitations (${skipped} skipped)`);
+      logger.info(`Sent ${sent} review invitations (${skipped} skipped)`);
     } catch (error) {
       logger.error(' Lỗi gửi lời mời đánh giá:', error);
     }
@@ -331,11 +332,11 @@ class SchedulerService {
    */
   async cleanupExpiredPoints() {
     try {
-      logger.log('Dọn dẹp điểm trung thành đã hết hạn...');
+      logger.info('Dọn dẹp điểm trung thành đã hết hạn...');
 
       const result = await loyaltyService.cleanupExpiredPoints();
 
-      logger.log(
+      logger.info(
         `Expired points cleanup: ${result.usersAffected} users, ${result.pointsRemoved} points removed`
       );
     } catch (error) {
@@ -350,7 +351,7 @@ class SchedulerService {
     try {
       // This would be implemented in seat lock service
       // For now, just log
-      logger.log('Dọn dẹp ổ khóa ghế hết hạn...');
+      logger.info('Dọn dẹp ổ khóa ghế hết hạn...');
     } catch (error) {
       logger.error('Lỗi vệ sinh ổ khóa ghế:', error);
     }
@@ -369,22 +370,22 @@ class SchedulerService {
    * Stop all scheduled jobs
    */
   stopAll() {
-    logger.log('Dừng tất cả các công việc theo lịch trình...');
+    logger.info('Dừng tất cả các công việc theo lịch trình...');
     Object.values(this.jobs).forEach((job) => {
       if (job) job.stop();
     });
-    logger.log('Tất cả công việc đã dừng lại');
+    logger.info('Tất cả công việc đã dừng lại');
   }
 
   /**
    * Start all scheduled jobs
    */
   startAll() {
-    logger.log('Bắt đầu tất cả các công việc đã lên lịch...');
+    logger.info('Bắt đầu tất cả các công việc đã lên lịch...');
     Object.values(this.jobs).forEach((job) => {
       if (job) job.start();
     });
-    logger.log('Mọi công việc bắt đầu');
+    logger.info('Mọi công việc bắt đầu');
   }
 }
 
