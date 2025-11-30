@@ -2,6 +2,7 @@ const AuthService = require('../services/auth.service');
 const User = require('../models/User');
 const BusOperator = require('../models/BusOperator');
 const Employee = require('../models/Employee');
+const logger = require('../utils/logger');
 
 /**
  * Check session timeout (30 minutes of inactivity by default)

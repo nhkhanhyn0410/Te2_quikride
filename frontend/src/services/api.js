@@ -14,14 +14,16 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Determine which auth storage to use based on the request URL
+    // Determine which auth storage to use based on the request URL or current path
     let storageKey = 'auth-storage'; // Default to customer auth
+    const currentPath = window.location.pathname;
 
     if (config.url?.includes('/operators/')) {
       storageKey = 'operator-auth-storage';
     } else if (config.url?.includes('/admin/')) {
       storageKey = 'admin-auth-storage';
-    } else if (config.url?.includes('/trip-manager/')) {
+    } else if (config.url?.includes('/trip-manager/') || 
+               (config.url?.includes('/employees/') && currentPath.startsWith('/trip-manager'))) {
       storageKey = 'trip-manager-auth-storage';
     }
 

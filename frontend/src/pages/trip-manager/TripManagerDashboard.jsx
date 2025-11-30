@@ -58,7 +58,7 @@ const TripManagerDashboard = () => {
     setLoading(true);
     try {
       // Get trips assigned to this trip manager
-      const response = await api.get('/employees/my-trips');
+      const response = await tripManagerApi.getAssignedTrips();
 
       if (response.status === 'success') {
         const tripsData = response.data.trips || [];

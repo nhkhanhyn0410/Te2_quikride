@@ -7,7 +7,6 @@ const {
   buildCustomTemplate,
 } = require('../utils/seatLayoutTemplates');
 const { validateSeatLayoutForBusType } = require('../utils/seatLayout');
-const logger = require('../utils/logger');
 
 /**
  * Bus Controller

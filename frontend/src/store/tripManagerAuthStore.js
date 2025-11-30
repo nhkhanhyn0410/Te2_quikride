@@ -19,9 +19,9 @@ const useTripManagerAuthStore = create(
 
       setToken: (token) => {
         if (token) {
-          localStorage.setItem('tripmanager-token', token);
+          localStorage.setItem('trip-manager-token', token);
         } else {
-          localStorage.removeItem('tripmanager-token');
+          localStorage.removeItem('trip-manager-token');
         }
         set({ token });
       },
@@ -32,8 +32,8 @@ const useTripManagerAuthStore = create(
           token,
           isAuthenticated: true,
         });
-        localStorage.setItem('tripmanager-token', token);
-        localStorage.setItem('tripManager', JSON.stringify(tripManager));
+        localStorage.setItem('trip-manager-token', token);
+        localStorage.setItem('trip-manager', JSON.stringify(tripManager));
       },
 
       logout: () => {
@@ -42,21 +42,21 @@ const useTripManagerAuthStore = create(
           token: null,
           isAuthenticated: false,
         });
-        localStorage.removeItem('tripmanager-token');
-        localStorage.removeItem('tripManager');
+        localStorage.removeItem('trip-manager-token');
+        localStorage.removeItem('trip-manager');
       },
 
       updateTripManager: (tripManagerData) => {
         const currentTripManager = get().tripManager;
         const updatedTripManager = { ...currentTripManager, ...tripManagerData };
         set({ tripManager: updatedTripManager });
-        localStorage.setItem('tripManager', JSON.stringify(updatedTripManager));
+        localStorage.setItem('trip-manager', JSON.stringify(updatedTripManager));
       },
 
       setLoading: (isLoading) => set({ isLoading }),
     }),
     {
-      name: 'tripmanager-auth-storage', // Separate localStorage key for trip manager
+      name: 'trip-manager-auth-storage', // Separate localStorage key for trip manager
       partialize: (state) => ({
         tripManager: state.tripManager,
         token: state.token,
